@@ -228,28 +228,33 @@ import axios from "axios";
 const MPESA_CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || "";
 const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || "";
 const MPESA_SHORTCODE = process.env.MPESA_SHORTCODE || "";
-//const MPESA_BASE_URL = process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke";
 const MPESA_BASE_URL =
   process.env.NODE_ENV === "production"
     ? process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke"
     : "https://sandbox.safaricom.co.ke";
 
-const MPESA_CALLBACK_URL =
-  process.env.MPESA_CALLBACK_URL || process.env.NEXTAUTH_URL;
+let MPESA_CALLBACK_URL = process.env.MPESA_CALLBACK_URL || process.env.NEXTAUTH_URL || "";
+// Remove trailing slash if present
+if (MPESA_CALLBACK_URL.endsWith("/")) {
+  MPESA_CALLBACK_URL = MPESA_CALLBACK_URL.slice(0, -1);
+}
 
 /**
  * 🔑 Get M-Pesa access token
  */
 export async function getMpesaAccessToken(): Promise<string> {
+  // Check if credentials exist
+  if (!MPESA_CONSUMER_KEY || !MPESA_CONSUMER_SECRET) {
+    throw new Error("M-Pesa Consumer Key or Secret is missing!");
+  }
+  console.log("[DEBUG] Consumer Key & Secret present ✅");
+
+  const rawAuth = `${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`;
+  const auth = Buffer.from(rawAuth).toString("base64");
+  console.log("[DEBUG] Base64 Auth:", auth);
+
   try {
-    const rawAuth = `${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`;
-    const auth = Buffer.from(rawAuth).toString("base64");
-
-    console.log(
-      "[DEBUG] Requesting token from:",
-      `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`
-    );
-
+    console.log("[DEBUG] Requesting token from:", `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`);
     const response = await axios.get(
       `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
       {
@@ -257,12 +262,14 @@ export async function getMpesaAccessToken(): Promise<string> {
       }
     );
 
-    return response.data.access_token;
+    const accessToken = response.data.access_token;
+    if (!accessToken) {
+      throw new Error("Access token is empty!");
+    }
+    console.log("[SUCCESS] Access token received ✅", accessToken);
+    return accessToken;
   } catch (error: any) {
-    console.error(
-      "[FAILURE] Error getting M-Pesa access token:",
-      error.response?.data || error.message
-    );
+    console.error("[FAILURE] Error getting M-Pesa access token:", error.response?.data || error.message);
     throw new Error("Failed to get M-Pesa access token");
   }
 }
@@ -272,17 +279,24 @@ export async function getMpesaAccessToken(): Promise<string> {
  * Run this once when deploying your app or updating URLs
  */
 export async function registerC2BUrls(retry = true) {
+  if (!MPESA_SHORTCODE) {
+    throw new Error("M-Pesa Shortcode is missing!");
+  }
+
   try {
     const accessToken = await getMpesaAccessToken();
 
+    const payload = {
+      ShortCode: MPESA_SHORTCODE,
+      ResponseType: "Completed",
+      ConfirmationURL: `${MPESA_CALLBACK_URL}/api/mpesa/confirmation`,
+      ValidationURL: `${MPESA_CALLBACK_URL}/api/mpesa/validation`,
+    };
+    console.log("[DEBUG] Register URL payload:", payload);
+
     const response = await axios.post(
       `${MPESA_BASE_URL}/mpesa/c2b/v1/registerurl`,
-      {
-        ShortCode: MPESA_SHORTCODE,
-        ResponseType: "Completed",
-        ConfirmationURL: `${MPESA_CALLBACK_URL}/api/mpesa/confirmation`,
-        ValidationURL: `${MPESA_CALLBACK_URL}/api/mpesa/validation`,
-      },
+      payload,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -291,7 +305,7 @@ export async function registerC2BUrls(retry = true) {
       }
     );
 
-    console.log("[SUCCESS] C2B URLs registered:", response.data);
+    console.log("[SUCCESS] C2B URLs registered ✅", response.data);
     return response.data;
   } catch (error: any) {
     const status = error.response?.status;
@@ -299,7 +313,7 @@ export async function registerC2BUrls(retry = true) {
 
     console.error("[FAILURE] Error registering C2B URLs:", data || error.message);
 
-    // 🔄 If token expired/invalid, retry once
+    // 🔄 Retry once if token is invalid
     if (status === 401 && retry) {
       console.warn("[RETRY] Token might be invalid/expired, refreshing...");
       return await registerC2BUrls(false);
@@ -336,4 +350,3 @@ export function confirmPayment(body: any) {
     accountRef: BillRefNumber,
   };
 }
-
