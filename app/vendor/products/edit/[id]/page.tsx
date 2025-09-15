@@ -90,7 +90,26 @@ export default function EditProductPage() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  // ---------- helper ----------
+function setNested<T>(obj: T, path: string, value: unknown): T {
+  const keys = path.split('.');
+  const last = keys.pop()!;
+  let cur: any = { ...obj };
+  let ref = cur;
+  for (const k of keys) ref = ref[k] = { ...ref[k] };
+  ref[last] = value;
+  return cur;
+}
+
+// ---------- handler ----------
+const handleInputChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => {
+  const { name, value } = e.target;
+  setFormData(prev => setNested(prev, name, value));
+};
+
+  /*const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
     if (name.includes('.')) {
@@ -104,7 +123,7 @@ export default function EditProductPage() {
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
-  };
+  };*/
 
   const handleSpecificationChange = (index: number, field: 'key' | 'value', value: string) => {
     setFormData(prev => {
