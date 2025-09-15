@@ -104,7 +104,7 @@ const MPESA_CALLBACK_URL = process.env.MPESA_CALLBACK_URL || process.env.NEXTAUT
 /**
  * 🔑 Get M-Pesa access token
  */
-export async function getMpesaAccessToken(): Promise<string> {
+/*export async function getMpesaAccessToken(): Promise<string> {
   try {
     const auth = Buffer.from(
       `${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`
@@ -122,7 +122,31 @@ export async function getMpesaAccessToken(): Promise<string> {
     console.error('[FAILURE] Error getting M-Pesa access token:', error.response?.data || error.message);
     throw new Error('Failed to get M-Pesa access token');
   }
+}*/
+
+export async function getMpesaAccessToken(): Promise<string> {
+  try {
+    const rawAuth = `${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`;
+    const auth = Buffer.from(rawAuth).toString('base64');
+
+    console.log("[DEBUG] Requesting token from:", `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`);
+    console.log("[DEBUG] Using key prefix:", MPESA_CONSUMER_KEY.slice(0, 5), "..."); 
+    console.log("[DEBUG] Using secret prefix:", MPESA_CONSUMER_SECRET.slice(0, 5), "...");
+
+    const response = await axios.get(
+      `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
+      {
+        headers: { Authorization: `Basic ${auth}` },
+      }
+    );
+
+    return response.data.access_token;
+  } catch (error: any) {
+    console.error('[FAILURE] Error getting M-Pesa access token:', error.response?.data || error.message);
+    throw new Error('Failed to get M-Pesa access token');
+  }
 }
+
 
 /**
  * 📌 Register C2B URLs (Validation + Confirmation)
