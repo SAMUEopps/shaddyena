@@ -355,7 +355,7 @@ export function confirmPayment(body: any) {
   };
 }*/
 
-import axios from "axios";
+/*import axios from "axios";
 
 const MPESA_CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || "";
 const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || "";
@@ -369,7 +369,7 @@ if (MPESA_CALLBACK_URL.endsWith("/")) {
 
 /**
  * 🔑 Get M-Pesa access token
- */
+ *
 export async function getMpesaAccessToken(): Promise<string> {
   if (!MPESA_CONSUMER_KEY || !MPESA_CONSUMER_SECRET) {
     throw new Error("M-Pesa Consumer Key or Secret is missing!");
@@ -402,7 +402,7 @@ export async function getMpesaAccessToken(): Promise<string> {
 /**
  * ✅ Handle C2B v2 Payment Notification (Webhook)
  * Perform validation here before confirming payment in your system
- */
+ *
 export async function handleC2Bv2Payment(body: any) {
   console.log("[INFO] C2B v2 payment received:", body);
 
@@ -436,7 +436,7 @@ export async function handleC2Bv2Payment(body: any) {
 
 /**
  * Dummy function: replace with real DB check
- */
+ *
 async function checkOrderInDB(billRef: string) {
   // e.g., Order.findOne({ reference: billRef })
   return true;
@@ -444,8 +444,86 @@ async function checkOrderInDB(billRef: string) {
 
 /**
  * Dummy function: replace with real DB update
- */
+ *
 async function confirmPaymentInDB(data: any) {
   // e.g., update order status to "paid"
   return true;
+}*/
+
+
+import axios from "axios";
+
+// ===== ENVIRONMENT CONFIGURATION =====
+const ENV = process.env.NODE_ENV || "development"; // "production" or "development"
+
+const CONFIG = ENV === "production"
+  ? {
+      BASE_URL: process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke",
+      CONSUMER_KEY: process.env.MPESA_CONSUMER_KEY || "",
+      CONSUMER_SECRET: process.env.MPESA_CONSUMER_SECRET || "",
+      SHORTCODE: process.env.MPESA_SHORTCODE || "", // Live shortcode
+      CALLBACK_URL: process.env.MPESA_CALLBACK_URL || "",
+    }
+  : {
+      BASE_URL: "https://sandbox.safaricom.co.ke",
+      CONSUMER_KEY: process.env.MPESA_SANDBOX_KEY || "",
+      CONSUMER_SECRET: process.env.MPESA_SANDBOX_SECRET || "",
+      SHORTCODE: process.env.MPESA_SANDBOX_SHORTCODE || "600000", // Sandbox shortcode
+      CALLBACK_URL: process.env.MPESA_SANDBOX_CALLBACK_URL || "https://example.com/callback",
+    };
+
+// ===== UTILS =====
+
+// Get Access Token
+export async function getMpesaAccessToken(): Promise<string> {
+  if (!CONFIG.CONSUMER_KEY || !CONFIG.CONSUMER_SECRET) {
+    throw new Error("M-Pesa Consumer Key or Secret is missing!");
+  }
+
+  const auth = Buffer.from(`${CONFIG.CONSUMER_KEY}:${CONFIG.CONSUMER_SECRET}`).toString("base64");
+  console.log("[DEBUG] Requesting token with Base64 auth:", auth);
+
+  try {
+    const response = await axios.get(`${CONFIG.BASE_URL}/oauth/v1/generate?grant_type=client_credentials`, {
+      headers: { Authorization: `Basic ${auth}` },
+    });
+
+    console.log("[SUCCESS] Access token received:", response.data.access_token);
+    return response.data.access_token;
+  } catch (err: any) {
+    console.error("[FAILURE] Could not generate token:", err.response?.data || err.message);
+    throw err;
+  }
+}
+
+// Register C2B URLs
+export async function registerC2BUrls() {
+  if (!CONFIG.SHORTCODE || !CONFIG.CALLBACK_URL) {
+    throw new Error("Shortcode or Callback URL missing!");
+  }
+
+  const token = await getMpesaAccessToken();
+  const payload = {
+    ShortCode: CONFIG.SHORTCODE,
+    ResponseType: "Completed",
+    ConfirmationURL: `${CONFIG.CALLBACK_URL}/api/mpesa/confirmation`,
+    ValidationURL: `${CONFIG.CALLBACK_URL}/api/mpesa/validation`,
+  };
+
+  console.log("[DEBUG] Register URL payload:", payload);
+
+  try {
+    const response = await axios.post(`${CONFIG.BASE_URL}/mpesa/c2b/v2/registerurl`, payload, {
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    });
+
+    console.log("[SUCCESS] C2B URLs registered:", response.data);
+    return response.data;
+  } catch (err: any) {
+    console.error("[FAILURE] Registration failed:", err.response?.data || err.message);
+    if (err.response?.data?.errorCode === "401.003.01") {
+      console.error("[HINT] Invalid token or shortcode mismatch. Check environment & credentials.");
+    }
+    throw err;
+  }
 }
