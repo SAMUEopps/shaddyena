@@ -228,7 +228,12 @@ import axios from "axios";
 const MPESA_CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || "";
 const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || "";
 const MPESA_SHORTCODE = process.env.MPESA_SHORTCODE || "";
-const MPESA_BASE_URL = "https://api.safaricom.co.ke";
+//const MPESA_BASE_URL = process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke";
+const MPESA_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke"
+    : "https://sandbox.safaricom.co.ke";
+
 const MPESA_CALLBACK_URL =
   process.env.MPESA_CALLBACK_URL || process.env.NEXTAUTH_URL;
 
