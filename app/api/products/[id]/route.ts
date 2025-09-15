@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+/*import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/product';
 
@@ -28,5 +28,44 @@ export async function GET(
   } catch (error) {
     console.error('Error fetching product:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+  }
+}*/
+
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/dbConnect";
+import Product from "@/models/product";
+
+export async function GET(
+  req: NextRequest,
+  context: { params: { id: string } } // ✅ type context, not destructured
+) {
+  try {
+    console.log("[INFO] Incoming product fetch request...");
+
+    await dbConnect();
+    console.log("[SUCCESS] Database connected");
+
+    const { id } = context.params;
+    console.log("[INFO] Looking up product with ID:", id);
+
+    const product = await Product.findById(id)
+      .populate("vendorId", "businessName")
+      .populate("shopId", "businessName location");
+
+    if (!product) {
+      console.warn("[WARN] Product not found:", id);
+      return NextResponse.json({ message: "Product not found" }, { status: 404 });
+    }
+
+    if (!product.isActive || !product.isApproved) {
+      console.warn("[WARN] Product inactive or not approved:", id);
+      return NextResponse.json({ message: "Product not available" }, { status: 404 });
+    }
+
+    console.log("[SUCCESS] Product fetched:", id);
+    return NextResponse.json({ product }, { status: 200 });
+  } catch (error) {
+    console.error("[ERROR] Failed to fetch product:", error);
+    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }
