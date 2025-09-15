@@ -48,7 +48,7 @@ async function registerC2BUrls() {
     console.log("[INFO] Registration payload:", payload);
 
     const response = await axios.post(
-      `${MPESA_BASE_URL}/mpesa/c2b/v1/registerurl`,
+      `${MPESA_BASE_URL}/mpesa/c2b/v2/registerurl`,
       payload,
       { headers: { Authorization: `Bearer ${token}` } }
     );
