@@ -451,79 +451,97 @@ async function confirmPaymentInDB(data: any) {
 }*/
 
 
-import axios from "axios";
+// mpesa.ts
+import axios from 'axios';
 
-// ===== ENVIRONMENT CONFIGURATION =====
-const ENV = process.env.NODE_ENV || "development"; // "production" or "development"
+// ---------- Configuration ----------
+const MPESA_CONSUMER_KEY     = process.env.MPESA_CONSUMER_KEY     ?? '';
+const MPESA_CONSUMER_SECRET  = process.env.MPESA_CONSUMER_SECRET  ?? '';
+const MPESA_SHORTCODE        = process.env.MPESA_SHORTCODE        ?? '';
+const MPESA_CALLBACK_URL     = process.env.MPESA_CALLBACK_URL     ?? '';
+const MPESA_BASE_URL         = process.env.MPESA_BASE_URL         ?? 'https://api.safaricom.co.ke';
 
-const CONFIG = ENV === "production"
-  ? {
-      BASE_URL: process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke",
-      CONSUMER_KEY: process.env.MPESA_CONSUMER_KEY || "",
-      CONSUMER_SECRET: process.env.MPESA_CONSUMER_SECRET || "",
-      SHORTCODE: process.env.MPESA_SHORTCODE || "", // Live shortcode
-      CALLBACK_URL: process.env.MPESA_CALLBACK_URL || "",
-    }
-  : {
-      BASE_URL: "https://sandbox.safaricom.co.ke",
-      CONSUMER_KEY: process.env.MPESA_SANDBOX_KEY || "",
-      CONSUMER_SECRET: process.env.MPESA_SANDBOX_SECRET || "",
-      SHORTCODE: process.env.MPESA_SANDBOX_SHORTCODE || "600000", // Sandbox shortcode
-      CALLBACK_URL: process.env.MPESA_SANDBOX_CALLBACK_URL || "https://example.com/callback",
-    };
+// ---------- Types ----------
+interface AccessTokenResponse {
+  access_token: string;
+  expires_in:   string;
+}
 
-// ===== UTILS =====
+interface RegisterUrlPayload {
+  ShortCode:       string;
+  ResponseType:    'Completed';
+  ConfirmationURL: string;
+  ValidationURL:   string;
+}
 
-// Get Access Token
-export async function getMpesaAccessToken(): Promise<string> {
-  if (!CONFIG.CONSUMER_KEY || !CONFIG.CONSUMER_SECRET) {
-    throw new Error("M-Pesa Consumer Key or Secret is missing!");
-  }
+interface RegisterUrlResponse {
+  ConversationID:   string;
+  OriginatorCoversationID: string;
+  ResponseDescription: string;
+}
 
-  const auth = Buffer.from(`${CONFIG.CONSUMER_KEY}:${CONFIG.CONSUMER_SECRET}`).toString("base64");
-  console.log("[DEBUG] Requesting token with Base64 auth:", auth);
+// ---------- Utilities ----------
+const toBase64 = (str: string): string => Buffer.from(str).toString('base64');
+
+// ---------- Core helpers ----------
+async function getAccessToken(): Promise<string> {
+  console.log('[INFO] Requesting M-Pesa access token...');
+  console.log('MPESA_CONSUMER_KEY:', MPESA_CONSUMER_KEY);
+  console.log('MPESA_CONSUMER_SECRET:', MPESA_CONSUMER_SECRET ? '****' : 'MISSING');
+  console.log('MPESA_BASE_URL:', MPESA_BASE_URL);
+
+  const auth = toBase64(`${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`);
 
   try {
-    const response = await axios.get(`${CONFIG.BASE_URL}/oauth/v1/generate?grant_type=client_credentials`, {
-      headers: { Authorization: `Basic ${auth}` },
-    });
+    const { data } = await axios.get<AccessTokenResponse>(
+      `${MPESA_BASE_URL}/oauth/v1/generate`,
+      {
+        params: { grant_type: 'client_credentials' },
+        headers: { Authorization: `Basic ${auth}` },
+      }
+    );
 
-    console.log("[SUCCESS] Access token received:", response.data.access_token);
-    return response.data.access_token;
+    console.log('[SUCCESS] Access token received ✅');
+    return data.access_token;
   } catch (err: any) {
-    console.error("[FAILURE] Could not generate token:", err.response?.data || err.message);
-    throw err;
+    console.error('[FAILURE] Error getting access token:', err.response?.data || err.message);
+    throw new Error('Failed to get M-Pesa access token');
   }
 }
 
-// Register C2B URLs
-export async function registerC2BUrls() {
-  if (!CONFIG.SHORTCODE || !CONFIG.CALLBACK_URL) {
-    throw new Error("Shortcode or Callback URL missing!");
-  }
-
-  const token = await getMpesaAccessToken();
-  const payload = {
-    ShortCode: CONFIG.SHORTCODE,
-    ResponseType: "Completed",
-    ConfirmationURL: `${CONFIG.CALLBACK_URL}/api/mpesa/confirmation`,
-    ValidationURL: `${CONFIG.CALLBACK_URL}/api/mpesa/validation`,
-  };
-
-  console.log("[DEBUG] Register URL payload:", payload);
+export async function registerC2BUrls(): Promise<void> {
+  console.log('[INFO] Starting C2B V2 URL registration...');
+  console.log('MPESA_SHORTCODE:', MPESA_SHORTCODE);
+  console.log('MPESA_CALLBACK_URL:', MPESA_CALLBACK_URL);
 
   try {
-    const response = await axios.post(`${CONFIG.BASE_URL}/mpesa/c2b/v2/registerurl`, payload, {
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    });
+    const token = await getAccessToken();
 
-    console.log("[SUCCESS] C2B URLs registered:", response.data);
-    return response.data;
+    const payload: RegisterUrlPayload = {
+      ShortCode:       MPESA_SHORTCODE,
+      ResponseType:    'Completed',
+      ConfirmationURL: MPESA_CALLBACK_URL,
+      ValidationURL:   MPESA_CALLBACK_URL,
+    };
+
+    console.log('[INFO] Registration payload:', payload);
+
+    const { data } = await axios.post<RegisterUrlResponse>(
+      `${MPESA_BASE_URL}/mpesa/c2b/v2/registerurl`,
+      payload,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    console.log('[SUCCESS] C2B V2 URLs registered ✅', data);
   } catch (err: any) {
-    console.error("[FAILURE] Registration failed:", err.response?.data || err.message);
-    if (err.response?.data?.errorCode === "401.003.01") {
-      console.error("[HINT] Invalid token or shortcode mismatch. Check environment & credentials.");
-    }
-    throw err;
+    console.error(
+      '[FAILURE] Registration failed:',
+      err.response?.data || err.message || err
+    );
   }
+}
+
+// ---------- Optional self-run ----------
+if (require.main === module) {
+  registerC2BUrls();
 }
