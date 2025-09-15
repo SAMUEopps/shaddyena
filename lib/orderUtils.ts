@@ -65,3 +65,36 @@ export function generateOrderId(): string {
   const random = Math.random().toString(36).substring(2, 8).toUpperCase();
   return `ORD-${year}${month}${day}-${random}`;
 }
+
+// … everything that is already here …
+
+/*  NEW  */
+const SHORT_LEN = 6;               // visible part for customer
+const SHORT_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+export function shortRef(fullRef: string): string {
+  // 1. hash the full reference -> 64 hex
+  const hash = crypto.createHash('sha256').update(fullRef).digest('hex');
+  // 2. take first 6 hex chars -> convert to 36-base -> upper-case
+  let num = parseInt(hash.slice(0, 8), 16); // 8 hex = 32 bit
+  let out = '';
+  for (let i = 0; i < SHORT_LEN; i++) {
+    out = SHORT_ALPHABET[num % 36] + out;
+    num = Math.floor(num / 36);
+  }
+  return out; // always 6 chars
+}
+
+/*  NEW  */
+// in-memory only – restart clears it (good enough for 20-min drafts)
+const shortToFull: Record<string, string> = {};
+
+export function storeShort(fullRef: string): string {
+  const short = shortRef(fullRef);
+  shortToFull[short] = fullRef;
+  return short;
+}
+
+export function lookupShort(short: string): string | undefined {
+  return shortToFull[short];
+}

@@ -422,36 +422,6 @@ export default function CheckoutPage() {
   };
 
 const [orderAmount, setOrderAmount] = useState(0);
-
-/*const handleCreateOrderDraft = async () => {
-  setIsLoading(true);
-  setError('');
-
-  try {
-    const response = await fetch('/api/orders/draft', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        items: cartItems,
-        shipping: shippingData
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to create order');
-    }
-
-    setOrderRef(data.ref);
-    setOrderAmount(totalPrice); // ✅ Save amount before clearing cart
-    clearCart();
-  } catch (error: any) {
-    setError(error.message);
-  } finally {
-    setIsLoading(false);
-  }
-};*/
 const handleCreateOrderDraft = async () => {
   setIsLoading(true);
   setError('');
@@ -662,19 +632,3 @@ const handleCreateOrderDraft = async () => {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

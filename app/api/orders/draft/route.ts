@@ -286,7 +286,7 @@ import { verify } from 'jsonwebtoken';
 import dbConnect from '@/lib/dbConnect';
 import OrderDraft from '@/models/OrderDraft';
 import Product from '@/models/product';
-import { makeToken, generateRef, calculateCommission } from '@/lib/orderUtils';
+import { makeToken, generateRef, calculateCommission, storeShort } from '@/lib/orderUtils';
 
 // From env
 const MPESA_PAYBILL = process.env.MPESA_SHORTCODE || '';
@@ -326,48 +326,6 @@ export async function POST(req: NextRequest) {
     let totalAmount = 0;
     const vendorMap: Record<string, { amount: number; vendorId: string; shopId: string }> = {};
     const validatedItems = [];
-
-    /*for (const item of items) {
-      const product = await Product.findById(item.productId);
-      if (!product) {
-        console.warn(`[FAILURE] Product not found: ${item.productId}`);
-        return NextResponse.json({ message: `Product ${item.productId} not found` }, { status: 400 });
-      }
-
-      if (!product.isActive || !product.isApproved) {
-        console.warn(`[FAILURE] Product not available: ${product.name}`);
-        return NextResponse.json({ message: `Product ${product.name} is not available` }, { status: 400 });
-      }
-
-      if (product.stock < item.quantity) {
-        console.warn(`[FAILURE] Insufficient stock for: ${product.name}`);
-        return NextResponse.json({ message: `Insufficient stock for ${product.name}` }, { status: 400 });
-      }
-
-      const itemTotal = product.price * item.quantity;
-      totalAmount += itemTotal;
-
-      if (!vendorMap[product.vendorId.toString()]) {
-        vendorMap[product.vendorId.toString()] = {
-          amount: 0,
-          vendorId: product.vendorId.toString(),
-          shopId: product.shopId.toString()
-        };
-      }
-      vendorMap[product.vendorId.toString()].amount += itemTotal;
-
-      validatedItems.push({
-        productId: product._id.toString(),
-        vendorId: product.vendorId.toString(),
-        shopId: product.shopId.toString(),
-        name: product.name,
-        price: product.price,
-        quantity: item.quantity,
-        image: product.images[0]
-      });
-
-      console.log(`[SUCCESS] Validated product: ${product.name}, Qty: ${item.quantity}, Total: ${itemTotal}`);
-    }*/
 
       for (const item of items) {
   const productId = item.productId || item._id; // fallback to _id
@@ -458,12 +416,25 @@ export async function POST(req: NextRequest) {
     console.log('[SUCCESS] Order draft created with reference:', ref);
 
     // 📲 Return PayBill + Ref to user
-    console.log('[SUCCESS] Checkout request processed successfully, returning payment instructions.');
+    /*console.log('[SUCCESS] Checkout request processed successfully, returning payment instructions.');
     return NextResponse.json({
       success: true,
       message: "Please complete payment via M-Pesa PayBill",
       paybill: MPESA_PAYBILL,
       accountReference: ref,
+      totalAmount,
+      currency: 'KES',
+      expiresAt: orderDraft.expiresAt,
+    });*/
+    const fullRef = generateRef(draftToken);
+    const customerRef = storeShort(fullRef);
+
+    console.log('[SUCCESS] Checkout request processed successfully, returning payment instructions.');
+    return NextResponse.json({
+      success: true,
+      message: "Please complete payment via M-Pesa PayBill",
+      paybill: MPESA_PAYBILL,
+      accountReference: customerRef, // ⬅️ 6-char only
       totalAmount,
       currency: 'KES',
       expiresAt: orderDraft.expiresAt,

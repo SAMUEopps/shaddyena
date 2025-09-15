@@ -5,7 +5,7 @@ import OrderDraft from '@/models/OrderDraft';
 import Order from '@/models/Order';
 import Ledger from '@/models/Ledger';
 import Product from '@/models/product';
-import { decodeRef, generateOrderId } from '@/lib/orderUtils';
+import { decodeRef, generateOrderId, lookupShort } from '@/lib/orderUtils';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,6 +13,8 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const accountNumber = body.AccountNumber || body.BillRefNumber;
+    const fullAccountNumber = lookupShort(accountNumber) || accountNumber;
+    
     const amount = Math.round(Number(body.Amount));
     const mpesaTransactionId = body.TransactionID || body.MpesaReceiptNumber;
 
@@ -21,7 +23,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Decode and validate reference
-    const decoded = decodeRef(accountNumber);
+    //const decoded = decodeRef(accountNumber);
+    const decoded = decodeRef(fullAccountNumber);
     if (!decoded.ok) {
       return NextResponse.json({ ResultCode: 1, ResultDesc: 'Invalid reference' });
     }
