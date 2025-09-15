@@ -1,38 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { simulateC2Bv2Payment } from "@/lib/mpesaUtils";
+import axios from "axios";
 
-/**
- * API to simulate a C2B v2 payment via browser
- * Example URL: /api/mpesa/simulate?amount=100&phone=2547XXXXXXXX
- */
+const MPESA_CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || "";
+const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || "";
+const MPESA_BASE_URL = process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke";
+
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const amount = parseFloat(searchParams.get("amount") || "1");
-    const phone = searchParams.get("phone");
-    const accountRef = searchParams.get("accountRef") || "Test123";
-
-    if (!phone) {
+    if (!MPESA_CONSUMER_KEY || !MPESA_CONSUMER_SECRET) {
       return NextResponse.json(
-        { success: false, message: "Phone number is required in query params" },
+        { success: false, message: "M-Pesa Consumer Key or Secret is missing!" },
         { status: 400 }
       );
     }
 
-    // Call your simulate function
-    const result = await simulateC2Bv2Payment(amount, phone, accountRef);
+    const rawAuth = `${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`;
+    const auth = Buffer.from(rawAuth).toString("base64");
 
-    console.log("[BROWSER] Simulation result:", result);
+    const response = await axios.get(
+      `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
+      {
+        headers: { Authorization: `Basic ${auth}` },
+      }
+    );
+
+    const accessToken = response.data.access_token;
+
+    if (!accessToken) {
+      throw new Error("Access token is empty!");
+    }
+
+    console.log("[SUCCESS] Access token received ✅", accessToken);
 
     return NextResponse.json({
       success: true,
-      message: "C2B v2 payment simulation completed",
-      result,
+      message: "M-Pesa access token is working",
+      accessToken,
     });
   } catch (error: any) {
-    console.error("[BROWSER] Simulation failed:", error);
+    console.error("[FAILURE] Access token error:", error.response?.data || error.message);
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message: "Failed to get M-Pesa access token", error: error.message },
       { status: 500 }
     );
   }
