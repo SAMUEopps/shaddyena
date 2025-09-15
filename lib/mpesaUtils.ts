@@ -223,7 +223,11 @@ export function confirmPayment(body: any) {
 
 
 
-import axios from "axios";
+
+
+
+
+/*import axios from "axios";
 
 const MPESA_CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || "";
 const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || "";
@@ -241,7 +245,7 @@ if (MPESA_CALLBACK_URL.endsWith("/")) {
 
 /**
  * 🔑 Get M-Pesa access token
- */
+ *
 export async function getMpesaAccessToken(): Promise<string> {
   // Check if credentials exist
   if (!MPESA_CONSUMER_KEY || !MPESA_CONSUMER_SECRET) {
@@ -277,7 +281,7 @@ export async function getMpesaAccessToken(): Promise<string> {
 /**
  * 📌 Register C2B URLs (Validation + Confirmation)
  * Run this once when deploying your app or updating URLs
- */
+ *
 export async function registerC2BUrls(retry = true) {
   if (!MPESA_SHORTCODE) {
     throw new Error("M-Pesa Shortcode is missing!");
@@ -325,7 +329,7 @@ export async function registerC2BUrls(retry = true) {
 
 /**
  * 🔎 Validate Payment (M-Pesa calls this first when a customer pays)
- */
+ *
 export function validatePayment(body: any) {
   console.log("[INFO] Payment validation request:", body);
 
@@ -337,7 +341,7 @@ export function validatePayment(body: any) {
 
 /**
  * ✅ Confirm Payment (M-Pesa calls this after successful payment)
- */
+ *
 export function confirmPayment(body: any) {
   console.log("[INFO] Payment confirmation received:", body);
 
@@ -349,4 +353,101 @@ export function confirmPayment(body: any) {
     phone: MSISDN,
     accountRef: BillRefNumber,
   };
+}*/
+
+import axios from "axios";
+
+const MPESA_CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || "";
+const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || "";
+const MPESA_SHORTCODE = process.env.MPESA_SHORTCODE || "";
+const MPESA_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke"
+    : "https://sandbox.safaricom.co.ke";
+
+let MPESA_CALLBACK_URL = process.env.MPESA_CALLBACK_URL || process.env.NEXTAUTH_URL || "";
+if (MPESA_CALLBACK_URL.endsWith("/")) {
+  MPESA_CALLBACK_URL = MPESA_CALLBACK_URL.slice(0, -1);
 }
+
+/**
+ * 🔑 Get M-Pesa access token
+ */
+export async function getMpesaAccessToken(): Promise<string> {
+  if (!MPESA_CONSUMER_KEY || !MPESA_CONSUMER_SECRET) {
+    throw new Error("M-Pesa Consumer Key or Secret is missing!");
+  }
+
+  const rawAuth = `${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`;
+  const auth = Buffer.from(rawAuth).toString("base64");
+
+  try {
+    const response = await axios.get(
+      `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
+      {
+        headers: { Authorization: `Basic ${auth}` },
+      }
+    );
+
+    const accessToken = response.data.access_token;
+    if (!accessToken) throw new Error("Access token is empty!");
+    return accessToken;
+  } catch (error: any) {
+    console.error("[FAILURE] Error getting M-Pesa access token:", error.response?.data || error.message);
+    throw new Error("Failed to get M-Pesa access token");
+  }
+}
+
+/**
+ * 📌 Simulate C2B v2 Payment (for sandbox/testing)
+ * amount: number, phone: string, accountRef?: string
+ */
+export async function simulateC2Bv2Payment(amount: number, phone: string, accountRef = "Test123") {
+  if (!MPESA_SHORTCODE) throw new Error("M-Pesa Shortcode is missing!");
+
+  try {
+    const accessToken = await getMpesaAccessToken();
+
+    const payload = {
+      ShortCode: MPESA_SHORTCODE,
+      CommandID: "CustomerPayBillOnline", // Common C2B command
+      Amount: amount,
+      Msisdn: phone,
+      BillRefNumber: accountRef,
+    };
+
+    const response = await axios.post(
+      `${MPESA_BASE_URL}/mpesa/c2b/v2/transactions/simulate`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("[SUCCESS] C2B v2 payment simulated ✅", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("[FAILURE] Error simulating C2B v2 payment:", error.response?.data || error.message);
+    throw new Error("Failed to simulate C2B v2 payment");
+  }
+}
+
+/**
+ * ✅ Handle Payment Notification (Webhook)
+ */
+export function handleC2Bv2Payment(body: any) {
+  console.log("[INFO] C2B v2 payment received:", body);
+
+  const { TransactionID, TransAmount, MSISDN, BillRefNumber } = body;
+
+  return {
+    transactionId: TransactionID,
+    amount: TransAmount,
+    phone: MSISDN,
+    accountRef: BillRefNumber,
+  };
+}
+
