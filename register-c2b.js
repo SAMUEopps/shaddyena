@@ -31,7 +31,7 @@ async function getAccessToken() {
 }
 
 async function registerC2BUrls() {
-  console.log("[INFO] Starting C2B URL registration...");
+  console.log("[INFO] Starting C2B V2 URL registration...");
   console.log("MPESA_SHORTCODE:", MPESA_SHORTCODE);
   console.log("MPESA_CALLBACK_URL:", MPESA_CALLBACK_URL);
 
@@ -48,12 +48,12 @@ async function registerC2BUrls() {
     console.log("[INFO] Registration payload:", payload);
 
     const response = await axios.post(
-      `${MPESA_BASE_URL}/mpesa/c2b/v2/registerurl`,
+      `${MPESA_BASE_URL}/mpesa/c2b/v2/registerurl`, // <--- V2 endpoint
       payload,
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    console.log("[SUCCESS] C2B URLs registered ✅", response.data);
+    console.log("[SUCCESS] C2B V2 URLs registered ✅", response.data);
   } catch (error) {
     if (error.response) {
       console.error("[FAILURE] Registration failed:", error.response.data || error.message);
