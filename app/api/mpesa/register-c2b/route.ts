@@ -98,7 +98,8 @@ import axios from "axios";
 const MPESA_CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || "";
 const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || "";
 const MPESA_SHORTCODE = process.env.MPESA_SHORTCODE || "";
-const MPESA_CALLBACK_URL = process.env.MPESA_CALLBACK_URL || "";
+const MPESA_VALIDATION_URL = process.env.MPESA_VALIDATION_URL || "";
+const MPESA_CONFIRMATION_URL = process.env.MPESA_CONFIRMATION_URL || "";
 const MPESA_BASE_URL = process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke";
 
 async function getAccessToken(): Promise<string> {
@@ -119,13 +120,13 @@ async function registerC2BUrls() {
 
     const payload = {
       ShortCode: MPESA_SHORTCODE,
-      ResponseType: "Completed", // Always Completed for production
-      ConfirmationURL: MPESA_CALLBACK_URL,
-      ValidationURL: MPESA_CALLBACK_URL,
+      ResponseType: "Completed", // Always Completed in prod
+      ConfirmationURL: MPESA_CONFIRMATION_URL,
+      ValidationURL: MPESA_VALIDATION_URL,
     };
 
     const response = await axios.post(
-      `${MPESA_BASE_URL}/mpesa/c2b/v2/registerurl`,
+      `${MPESA_BASE_URL}/mpesa/c2b/v1/registerurl`, // v1, not v2
       payload,
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -136,15 +137,13 @@ async function registerC2BUrls() {
 
     console.error("[FAILURE!!] ❌ Registration failed:", data);
 
-    // If error is "already registered", log what we tried to set
     if (data?.errorMessage?.includes("already registered")) {
-      console.log("[INFO] 🔗 The following URLs are already active for shortcode:", MPESA_SHORTCODE);
-      console.log("  ➤ ConfirmationURL:", MPESA_CALLBACK_URL);
-      console.log("  ➤ ValidationURL:", MPESA_CALLBACK_URL);
+      console.log("[INFO] 🔗 Already registered for shortcode:", MPESA_SHORTCODE);
+      console.log("  ➤ ConfirmationURL:", MPESA_CONFIRMATION_URL);
+      console.log("  ➤ ValidationURL:", MPESA_VALIDATION_URL);
     }
   }
 }
 
 // Run script
 registerC2BUrls();
-
