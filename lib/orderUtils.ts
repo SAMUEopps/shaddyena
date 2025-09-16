@@ -87,7 +87,7 @@ export function shortRef(fullRef: string): string {
   return out; // always 6 chars
 }
 
-/*  NEW  
+/*  NEW  */
 // in-memory only – restart clears it (good enough for 20-min drafts)
 const shortToFull: Record<string, string> = {};
 
@@ -99,4 +99,4 @@ export function storeShort(fullRef: string): string {
 
 export function lookupShort(short: string): string | undefined {
   return shortToFull[short];
-} */
+} 

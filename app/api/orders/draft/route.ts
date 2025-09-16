@@ -446,6 +446,7 @@ import {
   makeToken,
   generateRef,
   calculateCommission,
+  storeShort,
 } from "@/lib/orderUtils";
 
 const MPESA_PAYBILL = process.env.MPESA_SHORTCODE || "";
@@ -573,7 +574,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }
-function storeShort(fullRef: string) {
-  throw new Error("Function not implemented.");
-}
+
 
