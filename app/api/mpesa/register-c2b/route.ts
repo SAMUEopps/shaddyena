@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
 }
 */
 
-import axios from "axios";
+/*import axios from "axios";
 
 const MPESA_CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || "";
 const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || "";
@@ -91,4 +91,60 @@ async function registerC2BUrls() {
 }
 
 // Run script
+registerC2BUrls();*/
+
+import axios from "axios";
+
+const MPESA_CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || "";
+const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || "";
+const MPESA_SHORTCODE = process.env.MPESA_SHORTCODE || "";
+const MPESA_CALLBACK_URL = process.env.MPESA_CALLBACK_URL || "";
+const MPESA_BASE_URL = process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke";
+
+async function getAccessToken(): Promise<string> {
+  const rawAuth = `${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`;
+  const auth = Buffer.from(rawAuth).toString("base64");
+
+  const response = await axios.get(
+    `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
+    { headers: { Authorization: `Basic ${auth}` } }
+  );
+
+  return response.data.access_token;
+}
+
+async function registerC2BUrls() {
+  try {
+    const token = await getAccessToken();
+
+    const payload = {
+      ShortCode: MPESA_SHORTCODE,
+      ResponseType: "Completed", // Always Completed for production
+      ConfirmationURL: MPESA_CALLBACK_URL,
+      ValidationURL: MPESA_CALLBACK_URL,
+    };
+
+    const response = await axios.post(
+      `${MPESA_BASE_URL}/mpesa/c2b/v2/registerurl`,
+      payload,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    console.log("[SUCCESS] ✅ C2B URLs registered:", response.data);
+  } catch (error: any) {
+    const data = error.response?.data || error.message;
+
+    console.error("[FAILURE!!] ❌ Registration failed:", data);
+
+    // If error is "already registered", log what we tried to set
+    if (data?.errorMessage?.includes("already registered")) {
+      console.log("[INFO] 🔗 The following URLs are already active for shortcode:", MPESA_SHORTCODE);
+      console.log("  ➤ ConfirmationURL:", MPESA_CALLBACK_URL);
+      console.log("  ➤ ValidationURL:", MPESA_CALLBACK_URL);
+    }
+  }
+}
+
+// Run script
 registerC2BUrls();
+
