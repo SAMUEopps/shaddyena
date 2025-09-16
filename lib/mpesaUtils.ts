@@ -535,7 +535,7 @@ export async function registerC2BUrls(): Promise<void> {
     console.log('[SUCCESS] C2B V2 URLs registered ✅', data);
   } catch (err: any) {
     console.error(
-      '[FAILURE] Registration failed:',
+      '[FAILURE!!!] Registration failed:',
       err.response?.data || err.message || err
     );
   }
