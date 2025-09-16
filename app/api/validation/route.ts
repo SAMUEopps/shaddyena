@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
 */
 
 // app/api/validation/route.ts
-/*import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import OrderDraft from "@/models/OrderDraft";
 import { decodeRef, lookupShort } from "@/lib/orderUtils";
@@ -191,10 +191,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ResultCode: 1, ResultDesc: "Server error" });
   }
 }
-*/
+
 
 // src/app/api/validation/route.ts
-import { NextRequest, NextResponse } from "next/server";
+/*import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import OrderDraft from "@/models/OrderDraft";
 
@@ -235,4 +235,4 @@ export async function POST(req: NextRequest) {
     console.error("[VALIDATION] Error:", err.message);
     return NextResponse.json({ ResultCode: 1, ResultDesc: "Internal Error" });
   }
-}
+}*/
