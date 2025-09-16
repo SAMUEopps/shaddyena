@@ -2,6 +2,8 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IOrderDraft extends Document {
   token: string;
+  fullRef: string;
+  shortRef: string;
   prefix: string;
   version: string;
   items: {
@@ -39,6 +41,8 @@ export interface IOrderDraft extends Document {
 const OrderDraftSchema = new Schema<IOrderDraft>(
   {
     token: { type: String, unique: true, required: true },
+    fullRef: { type: String, required: true, unique: true },
+    shortRef: { type: String, required: true, unique: true },
     prefix: { type: String, default: 'SHD' },
     version: { type: String, default: 'V1' },
     items: [{

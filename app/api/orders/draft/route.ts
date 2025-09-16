@@ -281,7 +281,7 @@ export async function POST(req: NextRequest) {
 }*/
 
 // app/api/checkout/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+/*import { NextRequest, NextResponse } from 'next/server';
 import { verify } from 'jsonwebtoken';
 import dbConnect from '@/lib/dbConnect';
 import OrderDraft from '@/models/OrderDraft';
@@ -414,18 +414,6 @@ export async function POST(req: NextRequest) {
 
     await orderDraft.save();
     console.log('[SUCCESS] Order draft created with reference:', ref);
-
-    // 📲 Return PayBill + Ref to user
-    /*console.log('[SUCCESS] Checkout request processed successfully, returning payment instructions.');
-    return NextResponse.json({
-      success: true,
-      message: "Please complete payment via M-Pesa PayBill",
-      paybill: MPESA_PAYBILL,
-      accountReference: ref,
-      totalAmount,
-      currency: 'KES',
-      expiresAt: orderDraft.expiresAt,
-    });*/
     const fullRef = generateRef(draftToken);
     const customerRef = storeShort(fullRef);
 
@@ -443,5 +431,146 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('[FAILURE] Error creating order draft:', error.message, error.stack);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+  }
+}
+*/
+
+
+// app/api/checkout/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { verify } from "jsonwebtoken";
+import dbConnect from "@/lib/dbConnect";
+import OrderDraft from "@/models/OrderDraft";
+import Product from "@/models/product";
+import {
+  makeToken,
+  generateRef,
+  calculateCommission,
+  storeShort,
+} from "@/lib/orderUtils";
+
+const MPESA_PAYBILL = process.env.MPESA_SHORTCODE || "";
+
+export async function POST(req: NextRequest) {
+  try {
+    console.log("[INFO] Incoming checkout request...");
+
+    await dbConnect();
+    console.log("[SUCCESS] Database connected");
+
+    // 🔐 Check authentication
+    const token = req.cookies.get("token")?.value;
+    if (!token) {
+      console.warn("[FAILURE] No authentication token found");
+      return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
+    }
+
+    let decoded: any;
+    try {
+      decoded = verify(token, process.env.JWT_SECRET as string);
+      console.log("[SUCCESS] Token verified. User ID:", decoded.userId);
+    } catch (err) {
+      console.warn("[FAILURE] Invalid token verification:", err);
+      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
+    }
+
+    const { items, shipping } = await req.json();
+    if (!items || !shipping) {
+      console.warn("[FAILURE] Missing required fields:", { items, shipping });
+      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
+    }
+
+    console.log(`[INFO] Validating ${items.length} items...`);
+
+    // ✅ Validate items
+    let totalAmount = 0;
+    const vendorMap: Record<string, { amount: number; vendorId: string; shopId: string }> = {};
+    const validatedItems: any[] = [];
+
+    for (const item of items) {
+      const productId = item.productId || item._id;
+      console.log(`🔍 Validating productId: ${productId}, quantity: ${item.quantity}`);
+
+      const product = await Product.findById(productId);
+      if (!product) {
+        return NextResponse.json({ success: false, message: `Product ${productId} not found` }, { status: 400 });
+      }
+      if (!product.isActive || !product.isApproved) {
+        return NextResponse.json({ success: false, message: `Product ${product.name} is not available` }, { status: 400 });
+      }
+      if (product.stock < item.quantity) {
+        return NextResponse.json({ success: false, message: `Insufficient stock for ${product.name}` }, { status: 400 });
+      }
+
+      const itemTotal = product.price * item.quantity;
+      totalAmount += itemTotal;
+
+      const vendorId = product.vendorId?._id?.toString() || product.vendorId.toString();
+      const shopId = product.shopId?._id?.toString() || product.shopId.toString();
+
+      if (!vendorMap[vendorId]) {
+        vendorMap[vendorId] = { amount: 0, vendorId, shopId };
+      }
+      vendorMap[vendorId].amount += itemTotal;
+
+      validatedItems.push({
+        productId: product._id.toString(),
+        vendorId,
+        shopId,
+        name: product.name,
+        price: product.price,
+        quantity: item.quantity,
+        image: product.images?.[0] || item.image || "",
+      });
+    }
+
+    // 💰 Vendor splits
+    const vendorSplits = Object.values(vendorMap).map((vendor) => {
+      const { commission, netAmount } = calculateCommission(vendor.amount);
+      return {
+        vendorId: vendor.vendorId,
+        shopId: vendor.shopId,
+        amount: vendor.amount,
+        commission,
+        netAmount,
+      };
+    });
+
+    console.log("[SUCCESS] Vendor splits calculated:", vendorSplits);
+    console.log(`[INFO] Customer total: KES ${totalAmount}`);
+
+    // 📝 Create order draft with refs
+    const draftToken = makeToken();
+    const fullRef = generateRef(draftToken);
+    const shortRef = storeShort(fullRef);
+
+    const orderDraft = new OrderDraft({
+      token: draftToken,
+      fullRef,
+      shortRef,
+      items: validatedItems,
+      vendorSplits,
+      totalAmount,
+      buyerId: decoded.userId,
+      shipping,
+      expiresAt: new Date(Date.now() + 20 * 60 * 1000),
+    });
+
+    await orderDraft.save();
+
+    console.log("[SUCCESS] Order draft created with reference:", fullRef);
+
+    return NextResponse.json({
+      success: true,
+      message: "Please complete payment via M-Pesa PayBill",
+      paybill: MPESA_PAYBILL,
+      accountReference: shortRef, // ⬅️ 6-char for customer input
+      totalAmount,
+      currency: "KES",
+      expiresAt: orderDraft.expiresAt,
+    });
+  } catch (error: any) {
+    console.error("[FAILURE] Error creating order draft:", error.message, error.stack);
+    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }
