@@ -86,7 +86,7 @@ async function registerC2BUrls() {
 
     console.log("[SUCCESS] C2B URLs registered ✅", response.data);
   } catch (error: any) {
-    console.error("[FAILURE] Registration failed:", error.response?.data || error.message);
+    console.error("[FAILURE!!] Registration failed:", error.response?.data || error.message);
   }
 }
 
