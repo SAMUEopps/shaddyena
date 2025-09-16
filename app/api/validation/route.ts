@@ -64,6 +64,8 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     const body = await req.json();
+    console.log("[VALIDATION] Incoming:", body);
+
     console.log("📩 [VALIDATION] Incoming payload:", JSON.stringify(body, null, 2));
 
     const accountNumber = body.AccountNumber || body.BillRefNumber;
