@@ -9,13 +9,13 @@ const testPayload = {
   TransTime: "20250916235959",
   TransAmount: "100.00",
   BusinessShortCode: "4184219",
-  BillRefNumber: "0IMCZM", // replace with a real draft ref if you want
+  BillRefNumber: "A661BA", // replace with a real draft ref if you want
   InvoiceNumber: "",
   OrgAccountBalance: "1000.00",
   ThirdPartyTransID: "",
   MSISDN: "254700123456",
   FirstName: "SAMUEL",
-  AccountNumber: "0IMCZM", // included for validation
+  AccountNumber: "A661BA", // included for validation
   Amount: "100"
 };
 

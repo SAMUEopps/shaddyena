@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
 */
 
 // app/api/validation/route.ts
-import { NextRequest, NextResponse } from "next/server";
+/*import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import OrderDraft from "@/models/OrderDraft";
 import { decodeRef, lookupShort } from "@/lib/orderUtils";
@@ -189,5 +189,50 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("❌ [VALIDATION ERROR] Unexpected server error:", error);
     return NextResponse.json({ ResultCode: 1, ResultDesc: "Server error" });
+  }
+}
+*/
+
+// src/app/api/validation/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/dbConnect";
+import OrderDraft from "@/models/OrderDraft";
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    console.log("[VALIDATION] Incoming payload:", body);
+
+    await dbConnect();
+
+    const { BillRefNumber, TransAmount, MSISDN } = body;
+
+    // Check if BillRefNumber matches a shortRef in drafts
+    const draft = await OrderDraft.findOne({ shortRef: BillRefNumber });
+    if (!draft) {
+      console.warn("[VALIDATION] Invalid reference:", BillRefNumber);
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Invalid reference",
+      });
+    }
+
+    // Optional: amount check
+    if (parseFloat(TransAmount) !== draft.totalAmount) {
+      console.warn("[VALIDATION] Amount mismatch. Expected:", draft.totalAmount, "Got:", TransAmount);
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Amount mismatch",
+      });
+    }
+
+    console.log("[VALIDATION] Success for:", BillRefNumber, "MSISDN:", MSISDN);
+    return NextResponse.json({
+      ResultCode: 0,
+      ResultDesc: "Accepted",
+    });
+  } catch (err: any) {
+    console.error("[VALIDATION] Error:", err.message);
+    return NextResponse.json({ ResultCode: 1, ResultDesc: "Internal Error" });
   }
 }

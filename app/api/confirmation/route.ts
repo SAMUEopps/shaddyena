@@ -246,7 +246,7 @@ export async function POST(req: NextRequest) {
 
 
 // confirmation/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+/*import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import OrderDraft from '@/models/OrderDraft';
 import Order from '@/models/Order';
@@ -372,6 +372,49 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('❌ [CONFIRMATION ERROR] Unexpected server error:', error);
     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Server error' });
+  }
+}
+*/
+
+// src/app/api/confirmation/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/dbConnect";
+import OrderDraft from "@/models/OrderDraft";
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    console.log("[CONFIRMATION] Incoming payload:", body);
+
+    await dbConnect();
+
+    const { BillRefNumber, TransID, TransAmount, MSISDN } = body;
+
+    const draft = await OrderDraft.findOne({ shortRef: BillRefNumber });
+    if (!draft) {
+      console.warn("[CONFIRMATION] No draft found for ref:", BillRefNumber);
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Draft not found",
+      });
+    }
+
+    // ✅ Mark draft as paid
+    draft.isPaid = true;
+    draft.transactionId = TransID;
+    draft.payerPhone = MSISDN;
+    draft.paidAmount = parseFloat(TransAmount);
+    await draft.save();
+
+    console.log("[CONFIRMATION] Payment confirmed for:", BillRefNumber, "Txn:", TransID);
+
+    return NextResponse.json({
+      ResultCode: 0,
+      ResultDesc: "Confirmation received successfully",
+    });
+  } catch (err: any) {
+    console.error("[CONFIRMATION] Error:", err.message);
+    return NextResponse.json({ ResultCode: 1, ResultDesc: "Internal Error" });
   }
 }
 
