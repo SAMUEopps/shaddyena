@@ -50,13 +50,13 @@ const testPayload = {
   TransTime: "20250916235959",        // fake timestamp
   TransAmount: "1.00",                // must match totalAmount in draft
   BusinessShortCode: "4184219",       // your PayBill/Till
-  BillRefNumber: "CUPXCB",            // ⬅️ draft.shortRef
+  BillRefNumber: "PG6EWK",            // ⬅️ draft.shortRef
   InvoiceNumber: "",
   OrgAccountBalance: "1000.00",
   ThirdPartyTransID: "",
   MSISDN: "254700123456",             // fake customer phone
   FirstName: "SAMUEL",
-  AccountNumber: "CUPXCB",            // ⬅️ same as shortRef
+  AccountNumber: "PG6EWK",            // ⬅️ same as shortRef
   Amount: "1"                         // same as totalAmount
 };
 

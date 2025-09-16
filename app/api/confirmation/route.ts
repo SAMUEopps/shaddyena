@@ -421,6 +421,7 @@ export async function POST(req: NextRequest) {
 
 // app/api/confirmation/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/dbConnect";
 import OrderDraft from "@/models/OrderDraft";
 import Order from "@/models/Order";
 import Ledger from "@/models/Ledger";
@@ -429,40 +430,56 @@ import { decodeRef, generateOrderId } from "@/lib/orderUtils";
 
 export async function POST(req: NextRequest) {
   try {
+    await dbConnect();
+
     const body = await req.json();
     console.log("📥 Confirmation payload:", JSON.stringify(body, null, 2));
 
     const accountNumber = body.AccountNumber || body.BillRefNumber;
-    const amount = Math.round(Number(body.Amount || body.TransAmount));
+    const amount = parseInt(body.Amount || body.TransAmount, 10);
 
     if (!accountNumber) {
-      return NextResponse.json({ ResultCode: 1, ResultDesc: "Missing account number" });
+      console.error("❌ Missing account number");
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Missing account number",
+      });
     }
 
     /* ----------------------------------------------------------
-       1.  Find draft by the 6-char code the customer typed
+       1. Find draft by the 6-char code the customer typed
     ---------------------------------------------------------- */
     const draft = await OrderDraft.findOne({ shortRef: accountNumber });
     if (!draft) {
       console.error("❌ Unknown shortRef:", accountNumber);
-      return NextResponse.json({ ResultCode: 1, ResultDesc: "Unknown reference" });
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Unknown reference",
+      });
     }
 
     /* ----------------------------------------------------------
-       2.  Decode the *stored* long reference to get the token
+       2. Decode stored longRef to get the token
     ---------------------------------------------------------- */
     const decoded = decodeRef(draft.fullRef);
     if (!decoded.ok || !decoded.token) {
       console.error("❌ Invalid fullRef:", draft.fullRef);
-      return NextResponse.json({ ResultCode: 1, ResultDesc: "Invalid reference" });
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Invalid reference",
+      });
     }
+    console.log("🔑 Token prefix:", decoded.token.slice(0, 6));
 
     /* ----------------------------------------------------------
-       3.  Business checks (amount, expiry, status)
+       3. Business checks
     ---------------------------------------------------------- */
     if (amount !== draft.totalAmount) {
       draft.status = "FAILED";
       await draft.save();
+      console.error(
+        `❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`
+      );
       return NextResponse.json({
         ResultCode: 1,
         ResultDesc: `Amount mismatch. Expected ${draft.totalAmount}`,
@@ -470,25 +487,38 @@ export async function POST(req: NextRequest) {
     }
 
     if (draft.expiresAt < new Date()) {
-      return NextResponse.json({ ResultCode: 1, ResultDesc: "Reference expired" });
+      console.error("❌ Reference expired:", draft.shortRef);
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Reference expired",
+      });
     }
 
+    // Idempotency: if already confirmed, return success
     if (draft.status === "CONFIRMED") {
-      return NextResponse.json({ ResultCode: 0, ResultDesc: "Already processed" });
+      console.warn("⚠️ Already confirmed:", draft.shortRef);
+      return NextResponse.json({
+        ResultCode: 0,
+        ResultDesc: "Already processed",
+      });
     }
 
     /* ----------------------------------------------------------
-       4.  Update stock
+       4. Update stock
     ---------------------------------------------------------- */
     for (const item of draft.items) {
-      await Product.findByIdAndUpdate(
+      const res = await Product.findByIdAndUpdate(
         item.productId,
-        { $inc: { stock: -item.quantity } }
+        { $inc: { stock: -item.quantity } },
+        { new: true }
       );
+      if (!res) {
+        console.error("⚠️ Product not found during stock update:", item.productId);
+      }
     }
 
     /* ----------------------------------------------------------
-       5.  Create real Order
+       5. Create real Order
     ---------------------------------------------------------- */
     const orderId = generateOrderId();
     const order = new Order({
@@ -506,7 +536,10 @@ export async function POST(req: NextRequest) {
         status: "PENDING",
       })),
       totalAmount: draft.totalAmount,
-      platformFee: draft.vendorSplits.reduce((sum: number, v: any) => sum + v.commission, 0),
+      platformFee: draft.vendorSplits.reduce(
+        (sum: number, v: any) => sum + v.commission,
+        0
+      ),
       currency: draft.currency || "KES",
       paymentMethod: "M-PESA",
       paymentStatus: "PAID",
@@ -518,7 +551,7 @@ export async function POST(req: NextRequest) {
     await order.save();
 
     /* ----------------------------------------------------------
-       6.  Ledger entries (payouts after 24 h)
+       6. Ledger entries (payouts after 24h)
     ---------------------------------------------------------- */
     const ledgerEntries = draft.vendorSplits.map((v: any) => ({
       vendorId: v.vendorId,
@@ -534,7 +567,7 @@ export async function POST(req: NextRequest) {
     await Ledger.insertMany(ledgerEntries);
 
     /* ----------------------------------------------------------
-       7.  Mark draft confirmed
+       7. Mark draft confirmed
     ---------------------------------------------------------- */
     draft.status = "CONFIRMED";
     draft.mpesaTransactionId = body.TransID || body.TransId;
@@ -544,6 +577,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ResultCode: 0, ResultDesc: "Success" });
   } catch (err) {
     console.error("❌ Confirmation crash:", err);
-    return NextResponse.json({ ResultCode: 1, ResultDesc: "Server error" });
+    return NextResponse.json({
+      ResultCode: 1,
+      ResultDesc: "Server error",
+    });
   }
 }

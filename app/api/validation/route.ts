@@ -123,19 +123,26 @@ export async function POST(req: NextRequest) {
 
 // app/api/validation/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/dbConnect";
 import OrderDraft from "@/models/OrderDraft";
 import { decodeRef } from "@/lib/orderUtils";
 
 export async function POST(req: NextRequest) {
   try {
+    await dbConnect();
+
     const body = await req.json();
     console.log("📥 Validation payload:", JSON.stringify(body, null, 2));
 
     const accountNumber = body.AccountNumber || body.BillRefNumber;
-    const amount = Math.round(Number(body.Amount));
+    const amount = parseInt(body.Amount, 10);
 
     if (!accountNumber) {
-      return NextResponse.json({ ResultCode: 1, ResultDesc: "Missing account number" });
+      console.error("❌ Missing account number in payload");
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Missing account number",
+      });
     }
 
     /* ----------------------------------------------------------
@@ -144,7 +151,10 @@ export async function POST(req: NextRequest) {
     const draft = await OrderDraft.findOne({ shortRef: accountNumber });
     if (!draft) {
       console.error("❌ Unknown shortRef:", accountNumber);
-      return NextResponse.json({ ResultCode: 1, ResultDesc: "Unknown reference" });
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Unknown reference",
+      });
     }
 
     /* ----------------------------------------------------------
@@ -153,13 +163,20 @@ export async function POST(req: NextRequest) {
     const decoded = decodeRef(draft.fullRef);
     if (!decoded.ok || !decoded.token) {
       console.error("❌ Invalid fullRef:", draft.fullRef);
-      return NextResponse.json({ ResultCode: 1, ResultDesc: "Invalid reference" });
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Invalid reference",
+      });
     }
+    console.log("🔑 Token prefix:", decoded.token.slice(0, 6));
 
     /* ----------------------------------------------------------
        3.  Business checks (amount, expiry, status)
     ---------------------------------------------------------- */
     if (amount !== draft.totalAmount) {
+      console.error(
+        `❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`
+      );
       return NextResponse.json({
         ResultCode: 1,
         ResultDesc: `Amount mismatch. Expected ${draft.totalAmount}`,
@@ -167,11 +184,28 @@ export async function POST(req: NextRequest) {
     }
 
     if (draft.expiresAt < new Date()) {
-      return NextResponse.json({ ResultCode: 1, ResultDesc: "Reference expired" });
+      console.error("❌ Reference expired:", draft.shortRef);
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Reference expired",
+      });
     }
 
-    if (draft.status !== "PENDING" && draft.status !== "VALIDATED") {
-      return NextResponse.json({ ResultCode: 1, ResultDesc: "Already processed" });
+    // Allow re-validation (idempotency)
+    if (draft.status === "VALIDATED") {
+      console.warn("⚠️ Already validated:", draft.shortRef);
+      return NextResponse.json({
+        ResultCode: 0,
+        ResultDesc: "Already validated",
+      });
+    }
+
+    if (draft.status !== "PENDING") {
+      console.error("❌ Draft already processed:", draft.shortRef);
+      return NextResponse.json({
+        ResultCode: 1,
+        ResultDesc: "Already processed",
+      });
     }
 
     /* ----------------------------------------------------------
@@ -181,12 +215,19 @@ export async function POST(req: NextRequest) {
     await draft.save();
 
     console.log("✅ Validation OK for shortRef:", accountNumber);
-    return NextResponse.json({ ResultCode: 0, ResultDesc: "Accepted" });
+    return NextResponse.json({
+      ResultCode: 0,
+      ResultDesc: "Accepted",
+    });
   } catch (err) {
     console.error("❌ Validation crash:", err);
-    return NextResponse.json({ ResultCode: 1, ResultDesc: "Server error" });
+    return NextResponse.json({
+      ResultCode: 1,
+      ResultDesc: "Server error",
+    });
   }
 }
+
 // src/app/api/validation/route.ts
 /*import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
