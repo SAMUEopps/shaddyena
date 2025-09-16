@@ -377,7 +377,7 @@ export async function POST(req: NextRequest) {
 */
 
 // src/app/api/confirmation/route.ts
-import { NextRequest, NextResponse } from "next/server";
+/*import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import OrderDraft from "@/models/OrderDraft";
 
@@ -415,6 +415,128 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("[CONFIRMATION] Error:", err.message);
     return NextResponse.json({ ResultCode: 1, ResultDesc: "Internal Error" });
+  }
+}
+*/
+
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/dbConnect";
+import OrderDraft from "@/models/OrderDraft";
+import Order from "@/models/Order";
+import Ledger from "@/models/Ledger";
+import Product from "@/models/product";
+import { decodeRef, lookupShort, generateOrderId } from "@/lib/orderUtils";
+
+export async function POST(req: NextRequest) {
+  try {
+    await dbConnect();
+
+    const body = await req.json();
+    console.log("📩 [CONFIRMATION] Incoming payload:", JSON.stringify(body, null, 2));
+
+    const shortRef = body.AccountNumber || body.BillRefNumber;
+    console.log("🔗 [CONFIRMATION] shortRef received:", shortRef);
+
+    // Resolve shortRef → fullRef
+    const fullRef = lookupShort(shortRef) || shortRef;
+    console.log("🔗 [CONFIRMATION] Resolved fullRef:", fullRef);
+
+    // Decode reference
+    const decoded = decodeRef(fullRef);
+    if (!decoded.ok) {
+      console.error(`❌ [CONFIRMATION FAILED] Invalid reference: ${shortRef}`);
+      return NextResponse.json({ ResultCode: 1, ResultDesc: "Invalid reference" });
+    }
+
+    // Find draft
+    const draft = await OrderDraft.findOne({ token: decoded.token });
+    if (!draft) {
+      console.error(`❌ [CONFIRMATION FAILED] Draft not found for ref: ${shortRef}`);
+      return NextResponse.json({ ResultCode: 1, ResultDesc: "Reference not found" });
+    }
+
+    // Check already confirmed
+    if (draft.status === "CONFIRMED") {
+      console.log(`ℹ️ [CONFIRMATION INFO] Draft ${decoded.token} already confirmed`);
+      return NextResponse.json({ ResultCode: 0, ResultDesc: "Already processed" });
+    }
+
+    const amount = Math.round(Number(body.Amount || body.TransAmount));
+    if (amount !== draft.totalAmount) {
+      draft.status = "FAILED";
+      await draft.save();
+      console.error(
+        `❌ [CONFIRMATION FAILED] Amount mismatch. Expected ${draft.totalAmount}, got ${amount}`
+      );
+      return NextResponse.json({ ResultCode: 1, ResultDesc: "Amount mismatch" });
+    }
+
+    // Update stock
+    for (const item of draft.items) {
+      await Product.findByIdAndUpdate(item.productId, {
+        $inc: { stock: -item.quantity },
+      });
+    }
+    console.log(`📦 [CONFIRMATION] Stock updated for draft ${decoded.token}`);
+
+    // Create real Order
+    const orderId = generateOrderId();
+    const order = new Order({
+      orderId,
+      draftToken: draft.token,
+      buyerId: draft.buyerId,
+      items: draft.items,
+      suborders: draft.vendorSplits.map((vendor: any) => ({
+        vendorId: vendor.vendorId,
+        shopId: vendor.shopId,
+        items: draft.items.filter((i: any) => i.vendorId === vendor.vendorId),
+        amount: vendor.amount,
+        commission: vendor.commission,
+        netAmount: vendor.netAmount,
+        status: "PENDING",
+      })),
+      totalAmount: draft.totalAmount,
+      platformFee: draft.vendorSplits.reduce((sum: number, v: any) => sum + v.commission, 0),
+      currency: draft.currency,
+      paymentMethod: "M-PESA",
+      paymentStatus: "PAID",
+      shipping: draft.shipping,
+      status: "PENDING",
+      mpesaTransactionId: body.TransID || body.MpesaReceiptNumber,
+    });
+
+    await order.save();
+    console.log(`📝 [CONFIRMATION] Order ${orderId} created for draft ${decoded.token}`);
+
+    // Create ledger entries
+    const ledgerEntries = draft.vendorSplits.map((vendor: any) => ({
+      vendorId: vendor.vendorId,
+      shopId: vendor.shopId,
+      orderId,
+      draftToken: draft.token,
+      amount: vendor.amount,
+      commission: vendor.commission,
+      netAmount: vendor.netAmount,
+      status: "PENDING",
+      scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // payout after 24h
+    }));
+
+    await Ledger.insertMany(ledgerEntries);
+    console.log(`💰 [CONFIRMATION] Ledger entries created for order ${orderId}`);
+
+    // Mark draft confirmed
+    draft.status = "CONFIRMED";
+    draft.mpesaTransactionId = body.TransID || body.MpesaReceiptNumber;
+    await draft.save();
+    console.log(`✅ [CONFIRMATION SUCCESS] Draft ${decoded.token} confirmed`);
+
+    return NextResponse.json({
+      ResultCode: 0,
+      ResultDesc: "Confirmation received successfully",
+    });
+  } catch (err) {
+    console.error("❌ [CONFIRMATION ERROR]", err);
+    return NextResponse.json({ ResultCode: 1, ResultDesc: "Server error" });
   }
 }
 
