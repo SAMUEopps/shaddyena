@@ -39,6 +39,9 @@ export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
+    // Log the full callback URL
+    console.log('M-Pesa callback URL:', req.url);
+
     const body = await req.json();
     console.log('M-Pesa callback received:', JSON.stringify(body, null, 2));
 
@@ -76,7 +79,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Find the account reference in the metadata
-      const accountReferenceItem = callbackMetadata.Item.find((item: { Name: string; }) => item.Name === 'AccountReference');
+      const accountReferenceItem = callbackMetadata.Item.find((item: { Name: string }) => item.Name === 'AccountReference');
       if (!accountReferenceItem) {
         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Missing account reference' });
       }
@@ -122,17 +125,17 @@ export async function POST(req: NextRequest) {
         draftToken: draft.token,
         buyerId: draft.buyerId,
         items: draft.items,
-        suborders: draft.vendorSplits.map((vendor: { vendorId: any; shopId: any; amount: any; commission: any; netAmount: any; }) => ({
+        suborders: draft.vendorSplits.map((vendor: { vendorId: any; shopId: any; amount: any; commission: any; netAmount: any }) => ({
           vendorId: vendor.vendorId,
           shopId: vendor.shopId,
-          items: draft.items.filter((item: { vendorId: any; }) => item.vendorId === vendor.vendorId),
+          items: draft.items.filter((item: { vendorId: any }) => item.vendorId === vendor.vendorId),
           amount: vendor.amount,
           commission: vendor.commission,
           netAmount: vendor.netAmount,
           status: 'PENDING'
         })),
         totalAmount: draft.totalAmount,
-        platformFee: draft.vendorSplits.reduce((sum: any, vendor: { commission: any; }) => sum + vendor.commission, 0),
+        platformFee: draft.vendorSplits.reduce((sum: any, vendor: { commission: any }) => sum + vendor.commission, 0),
         currency: draft.currency,
         paymentMethod: 'M-PESA',
         paymentStatus: 'PAID',
@@ -144,7 +147,7 @@ export async function POST(req: NextRequest) {
       await order.save();
 
       // Create ledger entries for vendor payouts
-      const ledgerEntries = draft.vendorSplits.map((vendor: { vendorId: any; shopId: any; amount: any; commission: any; netAmount: any; }) => ({
+      const ledgerEntries = draft.vendorSplits.map((vendor: { vendorId: any; shopId: any; amount: any; commission: any; netAmount: any }) => ({
         vendorId: vendor.vendorId,
         shopId: vendor.shopId,
         orderId: orderId,

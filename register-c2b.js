@@ -56,9 +56,9 @@ async function registerC2BUrls() {
     console.log("[SUCCESS] C2B V2 URLs registered ✅", response.data);
   } catch (error) {
     if (error.response) {
-      console.error("[FAILURE] Registration failed:", error.response.data || error.message);
+      console.error("[FAILURE!] Registration failed:", error.response.data || error.message);
     } else {
-      console.error("[FAILURE] Registration failed:", error.message || error);
+      console.error("[FAILURE!] Registration failed:", error.message || error);
     }
   }
 }
