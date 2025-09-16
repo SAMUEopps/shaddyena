@@ -120,13 +120,13 @@ async function registerC2BUrls() {
 
     const payload = {
       ShortCode: MPESA_SHORTCODE,
-      ResponseType: "Completed", // Always Completed in prod
+      ResponseType: "Completed", 
       ConfirmationURL: MPESA_CONFIRMATION_URL,
       ValidationURL: MPESA_VALIDATION_URL,
     };
 
     const response = await axios.post(
-      `${MPESA_BASE_URL}/mpesa/c2b/v1/registerurl`, // v1, not v2
+      `${MPESA_BASE_URL}/mpesa/c2b/v2/registerurl`, 
       payload,
       { headers: { Authorization: `Bearer ${token}` } }
     );
