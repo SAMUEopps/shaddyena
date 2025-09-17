@@ -61,7 +61,6 @@ const MPESA_SHORTCODE = process.env.MPESA_SHORTCODE!;
 const MPESA_VALIDATION_URL = process.env.MPESA_VALIDATION_URL!;
 const MPESA_CONFIRMATION_URL = process.env.MPESA_CONFIRMATION_URL!;
 const MPESA_BASE_URL = process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke";
-const MPESA_CALLBACK_URL = process.env.MPESA_CALLBACK_URL || "https://shaddyena.onrender.com/api/callback";
 
 async function getAccessToken(): Promise<string> {
   const auth = Buffer.from(`${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`).toString("base64");
@@ -77,10 +76,9 @@ async function registerC2BUrls() {
 
     const payload = {
       ShortCode: MPESA_SHORTCODE,
-      ResponseType: "Completed",
+      ResponseType: "Completed",  // Always use Completed for instant confirmation
       ConfirmationURL: MPESA_CONFIRMATION_URL,
-      ValidationURL: MPESA_VALIDATION_URL,
-      CallbackURL: MPESA_CALLBACK_URL,
+      ValidationURL: MPESA_VALIDATION_URL
     };
 
     const res = await axios.post(`${MPESA_BASE_URL}/mpesa/c2b/v2/registerurl`, payload, {
@@ -93,15 +91,13 @@ async function registerC2BUrls() {
     const data = err.response?.data || err.message;
     console.error("[FAILURE] ❌ Registration failed:", data);
 
-    // Always log the URLs you want Safaricom to use
+    // Log the URLs you want Safaricom to use
     console.log("[INFO] 🔗 Target URLs you want:", {
       ConfirmationURL: MPESA_CONFIRMATION_URL,
-      ValidationURL: MPESA_VALIDATION_URL,
-      CallbackURL : MPESA_CALLBACK_URL
+      ValidationURL: MPESA_VALIDATION_URL
     });
   }
 }
 
 // Run the script on your production server
 registerC2BUrls();
-
