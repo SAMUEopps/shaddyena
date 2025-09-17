@@ -3,7 +3,8 @@ const axios = require("axios");
 const MPESA_CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || "";
 const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || "";
 const MPESA_SHORTCODE = process.env.MPESA_SHORTCODE || "";
-const MPESA_CALLBACK_URL = process.env.MPESA_CALLBACK_URL || "";
+const MPESA_VALIDATION_URL = process.env.MPESA_VALIDATION_URL || "https://shaddyena.onrender.com/api/validation";
+const MPESA_CONFIRMATION_URL = process.env.MPESA_CONFIRMATION_URL || "https://shaddyena.onrender.com/api/confirmation";
 const MPESA_BASE_URL = process.env.MPESA_BASE_URL || "https://api.safaricom.co.ke";
 
 async function getAccessToken() {
@@ -33,7 +34,8 @@ async function getAccessToken() {
 async function registerC2BUrls() {
   console.log("[INFO] Starting C2B V2 URL registration...");
   console.log("MPESA_SHORTCODE:", MPESA_SHORTCODE);
-  console.log("MPESA_CALLBACK_URL:", MPESA_CALLBACK_URL);
+  console.log("MPESA_VALIDATION_URL:", MPESA_VALIDATION_URL);
+  console.log("MPESA_CONFIRMATION_URL:", MPESA_CONFIRMATION_URL);
 
   try {
     const token = await getAccessToken();
@@ -41,8 +43,8 @@ async function registerC2BUrls() {
     const payload = {
       ShortCode: MPESA_SHORTCODE,
       ResponseType: "Completed",
-      ConfirmationURL: MPESA_CALLBACK_URL,
-      ValidationURL: MPESA_CALLBACK_URL,
+      ConfirmationURL: MPESA_CONFIRMATION_URL,
+      ValidationURL: MPESA_VALIDATION_URL,
     };
 
     console.log("[INFO] Registration payload:", payload);
