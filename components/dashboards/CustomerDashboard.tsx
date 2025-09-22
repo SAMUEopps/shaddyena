@@ -26,7 +26,7 @@ export default function CustomerDashboard() {
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-medium text-gray-900">Wishlist</h2>
           <p className="mt-2 text-sm text-gray-500">5 items in your wishlist</p>
-          <button className="mt-4 bg-[#ff199c] text-white px-4 py-2 rounded-md text-sm">
+          <button className="mt-4 bg-[#bf2c7e] text-white px-4 py-2 rounded-md text-sm">
             View Wishlist
           </button>
         </div>
@@ -47,22 +47,22 @@ export default function CustomerDashboard() {
           <div className="border rounded-lg p-4">
             <div className="bg-gray-200 h-32 mb-2"></div>
             <h3 className="font-medium">Product Name</h3>
-            <p className="text-[#ff199c] font-bold">KSh 1,200</p>
+            <p className="text-[#bf2c7e] font-bold">KSh 1,200</p>
           </div>
           <div className="border rounded-lg p-4">
             <div className="bg-gray-200 h-32 mb-2"></div>
             <h3 className="font-medium">Product Name</h3>
-            <p className="text-[#ff199c] font-bold">KSh 1,200</p>
+            <p className="text-[#bf2c7e] font-bold">KSh 1,200</p>
           </div>
           <div className="border rounded-lg p-4">
             <div className="bg-gray-200 h-32 mb-2"></div>
             <h3 className="font-medium">Product Name</h3>
-            <p className="text-[#ff199c] font-bold">KSh 1,200</p>
+            <p className="text-[#bf2c7e] font-bold">KSh 1,200</p>
           </div>
           <div className="border rounded-lg p-4">
             <div className="bg-gray-200 h-32 mb-2"></div>
             <h3 className="font-medium">Product Name</h3>
-            <p className="text-[#ff199c] font-bold">KSh 1,200</p>
+            <p className="text-[#bf2c7e] font-bold">KSh 1,200</p>
           </div>
         </div>
       </div>

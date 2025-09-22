@@ -9,10 +9,10 @@ export interface IUser extends Document {
   role: 'customer' | 'vendor' | 'admin' | 'delivery';
   phone: string;
   avatar?: string;
-  businessName?: string; // For vendors
-  businessType?: string; // For vendors
-  businessDocuments?: string[]; // For vendors
-  mpesaNumber?: string; // For payments
+  businessName?: string; 
+  businessType?: string; 
+  businessDocuments?: string[];
+  mpesaNumber?: string; 
   isVerified: boolean;
   isActive: boolean;
   createdAt: Date;

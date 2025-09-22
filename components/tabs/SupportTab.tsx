@@ -19,7 +19,7 @@ export default function SupportTab({ role }: SupportTabProps) {
   
   const faqItems: Record<FaqCategoryId, { question: string; answer: string }[]> = {
     general: [
-      { question: 'What is ShopEase?', answer: 'ShopEase is a multi-vendor e-commerce platform that connects buyers with sellers across Kenya. We offer a secure shopping experience with M-Pesa integration for seamless payments.' },
+      { question: 'What is Shaddyna?', answer: 'Shaddyna is a multi-vendor e-commerce platform that connects buyers with sellers across Kenya. We offer a secure shopping experience with M-Pesa integration for seamless payments.' },
       { question: 'How do I create an account?', answer: 'Click on the "Sign Up" button at the top right corner of the page. Fill in your details and verify your email address to activate your account.' },
     ],
     account: [
@@ -40,7 +40,7 @@ export default function SupportTab({ role }: SupportTabProps) {
     ],
     vendor: [
       { question: 'How do I become a vendor?', answer: 'Click on "Become a Seller" on the homepage and complete the vendor application form. Our team will review your application and get back to you within 2 business days.' },
-      { question: 'What commission does ShopEase charge?', answer: 'Our standard commission rate is 15% per sale. We offer reduced rates for high-volume sellers and subscription plans for featured placement.' },
+      { question: 'What commission does Shaddyna charge?', answer: 'Our standard commission rate is 15% per sale. We offer reduced rates for high-volume sellers and subscription plans for featured placement.' },
     ],
   };
   
@@ -70,7 +70,7 @@ export default function SupportTab({ role }: SupportTabProps) {
           </div>
           <h3 className="font-medium text-gray-900 mb-2">Live Chat</h3>
           <p className="text-sm text-gray-600 mb-4">Chat with our support team in real-time</p>
-          <button className="bg-[#ff199c] text-white px-4 py-2 rounded-lg text-sm">
+          <button className="bg-[#bf2c7e] text-white px-4 py-2 rounded-lg text-sm">
             Start Chat
           </button>
         </div>
@@ -102,7 +102,7 @@ export default function SupportTab({ role }: SupportTabProps) {
                 onClick={() => setActiveCategory(category.id)}
                 className={`px-4 py-2 rounded-full text-sm ${
                   activeCategory === category.id
-                    ? 'bg-[#ff199c] text-white'
+                    ? 'bg-[#bf2c7e] text-white'
                     : 'bg-white text-gray-700 border border-gray-300'
                 }`}
               >
@@ -133,14 +133,14 @@ export default function SupportTab({ role }: SupportTabProps) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
                 />
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function SupportTab({ role }: SupportTabProps) {
               <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
               <input 
                 type="email" 
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
               />
             </div>
             
@@ -157,7 +157,7 @@ export default function SupportTab({ role }: SupportTabProps) {
               <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
               <input 
                 type="text" 
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
               />
             </div>
             
@@ -165,13 +165,13 @@ export default function SupportTab({ role }: SupportTabProps) {
               <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
               <textarea 
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
               ></textarea>
             </div>
             
             <button
               type="submit"
-              className="bg-[#ff199c] text-white px-6 py-2 rounded-lg font-medium"
+              className="bg-[#bf2c7e] text-white px-6 py-2 rounded-lg font-medium"
             >
               Send Message
             </button>

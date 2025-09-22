@@ -143,7 +143,7 @@ export default function ProductsTab({ role }: ProductsTabProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff199c]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#bf2c7e]"></div>
       </div>
     );
   }
@@ -158,7 +158,7 @@ export default function ProductsTab({ role }: ProductsTabProps) {
         {role === 'vendor' && (
           <Link 
             href="/vendor/products/add"
-            className="bg-[#ff199c] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#e5178a] transition-colors"
+            className="bg-[#bf2c7e] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#e5178a] transition-colors"
           >
             Add New Product
           </Link>
@@ -174,14 +174,14 @@ export default function ProductsTab({ role }: ProductsTabProps) {
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
             />
           </div>
           <div className="flex space-x-2">
             <select 
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
             >
               <option value="All Categories">All Categories</option>
               {categories.map(category => (
@@ -191,7 +191,7 @@ export default function ProductsTab({ role }: ProductsTabProps) {
             <select 
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
             >
               <option value="newest">Sort by: Newest</option>
               <option value="oldest">Sort by: Oldest</option>
@@ -243,7 +243,7 @@ export default function ProductsTab({ role }: ProductsTabProps) {
               
               <div className="p-4">
                 <Link href={`/products/${product._id}`}>
-                  <h3 className="font-medium text-gray-900 hover:text-[#ff199c] transition-colors line-clamp-2">
+                  <h3 className="font-medium text-gray-900 hover:text-[#bf2c7e] transition-colors line-clamp-2">
                     {product.name}
                   </h3>
                 </Link>
@@ -269,7 +269,7 @@ export default function ProductsTab({ role }: ProductsTabProps) {
                 {/* Price */}
                 <div className="flex items-center justify-between mt-3">
                   <div>
-                    <span className="text-[#ff199c] font-bold">
+                    <span className="text-[#bf2c7e] font-bold">
                       KSh {product.price.toLocaleString()}
                     </span>
                     {product.originalPrice && product.originalPrice > product.price && (
@@ -338,7 +338,7 @@ export default function ProductsTab({ role }: ProductsTabProps) {
             <button className="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-100">
               Previous
             </button>
-            <button className="px-3 py-1 rounded bg-[#ff199c] text-white">1</button>
+            <button className="px-3 py-1 rounded bg-[#bf2c7e] text-white">1</button>
             <button className="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-100">2</button>
             <button className="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-100">3</button>
             <button className="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-100">Next</button>

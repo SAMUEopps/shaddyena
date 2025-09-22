@@ -22,7 +22,7 @@ export default function PaymentsTab({ role }: PaymentsTabProps) {
         </h1>
         
         {isCustomer && (
-          <button className="bg-[#ff199c] text-white px-4 py-2 rounded-lg font-medium">
+          <button className="bg-[#bf2c7e] text-white px-4 py-2 rounded-lg font-medium">
             Add M-Pesa Funds
           </button>
         )}
@@ -89,7 +89,7 @@ export default function PaymentsTab({ role }: PaymentsTabProps) {
                 <input 
                   type="text" 
                   placeholder="07XX XXX XXX" 
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
                 />
               </div>
               <div className="mb-4">
@@ -97,10 +97,10 @@ export default function PaymentsTab({ role }: PaymentsTabProps) {
                 <input 
                   type="text" 
                   placeholder="KSh" 
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
                 />
               </div>
-              <button className="bg-[#ff199c] text-white px-6 py-2 rounded-lg font-medium">
+              <button className="bg-[#bf2c7e] text-white px-6 py-2 rounded-lg font-medium">
                 Add Funds
               </button>
             </div>
@@ -127,7 +127,7 @@ export default function PaymentsTab({ role }: PaymentsTabProps) {
               <p className="text-gray-600">Available for payout: <span className="font-bold">KSh 24,580</span></p>
               <p className="text-sm text-gray-500">Payouts are processed every Friday</p>
             </div>
-            <button className="bg-[#ff199c] text-white px-6 py-2 rounded-lg font-medium">
+            <button className="bg-[#bf2c7e] text-white px-6 py-2 rounded-lg font-medium">
               Request Payout
             </button>
           </div>

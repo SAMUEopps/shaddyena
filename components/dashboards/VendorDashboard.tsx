@@ -124,7 +124,7 @@ export default function VendorDashboard() {
         {/* Shop Management Card */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Shop Management</h2>
-          <div className="bg-gradient-to-r from-[#182155] to-[#ff199c] text-white p-4 rounded-lg mb-4">
+          <div className="bg-gradient-to-r from-[#182155] to-[#bf2c7e] text-white p-4 rounded-lg mb-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">My Shop</p>
@@ -137,7 +137,7 @@ export default function VendorDashboard() {
           </div>
           <button 
             onClick={navigateToShop}
-            className="w-full bg-[#ff199c] text-white py-2 rounded-md text-sm font-medium hover:bg-[#e5178a] transition-colors"
+            className="w-full bg-[#bf2c7e] text-white py-2 rounded-md text-sm font-medium hover:bg-[#e5178a] transition-colors"
           >
             Manage Shop
           </button>
@@ -216,7 +216,7 @@ export default function VendorDashboard() {
           <h2 className="text-xl font-semibold">My Products ({products.length})</h2>
           <button 
             onClick={navigateToAddProduct}
-            className="bg-[#ff199c] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#e5178a]"
+            className="bg-[#bf2c7e] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#e5178a]"
           >
             Add New Product
           </button>
@@ -224,14 +224,14 @@ export default function VendorDashboard() {
 
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#ff199c]"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#bf2c7e]"></div>
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500 mb-4">No products found</p>
             <button 
               onClick={navigateToAddProduct}
-              className="bg-[#ff199c] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#e5178a]"
+              className="bg-[#bf2c7e] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#e5178a]"
             >
               Add Your First Product
             </button>
@@ -253,7 +253,7 @@ export default function VendorDashboard() {
                 </div>
                 
                 <h3 className="font-medium text-gray-900 truncate">{product.name}</h3>
-                <p className="text-[#ff199c] font-bold">KSh {product.price.toLocaleString()}</p>
+                <p className="text-[#bf2c7e] font-bold">KSh {product.price.toLocaleString()}</p>
                 
                 <div className="flex items-center justify-between mt-2">
                   <span className={`text-xs px-2 py-1 rounded ${

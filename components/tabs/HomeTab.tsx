@@ -1,10 +1,10 @@
 export default function HomeTab() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Welcome to ShopEase</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Welcome to Shaddyna</h1>
       
       {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-[#182155] to-[#ff199c] text-white p-8 rounded-lg mb-8">
+      <div className="bg-gradient-to-r from-[#182155] to-[#bf2c7e] text-white p-8 rounded-lg mb-8">
         <h2 className="text-3xl font-bold mb-4">Discover Amazing Products</h2>
         <p className="text-lg mb-6">Shop from hundreds of vendors with secure M-Pesa payments</p>
         <button className="bg-white text-[#182155] px-6 py-3 rounded-lg font-semibold hover:bg-gray-100">
@@ -42,7 +42,7 @@ export default function HomeTab() {
                 <span className="text-xs text-gray-500 ml-1">(24)</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[#ff199c] font-bold">KSh 1,200</span>
+                <span className="text-[#bf2c7e] font-bold">KSh 1,200</span>
                 <button className="bg-[#182155] text-white text-xs px-3 py-1 rounded">
                   Add to Cart
                 </button>
@@ -58,7 +58,7 @@ export default function HomeTab() {
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Become a Seller</h2>
             <p className="text-gray-600 mb-4">Join thousands of vendors selling on our platform. Start your online store today!</p>
-            <button className="bg-[#ff199c] text-white px-6 py-2 rounded-lg font-semibold">
+            <button className="bg-[#bf2c7e] text-white px-6 py-2 rounded-lg font-semibold">
               Register as Vendor
             </button>
           </div>
