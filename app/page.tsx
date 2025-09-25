@@ -15,12 +15,14 @@ import PaymentsTab from '@/components/tabs/PaymentsTab';
 import SupportTab from '@/components/tabs/SupportTab';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
+import ShopsTab from '@/components/tabs/ShopsTab';
 
 /* ---------- helpers ---------- */
 const navItems = [
   { id: 'home', label: 'Home', icon: '🏠' },
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'products', label: 'Products', icon: '🛒' },
+  { id: 'shops', label: 'Shops', icon: '🏪' },
   { id: 'orders', label: 'Orders', icon: '📦' },
   { id: 'payments', label: 'Payments', icon: '💳' },
   { id: 'support', label: 'Support', icon: '🛟' },
@@ -77,11 +79,13 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('home');
   // For demo purposes - allow role switching
-  const [demoRole, setDemoRole] = useState<'customer' | 'vendor' | 'admin'>(user?.role as 'customer' | 'vendor' | 'admin' || 'customer');
+  //const [demoRole, setDemoRole] = useState<'customer' | 'vendor' | 'admin'>(user?.role as 'customer' | 'vendor' | 'admin' || 'customer');
   const { totalItems: cartItemsCount } = useCart();
   const { wishlistItems } = useWishlist();
   // Combine actual user with demo role for testing
-  const currentUser = user ? { ...user, role: demoRole } : null;
+  //const currentUser = user ? { ...user, role: demoRole } : null;
+  const currentUser = user || null;
+
 
   /* ---------- render ---------- */
   const renderDashboard = () => {
@@ -100,6 +104,7 @@ export default function Home() {
       case 'home': return <HomeTab />;
       case 'dashboard': return renderDashboard();
       case 'products': return <ProductsTab role={currentUser.role} />;
+      case 'shops': return <ShopsTab />; 
       case 'orders': return <OrdersTab role={currentUser.role} />;
       case 'payments': return <PaymentsTab role={currentUser.role} />;
       case 'support': return <SupportTab role={currentUser.role} />;
@@ -285,8 +290,6 @@ export default function Home() {
                 {/* right: icons + avatar */}
           <div className="flex items-center">
             <div className="flex items-center space-x-3">
-              {/* Role switcher for demo */}
-              <RoleSwitcher currentRole={demoRole} switchRole={setDemoRole} />
               
               {/* Wishlist icon for all users */}
               <Link 

@@ -6,7 +6,7 @@ export interface IUser extends Document {
   lastName: string;
   email: string;
   password: string;
-  role: 'customer' | 'vendor' | 'admin' | 'delivery';
+  role: 'customer' | 'vendor' | 'admin';
   phone: string;
   avatar?: string;
   businessName?: string; 

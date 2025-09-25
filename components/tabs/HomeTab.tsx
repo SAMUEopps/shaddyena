@@ -52,7 +52,7 @@ export default function HomeTab() {
         </div>
       </div>
       
-      {/* Promotional Banner */}
+      {/* Promotional Banner *
       <div className="bg-gray-100 p-6 rounded-lg mb-8">
         <div className="flex flex-col md:flex-row items-center">
           <div className="flex-1">
@@ -68,7 +68,7 @@ export default function HomeTab() {
         </div>
       </div>
       
-      {/* Testimonials */}
+      {/* Testimonials *
       <div>
         <h2 className="text-xl font-bold text-gray-900 mb-4">What Our Customers Say</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -87,7 +87,7 @@ export default function HomeTab() {
             </div>
           ))}
         </div>
-      </div>
+      </div>*/}
     </div>
   );
 }

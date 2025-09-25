@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/product';
 import '@/models/shop';
+import dbConnect from '@/lib/dbConnect';
 
 
 export async function GET(req: NextRequest) {
