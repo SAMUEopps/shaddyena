@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Icons from "../icons/Icons";
 
 export default function HomeTab() {
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -157,6 +158,8 @@ export default function HomeTab() {
           )}
         </div>
       </div>
+
+      <Icons />
 
       {/* Featured Products */}
       <div className="mb-8">
