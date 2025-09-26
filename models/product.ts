@@ -154,6 +154,7 @@ export interface IProduct extends Document {
   };
   vendorId: mongoose.Types.ObjectId;
   shopId: mongoose.Types.ObjectId;
+  shopName: string;
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -210,6 +211,7 @@ const productSchema = new Schema<IProduct>(
     },
     vendorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     shopId: { type: Schema.Types.ObjectId, ref: 'Shop', required: true },
+    shopName: { type: String, required: true, trim: true },
     tags: [{ type: String, trim: true }]
   },
   { timestamps: true }
