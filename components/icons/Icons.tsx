@@ -87,7 +87,7 @@ const Icons = () => {
             className="group relative bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-md hover:shadow-lg sm:hover:shadow-xl transition-all duration-300 ease-in-out hover:-translate-y-1 border border-gray-100"
           >
             <div className="flex flex-col items-center text-center">
-              <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-primary-50 rounded-full text-primary-600  group-hover:bg-primary-100 transition-colors duration-300">
+              <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-primary-50 rounded-full text-gray-800  group-hover:bg-primary-100 transition-colors duration-300">
                 {feature.icon}
               </div>
               <h3 className="text-base sm:text-lg font-semibold text-gray-900  mb-1 sm:mb-2">

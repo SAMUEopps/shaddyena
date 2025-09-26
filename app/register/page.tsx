@@ -429,7 +429,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                     name="firstName"
                     type="text"
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                     placeholder="Enter your first name"
                     value={formData.firstName}
                     onChange={handleChange}
@@ -445,7 +445,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                     name="lastName"
                     type="text"
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                     placeholder="Enter your last name"
                     value={formData.lastName}
                     onChange={handleChange}
@@ -475,7 +475,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                       type="email"
                       autoComplete="email"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                       placeholder="Enter your email address"
                       value={formData.email}
                       onChange={handleChange}
@@ -498,7 +498,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                       name="phone"
                       type="tel"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                       placeholder="+254 700 000 000"
                       value={formData.phone}
                       onChange={handleChange}
@@ -519,7 +519,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                     id="mpesaNumber"
                     name="mpesaNumber"
                     type="tel"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                     placeholder="254 700 000 000"
                     value={formData.mpesaNumber}
                     onChange={handleChange}
@@ -545,7 +545,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                   id="role"
                   name="role"
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                   value={formData.role}
                   onChange={handleChange}
                 >
@@ -576,7 +576,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                       name="businessName"
                       type="text"
                       required
-                      className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      className="w-full px-4 py-3 border border-blue-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       placeholder="Your business name"
                       value={formData.businessName}
                       onChange={handleChange}
@@ -591,7 +591,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                       id="businessType"
                       name="businessType"
                       required
-                      className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 text-gray-900 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       value={formData.businessType}
                       onChange={handleChange}
                     >
@@ -632,7 +632,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                       name="password"
                       type="password"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                       placeholder="Create a strong password (min. 8 characters)"
                       value={formData.password}
                       onChange={handleChange}
@@ -656,7 +656,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                       name="confirmPassword"
                       type="password"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                       placeholder="Confirm your password"
                       value={formData.confirmPassword}
                       onChange={handleChange}
