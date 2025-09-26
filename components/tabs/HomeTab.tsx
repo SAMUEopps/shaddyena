@@ -400,7 +400,7 @@ const handleWishlistToggle = (product: Product) => {
       </div>
 
       {/* Featured Categories */}
-      <div className="mb-4">
+      <div className="mb-0">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-xl font-bold text-gray-900">Shop by Category</h2>
           <button className="md:hidden text-[#bf2c7e] text-sm font-medium">
