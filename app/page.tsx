@@ -380,7 +380,7 @@ export default function Home() {
 
           {/* page content */}
           <main className="flex-1">
-            <div className="px-4 sm:px-6 lg:px-8 py-6">
+            <div className="px-4 sm:px-6 lg:px-8 py-3">
               {renderTabContent()}
             </div>
           </main>

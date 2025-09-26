@@ -1,20 +1,64 @@
+import { useEffect, useRef } from "react";
+
 export default function HomeTab() {
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (carouselRef.current) {
+        const scrollWidth = carouselRef.current.scrollWidth;
+        const clientWidth = carouselRef.current.clientWidth;
+        const maxScrollLeft = scrollWidth - clientWidth;
+
+        if (carouselRef.current.scrollLeft >= maxScrollLeft) {
+          // Reset to first image
+          carouselRef.current.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          // Slide to next image
+          carouselRef.current.scrollBy({ left: clientWidth, behavior: "smooth" });
+        }
+      }
+    }, 3000); // change slide every 3s
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Welcome to Shaddyna</h1>
-      
+      <h1 className="text-2xl font-bold text-gray-900 mb-3">Welcome to Shaddyna</h1>
+
       {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-[#182155] to-[#bf2c7e] text-white p-8 rounded-lg mb-8">
-        <h2 className="text-3xl font-bold mb-4">Discover Amazing Products</h2>
-        <p className="text-lg mb-6">Shop from hundreds of vendors with secure M-Pesa payments</p>
-        <button className="bg-white text-[#182155] px-6 py-3 rounded-lg font-semibold hover:bg-gray-100">
-          Start Shopping
-        </button>
-      </div>
-      
-      {/* Featured Categories */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Shop by Category</h2>
+        {/* Desktop Hero */}
+        <div className="hidden md:block bg-gradient-to-r from-[#182155] to-[#bf2c7e] text-white p-8 rounded-lg">
+          <h2 className="text-3xl font-bold mb-4">Discover Amazing Products</h2>
+          <p className="text-lg mb-6">Shop from hundreds of vendors with secure M-Pesa payments</p>
+          <button className="bg-white text-[#182155] px-6 py-3 rounded-lg font-semibold hover:bg-gray-100">
+            Start Shopping
+          </button>
+        </div>
+
+        {/* Mobile Hero Carousel */}
+        <div className="block md:hidden">
+          <div
+            ref={carouselRef}
+            className="flex overflow-x-scroll no-scrollbar space-x-4 rounded-lg snap-x snap-mandatory"
+          >
+            <img
+              src="/hero/hero_mobile1.png"
+              alt="Hero Slide 1"
+              className="min-w-full object-cover rounded-lg snap-center"
+            />
+            <img
+              src="/hero/hero_mobile2.png"
+              alt="Hero Slide 2"
+              className="min-w-full object-cover rounded-lg snap-center"
+            />
+          </div>
+        </div>
+             {/* Featured Categories */}
+      <div className="mb-8">
+        <h2 className="text-xl font-bold text-gray-900 my-3">Shop by Category</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {['Electronics', 'Fashion', 'Home & Kitchen', 'Beauty'].map((category) => (
             <div key={category} className="bg-white p-4 rounded-lg shadow text-center cursor-pointer hover:shadow-md">
@@ -51,8 +95,12 @@ export default function HomeTab() {
           ))}
         </div>
       </div>
-      
-      {/* Promotional Banner *
+      </div>
+    </div>
+  );
+}
+
+    {/* Promotional Banner *
       <div className="bg-gray-100 p-6 rounded-lg mb-8">
         <div className="flex flex-col md:flex-row items-center">
           <div className="flex-1">
@@ -88,6 +136,3 @@ export default function HomeTab() {
           ))}
         </div>
       </div>*/}
-    </div>
-  );
-}
