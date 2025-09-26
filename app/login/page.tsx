@@ -229,7 +229,7 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
               </div>
 
               <Link 
-                href="/forgot-password" 
+                href="" 
                 className="text-sm text-[#bf2c7e] hover:text-[#a8256c] transition-colors"
               >
                 Forgot password?
