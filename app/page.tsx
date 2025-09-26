@@ -350,7 +350,7 @@ export default function Home() {
                 </span> *
               </Link>
 
-              {/* notifications */}
+              {/* notifications *
               <Link 
                 href="/notifications" 
                 className="bg-gray-100 p-2 rounded-full text-gray-400 hover:text-gray-500 relative"
@@ -362,8 +362,8 @@ export default function Home() {
                 {/* You can add notification count badge here if needed */}
                 {/* <span className="absolute -top-1 -right-1 bg-[#bf2c7e] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   5
-                </span> */}
-              </Link>
+                </span> *
+              </Link>*/}
 
               {/* avatar */}
               <Link href="/profile" className="relative cursor-pointer">
