@@ -21,7 +21,7 @@ const product = {
   ...doc.toObject(),
   _id: doc._id.toString(),
   vendorId: doc.vendorId._id.toString(),
-  shopId: doc.shopId._id.toString(),s
+  shopId: doc.shopId._id.toString(),
 };  
 
     if (!product || !product.isActive || !product.isApproved) {
