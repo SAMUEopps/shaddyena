@@ -48,6 +48,7 @@ import "./globals.css";
 import ClientProviders from "./ClientProvider";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
+import Footer from "@/components/footer/Footer";
 
 // Load Inconsolata font
 const inconsolata = Inconsolata({
@@ -73,7 +74,12 @@ export default function RootLayout({
       >
         <ClientProviders>
           <CartProvider>
-            <WishlistProvider>{children}</WishlistProvider>
+            <WishlistProvider>
+            <div className='flex min-h-screen flex-col'>  
+              {children}
+              <Footer />
+             </div>  
+            </WishlistProvider>
           </CartProvider>
         </ClientProviders>
       </body>
