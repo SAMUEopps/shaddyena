@@ -428,21 +428,23 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
 
 // components/Register.tsx
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Suspense } from "react";
-
 
 type RegisterProps = {
   onSwitchToLogin?: () => void;
 };
 
-  function ReferralPreloader({ onReferral }: { onReferral: (code: string) => void }) {
+function ReferralPreloader({ onReferral }: { onReferral: (code: string) => void }) {
   const sp = useSearchParams();
   const ref = sp?.get("ref");
-  if (ref) onReferral(ref);
+
+  useEffect(() => {
+    if (ref) onReferral(ref);
+  }, [ref, onReferral]);
+
   return null;
 }
 
@@ -463,20 +465,12 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showReferralSection, setShowReferralSection] = useState(false);
+
   const setReferralCode = (code: string) =>
-  setFormData((p) => ({ ...p, referralCode: code }));
-  
+    setFormData((p) => ({ ...p, referralCode: code }));
+
   const { register } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  // Get referral code from URL if present
-  useEffect(() => {
-    const refCode = searchParams?.get('ref');
-    if (refCode) {
-      setFormData(prev => ({ ...prev, referralCode: refCode }));
-    }
-  }, [searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -501,7 +495,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
     }
 
     try {
-      const { confirmPassword, ...userData } = formData; 
+      const { confirmPassword, ...userData } = formData;
       await register(userData);
       router.push('/');
     } catch (err: any) {
@@ -526,10 +520,9 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
     'Other'
   ];
 
-
-
   return (
-<>
+    <>
+      {/* ✅ Wrap in Suspense */}
       <Suspense fallback={null}>
         <ReferralPreloader onReferral={setReferralCode} />
       </Suspense>
