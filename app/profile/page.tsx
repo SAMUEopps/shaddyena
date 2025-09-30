@@ -229,7 +229,7 @@ export default function ProfilePage() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="text-center">
                 <div className="relative inline-block">
-                  <div className="w-24 h-24 bg-gradient-to-r from-[#bf2c7e] to-pink-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 shadow-lg">
+                  <div className="w-24 h-24 bg-[#bf2c7e] rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 shadow-lg">
                     {formData.avatar ? (
                       <img
                         src={formData.avatar}
@@ -357,7 +357,7 @@ export default function ProfilePage() {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                         required
                       />
                     </div>
@@ -371,7 +371,7 @@ export default function ProfilePage() {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                         required
                       />
                     </div>
@@ -386,7 +386,7 @@ export default function ProfilePage() {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 bg-gray-50 text-gray-500 cursor-not-allowed"
                       disabled
                     />
                     <p className="text-sm text-gray-500 mt-1">Email cannot be changed</p>

@@ -432,10 +432,19 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Suspense } from "react";
+
 
 type RegisterProps = {
   onSwitchToLogin?: () => void;
 };
+
+  function ReferralPreloader({ onReferral }: { onReferral: (code: string) => void }) {
+  const sp = useSearchParams();
+  const ref = sp?.get("ref");
+  if (ref) onReferral(ref);
+  return null;
+}
 
 export default function Register({ onSwitchToLogin }: RegisterProps) {
   const [formData, setFormData] = useState({
@@ -454,6 +463,8 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showReferralSection, setShowReferralSection] = useState(false);
+  const setReferralCode = (code: string) =>
+  setFormData((p) => ({ ...p, referralCode: code }));
   
   const { register } = useAuth();
   const router = useRouter();
@@ -515,7 +526,13 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
     'Other'
   ];
 
+
+
   return (
+<>
+      <Suspense fallback={null}>
+        <ReferralPreloader onReferral={setReferralCode} />
+      </Suspense>
     <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-lg w-full">
         {/* Header */}
@@ -923,5 +940,6 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }
