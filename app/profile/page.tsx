@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import ReferralDashboard from '@/components/dashboards/RefferalDasboard';
 
 interface ProfileFormData {
   firstName: string;
@@ -607,6 +608,9 @@ export default function ProfilePage() {
                 </div>
               </div>
             )}
+          </div>     
+          <div className="xl:col-span-1">
+            <ReferralDashboard />
           </div>
         </div>
       </div>
