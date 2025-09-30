@@ -484,7 +484,7 @@ export default function CheckoutPage() {
                     value={shippingData.address}
                     onChange={handleInputChange}
                     placeholder="Enter your complete address"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                    className="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                   />
                 </div>
 
@@ -501,7 +501,7 @@ export default function CheckoutPage() {
                       value={shippingData.city}
                       onChange={handleInputChange}
                       placeholder="e.g. Nairobi"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                      className="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                     />
                   </div>
 
@@ -515,7 +515,7 @@ export default function CheckoutPage() {
                       required
                       value={shippingData.country}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                      className="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                     >
                       <option value="Kenya">Kenya</option>
                       <option value="Uganda">Uganda</option>
@@ -537,7 +537,7 @@ export default function CheckoutPage() {
                     value={shippingData.phone}
                     onChange={handleInputChange}
                     placeholder="+254 700 000 000"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                    className="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                   />
                 </div>
 
@@ -552,7 +552,7 @@ export default function CheckoutPage() {
                     value={shippingData.instructions}
                     onChange={handleInputChange}
                     placeholder="Any special delivery instructions..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors resize-none"
+                    className="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors resize-none"
                   />
                 </div>
               </form>
