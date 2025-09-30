@@ -134,7 +134,7 @@ export default function CartPage() {
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <div className="mx-auto w-24 h-24 bg-gradient-to-r from-[#bf2c7e] to-pink-600 rounded-full flex items-center justify-center text-white text-4xl mb-6 shadow-lg">
+            <div className="mx-auto w-24 h-24 bg-[#bf2c7e] rounded-full flex items-center justify-center text-white text-4xl mb-6 shadow-lg">
               🛒
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3">Your cart is empty</h3>
@@ -142,7 +142,7 @@ export default function CartPage() {
               Looks like you haven't added any items to your cart yet. Start exploring our products to find something you'll love!
             </p>
             <Link 
-              href="/products"
+              href="/"
               className="bg-[#bf2c7e] text-white px-8 py-3 rounded-lg hover:bg-[#a8256c] transition-colors font-medium shadow-sm hover:shadow-md inline-flex items-center"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
