@@ -773,7 +773,7 @@ export default function HomeTab() {
 
       <Icons />
 
-      {/* Featured Products */}
+      {/* Featured Products *
       <div className="mb-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">Featured Products</h2>
@@ -785,7 +785,7 @@ export default function HomeTab() {
           </Link>
         </div>
 
-        {/* Products Grid */}
+        {/* Products Grid *
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
@@ -840,14 +840,14 @@ export default function HomeTab() {
                     </h3>
                   </Link>
                   
-                  {/* Vendor/Shop Info */}
+                  {/* Vendor/Shop Info *
                   {(product.vendor || product.shop) && (
                     <p className="text-sm text-gray-500 mt-1">
                       By {product.shop?.businessName || product.vendor?.businessName || 'Unknown Seller'}
                     </p>
                   )}
                   
-                  {/* Rating */}
+                  {/* Rating *
                   {product.rating && product.rating.count > 0 && (
                     <div className="flex items-center mt-1 mb-2">
                       <div className="flex text-yellow-400 text-sm">
@@ -858,7 +858,7 @@ export default function HomeTab() {
                     </div>
                   )}
                   
-                  {/* Price */}
+                  {/* Price *
                   <div className="flex items-center justify-between mt-3">
                     <div>
                       <span className="text-[#bf2c7e] font-bold">
@@ -871,7 +871,7 @@ export default function HomeTab() {
                       )}
                     </div>
                     
-                    {/* Stock Status */}
+                    {/* Stock Status *
                     <span className={`text-xs px-2 py-1 rounded ${
                       product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     }`}>
@@ -879,7 +879,7 @@ export default function HomeTab() {
                     </span>
                   </div>
                   
-                  {/* Action Buttons */}
+                  {/* Action Buttons *
                   <div className="flex justify-between items-center mt-4">
                     <button
                       onClick={() => handleAddToCart(product)}
@@ -912,7 +912,150 @@ export default function HomeTab() {
             ))}
           </div>
         )}
-      </div>
+      </div>*/}
+
+      {/* Featured Products */}
+<div className="mb-4">
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Featured Products</h2>
+    <Link 
+      href="" 
+      className="text-[#bf2c7e] text-xs sm:text-sm font-medium hover:text-[#182155] transition-colors"
+    >
+      View All
+    </Link>
+  </div>
+
+  {/* Products Grid */}
+  {loading ? (
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+        <div key={item} className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse">
+          <div className="bg-gray-200 h-36 sm:h-40 md:h-48"></div>
+          <div className="p-2 sm:p-3 md:p-4">
+            <div className="bg-gray-200 h-3 sm:h-4 rounded mb-1 sm:mb-2"></div>
+            <div className="bg-gray-200 h-2 sm:h-3 rounded w-3/4 mb-2 sm:mb-3"></div>
+            <div className="flex justify-between items-center mt-2 sm:mt-3">
+              <div className="bg-gray-200 h-3 sm:h-4 rounded w-1/3"></div>
+              <div className="bg-gray-200 h-4 sm:h-6 rounded w-1/4"></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : filteredProducts.length === 0 ? (
+    <div className="text-center py-8 sm:py-12">
+      <div className="text-gray-400 text-4xl sm:text-6xl mb-3 sm:mb-4">🔍</div>
+      <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-1 sm:mb-2">No products found</h3>
+      <p className="text-sm sm:text-base text-gray-500">Try adjusting your search criteria</p>
+    </div>
+  ) : (
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+      {filteredProducts.map((product) => (
+        <div key={product._id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 border border-gray-100">
+          <Link href={`/products/${product._id}`}>
+            <div className="bg-gray-100 h-36 sm:h-40 md:h-48 relative group">
+              {product.images && product.images.length > 0 ? (
+                <img 
+                  src={product.images[0]} 
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              )}
+              {product.originalPrice && product.originalPrice > product.price && (
+                <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full font-medium">
+                  SALE
+                </div>
+              )}
+            </div>
+          </Link>
+          
+          <div className="p-2 sm:p-3 md:p-4">
+            <Link href={`/products/${product._id}`}>
+              <h3 className="font-medium text-gray-900 hover:text-[#bf2c7e] transition-colors line-clamp-2 text-sm sm:text-base leading-tight">
+                {product.name}
+              </h3>
+            </Link>
+            
+            {/* Vendor/Shop Info */}
+            {(product.vendor || product.shop) && (
+              <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                By {product.shop?.businessName || product.vendor?.businessName || 'Unknown Seller'}
+              </p>
+            )}
+            
+            {/* Rating */}
+            {product.rating && product.rating.count > 0 && (
+              <div className="flex items-center mt-1 mb-1 sm:mb-2">
+                <div className="flex text-yellow-400 text-xs sm:text-sm">
+                  {'★'.repeat(Math.round(product.rating.average))}
+                  {'☆'.repeat(5 - Math.round(product.rating.average))}
+                </div>
+                <span className="text-xs text-gray-500 ml-1">({product.rating.count})</span>
+              </div>
+            )}
+            
+            {/* Price */}
+            <div className="flex items-center justify-between mt-2 sm:mt-3">
+              <div className="flex flex-col sm:flex-row sm:items-center">
+                <span className="text-[#bf2c7e] font-bold text-sm sm:text-base">
+                  KSh {product.price.toLocaleString()}
+                </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className="text-xs text-gray-500 line-through sm:ml-1">
+                    KSh {product.originalPrice.toLocaleString()}
+                  </span>
+                )}
+              </div>
+              
+              {/* Stock Status */}
+              <span className={`text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded ${
+                product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
+                {product.stock > 0 ? `${product.stock}` : 'Out'}
+              </span>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex justify-between items-center mt-3 sm:mt-4">
+              <button
+                onClick={() => handleAddToCart(product)}
+                disabled={product.stock === 0}
+                className="bg-[#182155] text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs sm:text-sm hover:bg-[#2a3170] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-1 mr-2"
+              >
+                Add to Cart
+              </button>
+              
+              <button
+                onClick={() => handleWishlistToggle(product)}
+                className={`p-1.5 sm:p-2 rounded-full transition-colors ${
+                  isInWishlist(product._id) 
+                    ? 'text-red-500 bg-red-50' 
+                    : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
+                }`}
+              >
+                <svg 
+                  className="w-4 h-4 sm:w-5 sm:h-5" 
+                  fill={isInWishlist(product._id) ? 'currentColor' : 'none'} 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
 
         <section className="overflow-hidden">
@@ -981,7 +1124,7 @@ export default function HomeTab() {
         </div>
       </section>
 
-      {/* Featured Shops Section */}
+      {/* Featured Shops Section *
       <div className="mb-4">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-xl font-bold text-gray-900">Featured Shops</h2>
@@ -1020,7 +1163,7 @@ export default function HomeTab() {
                 href={`/shops/${shop._id}`}
                 className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300 overflow-hidden group"
               >
-                {/* Shop Banner */}
+                {/* Shop Banner *
                 <div className="h-24 bg-gradient-to-r from-[#182155] to-[#bf2c7e] relative overflow-hidden">
                   {shop.banner ? (
                     <Image
@@ -1033,7 +1176,7 @@ export default function HomeTab() {
                     <div className="absolute inset-0 bg-gradient-to-r from-[#182155] to-[#bf2c7e] opacity-90" />
                   )}
                   
-                  {/* Verified Badge */}
+                  {/* Verified Badge *
                   {shop.isVerified && (
                     <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
                       <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -1043,7 +1186,7 @@ export default function HomeTab() {
                     </div>
                   )}
                   
-                  {/* Shop Logo */}
+                  {/* Shop Logo *
                   <div className="absolute -bottom-6 left-4">
                     <div className="w-12 h-12 bg-white rounded-lg shadow-md grid place-items-center border-2 border-white">
                       {shop.logo ? (
@@ -1063,14 +1206,14 @@ export default function HomeTab() {
                   </div>
                 </div>
 
-                {/* Shop Info */}
+                {/* Shop Info *
                 <div className="pt-8 pb-4 px-4">
                   <h3 className="font-semibold text-gray-900 group-hover:text-[#bf2c7e] transition-colors truncate">
                     {shop.businessName}
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">{shop.businessType}</p>
                   
-                  {/* Rating */}
+                  {/* Rating *
                   {shop.rating && shop.rating.average > 0 ? (
                     <div className="mt-2 flex items-center space-x-2">
                       {renderStars(shop.rating.average)}
@@ -1082,7 +1225,7 @@ export default function HomeTab() {
                     <div className="mt-2 text-xs text-gray-500">No reviews yet</div>
                   )}
                   
-                  {/* Location */}
+                  {/* Location *
                   <div className="mt-3 flex items-center text-sm text-gray-600">
                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -1094,7 +1237,127 @@ export default function HomeTab() {
             ))}
           </div>
         )}
-      </div>
+      </div>*/}
+      {/* Featured Shops Section */}
+<div className="mb-4">
+  <div className="flex justify-between items-center mb-3">
+    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Featured Shops</h2>
+    <Link 
+      href="" 
+      className="text-[#bf2c7e] text-xs sm:text-sm font-medium hover:text-[#182155] transition-colors"
+    >
+      View All
+    </Link>
+  </div>
+
+  {shopsLoading ? (
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+      {[1, 2, 3, 4].map((item) => (
+        <div key={item} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse">
+          <div className="h-20 sm:h-24 bg-gray-200"></div>
+          <div className="pt-6 sm:pt-8 pb-3 sm:pb-4 px-3 sm:px-4">
+            <div className="bg-gray-200 h-3 sm:h-4 rounded mb-1 sm:mb-2"></div>
+            <div className="bg-gray-200 h-2 sm:h-3 rounded w-3/4 mb-2 sm:mb-3"></div>
+            <div className="bg-gray-200 h-2 sm:h-3 rounded w-1/2"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : shops.length === 0 ? (
+    <div className="text-center py-6 sm:py-8">
+      <div className="text-gray-400 text-3xl sm:text-4xl mb-2 sm:mb-3">🏪</div>
+      <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-1">No shops available</h3>
+      <p className="text-sm text-gray-500">Check back later for new shops</p>
+    </div>
+  ) : (
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+      {shops.map((shop) => (
+        <Link
+          key={shop._id}
+          href={`/shops/${shop._id}`}
+          className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300 overflow-hidden group"
+        >
+          {/* Shop Banner */}
+          <div className="h-20 sm:h-24 bg-gradient-to-r from-[#182155] to-[#bf2c7e] relative overflow-hidden">
+            {shop.banner ? (
+              <Image
+                src={shop.banner}
+                alt={shop.businessName}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-r from-[#182155] to-[#bf2c7e] opacity-90" />
+            )}
+            
+            {/* Verified Badge */}
+            {shop.isVerified && (
+              <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-green-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium flex items-center">
+                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" clipRule="evenodd" />
+                </svg>
+                <span className="text-xs">Verified</span>
+              </div>
+            )}
+            
+            {/* Shop Logo */}
+            <div className="absolute -bottom-4 sm:-bottom-6 left-3 sm:left-4">
+              <div className="w-8 h-8 sm:w-12 sm:h-12 bg-white rounded-lg shadow-md grid place-items-center border-2 border-white">
+                {shop.logo ? (
+                  <Image
+                    src={shop.logo}
+                    alt={shop.businessName}
+                    width={64}
+                    height={64}
+                    className="rounded-lg object-cover w-8 h-8 sm:w-12 sm:h-12"
+                  />
+                ) : (
+                  <span className="text-sm sm:text-lg font-bold text-[#bf2c7e]">
+                    {shop.businessName.charAt(0)}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Shop Info */}
+          <div className="pt-6 sm:pt-8 pb-3 sm:pb-4 px-3 sm:px-4">
+            <h3 className="font-semibold text-gray-900 group-hover:text-[#bf2c7e] transition-colors truncate text-sm sm:text-base">
+              {shop.businessName}
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1 truncate">
+              {shop.businessType}
+            </p>
+            
+            {/* Rating */}
+            {shop.rating && shop.rating.average > 0 ? (
+              <div className="mt-1.5 sm:mt-2 flex items-center space-x-1 sm:space-x-2">
+                <div className="flex text-yellow-400 text-xs sm:text-sm">
+                  {'★'.repeat(Math.round(shop.rating.average))}
+                  {'☆'.repeat(5 - Math.round(shop.rating.average))}
+                </div>
+                <span className="text-xs text-gray-500">
+                  ({shop.rating.count})
+                </span>
+              </div>
+            ) : (
+              <div className="mt-1.5 sm:mt-2 text-xs text-gray-500">No reviews yet</div>
+            )}
+            
+            {/* Location */}
+            <div className="mt-2 sm:mt-3 flex items-center text-xs sm:text-sm text-gray-600">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              </svg>
+              <span className="truncate">{shop.location.city}</span>
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
+  )}
+</div>
     </div>
   );
 }
