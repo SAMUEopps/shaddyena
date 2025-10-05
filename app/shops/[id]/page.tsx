@@ -588,6 +588,7 @@ export default function ShopDetailPage() {
   }
 
   return (
+    <div className='bg-white'>
     <div className="min-h-screen bg-gray-50">
       {/* Banner */}
       <div className="relative h-64 bg-[#bf2c7e]">
@@ -936,6 +937,7 @@ export default function ShopDetailPage() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
