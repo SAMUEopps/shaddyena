@@ -161,7 +161,7 @@ export default function ProductsTab({ role }: ProductsTabProps) {
         {role === 'vendor' && (
           <Link 
             href="/vendor/products/add"
-            className="bg-[#bf2c7e] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#e5178a] transition-colors text-sm sm:text-base w-full sm:w-auto text-center"
+            className="bg-[#bf2c7e] text-white px-3 py-2 rounded-lg font-medium hover:bg-[#e5178a] transition-colors text-sm sm:text-base w-full sm:w-auto text-center"
           >
             Add New Product
           </Link>
@@ -194,31 +194,6 @@ export default function ProductsTab({ role }: ProductsTabProps) {
               {showFilters ? ' ↑' : ' ↓'}
             </button>
           </div>
-          
-          {/* Filters - Responsive Layout *
-          <div className={`${showFilters ? 'block' : 'hidden'} sm:flex sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0`}>
-            <select 
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] text-sm sm:text-base"
-            >
-              <option value="All Categories">All Categories</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-            <select 
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] text-sm sm:text-base"
-            >
-              <option value="newest">Newest</option>
-              <option value="oldest">Oldest</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
-          </div>*/}
-
           {/* Filters - Responsive Layout */}
           <div className={`${showFilters ? 'block' : 'hidden'} sm:flex sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0`}>
             <select 
