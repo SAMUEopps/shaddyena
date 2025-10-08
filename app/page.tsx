@@ -18,6 +18,8 @@ import { useCart } from '@/contexts/CartContext';
 import ShopsTab from '@/components/tabs/ShopsTab';
 import BecomeVendorModal from '@/components/modals/BecomeVendorModal';
 
+import { useSearchParams } from 'next/navigation'
+
 /* ---------- helpers ---------- */
 const navItems = [
   { id: 'home', label: 'Home', icon: '🏠' },
@@ -34,7 +36,14 @@ export default function Home() {
   const { user, isLoading, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('home');
+  const searchParams = useSearchParams()
+  const initialTab = searchParams.get('tab')          // ?tab=products
+  const [activeTab, setActiveTab] = useState(
+    initialTab && navItems.some(i => i.id === initialTab)
+      ? initialTab
+      : 'home'
+  )
+  //const [activeTab, setActiveTab] = useState('home');
   const { totalItems: cartItemsCount } = useCart();
   const { wishlistItems } = useWishlist();
   const currentUser = user || null;

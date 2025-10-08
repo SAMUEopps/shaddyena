@@ -167,7 +167,7 @@ export default function CartPage() {
                     </svg>
                   </button>
 
-                  <span className="text-sm font-medium px-2 sm:px-0 min-w-[2rem] text-center">{item.quantity}</span>
+                  <span className="text-sm font-medium text-gray-700 px-2 sm:px-0 min-w-[2rem] text-center">{item.quantity}</span>
 
                   <button
                     onClick={() => updateQuantity(item._id, item.quantity + 1)}
@@ -243,7 +243,7 @@ export default function CartPage() {
                   </Link>
 
               <Link 
-                href="/products" 
+                href="/?tab=products" 
                 className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition-colors font-medium mt-3 flex items-center justify-center"
               >
                 Continue Shopping
