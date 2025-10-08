@@ -177,7 +177,7 @@ export default function ProductsTab({ role }: ProductsTabProps) {
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] text-sm sm:text-base"
             />
           </div>
           
@@ -195,7 +195,7 @@ export default function ProductsTab({ role }: ProductsTabProps) {
             </button>
           </div>
           
-          {/* Filters - Responsive Layout */}
+          {/* Filters - Responsive Layout *
           <div className={`${showFilters ? 'block' : 'hidden'} sm:flex sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0`}>
             <select 
               value={selectedCategory}
@@ -217,7 +217,33 @@ export default function ProductsTab({ role }: ProductsTabProps) {
               <option value="price-low">Price: Low to High</option>
               <option value="price-high">Price: High to Low</option>
             </select>
+          </div>*/}
+
+          {/* Filters - Responsive Layout */}
+          <div className={`${showFilters ? 'block' : 'hidden'} sm:flex sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0`}>
+            <select 
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] text-sm sm:text-base text-gray-700"
+            >
+              <option value="All Categories" className="text-gray-700">All Categories</option>
+              {categories.map(category => (
+                <option key={category} value={category} className="text-gray-700">{category}</option>
+              ))}
+            </select>
+
+            <select 
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] text-sm sm:text-base text-gray-700"
+            >
+              <option value="newest" className="text-gray-700">Newest</option>
+              <option value="oldest" className="text-gray-700">Oldest</option>
+              <option value="price-low" className="text-gray-700">Price: Low to High</option>
+              <option value="price-high" className="text-gray-700">Price: High to Low</option>
+            </select>
           </div>
+
         </div>
       </div>
 
