@@ -8,7 +8,6 @@ export default function Page() {
     <div className="p-10 text-center">Loading...</div>
     </div>}>
       <HomeContent />
-      
     </Suspense>
   );
 }
