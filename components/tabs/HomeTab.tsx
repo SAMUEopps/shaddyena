@@ -455,7 +455,7 @@ export default function HomeTab() {
                 disabled={product.stock === 0}
                 className="bg-[#182155] text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs sm:text-sm hover:bg-[#2a3170] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-1 mr-2"
               >
-                Add to Cart
+                Add to Cart 
               </button>
               
               <button

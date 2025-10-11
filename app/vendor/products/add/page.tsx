@@ -236,7 +236,7 @@ export default function AddProductPage() {
 
       if (res.ok) {
         setMessage('Product created successfully!');
-        setTimeout(() => router.push('/dashboard'), 2000);
+        setTimeout(() => router.push('/?tab=dashboard'), 2000);
       } else {
         const err = await res.json();
         setMessage(err.message || 'Error creating product');
