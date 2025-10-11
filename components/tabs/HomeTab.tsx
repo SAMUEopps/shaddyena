@@ -639,7 +639,7 @@ export default function HomeTab() {
                   {shop.businessType}
                 </p>
 
-                {shop.rating && shop.rating.average > 0 ? (
+                {/*{shop.rating && shop.rating.average > 0 ? (
                   <div className="mt-1.5 sm:mt-2">
                     {renderStars(shop.rating.average)}
                     <span className="text-xs text-gray-500 block mt-0.5">
@@ -648,7 +648,7 @@ export default function HomeTab() {
                   </div>
                 ) : (
                   <div className="mt-1.5 sm:mt-2 text-xs text-gray-500">No reviews yet</div>
-                )}
+                )}*/}
 
                 <div className="mt-2 sm:mt-3 flex items-center text-xs sm:text-sm text-gray-600">
                   <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
