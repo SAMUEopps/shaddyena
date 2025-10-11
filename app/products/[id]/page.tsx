@@ -749,7 +749,7 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 py-0">
         {/* Breadcrumb - Desktop Only */}
         <nav className="hidden lg:flex mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2 text-sm">
@@ -785,10 +785,10 @@ export default function ProductDetailPage() {
           </ol>
         </nav>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:p-8">
+        <div className="overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-3 lg:p-8">
             {/* Product Images */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Main Image */}
               <div className="aspect-square w-full overflow-hidden rounded-xl bg-gray-100 relative">
                 {product.images && product.images.length > 0 ? (
@@ -836,7 +836,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Product Info */}
-            <div className="space-y-6">
+            <div className="space-y-3">
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
                   {product.name}
