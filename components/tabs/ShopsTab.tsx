@@ -483,15 +483,16 @@ export default function ShopsTab() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+          {/*<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
             {shops.map((shop) => (
               <Link
                 key={shop._id}
                 href={`/shops/${shop._id}`}
                 className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300 overflow-hidden group"
               >
-                {/* Shop Banner - Improved mobile sizing */}
-                <div className="h-20 sm:h-28 md:h-32 bg-[#bf2c7e] relative overflow-hidden">
+                {/* Shop Banner - Improved mobile sizing *
+                  <div className="h-20 sm:h-28 md:h-32 bg-[#bf2c7e] relative overflow-hidden">
+
                   {shop.banner ? (
                     <Image
                       src={shop.banner}
@@ -505,7 +506,7 @@ export default function ShopsTab() {
                     <div className="absolute inset-0 bg-[#bf2c7e] opacity-90" />
                   )}
                   
-                  {/* Verified Badge - Responsive sizing */}
+                  {/* Verified Badge - Responsive sizing *
                   {shop.isVerified && (
                     <div className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-green-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium flex items-center">
                       <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -515,7 +516,7 @@ export default function ShopsTab() {
                     </div>
                   )}
                   
-                  {/* Shop Logo - Better mobile positioning and sizing */}
+                  {/* Shop Logo - Better mobile positioning and sizing *
                   <div className="absolute -bottom-3 sm:-bottom-4 left-2 sm:left-4">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white rounded-lg shadow-md grid place-items-center border border-white">
                       {shop.logo ? (
@@ -536,7 +537,7 @@ export default function ShopsTab() {
                   </div>
                 </div>
 
-                {/* Shop Info - Improved mobile spacing and typography */}
+                {/* Shop Info - Improved mobile spacing and typography *
                 <div className="pt-5 sm:pt-6 md:pt-8 pb-3 sm:pb-4 px-2 sm:px-3 md:px-4">
                   <h3 className="font-semibold text-gray-900 group-hover:text-[#bf2c7e] transition-colors truncate text-sm sm:text-base">
                     {shop.businessName}
@@ -545,7 +546,7 @@ export default function ShopsTab() {
                     {shop.businessType}
                   </p>
                   
-                  {/* Rating - Responsive sizing */}
+                  {/* Rating - Responsive sizing *
                   {shop.rating && shop.rating.average > 0 ? (
                     <div className="mt-1.5 sm:mt-2">
                       {renderStars(shop.rating.average)}
@@ -557,7 +558,7 @@ export default function ShopsTab() {
                     <div className="mt-1.5 sm:mt-2 text-xs text-gray-500">No reviews yet</div>
                   )}
                   
-                  {/* Location - Improved mobile layout */}
+                  {/* Location - Improved mobile layout *
                   <div className="mt-2 sm:mt-3 flex items-center text-xs sm:text-sm text-gray-600">
                     <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -566,7 +567,7 @@ export default function ShopsTab() {
                     <span className="truncate">{shop.location.city}, {shop.location.country}</span>
                   </div>
                   
-                  {/* Description Preview - Hidden on smallest screens */}
+                  {/* Description Preview - Hidden on smallest screens *
                   {shop.description && (
                     <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-gray-600 line-clamp-2 hidden xs:block">
                       {shop.description}
@@ -575,7 +576,97 @@ export default function ShopsTab() {
                 </div>
               </Link>
             ))}
+          </div>*/}
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+  {shops.map((shop) => (
+    <Link
+      key={shop._id}
+      href={`/shops/${shop._id}`}
+      className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300 overflow-hidden group"
+    >
+      {/* Shop Banner - allow logo to overflow */}
+      <div className="h-20 sm:h-28 md:h-32 bg-[#bf2c7e] relative overflow-visible">
+        {shop.banner ? (
+          <Image
+            src={shop.banner}
+            alt={shop.businessName}
+            fill
+            className="object-cover rounded-t-lg"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[#bf2c7e] opacity-90" />
+        )}
+
+        {/* Verified Badge */}
+        {shop.isVerified && (
+          <div className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-green-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium flex items-center">
+            <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            <span className="text-xs">Verified</span>
           </div>
+        )}
+
+        {/* Shop Logo - positioned overlapping nicely */}
+        <div className="absolute left-2 sm:left-4 -bottom-6 sm:-bottom-7">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white rounded-lg shadow-md grid place-items-center border border-gray-200">
+            {shop.logo ? (
+              <Image
+                src={shop.logo}
+                alt={shop.businessName}
+                width={64}
+                height={64}
+                className="rounded-lg object-cover w-full h-full"
+              />
+            ) : (
+              <span className="text-base sm:text-lg font-bold text-[#bf2c7e]">
+                {shop.businessName.charAt(0)}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Shop Info - add padding-top to avoid overlap */}
+      <div className="pt-6 sm:pt-8 md:pt-10 pb-3 sm:pb-4 px-2 sm:px-3 md:px-4">
+        <h3 className="font-semibold text-gray-900 group-hover:text-[#bf2c7e] transition-colors truncate text-sm sm:text-base">
+          {shop.businessName}
+        </h3>
+        <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1 truncate">
+          {shop.businessType}
+        </p>
+
+        {shop.rating && shop.rating.average > 0 ? (
+          <div className="mt-1.5 sm:mt-2">
+            {renderStars(shop.rating.average)}
+            <span className="text-xs text-gray-500 block mt-0.5">
+              ({shop.rating.count} reviews)
+            </span>
+          </div>
+        ) : (
+          <div className="mt-1.5 sm:mt-2 text-xs text-gray-500">No reviews yet</div>
+        )}
+
+        <div className="mt-2 sm:mt-3 flex items-center text-xs sm:text-sm text-gray-600">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span className="truncate">{shop.location.city}, {shop.location.country}</span>
+        </div>
+
+        {shop.description && (
+          <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-gray-600 line-clamp-2 hidden xs:block">
+            {shop.description}
+          </p>
+        )}
+      </div>
+    </Link>
+  ))}
+</div>
+
 
           {/* Pagination - Mobile optimized */}
           {pagination.totalPages > 1 && (
