@@ -643,6 +643,7 @@ export default function ShopDetailPage() {
   const [loading, setLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('products');
+
   const { addToCart } = useCart();
    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
    const handleWishlistToggle = (product: Product) => {
@@ -760,12 +761,18 @@ export default function ShopDetailPage() {
     });
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+  /*const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-ke', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'Ksh',
     }).format(price);
-  };
+  };*/
+
+  const formatPrice = (price: number) => {
+  return `Ksh ${price.toLocaleString()}`;
+};
+
+
 
   if (loading) {
     return (
@@ -993,7 +1000,7 @@ export default function ShopDetailPage() {
                 <div className="flex items-center justify-between mt-2 sm:mt-3">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1">
                     <span className="text-[#bf2c7e] font-bold text-sm sm:text-base">
-                      {formatPrice(product.price)}
+                       {formatPrice(product.price)}
                     </span>
                     {product.originalPrice && product.originalPrice > product.price && (
                       <span className="text-xs text-gray-500 line-through">
