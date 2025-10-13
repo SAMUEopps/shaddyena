@@ -97,25 +97,25 @@ export default function VendorDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-medium text-gray-900">Total Sales</h2>
-          <p className="mt-2 text-2xl font-bold">KSh 85,420</p>
+          <p className="mt-2 text-2xl text-gray-700 font-bold">KSh 85,420</p>
           <p className="text-sm text-green-600">+12% from last month</p>
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-medium text-gray-900">Orders</h2>
-          <p className="mt-2 text-2xl font-bold">42</p>
+          <p className="mt-2 text-2xl text-gray-700 font-bold">42</p>
           <p className="text-sm text-gray-500">Pending: 5</p>
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-medium text-gray-900">Products</h2>
-          <p className="mt-2 text-2xl font-bold">{products.length}</p>
+          <p className="mt-2 text-2xl text-gray-700 font-bold">{products.length}</p>
           <p className="text-sm text-gray-500">Active: {products.filter(p => p.isActive).length}</p>
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-medium text-gray-900">Commission</h2>
-          <p className="mt-2 text-2xl font-bold">KSh 8,542</p>
+          <p className="mt-2 text-2xl text-gray-700 font-bold">KSh 8,542</p>
           <p className="text-sm text-gray-500">15% platform fee</p>
         </div>
       </div>
@@ -148,7 +148,7 @@ export default function VendorDashboard() {
           <div className="bg-[#f0f9ff] p-4 rounded-lg">
             <div className="flex justify-between items-center">
               <div>
-                <p className="font-medium">Premium Store</p>
+                <p className="font-medium text-gray-700">Premium Store</p>
                 <p className="text-sm text-gray-500">Renews on: 15th Oct 2023</p>
               </div>
               <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Active</span>
@@ -166,21 +166,21 @@ export default function VendorDashboard() {
           <div className="space-y-3">
             <div className="flex justify-between items-center border-b pb-2">
               <div>
-                <p className="font-medium">Order #12345</p>
+                <p className="font-medium text-gray-700">Order #12345</p>
                 <p className="text-sm text-gray-500">2 products • KSh 2,400</p>
               </div>
               <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Processing</span>
             </div>
             <div className="flex justify-between items-center border-b pb-2">
               <div>
-                <p className="font-medium">Order #12346</p>
+                <p className="font-medium text-gray-700">Order #12346</p>
                 <p className="text-sm text-gray-500">1 product • KSh 1,200</p>
               </div>
               <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Shipped</span>
             </div>
             <div className="flex justify-between items-center border-b pb-2">
               <div>
-                <p className="font-medium">Order #12347</p>
+                <p className="font-medium text-gray-700">Order #12347</p>
                 <p className="text-sm text-gray-500">3 products • KSh 3,800</p>
               </div>
               <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Delivered</span>
@@ -193,17 +193,17 @@ export default function VendorDashboard() {
           <div className="grid grid-cols-2 gap-2">
             <button 
               onClick={navigateToAddProduct}
-              className="bg-gray-100 hover:bg-gray-200 py-2 rounded text-sm"
+              className="bg-gray-100 text-gray-700 hover:bg-gray-200 py-2 rounded text-sm"
             >
               Add Product
             </button>
-            <button className="bg-gray-100 hover:bg-gray-200 py-2 rounded text-sm">
+            <button className="bg-gray-100 text-gray-700 hover:bg-gray-200 py-2 rounded text-sm">
               View Analytics
             </button>
-            <button className="bg-gray-100 hover:bg-gray-200 py-2 rounded text-sm">
+            <button className="bg-gray-100 text-gray-700 hover:bg-gray-200 py-2 rounded text-sm">
               Process Orders
             </button>
-            <button className="bg-gray-100 hover:bg-gray-200 py-2 rounded text-sm">
+            <button className="bg-gray-100 text-gray-700 hover:bg-gray-200 py-2 rounded text-sm">
               Update Stock
             </button>
           </div>
@@ -213,7 +213,7 @@ export default function VendorDashboard() {
       {/* Products Listing */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">My Products ({products.length})</h2>
+          <h2 className="text-xl font-semibold text-gray-700">My Products ({products.length})</h2>
           <button 
             onClick={navigateToAddProduct}
             className="bg-[#bf2c7e] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#e5178a]"
