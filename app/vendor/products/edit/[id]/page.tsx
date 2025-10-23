@@ -627,7 +627,7 @@ export default function EditProductPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen text-gray-700 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff199c]" />
       </div>
     );
@@ -664,7 +664,7 @@ export default function EditProductPage() {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Edit Product</h1>
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/?tab=dashboard')}
             className="bg-gray-300 text-gray-700 px-3 sm:px-4 py-2 rounded-md hover:bg-gray-400 text-sm sm:text-base w-full sm:w-auto"
           >
             Back to Dashboard
@@ -887,13 +887,13 @@ export default function EditProductPage() {
 
           {/* Tags */}
           <div>
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Tags</h2>
+            <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Tags</h2>
             <input
               type="text"
               placeholder="Enter tags separated by commas (e.g., electronics, gadget, wireless)"
               value={formData.tags.join(', ')}
               onChange={handleTagsChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+              className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
             />
             <p className="text-xs sm:text-sm text-gray-500 mt-1">Current tags: {formData.tags.join(', ') || 'None'}</p>
           </div>
