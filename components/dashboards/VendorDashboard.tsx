@@ -487,17 +487,17 @@ export default function VendorDashboard() {
         
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
+          {/*<div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-lg font-medium text-gray-900">Total Sales</h2>
             <p className="mt-2 text-2xl text-gray-700 font-bold">KSh 85,420</p>
             <p className="text-sm text-green-600">+12% from last month</p>
-          </div>
+          </div>*/}
           
-          <div className="bg-white p-6 rounded-lg shadow">
+          {/*<div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-lg font-medium text-gray-900">Orders</h2>
             <p className="mt-2 text-2xl text-gray-700 font-bold">42</p>
             <p className="text-sm text-gray-500">Pending: 5</p>
-          </div>
+          </div>*/}
           
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-lg font-medium text-gray-900">Products</h2>
@@ -505,11 +505,11 @@ export default function VendorDashboard() {
             <p className="text-sm text-gray-500">Active: {products.filter(p => p.isActive).length}</p>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow">
+          {/*<div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-lg font-medium text-gray-900">Commission</h2>
             <p className="mt-2 text-2xl text-gray-700 font-bold">KSh 8,542</p>
             <p className="text-sm text-gray-500">15% platform fee</p>
-          </div>
+          </div>*/}
         </div>
         
         {/* Shop Management & Subscription */}
