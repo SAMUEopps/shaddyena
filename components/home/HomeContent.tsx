@@ -58,7 +58,7 @@ export default function Home() {
       /*case 'customer': return <CustomerDashboard />;*/
       case 'vendor': return <VendorDashboard />;
       case 'admin': return <AdminDashboard />;
-      default: return <CustomerDashboard />;
+      default: return null;
     }
   };
 
