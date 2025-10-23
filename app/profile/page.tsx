@@ -292,7 +292,7 @@ export default function ProfilePage() {
                 >
                   Change Password
                 </button>
-                <button
+                {/*<button
                   onClick={() => setActiveTab('security')}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
                     activeTab === 'security'
@@ -301,7 +301,7 @@ export default function ProfilePage() {
                   }`}
                 >
                   Security
-                </button>
+                </button>*/}
               </nav>
 
               <div className="mt-8 pt-8 border-t border-gray-200">
@@ -419,7 +419,7 @@ export default function ProfilePage() {
                             name="businessName"
                             value={formData.businessName}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                            className="w-full px-4 py- text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                             required
                           />
                         </div>
@@ -432,10 +432,10 @@ export default function ProfilePage() {
                             name="businessType"
                             value={formData.businessType}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                            className="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                             required
                           >
-                            <option value="">Select business type</option>
+                            <option className='text-gray-500' value="">Select business type</option>
                             <option value="restaurant">Restaurant</option>
                             <option value="grocery">Grocery Store</option>
                             <option value="pharmacy">Pharmacy</option>
@@ -455,7 +455,7 @@ export default function ProfilePage() {
                           name="mpesaNumber"
                           value={formData.mpesaNumber}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
+                          className="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
                           placeholder="254 700 000 000"
                           required
                         />
