@@ -627,7 +627,7 @@ export default function EditProductPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen text-gray-700 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff199c]" />
       </div>
     );
@@ -680,7 +680,7 @@ export default function EditProductPage() {
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm sm:shadow p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* Basic Information */}
           <div>
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Basic Information</h2>
+            <h2 className="text-lg text-gray-700 sm:text-xl font-semibold mb-3 sm:mb-4">Basic Information</h2>
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
@@ -690,7 +690,7 @@ export default function EditProductPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
                 />
               </div>
               <div>
@@ -701,7 +701,7 @@ export default function EditProductPage() {
                   value={formData.sku}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -714,7 +714,7 @@ export default function EditProductPage() {
                 onChange={handleInputChange}
                 required
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
               />
             </div>
 
@@ -729,7 +729,7 @@ export default function EditProductPage() {
                   required
                   min="0"
                   step="0.01"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
                 />
               </div>
               <div>
@@ -741,7 +741,7 @@ export default function EditProductPage() {
                   onChange={handleInputChange}
                   min="0"
                   step="0.01"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
                 />
               </div>
               <div>
@@ -753,7 +753,7 @@ export default function EditProductPage() {
                   onChange={handleInputChange}
                   required
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -770,7 +770,7 @@ export default function EditProductPage() {
                   value={formData.category}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full px-3 text-gray-700 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
                 >
                   <option value="">Select Category</option>
                   {categories.map(category => (
@@ -785,7 +785,7 @@ export default function EditProductPage() {
                   name="subcategory"
                   value={formData.subcategory || ''}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full px-3 text-gray-700 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -793,7 +793,7 @@ export default function EditProductPage() {
 
           {/* Specifications */}
           <div>
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Specifications</h2>
+            <h2 className="text-lg text-gray-700 sm:text-xl font-semibold mb-3 sm:mb-4">Specifications</h2>
             {formData.specifications.map((spec, index) => (
               <div key={index} className="flex flex-col xs:flex-row items-center gap-2 mb-2">
                 <input
@@ -801,14 +801,14 @@ export default function EditProductPage() {
                   placeholder="Key"
                   value={spec.key}
                   onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)}
-                  className="flex-1 w-full xs:w-auto px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  className="flex-1 text-gray-700 w-full xs:w-auto px-3 py-2 border border-gray-300 rounded-md text-sm"
                 />
                 <input
                   type="text"
                   placeholder="Value"
                   value={spec.value}
                   onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
-                  className="flex-1 w-full xs:w-auto px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  className="flex-1 text-gray-700 w-full xs:w-auto px-3 py-2 border border-gray-300 rounded-md text-sm"
                 />
                 <button
                   type="button"
@@ -830,7 +830,7 @@ export default function EditProductPage() {
 
           {/* Shipping */}
           <div>
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Shipping Information</h2>
+            <h2 className="text-lg text-gray-700 sm:text-xl font-semibold mb-3 sm:mb-4">Shipping Information</h2>
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Weight (grams) *</label>
@@ -841,7 +841,7 @@ export default function EditProductPage() {
                   onChange={handleInputChange}
                   required
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
                 />
               </div>
               <div className="grid grid-cols-1 xs:grid-cols-3 gap-2">
@@ -854,7 +854,7 @@ export default function EditProductPage() {
                     onChange={handleInputChange}
                     required
                     min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md text-sm"
                   />
                 </div>
                 <div>
@@ -866,7 +866,7 @@ export default function EditProductPage() {
                     onChange={handleInputChange}
                     required
                     min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md text-sm"
                   />
                 </div>
                 <div>
@@ -878,7 +878,7 @@ export default function EditProductPage() {
                     onChange={handleInputChange}
                     required
                     min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md text-sm"
                   />
                 </div>
               </div>
