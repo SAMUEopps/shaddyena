@@ -270,7 +270,7 @@ export default function VendorShopPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff199c]" />
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#bf2c7e]" />
       </div>
     );
   }
@@ -283,7 +283,7 @@ export default function VendorShopPage() {
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="bg-[#ff199c] text-white px-4 py-2 rounded-md hover:bg-[#e5178a]"
+              className="bg-[#bf2c7e] text-white px-4 py-2 rounded-md hover:bg-[#e5178a]"
             >
               Edit Shop
             </button>
@@ -334,7 +334,7 @@ export default function VendorShopPage() {
                 Upload your shop logo. Recommended size: 256x256px. Max file size: 5MB.
               </p>
               <div className="flex space-x-3">
-                <label className="bg-[#ff199c] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] cursor-pointer disabled:opacity-50">
+                <label className="bg-[#bf2c7e] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] cursor-pointer disabled:opacity-50">
                   {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
                   <input
                     type="file"
@@ -387,7 +387,7 @@ export default function VendorShopPage() {
                 Upload your shop banner. Recommended size: 1200x300px. Max file size: 10MB.
               </p>
               <div className="flex space-x-3">
-                <label className="bg-[#ff199c] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] cursor-pointer disabled:opacity-50">
+                <label className="bg-[#bf2c7e] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] cursor-pointer disabled:opacity-50">
                   {uploadingBanner ? 'Uploading...' : 'Upload Banner'}
                   <input
                     type="file"
@@ -424,7 +424,7 @@ export default function VendorShopPage() {
                 value={shopData?.businessName || ''}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
                 required
               />
             </div>
@@ -436,7 +436,7 @@ export default function VendorShopPage() {
                 value={shopData?.businessType || ''}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
                 required
               />
             </div>
@@ -449,7 +449,7 @@ export default function VendorShopPage() {
               onChange={handleInputChange}
               disabled={!isEditing}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
             />
           </div>
         </div>
@@ -467,7 +467,7 @@ export default function VendorShopPage() {
                 value={shopData?.location.address || ''}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
                 required
               />
             </div>
@@ -479,7 +479,7 @@ export default function VendorShopPage() {
                 value={shopData?.location.city || ''}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
                 required
               />
             </div>
@@ -491,7 +491,7 @@ export default function VendorShopPage() {
                 value={shopData?.location.country || 'Kenya'}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
                 required
               />
             </div>
@@ -510,7 +510,7 @@ export default function VendorShopPage() {
                 value={shopData?.contact.phone || ''}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
                 required
               />
             </div>
@@ -522,7 +522,7 @@ export default function VendorShopPage() {
                 value={shopData?.contact.email || ''}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
                 required
               />
             </div>
@@ -535,7 +535,7 @@ export default function VendorShopPage() {
               value={shopData?.contact.website || ''}
               onChange={handleInputChange}
               disabled={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
             />
           </div>
         </div>
@@ -593,7 +593,7 @@ export default function VendorShopPage() {
                   value={shopData?.socialMedia?.[platform as keyof typeof shopData.socialMedia] || ''}
                   onChange={(e) => handleSocialMediaChange(platform, e.target.value)}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
                   placeholder={`https://${platform}.com/yourpage`}
                 />
               </div>
@@ -615,7 +615,7 @@ export default function VendorShopPage() {
                   onChange={(e) => handlePolicyChange(policy, e.target.value)}
                   disabled={!isEditing}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
                   placeholder={`Enter your ${policy.replace('Policy', '').toLowerCase()} policy`}
                 />
               </div>
@@ -635,7 +635,7 @@ export default function VendorShopPage() {
             <button
               type="submit"
               disabled={isSaving}
-              className="bg-[#ff199c] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] disabled:opacity-50"
+              className="bg-[#bf2c7e] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] disabled:opacity-50"
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -910,8 +910,8 @@ export default function VendorShopPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff199c]" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#bf2c7e]" />
       </div>
     );
   }
@@ -938,7 +938,7 @@ export default function VendorShopPage() {
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="bg-[#ff199c] text-white px-3 sm:px-4 py-2 rounded-md hover:bg-[#e5178a] text-sm sm:text-base"
+                className="bg-[#bf2c7e] text-white px-3 sm:px-4 py-2 rounded-md hover:bg-[#e5178a] text-sm sm:text-base"
               >
                 Edit Shop
               </button>
@@ -961,7 +961,7 @@ export default function VendorShopPage() {
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm sm:shadow p-4 sm:p-6">
           {/* Logo Upload */}
           <div className="mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Shop Logo</h2>
+            <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Shop Logo</h2>
             <div className="flex flex-col sm:flex-row sm:items-start gap-4">
               <div className="flex-shrink-0 mx-auto sm:mx-0">
                 <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
@@ -989,7 +989,7 @@ export default function VendorShopPage() {
                   Upload your shop logo. Recommended size: 256x256px. Max file size: 5MB.
                 </p>
                 <div className="flex flex-col xs:flex-row gap-2 justify-center sm:justify-start">
-                  <label className="bg-[#ff199c] text-white px-3 sm:px-4 py-2 rounded-md hover:bg-[#e5178a] cursor-pointer disabled:opacity-50 text-sm">
+                  <label className="bg-[#bf2c7e] text-white px-3 sm:px-4 py-2 rounded-md hover:bg-[#e5178a] cursor-pointer disabled:opacity-50 text-sm">
                     {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
                     <input
                       type="file"
@@ -1016,7 +1016,7 @@ export default function VendorShopPage() {
 
           {/* Banner Upload */}
           <div className="mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Shop Banner</h2>
+            <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Shop Banner</h2>
             <div className="space-y-4">
               <div className="bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 h-32 sm:h-48 flex items-center justify-center overflow-hidden">
                 {shopData?.banner ? (
@@ -1042,7 +1042,7 @@ export default function VendorShopPage() {
                   Upload your shop banner. Recommended size: 1200x300px. Max file size: 10MB.
                 </p>
                 <div className="flex flex-col xs:flex-row gap-2 justify-center sm:justify-start">
-                  <label className="bg-[#ff199c] text-white px-3 sm:px-4 py-2 rounded-md hover:bg-[#e5178a] cursor-pointer disabled:opacity-50 text-sm">
+                  <label className="bg-[#bf2c7e] text-white px-3 sm:px-4 py-2 rounded-md hover:bg-[#e5178a] cursor-pointer disabled:opacity-50 text-sm">
                     {uploadingBanner ? 'Uploading...' : 'Upload Banner'}
                     <input
                       type="file"
@@ -1069,7 +1069,7 @@ export default function VendorShopPage() {
 
           {/* Basic Information */}
           <div className="mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Basic Information</h2>
+            <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Basic Information</h2>
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Business Name *</label>
@@ -1079,7 +1079,7 @@ export default function VendorShopPage() {
                   value={shopData?.businessName || ''}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                   required
                 />
               </div>
@@ -1091,7 +1091,7 @@ export default function VendorShopPage() {
                   value={shopData?.businessType || ''}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full px-3 text-gray-700 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                   required
                 />
               </div>
@@ -1103,7 +1103,7 @@ export default function VendorShopPage() {
                   onChange={handleInputChange}
                   disabled={!isEditing}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -1111,7 +1111,7 @@ export default function VendorShopPage() {
 
           {/* Location Information */}
           <div className="mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Location</h2>
+            <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Location</h2>
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
@@ -1121,7 +1121,7 @@ export default function VendorShopPage() {
                   value={shopData?.location.address || ''}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full px-3 text-gray-700 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                   required
                 />
               </div>
@@ -1133,7 +1133,7 @@ export default function VendorShopPage() {
                   value={shopData?.location.city || ''}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                   required
                 />
               </div>
@@ -1145,7 +1145,7 @@ export default function VendorShopPage() {
                   value={shopData?.location.country || 'Kenya'}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                   required
                 />
               </div>
@@ -1154,7 +1154,7 @@ export default function VendorShopPage() {
 
           {/* Contact Information */}
           <div className="mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Contact Information</h2>
+            <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Contact Information</h2>
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
@@ -1164,7 +1164,7 @@ export default function VendorShopPage() {
                   value={shopData?.contact.phone || ''}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                   required
                 />
               </div>
@@ -1176,7 +1176,7 @@ export default function VendorShopPage() {
                   value={shopData?.contact.email || ''}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full px-3 text-gray-700 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                   required
                 />
               </div>
@@ -1188,7 +1188,7 @@ export default function VendorShopPage() {
                   value={shopData?.contact.website || ''}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                  className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -1196,7 +1196,7 @@ export default function VendorShopPage() {
 
           {/* Operating Hours */}
           <div className="mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Operating Hours</h2>
+            <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Operating Hours</h2>
             <div className="space-y-2 sm:space-y-3">
               {shopData?.operatingHours.map((hours, index) => (
                 <div key={hours.day} className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-3 p-2 sm:p-3 bg-gray-50 rounded-md">
@@ -1207,18 +1207,18 @@ export default function VendorShopPage() {
                       value={hours.open}
                       onChange={(e) => handleOperatingHoursChange(index, 'open', e.target.value)}
                       disabled={!isEditing || hours.isClosed}
-                      className="flex-1 px-2 py-1 border border-gray-300 rounded-md text-sm"
+                      className="flex-1 px-2 py-1 text-gray-700 border border-gray-300 rounded-md text-sm"
                     />
-                    <span className="text-xs sm:text-sm">to</span>
+                    <span className="text-xs text-gray-700 sm:text-sm">to</span>
                     <input
                       type="time"
                       value={hours.close}
                       onChange={(e) => handleOperatingHoursChange(index, 'close', e.target.value)}
                       disabled={!isEditing || hours.isClosed}
-                      className="flex-1 px-2 py-1 border border-gray-300 rounded-md text-sm"
+                      className="flex-1 px-2 text-gray-700 py-1 border border-gray-300 rounded-md text-sm"
                     />
                   </div>
-                  <label className="flex items-center gap-2 mt-1 xs:mt-0">
+                  <label className="flex items-center text-gray-700 gap-2 mt-1 xs:mt-0">
                     <input
                       type="checkbox"
                       checked={hours.isClosed}
@@ -1235,11 +1235,11 @@ export default function VendorShopPage() {
 
           {/* Social Media */}
           <div className="mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Social Media</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 text-gray-700 sm:mb-4">Social Media</h2>
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
               {['facebook', 'instagram', 'twitter', 'youtube'].map((platform) => (
                 <div key={platform}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
+                  <label className="block text-sm text-gray-700 font-medium mb-1 capitalize">
                     {platform}
                   </label>
                   <input
@@ -1247,7 +1247,7 @@ export default function VendorShopPage() {
                     value={shopData?.socialMedia?.[platform as keyof typeof shopData.socialMedia] || ''}
                     onChange={(e) => handleSocialMediaChange(platform, e.target.value)}
                     disabled={!isEditing}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                     placeholder={`https://${platform}.com/yourpage`}
                   />
                 </div>
@@ -1269,7 +1269,7 @@ export default function VendorShopPage() {
                     onChange={(e) => handlePolicyChange(policy, e.target.value)}
                     disabled={!isEditing}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c] text-sm sm:text-base"
+                    className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                     placeholder={`Enter your ${policy.replace('Policy', '').toLowerCase()} policy`}
                   />
                 </div>
@@ -1289,7 +1289,7 @@ export default function VendorShopPage() {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="bg-[#ff199c] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] disabled:opacity-50 text-sm sm:text-base order-1 sm:order-2"
+                className="bg-[#bf2c7e] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] disabled:opacity-50 text-sm sm:text-base order-1 sm:order-2"
               >
                 {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
