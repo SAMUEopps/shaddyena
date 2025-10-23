@@ -27,8 +27,8 @@ const navItems = [
   { id: 'products', label: 'Products', icon: '🛒' },
   { id: 'shops', label: 'Shops', icon: '🏪' },
   { id: 'orders', label: 'Orders', icon: '📦' },
-  { id: 'payments', label: 'Payments', icon: '💳' },
-  { id: 'support', label: 'Support', icon: '🛟' },
+  /*{ id: 'payments', label: 'Payments', icon: '💳' },
+  { id: 'support', label: 'Support', icon: '🛟' },*/
 ];
 
 /* ---------- page ---------- */
