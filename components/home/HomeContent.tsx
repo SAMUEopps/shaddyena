@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import CustomerDashboard from '@/components/dashboards/CustomerDashboard';
@@ -21,7 +21,7 @@ import BecomeVendorModal from '@/components/modals/BecomeVendorModal';
 import { useSearchParams } from 'next/navigation'
 
 /* ---------- helpers ---------- */
-const navItems = [
+const baseNavItems = [
   { id: 'home', label: 'Home', icon: '🏠' },
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'products', label: 'Products', icon: '🛒' },
@@ -39,7 +39,7 @@ export default function Home() {
   const searchParams = useSearchParams()
   const initialTab = searchParams.get('tab')          // ?tab=products
   const [activeTab, setActiveTab] = useState(
-    initialTab && navItems.some(i => i.id === initialTab)
+    initialTab && baseNavItems.some(i => i.id === initialTab)
       ? initialTab
       : 'home'
   )
@@ -51,11 +51,21 @@ export default function Home() {
   const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
   const [showVendorSuccess, setShowVendorSuccess] = useState(false);
 
+    /* ---------- handle nav items per role ---------- */
+  const navItems = useMemo(() => {
+    if (!user) return baseNavItems;
+    // Remove dashboard for customers only
+    if (user.role === 'customer') {
+      return baseNavItems.filter(item => item.id !== 'dashboard');
+    }
+    return baseNavItems;
+  }, [user]);
+
   /* ---------- render ---------- */
   const renderDashboard = () => {
     if (!currentUser) return null;
     switch (currentUser.role) {
-      /*case 'customer': return <CustomerDashboard />;*/
+      case 'customer': return <CustomerDashboard />;
       case 'vendor': return <VendorDashboard />;
       case 'admin': return <AdminDashboard />;
       default: return null;
