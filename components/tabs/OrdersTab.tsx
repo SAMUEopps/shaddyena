@@ -679,12 +679,12 @@ export default function OrdersTab({ role }: OrdersTabProps) {
             placeholder="Search orders..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
           />
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
           >
             <option value="all">All Status</option>
             <option value="processing">Processing</option>
@@ -702,7 +702,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
           <h3 className="text-sm font-medium text-gray-500">Total Orders</h3>
           <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
+        {/*<div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-500">Processing</h3>
           <p className="text-2xl font-bold text-yellow-600">{stats.processing}</p>
         </div>
@@ -713,7 +713,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-500">Delivered</h3>
           <p className="text-2xl font-bold text-green-600">{stats.delivered}</p>
-        </div>
+        </div>*/}
       </div>
       
       {/* Orders Table */}

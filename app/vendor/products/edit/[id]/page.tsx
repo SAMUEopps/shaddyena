@@ -761,7 +761,7 @@ export default function EditProductPage() {
 
           {/* Category */}
           <div>
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Category</h2>
+            <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Category</h2>
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
