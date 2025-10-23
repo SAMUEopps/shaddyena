@@ -1200,7 +1200,7 @@ export default function VendorShopPage() {
             <div className="space-y-2 sm:space-y-3">
               {shopData?.operatingHours.map((hours, index) => (
                 <div key={hours.day} className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-3 p-2 sm:p-3 bg-gray-50 rounded-md">
-                  <span className="w-16 xs:w-20 font-medium text-sm">{hours.day}</span>
+                  <span className="w-16 xs:w-20 text-gray-700 font-medium text-sm">{hours.day}</span>
                   <div className="flex items-center gap-2 flex-1">
                     <input
                       type="time"
@@ -1247,7 +1247,7 @@ export default function VendorShopPage() {
                     value={shopData?.socialMedia?.[platform as keyof typeof shopData.socialMedia] || ''}
                     onChange={(e) => handleSocialMediaChange(platform, e.target.value)}
                     disabled={!isEditing}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
+                    className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                     placeholder={`https://${platform}.com/yourpage`}
                   />
                 </div>
