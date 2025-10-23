@@ -149,7 +149,7 @@ export default function BecomeVendorModal({
                     required
                     value={formData.businessName}
                     onChange={handleChange}
-                    className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] sm:text-sm"
+                    className="block w-full text-gray-700 px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] sm:text-sm"
                     placeholder="Enter your business name"
                   />
                 </div>
@@ -167,7 +167,7 @@ export default function BecomeVendorModal({
                     required
                     value={formData.businessType}
                     onChange={handleChange}
-                    className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] sm:text-sm"
+                    className="block w-full text-gray-700 px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] sm:text-sm"
                   >
                     <option value="">Select business type</option>
                     {businessTypes.map((type) => (
@@ -192,7 +192,7 @@ export default function BecomeVendorModal({
                     required
                     value={formData.mpesaNumber}
                     onChange={handleChange}
-                    className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] sm:text-sm"
+                    className="block w-full text-gray-700 px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] sm:text-sm"
                     placeholder="07XXXXXXXX"
                     pattern="[0-9]{10}"
                     maxLength={10}

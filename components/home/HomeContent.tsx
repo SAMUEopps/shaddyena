@@ -55,7 +55,7 @@ export default function Home() {
   const renderDashboard = () => {
     if (!currentUser) return null;
     switch (currentUser.role) {
-      case 'customer': return <CustomerDashboard />;
+      /*case 'customer': return <CustomerDashboard />;*/
       case 'vendor': return <VendorDashboard />;
       case 'admin': return <AdminDashboard />;
       default: return <CustomerDashboard />;
