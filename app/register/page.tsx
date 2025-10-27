@@ -1,5 +1,4 @@
-// components/Register.tsx
-"use client";
+/*"use client";
 import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -49,7 +48,64 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
+  };*/
+
+  // components/Register.tsx
+"use client";
+import { useState, useEffect, Suspense, useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+
+type RegisterProps = {
+  onSwitchToLogin?: () => void;
+};
+
+function ReferralPreloader({ onReferral }: { onReferral: (code: string) => void }) {
+  const sp = useSearchParams();
+  const ref = sp?.get("ref");
+
+  useEffect(() => {
+    if (ref) onReferral(ref);
+  }, [ref, onReferral]);
+
+  return null;
+}
+
+export default function Register({ onSwitchToLogin }: RegisterProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm]   = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    role: 'customer',
+    phone: '',
+    businessName: '',
+    businessType: '',
+    mpesaNumber: '',
+    referralCode: ''
+  });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showReferralSection, setShowReferralSection] = useState(false);
+
+  // FIX: Use useCallback to memoize the function
+  const setReferralCode = useCallback((code: string) => {
+    setFormData((p) => ({ ...p, referralCode: code }));
+  }, []); // Empty dependency array means this function never changes
+
+  const { register } = useAuth();
+  const router = useRouter();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
   };
+
+  // ... rest of your component remains the same
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -401,66 +457,6 @@ const EyeClosed = () => (
                 )}
               </div>
             )}
-
-            {/* Security *
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-[#bf2c7e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                Security
-              </h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                    Password *
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
-                      placeholder="Create a strong password (min. 8 characters)"
-                      value={formData.password}
-                      onChange={handleChange}
-                      minLength={8}
-                    />
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirm Password *
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type="password"
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#bf2c7e] focus:border-[#bf2c7e] transition-colors"
-                      placeholder="Confirm your password"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                    />
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>*/}
-
             <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
               <svg className="w-5 h-5 mr-2 text-[#bf2c7e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
