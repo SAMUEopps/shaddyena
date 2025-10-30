@@ -1,4 +1,4 @@
-/*import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { verify } from 'jsonwebtoken';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/user';
@@ -106,10 +106,10 @@ export async function PATCH(
     console.error('Process seller request error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
-}*/
+}
 
 
-import { NextRequest, NextResponse } from "next/server";
+/*import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import SellerRequest from "@/models/SellerRequest";
 import User from "@/models/user";
@@ -163,4 +163,4 @@ export async function PATCH(
     console.error("PATCH seller request error:", error);
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
-}
+}*/
