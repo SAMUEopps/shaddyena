@@ -4,13 +4,10 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/models/user';
 import SellerRequest from '@/models/SellerRequest';
 
-interface Params {
-  params: {
-    id: string;
-  };
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     await dbConnect();
 
@@ -42,31 +39,22 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const { action, rejectionReason } = await req.json();
 
     if (!['approve', 'reject'].includes(action)) {
-      return NextResponse.json(
-        { message: 'Invalid action' },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: 'Invalid action' }, { status: 400 });
     }
 
     // Find the seller request
     const sellerRequest = await SellerRequest.findById(params.id).populate('user');
     if (!sellerRequest) {
-      return NextResponse.json(
-        { message: 'Seller request not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: 'Seller request not found' }, { status: 404 });
     }
 
     if (sellerRequest.status !== 'pending') {
-      return NextResponse.json(
-        { message: 'This request has already been processed' },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: 'This request has already been processed' }, { status: 400 });
     }
 
     // Start a session for transaction
     const session = await dbConnect().then(conn => conn.startSession());
-    
+
     try {
       session.startTransaction();
 
@@ -78,7 +66,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             role: 'vendor',
             businessName: sellerRequest.businessName,
             businessType: sellerRequest.businessType,
-            mpesaNumber: sellerRequest.mpesaNumber
+            mpesaNumber: sellerRequest.mpesaNumber,
           },
           { session }
         );
@@ -91,15 +79,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
         await session.commitTransaction();
 
-        return NextResponse.json({
-          message: 'Seller request approved successfully'
-        });
+        return NextResponse.json({ message: 'Seller request approved successfully' });
       } else if (action === 'reject') {
         if (!rejectionReason?.trim()) {
-          return NextResponse.json(
-            { message: 'Rejection reason is required' },
-            { status: 400 }
-          );
+          return NextResponse.json({ message: 'Rejection reason is required' }, { status: 400 });
         }
 
         // Update seller request status
@@ -111,9 +94,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
         await session.commitTransaction();
 
-        return NextResponse.json({
-          message: 'Seller request rejected successfully'
-        });
+        return NextResponse.json({ message: 'Seller request rejected successfully' });
       }
     } catch (error) {
       await session.abortTransaction();
@@ -123,9 +104,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
   } catch (error: any) {
     console.error('Process seller request error:', error);
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
