@@ -17,7 +17,7 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import ShopsTab from '@/components/tabs/ShopsTab';
 import BecomeVendorModal from '@/components/modals/BecomeVendorModal';
-
+import SellerRequestsTab from '@/components/tabs/SellerRequestsTab';
 import { useSearchParams } from 'next/navigation'
 
 /* ---------- helpers ---------- */
@@ -27,6 +27,7 @@ const baseNavItems = [
   { id: 'products', label: 'Products', icon: '🛒' },
   { id: 'shops', label: 'Shops', icon: '🏪' },
   { id: 'orders', label: 'Orders', icon: '📦' },
+  { id: 'seller-requests', label: 'Seller Requests', icon: '👥' },
   /*{ id: 'payments', label: 'Payments', icon: '💳' },
   { id: 'support', label: 'Support', icon: '🛟' },*/
 ];
@@ -52,14 +53,32 @@ export default function Home() {
   const [showVendorSuccess, setShowVendorSuccess] = useState(false);
 
     /* ---------- handle nav items per role ---------- */
-  const navItems = useMemo(() => {
+  /*const navItems = useMemo(() => {
     if (!user) return baseNavItems;
     // Remove dashboard for customers only
     if (user.role === 'customer') {
       return baseNavItems.filter(item => item.id !== 'dashboard');
     }
     return baseNavItems;
-  }, [user]);
+  }, [user]);*/
+
+  const navItems = useMemo(() => {
+  if (!user) return baseNavItems;
+  
+  let filteredItems = baseNavItems;
+  
+  // Remove dashboard for customers only
+  if (user.role === 'customer') {
+    filteredItems = filteredItems.filter(item => item.id !== 'dashboard');
+  }
+  
+  // Only show seller-requests for admins
+  if (user.role !== 'admin') {
+    filteredItems = filteredItems.filter(item => item.id !== 'seller-requests');
+  }
+  
+  return filteredItems;
+}, [user]);
 
   /* ---------- render ---------- */
   const renderDashboard = () => {
@@ -80,6 +99,7 @@ export default function Home() {
       case 'products': return <ProductsTab role={currentUser.role} />;
       case 'shops': return <ShopsTab />; 
       case 'orders': return <OrdersTab role={currentUser.role} />;
+      case 'seller-requests': return <SellerRequestsTab />;
       case 'payments': return <PaymentsTab role={currentUser.role} />;
       case 'support': return <SupportTab role={currentUser.role} />;
       default: return <HomeTab />;

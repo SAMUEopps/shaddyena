@@ -191,7 +191,11 @@ export interface IUser extends Document {
   referredBy?: Types.ObjectId; // Changed from string to ObjectId
   referralCount: number;
   referrals: Types.ObjectId[]; // ADD THIS FIELD
-
+// In the User schema, add:
+hasPendingVendorRequest: {
+  type: Boolean,
+  default: false
+}
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -217,7 +221,6 @@ const userSchema = new Schema<IUser>(
     mpesaNumber: { type: String, trim: true },
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
-    
     // Referral schema - FIXED
     referralCode: {
       type: String,
