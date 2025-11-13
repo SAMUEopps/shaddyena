@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import ReferralDashboard from '@/components/dashboards/RefferalDasboard';
+import SubscriptionPayment from '@/components/dashboards/SubscriptionPayment';
 
 interface ProfileFormData {
   firstName: string;
@@ -612,6 +613,10 @@ export default function ProfilePage() {
           <div className="xl:col-span-1">
             <ReferralDashboard />
           </div>
+          {/* Add this new column for the subscription component */}
+        <div >
+          <SubscriptionPayment />
+        </div>
         </div>
       </div>
     </div>
