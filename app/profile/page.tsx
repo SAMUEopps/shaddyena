@@ -613,10 +613,11 @@ export default function ProfilePage() {
           <div className="xl:col-span-1">
             <ReferralDashboard />
           </div>
-          {/* Add this new column for the subscription component */}
-        <div >
-          <SubscriptionPayment />
-        </div>
+          {user.role === 'vendor' && (
+            <div className="xl:col-span-1">
+              <SubscriptionPayment />
+            </div>
+          )}
         </div>
       </div>
     </div>
