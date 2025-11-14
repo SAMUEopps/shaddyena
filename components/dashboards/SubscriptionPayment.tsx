@@ -22,7 +22,7 @@ export default function SubscriptionPayment() {
     {
       id: 'basic',
       name: 'Basic Vendor',
-      price: 3000,
+      price: 1,
       period: 'month',
       features: [
         'Up to 50 products',
