@@ -28,8 +28,8 @@ const baseNavItems = [
   { id: 'shops', label: 'Shops', icon: '🏪' },
   { id: 'orders', label: 'Orders', icon: '📦' },
   { id: 'seller-requests', label: 'Seller Requests', icon: '👥' },
-  /*{ id: 'payments', label: 'Payments', icon: '💳' },
-  { id: 'support', label: 'Support', icon: '🛟' },*/
+  { id: 'payments', label: 'Payments', icon: '💳' },
+  /*{ id: 'support', label: 'Support', icon: '🛟' },*/
 ];
 
 /* ---------- page ---------- */
@@ -100,7 +100,7 @@ export default function Home() {
       case 'shops': return <ShopsTab />; 
       case 'orders': return <OrdersTab role={currentUser.role} />;
       case 'seller-requests': return <SellerRequestsTab />;
-      case 'payments': return <PaymentsTab role={currentUser.role} />;
+      case 'payments': return <PaymentsTab />;
       case 'support': return <SupportTab role={currentUser.role} />;
       default: return <HomeTab />;
     }
