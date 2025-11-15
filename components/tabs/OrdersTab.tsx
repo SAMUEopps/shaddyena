@@ -645,7 +645,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff199c]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#bf2c7e]"></div>
       </div>
     );
   }
@@ -786,7 +786,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button className="text-[#ff199c] hover:text-[#182155] mr-3">View</button>
+                              <button className="text-[#bf2c7e] hover:text-[#bf2c7e] mr-3">View</button>
 
                               {sub.status === 'PROCESSING' && (
                                 <button
@@ -840,7 +840,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button className="text-[#ff199c] hover:text-[#182155] mr-3">
+                          <button className="text-[#bf2c7e] hover:text-[#bf2c7e] mr-3">
                             View
                           </button>
                           {isAdmin && (
