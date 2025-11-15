@@ -114,7 +114,7 @@ export async function GET(req: NextRequest) {
     const detailedPayments = payments.map(p => ({
       paymentId: p._id,
       amount: p.amount,
-      referralBonus: p.amount * 0.10,
+      referralBonus: p.amount * 0.20,
       user: referredUsers.find(u => u._id.toString() === p.userId.toString()),
     }));
 
