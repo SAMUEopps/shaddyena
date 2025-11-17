@@ -848,7 +848,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                               <select 
                                 value={order.status}
                                 onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
-                                className="text-xs border rounded p-1"
+                                className="text-xs text-gray-700 border rounded p-1"
                               >
                                 <option value="PENDING">Pending</option>
                                 <option value="PROCESSING">Processing</option>

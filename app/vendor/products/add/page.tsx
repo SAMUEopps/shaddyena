@@ -276,10 +276,11 @@ export default function AddProductPage() {
   /* Render                                                         */
   /* -------------------------------------------------------------- */
   return (
+    <div className='bg-gray-50'>
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Add New Product</h1>
-        <button onClick={() => router.push('/dashboard')} className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
+        <button onClick={() => router.push('/?tab=dashboard')} className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
           Back to Dashboard
         </button>
       </div>
@@ -293,7 +294,7 @@ export default function AddProductPage() {
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
         {/* Basic Information */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">Basic Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
@@ -303,7 +304,7 @@ export default function AddProductPage() {
                 value={formData.name}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
               />
             </div>
             <div>
@@ -314,7 +315,7 @@ export default function AddProductPage() {
                 value={formData.sku}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
               />
             </div>
           </div>
@@ -327,7 +328,7 @@ export default function AddProductPage() {
               onChange={handleInputChange}
               required
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+              className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
             />
           </div>
 
@@ -342,7 +343,7 @@ export default function AddProductPage() {
                 required
                 min="0"
                 step="0.01"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full text-gray-600 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
               />
             </div>
             <div>
@@ -354,7 +355,7 @@ export default function AddProductPage() {
                 onChange={handleInputChange}
                 min="0"
                 step="0.01"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
               />
             </div>
             <div>
@@ -366,7 +367,7 @@ export default function AddProductPage() {
                 onChange={handleInputChange}
                 required
                 min="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
               />
             </div>
           </div>
@@ -374,7 +375,7 @@ export default function AddProductPage() {
 
         {/* Image Upload */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Product Images</h2>
+          <h2 className="text-xl text-gray-700 font-semibold mb-4">Product Images</h2>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">Upload Images</label>
             <input
@@ -383,7 +384,7 @@ export default function AddProductPage() {
               accept="image/*"
               onChange={handleImageUpload}
               disabled={isUploading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md"
             />
             <p className="text-sm text-gray-500 mt-1">You can upload multiple images at once</p>
           </div>
@@ -421,7 +422,7 @@ export default function AddProductPage() {
 
         {/* Category */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Category</h2>
+          <h2 className="text-xl text-gray-700 font-semibold mb-4">Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
@@ -429,7 +430,7 @@ export default function AddProductPage() {
                 value={formData.category}
                 onChange={e => handleCategoryChange(1, e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
               >
                 <option value="">-- Select Category --</option>
                 {level1.map(c => (
@@ -445,7 +446,7 @@ export default function AddProductPage() {
                 onChange={e => handleCategoryChange(2, e.target.value)}
                 required={level2.length > 0}
                 disabled={!formData.category}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
               >
                 <option value="">-- Select Subcategory --</option>
                 {level2.map(c => (
@@ -461,7 +462,7 @@ export default function AddProductPage() {
                 onChange={e => handleCategoryChange(3, e.target.value)}
                 required={level3.length > 0}
                 disabled={!formData.subcategory}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
               >
                 <option value="">-- Select Sub-subcategory --</option>
                 {level3.map(c => (
@@ -477,7 +478,7 @@ export default function AddProductPage() {
                 onChange={e => handleCategoryChange(4, e.target.value)}
                 required={level4.length > 0}
                 disabled={!formData.subSubcategory}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
               >
                 <option value="">-- Select Sub-sub-subcategory --</option>
                 {level4.map(c => (
@@ -490,7 +491,7 @@ export default function AddProductPage() {
 
         {/* Specifications */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Specifications</h2>
+          <h2 className="text-xl text-gray-700 font-semibold mb-4">Specifications</h2>
           {formData.specifications.map((spec, idx) => (
             <div key={idx} className="flex items-center space-x-2 mb-2">
               <input
@@ -527,7 +528,7 @@ export default function AddProductPage() {
 
         {/* Shipping */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
+          <h2 className="text-xl text-gray-700 font-semibold mb-4">Shipping Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Weight (grams) *</label>
@@ -538,7 +539,7 @@ export default function AddProductPage() {
                 onChange={handleInputChange}
                 required
                 min="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+                className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
               />
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -551,7 +552,7 @@ export default function AddProductPage() {
                   onChange={handleInputChange}
                   required
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
               <div>
@@ -563,7 +564,7 @@ export default function AddProductPage() {
                   onChange={handleInputChange}
                   required
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
               <div>
@@ -575,7 +576,7 @@ export default function AddProductPage() {
                   onChange={handleInputChange}
                   required
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
             </div>
@@ -584,12 +585,12 @@ export default function AddProductPage() {
 
         {/* Tags */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Tags</h2>
+          <h2 className="text-xl text-gray-700 font-semibold mb-4">Tags</h2>
           <input
             type="text"
             placeholder="Enter tags separated by commas (e.g., electronics, gadget, wireless)"
             onChange={handleTagsChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#ff199c] focus:border-[#ff199c]"
+            className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
           />
           <p className="text-sm text-gray-500 mt-1">Current tags: {formData.tags.join(', ') || 'None'}</p>
         </div>
@@ -605,12 +606,13 @@ export default function AddProductPage() {
           <button
             type="submit"
             disabled={isLoading || isUploading}
-            className="bg-[#ff199c] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] disabled:opacity-50"
+            className="bg-[#bf2c7e] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] disabled:opacity-50"
           >
             {isLoading ? 'Creating Product...' : 'Create Product'}
           </button>
         </div>
       </form>
+    </div>
     </div>
   );
 }
