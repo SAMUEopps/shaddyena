@@ -339,14 +339,14 @@ export default function PaymentsTab() {
   return (
     <div className="space-y-8">
       {/* Title */}
-      <h2 className="text-2xl font-bold">Payments & Subscription</h2>
+      <h2 className="text-2xl text-gray-700 font-bold">Payments & Subscription</h2>
 
       {/* Payment Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {/* Subscription Card */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Vendor Subscription</h3>
+          <h3 className="text-lg text-gray-700 font-semibold mb-2">Vendor Subscription</h3>
 
           <p className="text-gray-600 mb-3">
             Monthly Vendor Subscription Fee
@@ -367,7 +367,7 @@ export default function PaymentsTab() {
 
         {/* Referral Earnings Card */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Referral Earnings</h3>
+          <h3 className="text-lg text-gray-700 font-semibold mb-2">Referral Earnings</h3>
 
           <p className="text-3xl font-bold text-green-600">
             KSh {referralEarnings.toFixed(2)}
@@ -380,7 +380,7 @@ export default function PaymentsTab() {
 
         {/* Total Transactions */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Total Transactions</h3>
+          <h3 className="text-lg text-gray-700 font-semibold mb-2">Total Transactions</h3>
 
           <p className="text-3xl font-bold text-purple-600">
             {payments.length}
@@ -394,7 +394,7 @@ export default function PaymentsTab() {
 
       {/* Payment History */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-xl font-bold mb-4">Payment History</h3>
+        <h3 className="text-xl text-gray-700 font-bold mb-4">Payment History</h3>
 
         <table className="min-w-full text-sm">
           <thead>
