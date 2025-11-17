@@ -909,7 +909,7 @@ export default function EditProductPage() {
             <button
               type="submit"
               disabled={isSaving}
-              className="bg-[#ff199c] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] disabled:opacity-50 text-sm sm:text-base order-1 sm:order-2"
+              className="bg-[#bf2c7e] text-white px-4 py-2 rounded-md hover:bg-[#bf2c7e] disabled:opacity-50 text-sm sm:text-base order-1 sm:order-2"
             >
               {isSaving ? 'Updating Product...' : 'Update Product'}
             </button>

@@ -254,7 +254,7 @@ export default function AddProductPage() {
   /* -------------------------------------------------------------- */
   if (!user || user.role !== 'vendor')
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900">Access Denied</h1>
           <p className="text-gray-600">Only vendors can access this page.</p>
@@ -276,7 +276,7 @@ export default function AddProductPage() {
   /* Render                                                         */
   /* -------------------------------------------------------------- */
   return (
-    <div className='bg-gray-50'>
+    <div className='min-h-screen bg-gray-50'>
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Add New Product</h1>
@@ -598,7 +598,7 @@ export default function AddProductPage() {
         <div className="flex justify-end space-x-4">
           <button
             type="button"
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/?tab=dashboard')}
             className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
           >
             Cancel
