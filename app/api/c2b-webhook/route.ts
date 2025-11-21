@@ -313,6 +313,8 @@ import Order from '@/models/Order';
 import Ledger from '@/models/Ledger';
 import Product from '@/models/product';
 import { decodeRef, generateOrderId } from '@/lib/orderUtils';
+import { sendSMS } from '@/lib/sms';
+
 
 /* =================================================================
    Helpers reused by both flows
@@ -431,25 +433,77 @@ async function handleConfirmation(body: any) {
   draft.mpesaTransactionId = body.TransID || body.TransId;
   await draft.save();
 
+
+  /* ---------- SEND SMS ---------- */
+
+  // Customer phone number (from shipping)
+  const customerPhone = draft.shipping.phone;
+
+  // Format phone (ensure +2547…)
+  const normalizePhone = (phone: string) => {
+    if (phone.startsWith("+")) return phone;
+    if (phone.startsWith("0")) return "+254" + phone.substring(1);
+    if (phone.startsWith("7")) return "+254" + phone;
+    return phone;
+  };
+
+  const formattedPhone = normalizePhone(customerPhone);
+
+  // Build customer SMS message
+  const customerMessage = `
+  Thank you for your order!
+
+  Order ID: ${orderId}
+  Amount: KES ${draft.totalAmount}
+  Transaction: ${draft.mpesaTransactionId}
+
+  We will process and keep you updated.
+  -Shaddyna
+  `.trim();
+
+  // Admin phone (replace with yours)
+  const adminPhone = "+254711118817";
+  const adminMessage = `
+  New Order Received!
+
+  Order ID: ${orderId}
+  Customer Phone: ${formattedPhone}
+  Amount: KES ${draft.totalAmount}
+  Transaction: ${draft.mpesaTransactionId}
+  `.trim();
+
+  // Send SMS to customer
+  await sendSMS(formattedPhone, customerMessage);
+
+  // Send SMS to admin
+  await sendSMS(adminPhone, adminMessage);
+
+  console.log("📨 SMS notifications sent.");
+
+  /* ---------- return response ---------- */
   console.log('✅ Confirmation complete for shortRef:', accountNumber);
   return ok('Success');
-}
 
-/* =================================================================
-   MAIN ENTRY
-================================================================= */
-export async function POST(req: NextRequest) {
-  try {
-    await dbConnect();
-    const body = await req.json();
-    console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
 
-    // M-Pesa sends TransID only in the confirmation phase
-    return body.TransID || body.TransId
-      ? await handleConfirmation(body)
-      : await handleValidation(body);
-  } catch (e) {
-    console.error('❌ C2B webhook crash:', e);
-    return fail(1, 'Server error');
+    console.log('✅ Confirmation complete for shortRef:', accountNumber);
+    return ok('Success');
   }
+
+  /* =================================================================
+    MAIN ENTRY
+  ================================================================= */
+  export async function POST(req: NextRequest) {
+    try {
+      await dbConnect();
+      const body = await req.json();
+      console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+
+      // M-Pesa sends TransID only in the confirmation phase
+      return body.TransID || body.TransId
+        ? await handleConfirmation(body)
+        : await handleValidation(body);
+    } catch (e) {
+      console.error('❌ C2B webhook crash:', e);
+      return fail(1, 'Server error');
+    }
 }
