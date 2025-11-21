@@ -449,6 +449,10 @@ async function handleConfirmation(body: any) {
 
   const formattedPhone = normalizePhone(customerPhone);
 
+  // 🆕 Log phone for debugging
+  console.log("📞 Raw phone from DB:", customerPhone);
+  console.log("📞 Formatted phone:", formattedPhone);
+
   // Build customer SMS message
   const customerMessage = `
   Thank you for your order!
