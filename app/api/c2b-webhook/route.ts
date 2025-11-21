@@ -484,9 +484,6 @@ async function handleConfirmation(body: any) {
   console.log('✅ Confirmation complete for shortRef:', accountNumber);
   return ok('Success');
 
-
-    console.log('✅ Confirmation complete for shortRef:', accountNumber);
-    return ok('Success');
   }
 
   /* =================================================================

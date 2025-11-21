@@ -15,9 +15,9 @@ export async function sendSMS(to: string, message: string) {
     };
 
     // Add senderId only if it exists
-    if (process.env.AT_SENDER_ID) {
-      payload.from = process.env.AT_SENDER_ID;
-    }
+    //if (process.env.AT_SENDER_ID) {
+     // payload.from = process.env.AT_SENDER_ID;
+   // }
 
     const res = await sms.send(payload);
 
