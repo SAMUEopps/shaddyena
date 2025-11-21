@@ -88,15 +88,15 @@ export default function SubscriptionPayment() {
 
       {/* Current Plan */}
       <div className="bg-gradient-to-r from-[#bf2c7e] to-[#a8256c] rounded-lg p-4 text-white mb-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="text-sm opacity-90">Current Plan</p>
-            <h4 className="text-xl font-bold">Professional</h4>
-            <p className="text-sm opacity-90">Renews on Dec 15, 2024</p>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div className="text-center sm:text-left">
+            <p className="text-sm opacity-90 mb-1">Current Plan</p>
+            <h4 className="text-xl font-bold mb-1">Professional</h4>
+            <p className="text-xs sm:text-sm opacity-90">Renews on Dec 15, 2024</p>
           </div>
-          <div className="text-right">
+          <div className="text-center sm:text-right">
             <p className="text-2xl font-bold">{formatPrice(3000)}</p>
-            <p className="text-sm opacity-90">per month</p>
+            <p className="text-xs sm:text-sm opacity-90">per month</p>
           </div>
         </div>
       </div>
