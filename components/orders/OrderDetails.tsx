@@ -1,0 +1,488 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
+
+interface Order {
+  _id: string;
+  orderId: string;
+  createdAt: string;
+  buyerId: string | {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+  };
+  items: {
+    productId: string;
+    vendorId: string;
+    shopId: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image?: string;
+  }[];
+  suborders: {
+    _id?: string;
+    vendorId: string;
+    shopId: string;
+    items: {
+      productId: string;
+      name: string;
+      price: number;
+      quantity: number;
+      image?: string;
+    }[];
+    amount: number;
+    commission: number;
+    netAmount: number;
+    status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  }[];
+  totalAmount: number;
+  platformFee: number;
+  shippingFee: number;
+  currency: string;
+  paymentMethod: string;
+  paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+  shipping: {
+    address: string;
+    city: string;
+    country: string;
+    phone: string;
+    instructions?: string;
+  };
+  status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'COMPLETED' | 'CANCELLED';
+  mpesaTransactionId?: string;
+}
+
+interface OrderDetailsProps {
+  orderId: string;
+}
+
+export default function OrderDetails({ orderId }: OrderDetailsProps) {
+  const { user, isLoading: authLoading } = useAuth();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      fetchOrder();
+    }
+  }, [orderId, authLoading, user]);
+
+  const fetchOrder = async () => {
+    if (!user) {
+      setError('Please log in to view order details');
+      setIsLoading(false);
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/orders/${orderId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch order details');
+      }
+      
+      const data = await response.json();
+      setOrder(data.order);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case 'DELIVERED':
+      case 'COMPLETED':
+      case 'PAID': 
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'SHIPPED': 
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'PENDING':
+      case 'PROCESSING': 
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'CANCELLED':
+      case 'FAILED':
+      case 'REFUNDED': 
+        return 'bg-red-100 text-red-800 border-red-200';
+      default: 
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatCurrency = (amount: number, currency: string = 'KES') => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const getBuyerName = (buyer: string | any): string => {
+    if (typeof buyer === 'object') {
+      return `${buyer.firstName} ${buyer.lastName}`;
+    }
+    return 'Customer';
+  };
+
+  const getBuyerEmail = (buyer: string | any): string => {
+    if (typeof buyer === 'object') {
+      return buyer.email;
+    }
+    return 'N/A';
+  };
+
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#bf2c7e] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if user is not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Authentication Required</h3>
+          <p className="text-gray-600 mb-6">Please log in to view order details.</p>
+          <div className="flex gap-3 justify-center">
+            <Link 
+              href="/login"
+              className="px-4 py-2 bg-[#bf2c7e] text-white rounded-lg hover:bg-[#a8246e] transition-colors"
+            >
+              Log In
+            </Link>
+            <Link 
+              href="/"
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Go Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const role = user.role;
+  const isVendor = role === 'vendor';
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#bf2c7e] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading order details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Order</h3>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="flex gap-3 justify-center">
+            <button 
+              onClick={fetchOrder}
+              className="px-4 py-2 bg-[#bf2c7e] text-white rounded-lg hover:bg-[#a8246e] transition-colors"
+            >
+              Try Again
+            </button>
+            <Link 
+              href="/?tab=orders"
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Back to Orders
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Order Not Found</h3>
+          <p className="text-gray-600 mb-6">The order you're looking for doesn't exist or you don't have permission to view it.</p>
+          <Link 
+            href="/?tab=orders"
+            className="px-4 py-2 bg-[#bf2c7e] text-white rounded-lg hover:bg-[#a8246e] transition-colors inline-block"
+          >
+            Back to Orders
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const displayItems = isVendor 
+    ? order.suborders.flatMap(suborder => suborder.items)
+    : order.items;
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Link 
+            href="/?tab=orders"
+            className="inline-flex items-center text-[#bf2c7e] hover:text-[#a8246e] mb-4 transition-colors"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Orders
+          </Link>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Order Details</h1>
+              <p className="text-gray-600 mt-2">Order placed on {formatDate(order.createdAt)}</p>
+              <p className="text-sm text-gray-500 mt-1">Viewing as: <span className="capitalize font-medium">{role}</span></p>
+            </div>
+            <div className="mt-4 lg:mt-0 flex flex-col items-end gap-2">
+              <span className={`px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(order.status)}`}>
+                {order.status}
+              </span>
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.paymentStatus)}`}>
+                Payment: {order.paymentStatus}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Order Summary Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Order Summary</h2>
+                <p className="text-sm text-gray-600">Order ID: {order.orderId}</p>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {displayItems.map((item, index) => (
+                    <div key={index} className="flex items-center space-x-4 py-3 border-b border-gray-100 last:border-b-0">
+                      <div className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                        {item.image ? (
+                          <img src={item.image} alt={item.name} className="w-full h-full object-cover rounded-lg" />
+                        ) : (
+                          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-medium text-gray-900 truncate">{item.name}</h3>
+                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                        {/* Show vendor ID for customers and admins viewing individual items */}
+                        {!isVendor && 'vendorId' in item && (
+                          <p className="text-xs text-gray-400">Vendor ID: {(item as any).vendorId}</p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {formatCurrency(item.price * item.quantity, order.currency)}
+                        </p>
+                        <p className="text-xs text-gray-500">{formatCurrency(item.price, order.currency)} each</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Shipping Information */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Shipping Information</h2>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-700 mb-2">Shipping Address</h3>
+                    <p className="text-sm text-gray-900">{order.shipping.address}</p>
+                    <p className="text-sm text-gray-900">{order.shipping.city}, {order.shipping.country}</p>
+                    <p className="text-sm text-gray-600 mt-2">Phone: {order.shipping.phone}</p>
+                  </div>
+                  {order.shipping.instructions && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-700 mb-2">Delivery Instructions</h3>
+                      <p className="text-sm text-gray-900">{order.shipping.instructions}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Vendor Suborders (for admin/customer) */}
+            {!isVendor && order.suborders.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">Vendor Orders</h2>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-4">
+                    {order.suborders.map((suborder, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="font-medium text-gray-900">Vendor Order #{index + 1}</h3>
+                            <p className="text-sm text-gray-600">Vendor ID: {suborder.vendorId}</p>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(suborder.status)}`}>
+                            {suborder.status}
+                          </span>
+                        </div>
+                        <div className="text-sm space-y-1">
+                          <p>Amount: {formatCurrency(suborder.amount, order.currency)}</p>
+                          <p>Commission: {formatCurrency(suborder.commission, order.currency)}</p>
+                          <p className="font-semibold">Net: {formatCurrency(suborder.netAmount, order.currency)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Order Information */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Order Information</h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-700">Order ID</h3>
+                    <p className="text-sm text-gray-900 font-mono">{order.orderId}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-700">Order Date</h3>
+                    <p className="text-sm text-gray-900">{formatDate(order.createdAt)}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-700">Payment Method</h3>
+                    <p className="text-sm text-gray-900">{order.paymentMethod}</p>
+                  </div>
+                  {order.mpesaTransactionId && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-700">MPESA Transaction ID</h3>
+                      <p className="text-sm text-gray-900 font-mono">{order.mpesaTransactionId}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Customer Information */}
+            {(role === 'admin' || role === 'vendor') && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">Customer Information</h2>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-700">Name</h3>
+                      <p className="text-sm text-gray-900">{getBuyerName(order.buyerId)}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-700">Email</h3>
+                      <p className="text-sm text-gray-900">{getBuyerEmail(order.buyerId)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Payment Summary */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Payment Summary</h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Subtotal</span>
+                    <span className="text-sm text-gray-900">
+                      {formatCurrency(order.totalAmount - order.shippingFee - order.platformFee, order.currency)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Shipping</span>
+                    <span className="text-sm text-gray-900">
+                      {formatCurrency(order.shippingFee, order.currency)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Platform Fee</span>
+                    <span className="text-sm text-gray-900">
+                      {formatCurrency(order.platformFee, order.currency)}
+                    </span>
+                  </div>
+                  <div className="border-t border-gray-200 pt-3 flex justify-between">
+                    <span className="text-base font-semibold text-gray-900">Total</span>
+                    <span className="text-base font-semibold text-gray-900">
+                      {formatCurrency(order.totalAmount, order.currency)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

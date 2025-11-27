@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 interface OrdersTabProps {
   role: 'customer' | 'vendor' | 'admin';
@@ -75,6 +76,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
+  const router = useRouter();
   
   const isCustomer = role === 'customer';
   const isVendor = role === 'vendor';
@@ -350,8 +352,13 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button className="text-[#bf2c7e] hover:text-[#bf2c7e] mr-3">View</button>
-
+                              {/*<button className="text-[#bf2c7e] hover:text-[#bf2c7e] mr-3">View</button>*/}
+                              <button 
+                                onClick={() => router.push(`/orders/${order._id}`)}
+                                className="text-[#bf2c7e] hover:text-[#a8246e] mr-3 transition-colors"
+                              >
+                                View
+                              </button>
                               {sub.status === 'PROCESSING' && (
                                 <button
                                   onClick={() => handleStatusUpdate(order._id, 'SHIPPED', sub._id)}
@@ -404,9 +411,12 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button className="text-[#bf2c7e] hover:text-[#bf2c7e] mr-3">
-                            View
-                          </button>
+                          <button 
+                                onClick={() => router.push(`/orders/${order._id}`)}
+                                className="text-[#bf2c7e] hover:text-[#a8246e] mr-3 transition-colors"
+                              >
+                                View
+                              </button>
                           {isAdmin && (
                             <div className="flex flex-col space-y-1">
                               <select 
