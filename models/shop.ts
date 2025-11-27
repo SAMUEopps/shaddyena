@@ -19,7 +19,7 @@ export interface IShop extends Document {
   contact: {
     phone: string;
     email: string;
-    website?: string;
+    //website?: string;
   };
   operatingHours: {
     day: string;

@@ -670,7 +670,7 @@ interface ShopData {
   contact: {
     phone: string;
     email: string;
-    website?: string;
+    //website?: string;
   };
   operatingHours: {
     day: string;
@@ -1180,7 +1180,7 @@ export default function VendorShopPage() {
                   required
                 />
               </div>
-              <div>
+              {/*<div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
                 <input
                   type="url"
@@ -1190,7 +1190,7 @@ export default function VendorShopPage() {
                   disabled={!isEditing}
                   className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                 />
-              </div>
+              </div>*/}
             </div>
           </div>
 
