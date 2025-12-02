@@ -228,6 +228,11 @@ const userSchema = new Schema<IUser>(
       unique: true,
       default: () => uuidv4().substring(0, 8).toUpperCase()
     },
+    // Add this field in the User schema
+hasPendingVendorRequest: {
+  type: Boolean,
+  default: false
+},
 // lib/models/User.ts - Update the referredBy field
 referredBy: {
   type: String, // Explicitly set as String
