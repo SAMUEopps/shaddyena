@@ -114,7 +114,7 @@ export default function VendorWithdrawalsPage() {
   };
 
   if (loading) {
-    return <div className="p-8">Loading...</div>;
+    return <div className="bg-gray-50 p-8">Loading...</div>;
   }
 
   return (
