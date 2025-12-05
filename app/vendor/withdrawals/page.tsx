@@ -118,8 +118,9 @@ export default function VendorWithdrawalsPage() {
   }
 
   return (
+    <div className='bg-gray-50'>
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Vendor Earnings & Withdrawals</h1>
+      <h1 className="text-2xl text-gray-700 font-bold text-gray-800 mb-6">Vendor Earnings & Withdrawals</h1>
       
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -251,6 +252,7 @@ export default function VendorWithdrawalsPage() {
           </table>
         </div>
       </div>
+    </div>
     </div>
   );
 }
