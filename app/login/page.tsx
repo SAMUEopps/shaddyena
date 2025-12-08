@@ -194,9 +194,15 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                 </label>
               </div>
 
-              <Link
+              {/*}Link
                 href=""
                 className="text-sm text-[#bf2c7e] hover:text-[#a8256c] transition-colors"
+              >
+                Forgot password?
+              </Link>*/}
+              <Link
+                href="/forgot-password"
+                className="text-sm font-medium text-[#bf2c7e] hover:text-[#a8256c] transition-colors"
               >
                 Forgot password?
               </Link>
