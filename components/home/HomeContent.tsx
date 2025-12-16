@@ -19,6 +19,7 @@ import ShopsTab from '@/components/tabs/ShopsTab';
 import BecomeVendorModal from '@/components/modals/BecomeVendorModal';
 import SellerRequestsTab from '@/components/tabs/SellerRequestsTab';
 import { useSearchParams } from 'next/navigation'
+import EarningsTab from '../tabs/EarningsTab';
 
 /* ---------- helpers ---------- */
 const baseNavItems = [
@@ -29,6 +30,7 @@ const baseNavItems = [
   { id: 'orders', label: 'Orders', icon: '📦' },
   { id: 'seller-requests', label: 'Seller Requests', icon: '👥' },
   { id: 'payments', label: 'Payments', icon: '💳' },
+  { id: 'earnings', label: 'Earnings', icon: '�' },
   /*{ id: 'support', label: 'Support', icon: '🛟' },*/
 ];
 
@@ -102,6 +104,7 @@ export default function Home() {
       case 'seller-requests': return <SellerRequestsTab />;
       case 'payments': return <PaymentsTab />;
       case 'support': return <SupportTab role={currentUser.role} />;
+      case 'earnings': return <EarningsTab />;
       default: return <HomeTab />;
     }
   };

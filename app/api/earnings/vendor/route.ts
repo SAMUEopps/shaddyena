@@ -1,78 +1,91 @@
-import { NextRequest, NextResponse } from 'next/server';
-import VendorEarnings from '@/models/VendorEarnings';
-import WithdrawalRequest from '@/models/WithdrawalRequest';
-import User from '@/models/user';
-import { verify } from 'jsonwebtoken';
-import { Types } from 'mongoose';
-import dbConnect from '@/lib/dbConnect';
+import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+import dbConnect from "@/lib/dbConnect";
+import VendorEarning from "@/models/VendorEarnings";
+import WithdrawalRequest from "@/models/WithdrawalRequest";
+import User from "@/models/user";
+
+interface DecodedUser {
+  userId: string;
+  role: "customer" | "vendor" | "admin" | "delivery";
+}
 
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
 
-    // Get session or use your auth method
-    //const session = await getServerSession();
-   // if (!session) {
-  //    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  //  }
+    // 1. Authenticate user
+    const token = req.cookies.get("token")?.value ||
+      req.headers.get("authorization")?.split(" ")[1];
 
-    // Extract JWT token from cookies
-    const token = req.cookies.get('token')?.value;
     if (!token) {
-    return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Verify token
-    let decoded: any;
-    try {
-    decoded = verify(token, process.env.JWT_SECRET as string);
-    } catch {
-    return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
-    }
-    const user = await User.findById(decoded.userId).select('-password');
-    if (!user || !user.isActive) {
-    return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedUser;
+    
+    if (decoded.role !== "vendor") {
+      return NextResponse.json({ message: "Vendor access only" }, { status: 403 });
     }
 
-    const userId = user.id;
-
-    // Get vendor earnings summary
-    const earnings = await VendorEarnings.aggregate([
-      {
-        $match: {
-          vendorId: new Types.ObjectId(userId),
-          status: { $in: ['PENDING', 'PAID'] }
+    // 2. Calculate earnings summary
+    const [earningsSummary, pendingRequest] = await Promise.all([
+      // Calculate earnings by status
+      VendorEarning.aggregate([
+        { $match: { vendorId: decoded.userId } },
+        {
+          $group: {
+            _id: "$status",
+            totalAmount: { $sum: "$netAmount" },
+            count: { $sum: 1 }
+          }
         }
-      },
-      {
-        $group: {
-          _id: '$status',
-          totalAmount: { $sum: '$netAmount' },
-          count: { $sum: 1 }
-        }
-      }
+      ]),
+      // Check for pending withdrawal request
+      WithdrawalRequest.findOne({
+        vendorId: decoded.userId,
+        status: "PENDING"
+      })
     ]);
 
-    const availableEarnings = earnings.find(e => e._id === 'PENDING')?.totalAmount || 0;
-    const withdrawnEarnings = earnings.find(e => e._id === 'WITHDRAWN')?.totalAmount || 0;
-    const totalEarnings = earnings.reduce((sum, e) => sum + e.totalAmount, 0);
+    // 3. Transform summary data
+    const summary = {
+      availableEarnings: 0,
+      withdrawnEarnings: 0,
+      totalEarnings: 0,
+      pendingAmount: 0,
+      hasPendingRequest: !!pendingRequest
+    };
 
-    // Check if user has pending withdrawal request
-    //const user = await User.findById(userId);
-    const hasPendingRequest = user?.hasPendingVendorRequest || false;
-
-    return NextResponse.json({
-      availableEarnings,
-      withdrawnEarnings,
-      totalEarnings,
-      hasPendingRequest,
-      earningsBreakdown: earnings
+    earningsSummary.forEach(item => {
+      switch (item._id) {
+        case 'AVAILABLE':
+          summary.availableEarnings = item.totalAmount;
+          break;
+        case 'WITHDRAWN':
+          summary.withdrawnEarnings = item.totalAmount;
+          break;
+        case 'PENDING':
+          summary.pendingAmount = item.totalAmount;
+          break;
+      }
+      summary.totalEarnings += item.totalAmount;
     });
 
-  } catch (error) {
-    console.error('Error fetching vendor earnings:', error);
+    // 4. Get vendor details
+    const vendor = await User.findById(decoded.userId)
+      .select("firstName lastName email phone businessName mpesaNumber")
+      .lean();
+
+    return NextResponse.json({
+      summary,
+      vendor,
+      success: true
+    });
+  } catch (error: any) {
+    console.error("Vendor earnings error:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch vendor earnings' },
+      { message: "Server error", error: error.message },
       { status: 500 }
     );
   }
@@ -82,95 +95,107 @@ export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    // Extract JWT token from cookies
-    const token = req.cookies.get('token')?.value;
+    // 1. Authenticate user
+    const token = req.cookies.get("token")?.value ||
+      req.headers.get("authorization")?.split(" ")[1];
+
     if (!token) {
-    return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Verify token
-    let decoded: any;
-    try {
-    decoded = verify(token, process.env.JWT_SECRET as string);
-    } catch {
-    return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
-    }
-    const user = await User.findById(decoded.userId).select('-password');
-    if (!user || !user.isActive) {
-    return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedUser;
+    
+    if (decoded.role !== "vendor") {
+      return NextResponse.json({ message: "Vendor access only" }, { status: 403 });
     }
 
-    const userId = user.id;
-    const body = await req.json();
-    const { amount } = body;
+    const { amount } = await req.json();
 
-    // Get vendor details
-    const vendor = await User.findById(userId);
-    if (!vendor || vendor.role !== 'vendor') {
-      return NextResponse.json({ error: 'Only vendors can request withdrawals' }, { status: 403 });
-    }
+    // 2. Validate amount
+    const availableEarnings = await VendorEarning.aggregate([
+      { $match: { vendorId: decoded.userId, status: "AVAILABLE" } },
+      { $group: { _id: null, total: { $sum: "$netAmount" } } }
+    ]);
 
-    // Check if vendor already has a pending request
-    if (vendor.hasPendingVendorRequest) {
+    const availableAmount = availableEarnings[0]?.total || 0;
+    
+    if (amount > availableAmount) {
       return NextResponse.json(
-        { error: 'You already have a pending withdrawal request' },
+        { message: "Insufficient available earnings" },
         { status: 400 }
       );
     }
 
-    // Get available earnings
-    const availableEarnings = await VendorEarnings.find({
-      vendorId: userId,
-      status: 'PENDING'
+    // 3. Check for existing pending request
+    const existingRequest = await WithdrawalRequest.findOne({
+      vendorId: decoded.userId,
+      status: "PENDING"
     });
 
-    if (availableEarnings.length === 0) {
+    if (existingRequest) {
       return NextResponse.json(
-        { error: 'No available earnings to withdraw' },
+        { message: "You already have a pending withdrawal request" },
         { status: 400 }
       );
     }
 
-    const totalAvailable = availableEarnings.reduce((sum, earning) => sum + earning.netAmount, 0);
-    
-    if (amount > totalAvailable) {
+    // 4. Get vendor details
+    const vendor = await User.findById(decoded.userId)
+      .select("firstName lastName email phone businessName mpesaNumber")
+      .lean();
+
+    if (!vendor) {
+      return NextResponse.json({ message: "Vendor not found" }, { status: 404 });
+    }
+
+    // 5. Get available earnings to withdraw
+    const earningsToWithdraw = await VendorEarning.find({
+      vendorId: decoded.userId,
+      status: "AVAILABLE"
+    }).limit(10); // Limit to recent earnings
+
+    if (earningsToWithdraw.length === 0) {
       return NextResponse.json(
-        { error: `Requested amount exceeds available earnings. Maximum: KSh ${totalAvailable.toFixed(2)}` },
+        { message: "No available earnings to withdraw" },
         { status: 400 }
       );
     }
 
-    // Create withdrawal request
+    // 6. Create withdrawal request
     const withdrawalRequest = new WithdrawalRequest({
-      vendorId: userId,
-      vendor: {
+      vendorId: decoded.userId,
+      /*vendorDetails: {
         firstName: vendor.firstName,
         lastName: vendor.lastName,
-        businessName: vendor.businessName,
-        mpesaNumber: vendor.mpesaNumber
-      },
-      earningsIds: availableEarnings.map(e => e._id),
-      totalAmount: amount,
-      status: 'PENDING'
+        email: vendor.email,
+        phone: vendor.phone,
+        mpesaNumber: vendor.mpesaNumber,
+        businessName: vendor.businessName
+      },*/
+      earnings: earningsToWithdraw.map(earning => ({
+        earningId: earning._id,
+        amount: earning.netAmount
+      })),
+      totalAmount: amount
     });
 
     await withdrawalRequest.save();
 
-    // Update user's hasPendingVendorRequest flag
-    await User.findByIdAndUpdate(userId, {
-      hasPendingVendorRequest: true
-    });
+    // 7. Mark earnings as HOLD (temporarily reserved)
+    await VendorEarning.updateMany(
+      { _id: { $in: earningsToWithdraw.map(e => e._id) } },
+      { $set: { status: "HOLD", withdrawalRequestId: withdrawalRequest._id } }
+    );
 
     return NextResponse.json({
-      message: 'Withdrawal request submitted successfully',
+      message: "Withdrawal request submitted successfully",
       requestId: withdrawalRequest._id,
-      amount: withdrawalRequest.totalAmount
+      success: true
     });
-
-  } catch (error) {
-    console.error('Error creating withdrawal request:', error);
+  } catch (error: any) {
+    console.error("Withdrawal request error:", error);
     return NextResponse.json(
-      { error: 'Failed to create withdrawal request' },
+      { message: "Server error", error: error.message },
       { status: 500 }
     );
   }

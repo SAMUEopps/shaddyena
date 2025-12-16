@@ -1,38 +1,102 @@
-import mongoose, { Document, Schema, Types } from 'mongoose';
+/*import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IVendorEarnings extends Document {
-  vendorId: Types.ObjectId;
+export interface IVendorEarning extends Document {
+  vendorId: string;
   orderId: string;
-  suborderId: Types.ObjectId;
-  amount: number; // Total amount for this suborder
-  commission: number; // Platform commission
-  netAmount: number; // Amount after commission (vendor earnings)
-  status: 'PENDING' | 'PAID' | 'WITHDRAWN';
-  withdrawalRequestId?: Types.ObjectId;
+  suborderId: string;
+  amount: number;          // Gross amount (items total)
+  commission: number;      // Platform commission
+  netAmount: number;       // Amount after commission (amount - commission)
+  status: 'PENDING' | 'AVAILABLE' | 'WITHDRAWN' | 'HOLD';
+  withdrawalRequestId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const VendorEarningsSchema = new Schema<IVendorEarnings>(
+const VendorEarningSchema = new Schema<IVendorEarning>(
   {
-    vendorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    orderId: { type: String, required: true },
-    suborderId: { type: Schema.Types.ObjectId, ref: 'Order.suborders', required: true },
+    vendorId: { type: String, required: true, index: true },
+    orderId: { type: String, required: true, index: true },
+    suborderId: { type: String, required: true },
     amount: { type: Number, required: true },
     commission: { type: Number, required: true },
     netAmount: { type: Number, required: true },
-    status: {
-      type: String,
-      enum: ['PENDING', 'PAID', 'WITHDRAWN'],
+    status: { 
+      type: String, 
+      enum: ['PENDING', 'AVAILABLE', 'WITHDRAWN', 'HOLD'],
       default: 'PENDING'
     },
-    withdrawalRequestId: { type: Schema.Types.ObjectId, ref: 'WithdrawalRequest' }
+    withdrawalRequestId: { type: String }
   },
   { timestamps: true }
 );
 
-VendorEarningsSchema.index({ vendorId: 1, status: 1 });
-VendorEarningsSchema.index({ orderId: 1 });
-VendorEarningsSchema.index({ suborderId: 1 });
+// Indexes for better query performance
+VendorEarningSchema.index({ vendorId: 1, status: 1 });
+VendorEarningSchema.index({ orderId: 1 });
+VendorEarningSchema.index({ createdAt: -1 });
 
-export default mongoose.models.VendorEarnings || mongoose.model<IVendorEarnings>('VendorEarnings', VendorEarningsSchema);
+export default mongoose.models.VendorEarning || mongoose.model<IVendorEarning>('VendorEarning', VendorEarningSchema);*/
+
+import mongoose, { Document, Schema } from 'mongoose';
+
+export interface IVendorEarning extends Document {
+  vendorId: string;
+  orderId: string;
+  suborderId: string;
+  amount: number;          // Gross amount (items total)
+  commission: number;      // Platform commission
+  netAmount: number;       // Amount after commission (amount - commission)
+  status: 'PENDING' | 'AVAILABLE' | 'WITHDRAWN' | 'HOLD';
+  withdrawalRequestId?: string;
+  orderDetails: {
+    orderId: string;
+    buyerName: string;
+    buyerEmail: string;
+    itemsCount: number;
+    createdAt: Date;
+  };
+  vendorDetails: {
+    vendorId: string;
+    businessName?: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const VendorEarningSchema = new Schema<IVendorEarning>(
+  {
+    vendorId: { type: String, required: true, index: true },
+    orderId: { type: String, required: true, index: true },
+    suborderId: { type: String, required: true },
+    amount: { type: Number, required: true },
+    commission: { type: Number, required: true },
+    netAmount: { type: Number, required: true },
+    status: { 
+      type: String, 
+      enum: ['PENDING', 'AVAILABLE', 'WITHDRAWN', 'HOLD'],
+      default: 'PENDING'
+    },
+    withdrawalRequestId: { type: String },
+    orderDetails: {
+      orderId: { type: String, required: true },
+      buyerName: { type: String, required: true },
+      buyerEmail: { type: String, required: true },
+      itemsCount: { type: Number, required: true },
+      createdAt: { type: Date, required: true }
+    },
+    vendorDetails: {
+      vendorId: { type: String, required: true },
+      businessName: { type: String }
+    }
+  },
+  { timestamps: true }
+);
+
+// Indexes for better query performance
+VendorEarningSchema.index({ vendorId: 1, status: 1 });
+VendorEarningSchema.index({ orderId: 1 });
+VendorEarningSchema.index({ createdAt: -1 });
+VendorEarningSchema.index({ updatedAt: -1 });
+
+export default mongoose.models.VendorEarning || mongoose.model<IVendorEarning>('VendorEarning', VendorEarningSchema);

@@ -943,12 +943,7 @@ export default function VendorShopPage() {
                 Edit Shop
               </button>
             )}
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="bg-gray-300 text-gray-700 px-3 sm:px-4 py-2 rounded-md hover:bg-gray-400 text-sm sm:text-base"
-            >
-              Back to Dashboard
-            </button>
+           
           </div>
         </div>
 

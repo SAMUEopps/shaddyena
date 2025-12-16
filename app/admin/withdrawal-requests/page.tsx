@@ -150,18 +150,18 @@ export default function AdminWithdrawalRequestsPage() {
                 <tr key={request._id}>
                   <td className="py-3 px-4">
                     <div>
-                      <p className="font-medium">
+                      {/*<p className="font-medium">
                         {request.vendor.firstName} {request.vendor.lastName}
-                      </p>
+                      </p>*/}
                       <p className="text-sm text-gray-500">{request.vendorId?.email}</p>
                     </div>
                   </td>
-                  <td className="py-3 px-4">
+                  {/*<td className="py-3 px-4">
                     {request.vendor.businessName || 'N/A'}
                   </td>
                   <td className="py-3 px-4">
                     {request.vendor.mpesaNumber || 'Not set'}
-                  </td>
+                  </td>*/}
                   <td className="py-3 px-4 font-bold text-green-700">
                     KSh {request.totalAmount.toFixed(2)}
                   </td>
