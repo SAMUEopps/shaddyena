@@ -214,7 +214,7 @@ export default function EarningsTab() {
   return (
     <div className="space-y-8">
       {/* Title */}
-      <h2 className="text-2xl text-gray-700 font-bold">Payments & Subscription</h2>
+      <h2 className="text-2xl text-gray-700 font-bold">Refferals & Earnings</h2>
 
       {/* Payment Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
