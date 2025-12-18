@@ -171,7 +171,7 @@ export default function AdminWithdrawalRequestsPage() {
                       {request.status}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-sm">
+                  <td className="py-3 px-4 text-sm text-gray-700">
                     {new Date(request.createdAt).toLocaleDateString()}
                   </td>
                   <td className="py-3 px-4">
