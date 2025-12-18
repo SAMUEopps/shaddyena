@@ -106,7 +106,7 @@ export default function AdminWithdrawalRequestsPage() {
   };
 
   if (loading) {
-    return <div className="p-8">Loading...</div>;
+    return <div className="flex-1 p-8">Loading...</div>;
   }
 
   return (
