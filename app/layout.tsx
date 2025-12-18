@@ -76,8 +76,10 @@ export default function RootLayout({
           <CartProvider>
             <WishlistProvider>
             <div className='flex min-h-screen flex-col'>  
+                <main className="flex-1"> 
               {children}
               <Footer />
+              </main>
              </div>  
             </WishlistProvider>
           </CartProvider>
