@@ -40,7 +40,7 @@ export default function AdminWithdrawalRequestsPage() {
 
   useEffect(() => {
     if (user?.role !== 'admin') {
-      router.push('/dashboard');
+      //router.push('/dashboard');
       return;
     }
     
