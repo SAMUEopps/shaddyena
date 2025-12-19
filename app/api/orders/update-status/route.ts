@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+/*import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import Order from "@/models/Order";
 import dbConnect from "@/lib/dbConnect";
@@ -208,4 +208,321 @@ async function createVendorEarnings(order: any, suborder: any) {
     console.error("Error creating vendor earnings:", error);
     throw error;
   }
+}*/
+
+import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+import Order from "@/models/Order";
+import dbConnect from "@/lib/dbConnect";
+import VendorEarning from "@/models/VendorEarnings";
+
+interface DecodedUser {
+  userId: string;
+  role: "customer" | "vendor" | "admin" | "delivery";
+}
+
+interface RequestBody {
+  orderId: string;
+  status: string;
+  suborderId?: string;
+  notes?: string;
+}
+
+/* ----------------------------- LOGGER HELPERS ----------------------------- */
+const logSuccess = (msg: string, meta?: any) =>
+  console.log(`✅ SUCCESS: ${msg}`, meta || "");
+
+const logFailure = (msg: string, meta?: any) =>
+  console.warn(`❌ FAILURE: ${msg}`, meta || "");
+
+const logSecurity = (msg: string, meta?: any) =>
+  console.error(`🚨 SECURITY: ${msg}`, meta || "");
+
+const logAudit = (msg: string, meta?: any) =>
+  console.info(`📘 AUDIT: ${msg}`, meta || "");
+
+/* -------------------------------------------------------------------------- */
+
+export async function POST(req: NextRequest) {
+  try {
+    await dbConnect();
+
+    /* ----------------------------- AUTHENTICATION ---------------------------- */
+    const token =
+      req.cookies.get("token")?.value ||
+      req.headers.get("authorization")?.split(" ")[1];
+
+    if (!token) {
+      logSecurity("Missing auth token");
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET!
+    ) as DecodedUser;
+
+    const { orderId, status, suborderId, notes } =
+      (await req.json()) as RequestBody;
+
+    logAudit("Status update request received", {
+      userId: decoded.userId,
+      role: decoded.role,
+      orderId,
+      suborderId,
+      status,
+    });
+
+    /* -------------------------------- FIND ORDER ----------------------------- */
+    const order = await Order.findById(orderId);
+    if (!order) {
+      logFailure("Order not found", { orderId });
+      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    }
+
+    /* --------------------------- ALLOWED STATUSES ---------------------------- */
+    const allowedStatuses = {
+      vendor: ["SHIPPED"],
+      admin: ["DELIVERED", "CANCELLED", "COMPLETED"],
+      customer: ["CANCELLED"],
+    };
+
+    let updated = false;
+    let oldStatus = "";
+
+    /* ============================ SUBORDER UPDATE ============================ */
+    if (suborderId) {
+      const suborder = order.suborders.id(suborderId);
+
+      if (!suborder) {
+        logFailure("Suborder not found", { suborderId });
+        return NextResponse.json(
+          { message: "Suborder not found" },
+          { status: 404 }
+        );
+      }
+
+      if (
+        decoded.role === "vendor" &&
+        suborder.vendorId !== decoded.userId
+      ) {
+        logSecurity("Vendor tried updating foreign suborder", {
+          vendorId: decoded.userId,
+          suborderVendorId: suborder.vendorId,
+        });
+        return NextResponse.json(
+          { message: "Forbidden" },
+          { status: 403 }
+        );
+      }
+
+      if (
+        decoded.role === "vendor" &&
+        !allowedStatuses.vendor.includes(status)
+      ) {
+        logFailure("Invalid vendor status transition", {
+          status,
+        });
+        return NextResponse.json(
+          { message: "Invalid status for vendor" },
+          { status: 403 }
+        );
+      }
+
+      if (
+        decoded.role === "admin" &&
+        !["DELIVERED", "CANCELLED"].includes(status)
+      ) {
+        logFailure("Invalid admin suborder status", { status });
+        return NextResponse.json(
+          { message: "Invalid status for admin on suborder" },
+          { status: 403 }
+        );
+      }
+
+      oldStatus = suborder.status;
+      suborder.status = status;
+      updated = true;
+
+      logAudit("Suborder status updated", {
+        suborderId,
+        from: oldStatus,
+        to: status,
+      });
+
+      if (status === "DELIVERED" && oldStatus !== "DELIVERED") {
+        await createVendorEarnings(order, suborder);
+      }
+    }
+
+    /* ============================== MAIN ORDER ============================== */
+    else {
+      if (!["admin", "customer"].includes(decoded.role)) {
+        logSecurity("Unauthorized main order update attempt", {
+          role: decoded.role,
+        });
+        return NextResponse.json(
+          { message: "Forbidden" },
+          { status: 403 }
+        );
+      }
+
+      if (
+        decoded.role === "customer" &&
+        (status !== "CANCELLED" ||
+          !["PENDING", "PROCESSING"].includes(order.status))
+      ) {
+        logFailure("Invalid customer cancellation", {
+          currentStatus: order.status,
+        });
+        return NextResponse.json(
+          { message: "Cannot cancel order" },
+          { status: 400 }
+        );
+      }
+
+      if (
+        decoded.role === "admin" &&
+        !allowedStatuses.admin.includes(status)
+      ) {
+        logFailure("Invalid admin order status", { status });
+        return NextResponse.json(
+          { message: "Invalid status for admin" },
+          { status: 403 }
+        );
+      }
+
+      oldStatus = order.status;
+      order.status = status;
+      updated = true;
+
+      logAudit("Main order status updated", {
+        orderId,
+        from: oldStatus,
+        to: status,
+      });
+
+      if (decoded.role === "admin" && status === "COMPLETED") {
+        for (const suborder of order.suborders) {
+          if (
+            !["DELIVERED", "CANCELLED"].includes(suborder.status)
+          ) {
+            suborder.status = "DELIVERED";
+            await createVendorEarnings(order, suborder);
+          }
+        }
+        logSuccess("All suborders auto-delivered", { orderId });
+      }
+    }
+
+    if (!updated) {
+      logFailure("No updates applied", { orderId });
+      return NextResponse.json(
+        { message: "No changes made" },
+        { status: 400 }
+      );
+    }
+
+    await order.save();
+    logSuccess("Order status update persisted", { orderId });
+
+    return NextResponse.json({
+      success: true,
+      message: "Status updated successfully",
+      orderId: order._id,
+    });
+  } catch (error: any) {
+    logFailure("Unhandled order status update error", error);
+    return NextResponse.json(
+      { message: "Server error", error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+/* ----------------------- CREATE VENDOR EARNINGS ----------------------- */
+/*async function createVendorEarnings(order: any, suborder: any) {
+  try {
+    const exists = await VendorEarning.findOne({
+      orderId: order._id,
+      suborderId: suborder._id,
+      vendorId: suborder.vendorId,
+    });
+
+    if (exists) {
+      logAudit("Vendor earning already exists", {
+        suborderId: suborder._id,
+      });
+      return exists;
+    }
+
+    const earning = new VendorEarning({
+      vendorId: suborder.vendorId,
+      orderId: order._id,
+      suborderId: suborder._id,
+      amount: suborder.amount,
+      commission: suborder.commission,
+      netAmount: suborder.netAmount,
+      status: "PENDING",
+    });
+
+    await earning.save();
+
+    logSuccess("Vendor earning created", {
+      vendorId: suborder.vendorId,
+      netAmount: suborder.netAmount,
+    });
+
+    return earning;
+  } catch (error) {
+    logFailure("Vendor earning creation failed", error);
+    throw error;
+  }
+}*/
+async function createVendorEarnings(order: any, suborder: any) {
+  const exists = await VendorEarning.findOne({
+    orderId: order._id,
+    suborderId: suborder._id,
+    vendorId: suborder.vendorId,
+  });
+
+  if (exists) {
+    console.log("📘 AUDIT: Vendor earning already exists", {
+      suborderId: suborder._id,
+    });
+    return exists;
+  }
+
+  const vendorItems = order.items.filter(
+    (item: any) => item.vendorId === suborder.vendorId
+  );
+
+  const earning = new VendorEarning({
+    // ✅ REQUIRED FIELDS (THIS WAS MISSING)
+    orderId: order._id,
+    vendorId: suborder.vendorId,
+
+    // 🔗 Optional but useful
+    suborderId: suborder._id,
+
+    amount: suborder.amount,
+    commission: suborder.commission,
+    netAmount: suborder.netAmount,
+
+    itemsCount: vendorItems.reduce(
+      (sum: number, item: any) => sum + item.quantity,
+      0
+    ),
+
+    status: "PENDING",
+  });
+
+  await earning.save();
+
+  console.log("✅ SUCCESS: Vendor earning created", {
+    vendorId: suborder.vendorId,
+    netAmount: suborder.netAmount,
+  });
+
+  return earning;
 }

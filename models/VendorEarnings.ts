@@ -79,16 +79,17 @@ const VendorEarningSchema = new Schema<IVendorEarning>(
     },
     withdrawalRequestId: { type: String },
     orderDetails: {
-      orderId: { type: String, required: true },
-      buyerName: { type: String, required: true },
-      buyerEmail: { type: String, required: true },
-      itemsCount: { type: Number, required: true },
-      createdAt: { type: Date, required: true }
+      orderId: { type: String },
+      buyerName: { type: String },
+      buyerEmail: { type: String },
+      itemsCount: { type: Number },
+      createdAt: { type: Date }
     },
+
     vendorDetails: {
-      vendorId: { type: String, required: true },
+      vendorId: { type: String },
       businessName: { type: String }
-    }
+    },
   },
   { timestamps: true }
 );
