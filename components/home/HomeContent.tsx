@@ -30,7 +30,7 @@ const baseNavItems = [
   { id: 'orders', label: 'Orders', icon: '📦' },
   { id: 'seller-requests', label: 'Seller Requests', icon: '👥' },
   { id: 'payments', label: 'Payments', icon: '💳' },
-  { id: 'earnings', label: 'Earnings', icon: '�' },
+  { id: 'earnings', label: 'Refferals', icon: '�' },
   /*{ id: 'support', label: 'Support', icon: '🛟' },*/
 ];
 
