@@ -70,9 +70,17 @@ export default function Home() {
   let filteredItems = baseNavItems;
   
   // Remove dashboard for customers only
+  //if (user.role === 'customer') {
+  //  filteredItems = filteredItems.filter(item => item.id !== 'dashboard');
+  //}
+
+  // Remove dashboard and payments for customers only
   if (user.role === 'customer') {
-    filteredItems = filteredItems.filter(item => item.id !== 'dashboard');
+    filteredItems = filteredItems.filter(
+      item => item.id !== 'dashboard' && item.id !== 'payments'
+    );
   }
+
   
   // Only show seller-requests for admins
   if (user.role !== 'admin') {
