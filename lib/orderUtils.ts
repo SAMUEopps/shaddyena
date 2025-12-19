@@ -8,7 +8,7 @@ const HMAC_SECRET = process.env.REF_HMAC_SECRET || 'your-secure-hmac-secret-chan
 const REF_VERSION = 'V1';
 const REF_SIG_LEN = 6;
 const REF_TOKEN_RANDOM = 5;
-const COMMISSION_RATE = 0.15; // 15% platform commission
+const COMMISSION_RATE = 0.03; // 3% platform commission
 
 // Helper functions
 function base36Encode(num: number): string {
