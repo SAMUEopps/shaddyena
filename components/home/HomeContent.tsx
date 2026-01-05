@@ -20,6 +20,7 @@ import BecomeVendorModal from '@/components/modals/BecomeVendorModal';
 import SellerRequestsTab from '@/components/tabs/SellerRequestsTab';
 import { useSearchParams } from 'next/navigation'
 import EarningsTab from '../tabs/EarningsTab';
+import UsersTab from '../tabs/UsersTab';
 
 /* ---------- helpers ---------- */
 const baseNavItems = [
@@ -31,6 +32,7 @@ const baseNavItems = [
   { id: 'seller-requests', label: 'Seller Requests', icon: '👥' },
   { id: 'payments', label: 'Payments', icon: '💳' },
   { id: 'earnings', label: 'Refferals', icon: '�' },
+  { id: 'users', label: 'Users', icon: '�' },
   /*{ id: 'support', label: 'Support', icon: '🛟' },*/
 ];
 
@@ -84,7 +86,7 @@ export default function Home() {
   
   // Only show seller-requests for admins
   if (user.role !== 'admin') {
-    filteredItems = filteredItems.filter(item => item.id !== 'seller-requests');
+    filteredItems = filteredItems.filter(item => item.id !== 'seller-requests' && item.id !== 'users');
   }
   
   return filteredItems;
@@ -113,6 +115,7 @@ export default function Home() {
       case 'payments': return <PaymentsTab />;
       case 'support': return <SupportTab role={currentUser.role} />;
       case 'earnings': return <EarningsTab />;
+      case 'users': return <UsersTab />;
       default: return <HomeTab />;
     }
   };
