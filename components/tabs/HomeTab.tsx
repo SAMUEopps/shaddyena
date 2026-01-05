@@ -338,7 +338,7 @@ export default function HomeTab() {
         </div>
       </div>
 
-      <Icons />
+      
 
       {/* Featured Products */}
 <div className="mb-4">
@@ -669,6 +669,7 @@ export default function HomeTab() {
         </div>
   )}
 </div>
+<Icons />
     </div>
   );
 }
