@@ -291,22 +291,26 @@ export default function UsersTab() {
 
           {/* Role Filter */}
           <div>
-            <label htmlFor="roleFilter" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="roleFilter"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Role
             </label>
             <select
               id="roleFilter"
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] focus:border-transparent text-gray-700"
             >
-              <option className='text-gray-700' value="">All Roles</option>
-              <option className='text-gray-700' value="customer">Customer</option>
-              <option className='text-gray-700' value="vendor">Vendor</option>
-              <option className='text-gray-700' value="admin">Admin</option>
-              <option className='text-gray-700' value="delivery">Delivery</option>
+              <option value="" className="text-gray-700">All Roles</option>
+              <option value="customer" className="text-gray-700">Customer</option>
+              <option value="vendor" className="text-gray-700">Vendor</option>
+              <option value="admin" className="text-gray-700">Admin</option>
+              <option value="delivery" className="text-gray-700">Delivery</option>
             </select>
           </div>
+
 
           {/* Status Filter */}
           <div>
