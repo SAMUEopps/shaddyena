@@ -300,11 +300,11 @@ export default function UsersTab() {
               onChange={(e) => setRoleFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] focus:border-transparent"
             >
-              <option value="">All Roles</option>
-              <option value="customer">Customer</option>
-              <option value="vendor">Vendor</option>
-              <option value="admin">Admin</option>
-              <option value="delivery">Delivery</option>
+              <option className='text-gray-700' value="">All Roles</option>
+              <option className='text-gray-700' value="customer">Customer</option>
+              <option className='text-gray-700' value="vendor">Vendor</option>
+              <option className='text-gray-700' value="admin">Admin</option>
+              <option className='text-gray-700' value="delivery">Delivery</option>
             </select>
           </div>
 
