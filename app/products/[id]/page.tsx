@@ -458,7 +458,6 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import Image from 'next/image';
 
 interface Product {
   _id: string;
@@ -849,7 +848,23 @@ export default function ProductDetailPage() {
                     href={`/shops/${shopIdString}`} 
                     className="font-medium text-[#bf2c7e] hover:text-[#a8246b] transition-colors text-sm bg-pink-50 px-2 py-1 rounded-md"
                   >
-                    {product.shopName || product.shop?.businessName || product.vendor?.businessName || 'Unknown Seller'}
+                    {/*{product.shopName || product.shop?.businessName || product.vendor?.businessName || 'Unknown Seller'}*/}
+                    {(() => {
+  const sellerName = product.shopName || 
+                    product.shop?.businessName || 
+                    product.vendor?.businessName || 
+                    'Unknown Seller';
+  
+  // Debug log to see what's available
+  console.log('Product seller data:', {
+    shopName: product.shopName,
+    shop: product.shop,
+    vendor: product.vendor,
+    finalName: sellerName
+  });
+  
+  return sellerName;
+})()}
                   </Link>
                   {product.shop?.location && (
                     <>

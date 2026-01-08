@@ -196,6 +196,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
     return 'Customer';
   };
 
+
   const getVendorStats = () => {
     const stats = {
       total: vendorOrders.length,
