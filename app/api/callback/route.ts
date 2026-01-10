@@ -246,7 +246,7 @@ export async function POST(req: NextRequest) {
         accountReference,
       });
 
-      // Decode reference
+      // Decode your reference
       const decoded = decodeRef(accountReference);
       if (!decoded.ok) {
         console.error('❌ Invalid reference:', accountReference);
@@ -274,14 +274,18 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Amount mismatch' });
       }
 
-      // Update stock
+      /************************************************************
+       * Update product stock
+       ************************************************************/
       for (const item of draft.items) {
         await Product.findByIdAndUpdate(item.productId, {
           $inc: { stock: -item.quantity },
         });
       }
 
-      // Create order
+      /************************************************************
+       * Create order and suborders
+       ************************************************************/
       const orderId = generateOrderId();
       const order = new Order({
         orderId,
@@ -298,10 +302,7 @@ export async function POST(req: NextRequest) {
           status: 'PENDING',
         })),
         totalAmount: draft.totalAmount,
-        platformFee: draft.vendorSplits.reduce(
-          (sum: number, v: any) => sum + v.commission,
-          0
-        ),
+        platformFee: draft.vendorSplits.reduce((sum: number, v: any) => sum + v.commission, 0),
         currency: draft.currency,
         paymentMethod: 'M-PESA',
         paymentStatus: 'PAID',
@@ -309,31 +310,12 @@ export async function POST(req: NextRequest) {
         status: 'PENDING',
         mpesaTransactionId: mpesaReceiptNumber,
       });
-
       await order.save();
 
       /************************************************************
-       * 3️⃣ PREPARE LEDGER ENTRIES
+       * Create ledger entries
        ************************************************************/
-      const referralLedgerEntries: any[] = [];
-
-      for (const vendor of draft.vendorSplits) {
-        const vendorUser = await User.findById(vendor.vendorId);
-        if (!vendorUser?.referredBy) continue;
-
-        const referralAmount = vendor.amount * 0.005; // 0.5%
-        referralLedgerEntries.push({
-          type: 'REFERRAL_COMMISSION',
-          referrerId: vendorUser.referredBy,
-          referredVendorId: vendorUser._id,
-          orderId,
-          draftToken: draft.token,
-          amount: referralAmount,
-          status: 'PENDING',
-          scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
-        });
-      }
-
+      // Vendor payouts
       const vendorLedgerEntries = draft.vendorSplits.map((vendor: any) => ({
         type: 'VENDOR_PAYOUT',
         vendorId: vendor.vendorId,
@@ -344,37 +326,50 @@ export async function POST(req: NextRequest) {
         commission: vendor.commission,
         netAmount: vendor.netAmount,
         status: 'PENDING',
-        scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       }));
 
-      // Combine all ledger entries and filter out invalid entries
-      const allLedgerEntries = [...vendorLedgerEntries, ...referralLedgerEntries]
-        .filter(e => e.type && e.amount && e.orderId);
+      // Referral commissions
+      const referralLedgerEntries = await Promise.all(
+        draft.vendorSplits.map(async (vendor: any) => {
+          const vendorUser = await User.findById(vendor.vendorId);
+          if (!vendorUser?.referredBy) return null;
 
-      if (allLedgerEntries.length > 0) {
-        await Ledger.insertMany(allLedgerEntries);
-        console.log(`📗 Ledger entries inserted: ${allLedgerEntries.length}`);
-      } else {
-        console.log('⚠️ No ledger entries to insert for this order.');
-      }
+          return {
+            type: 'REFERRAL_COMMISSION',
+            referrerId: vendorUser.referredBy,
+            referredVendorId: vendorUser._id,
+            orderId,
+            draftToken: draft.token,
+            amount: vendor.amount * 0.005, // 0.5%
+            status: 'PENDING',
+            scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          };
+        })
+      );
 
-      // Mark draft as confirmed
+      const validReferralLedgerEntries = referralLedgerEntries.filter(Boolean);
+
+      // Insert all ledger entries
+      await Ledger.insertMany([...vendorLedgerEntries, ...validReferralLedgerEntries]);
+
+      /************************************************************
+       * Mark draft as confirmed
+       ************************************************************/
       draft.status = 'CONFIRMED';
       draft.mpesaTransactionId = mpesaReceiptNumber;
       await draft.save();
 
       console.log(`✅ ORDER CONFIRMED — ${orderId}`);
-
       return NextResponse.json({ ResultCode: 0, ResultDesc: 'Success' });
     }
 
     /************************************************************
-     * 4️⃣ UNKNOWN PAYLOAD
+     * 3️⃣ UNKNOWN PAYLOAD
      ************************************************************/
     console.log('⚠️ Unknown M-Pesa callback type');
     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Unknown payload' });
-
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ CALLBACK ERROR:', error);
     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Server error' });
   }
