@@ -48,19 +48,19 @@ LedgerSchema.index({ scheduledAt: 1 });
 
 export default mongoose.models.Ledger || mongoose.model<ILedger>('Ledger', LedgerSchema);*/
 
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface ILedger extends Document {
   type: 'VENDOR_PAYOUT' | 'REFERRAL_COMMISSION';
-  vendorId?: string;
-  shopId?: string;
-  referrerId?: mongoose.Types.ObjectId;
-  referredVendorId?: mongoose.Types.ObjectId;
+  vendorId?: string; // Only for VENDOR_PAYOUT
+  shopId?: string;   // Only for VENDOR_PAYOUT
+  referrerId?: Types.ObjectId | string;       // Only for REFERRAL_COMMISSION, allow string temporarily
+  referredVendorId?: Types.ObjectId | string; // Only for REFERRAL_COMMISSION, allow string temporarily
   orderId: string;
   draftToken: string;
   amount: number;
-  commission?: number;
-  netAmount?: number;
+  commission?: number; // Only for VENDOR_PAYOUT
+  netAmount?: number;  // Only for VENDOR_PAYOUT
   status: 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
   payoutRef?: string;
   failureReason?: string;
@@ -79,8 +79,19 @@ const LedgerSchema = new Schema<ILedger>(
     },
     vendorId: { type: String }, // Only for VENDOR_PAYOUT
     shopId: { type: String },   // Only for VENDOR_PAYOUT
-    referrerId: { type: Schema.Types.ObjectId, ref: 'User' }, // Only for REFERRAL_COMMISSION
-    referredVendorId: { type: Schema.Types.ObjectId, ref: 'User' }, // Only for REFERRAL_COMMISSION
+
+    // For referrals, we allow either ObjectId or string to prevent crashes
+    referrerId: {
+      type: Schema.Types.Mixed, 
+      ref: 'User', 
+      required: function () { return this.type === 'REFERRAL_COMMISSION'; },
+    },
+    referredVendorId: {
+      type: Schema.Types.Mixed, 
+      ref: 'User',
+      required: function () { return this.type === 'REFERRAL_COMMISSION'; },
+    },
+
     orderId: { type: String, required: true },
     draftToken: { type: String, required: true },
     amount: { type: Number, required: true },
@@ -99,7 +110,7 @@ const LedgerSchema = new Schema<ILedger>(
   { timestamps: true }
 );
 
-// Indexes
+// Indexes for faster queries
 LedgerSchema.index({ type: 1 });
 LedgerSchema.index({ vendorId: 1 });
 LedgerSchema.index({ referrerId: 1 });
