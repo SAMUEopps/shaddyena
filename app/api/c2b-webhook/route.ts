@@ -305,8 +305,11 @@ export async function POST(req: NextRequest) {
 }
 */
 
+
+
+
 // app/api/c2b-webhook/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+/*import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import OrderDraft from '@/models/OrderDraft';
 import Order from '@/models/Order';
@@ -318,10 +321,226 @@ import { sendSMS } from '@/lib/sms';
 
 /* =================================================================
    Helpers reused by both flows
+================================================================= *
+function fail(code: number, desc: string) {
+  return NextResponse.json({ ResultCode: code, ResultDesc: desc });
+}
+function ok(desc = 'Accepted') {
+  return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
+}
+
+/* =================================================================
+   VALIDATION  (M-Pesa Validation phase)
+================================================================= *
+async function handleValidation(body: any) {
+  const accountNumber = body.AccountNumber || body.BillRefNumber;
+  const amount = parseInt(body.Amount || body.TransAmount, 10);
+
+  if (!accountNumber) return fail(1, 'Missing account number');
+
+  const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+  if (!draft) return fail(1, 'Unknown reference');
+
+  const decoded = decodeRef(draft.fullRef);
+  if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
+
+  if (amount !== draft.totalAmount) {
+    console.error(`❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`);
+    return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+  }
+
+  if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+
+  if (draft.status === 'VALIDATED') return ok('Already validated');
+  if (draft.status !== 'PENDING') return fail(1, 'Already processed');
+
+  draft.status = 'VALIDATED';
+  await draft.save();
+  console.log('✅ Validation OK for shortRef:', accountNumber);
+  return ok();
+}
+
+/* =================================================================
+   CONFIRMATION  (M-Pesa Confirmation phase)
+================================================================= *
+async function handleConfirmation(body: any) {
+  const accountNumber = body.BillRefNumber || body.AccountNumber;
+  const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+  if (!accountNumber) return fail(1, 'Missing account number');
+
+  const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+  if (!draft) return fail(1, 'Unknown reference');
+
+  const decoded = decodeRef(draft.fullRef);
+  if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
+
+  if (amount !== draft.totalAmount) {
+    draft.status = 'FAILED';
+    await draft.save();
+    return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+  }
+
+  if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+
+  if (draft.status === 'CONFIRMED') return ok('Already processed');
+
+  /* ---------- stock ---------- *
+  for (const it of draft.items) {
+    await Product.findByIdAndUpdate(it.productId, { $inc: { stock: -it.quantity } });
+  }
+
+  /* ---------- order ---------- *
+  const orderId = generateOrderId();
+  const order = new Order({
+    orderId,
+    draftToken: draft.token,
+    buyerId: draft.buyerId,
+    items: draft.items,
+    suborders: draft.vendorSplits.map((v: any) => ({
+      vendorId: v.vendorId,
+      shopId: v.shopId,
+      items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
+      amount: v.amount,
+      commission: v.commission,
+      netAmount: v.netAmount,
+      status: 'PENDING',
+    })),
+    totalAmount: draft.totalAmount,
+    platformFee: draft.vendorSplits.reduce((s: number, v: any) => s + v.commission, 0),
+    currency: draft.currency || 'KES',
+    paymentMethod: 'M-PESA',
+    paymentStatus: 'PAID',
+    shipping: draft.shipping,
+    status: 'PENDING',
+    mpesaTransactionId: body.TransID || body.TransId,
+  });
+  await order.save();
+
+  /* ---------- ledger ---------- *
+  const ledgerEntries = draft.vendorSplits.map((v: any) => ({
+    vendorId: v.vendorId,
+    shopId: v.shopId,
+    orderId,
+    draftToken: draft.token,
+    amount: v.amount,
+    commission: v.commission,
+    netAmount: v.netAmount,
+    status: 'PENDING',
+    scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+  }));
+  await Ledger.insertMany(ledgerEntries);
+
+  /* ---------- finalize draft ---------- *
+  draft.status = 'CONFIRMED';
+  draft.mpesaTransactionId = body.TransID || body.TransId;
+  await draft.save();
+
+
+  /* ---------- SEND SMS ---------- *
+
+  // Customer phone number (from shipping)
+  const customerPhone = draft.shipping.phone;
+
+  // Format phone (ensure +2547…)
+  const normalizePhone = (phone: string) => {
+    if (phone.startsWith("+")) return phone;
+    if (phone.startsWith("0")) return "+254" + phone.substring(1);
+    if (phone.startsWith("7")) return "+254" + phone;
+    return phone;
+  };
+
+  const formattedPhone = normalizePhone(customerPhone);
+
+  // 🆕 Log phone for debugging
+  console.log("📞 Raw phone from DB:", customerPhone);
+  console.log("📞 Formatted phone:", formattedPhone);
+
+  // Build customer SMS message
+  const customerMessage = `
+  Thank you for your order!
+
+  Order ID: ${orderId}
+  Amount: KES ${draft.totalAmount}
+  Transaction: ${draft.mpesaTransactionId}
+
+  We will process and keep you updated.
+  -Shaddyna
+  `.trim();
+
+  // Admin phone (replace with yours)
+  const adminPhone = "+254711118817";
+  const adminMessage = `
+  New Order Received!
+
+  Order ID: ${orderId}
+  Customer Phone: ${formattedPhone}
+  Amount: KES ${draft.totalAmount}
+  Transaction: ${draft.mpesaTransactionId}
+  `.trim();
+
+  // Send SMS to customer
+  await sendSMS(formattedPhone, customerMessage);
+
+  // Send SMS to admin
+  await sendSMS(adminPhone, adminMessage);
+
+  console.log("📨 SMS notifications sent.");
+
+  /* ---------- return response ---------- *
+  console.log('✅ Confirmation complete for shortRef:', accountNumber);
+  return ok('Success');
+
+  }
+
+  /* =================================================================
+    MAIN ENTRY
+  ================================================================= *
+  export async function POST(req: NextRequest) {
+    try {
+      await dbConnect();
+      const body = await req.json();
+      console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+
+      // M-Pesa sends TransID only in the confirmation phase
+      return body.TransID || body.TransId
+        ? await handleConfirmation(body)
+        : await handleValidation(body);
+    } catch (e) {
+      console.error('❌ C2B webhook crash:', e);
+      return fail(1, 'Server error');
+    }
+}*/
+
+
+
+
+
+
+
+
+
+
+
+
+// app/api/c2b-webhook/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import dbConnect from '@/lib/dbConnect';
+import OrderDraft from '@/models/OrderDraft';
+import Order from '@/models/Order';
+import Ledger from '@/models/Ledger';
+import Product from '@/models/product';
+import User from '@/models/user';
+import { decodeRef, generateOrderId } from '@/lib/orderUtils';
+import { sendSMS } from '@/lib/sms';
+
+/* =================================================================
+   Helpers reused by both flows
 ================================================================= */
 function fail(code: number, desc: string) {
   return NextResponse.json({ ResultCode: code, ResultDesc: desc });
 }
+
 function ok(desc = 'Accepted') {
   return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
 }
@@ -415,7 +634,9 @@ async function handleConfirmation(body: any) {
   await order.save();
 
   /* ---------- ledger ---------- */
-  const ledgerEntries = draft.vendorSplits.map((v: any) => ({
+  // Vendor payouts
+  const vendorLedgerEntries = draft.vendorSplits.map((v: any) => ({
+    type: 'VENDOR_PAYOUT',
     vendorId: v.vendorId,
     shopId: v.shopId,
     orderId,
@@ -426,85 +647,87 @@ async function handleConfirmation(body: any) {
     status: 'PENDING',
     scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
   }));
-  await Ledger.insertMany(ledgerEntries);
+
+  // Referral commissions
+  const referralLedgerEntries = await Promise.all(
+    draft.vendorSplits.map(async (v: any) => {
+      const vendorUser = await User.findById(v.vendorId);
+      if (!vendorUser?.referredBy) return null;
+
+      return {
+        type: 'REFERRAL_COMMISSION',
+        referrerId: vendorUser.referredBy,
+        referredVendorId: vendorUser._id,
+        orderId,
+        draftToken: draft.token,
+        amount: v.amount * 0.005, // 0.5%
+        status: 'PENDING',
+        scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      };
+    })
+  );
+
+  const validReferralLedgerEntries = referralLedgerEntries.filter(Boolean);
+
+  // Insert all ledger entries
+  await Ledger.insertMany([...vendorLedgerEntries, ...validReferralLedgerEntries]);
 
   /* ---------- finalize draft ---------- */
   draft.status = 'CONFIRMED';
   draft.mpesaTransactionId = body.TransID || body.TransId;
   await draft.save();
 
-
   /* ---------- SEND SMS ---------- */
-
-  // Customer phone number (from shipping)
   const customerPhone = draft.shipping.phone;
-
-  // Format phone (ensure +2547…)
   const normalizePhone = (phone: string) => {
     if (phone.startsWith("+")) return phone;
     if (phone.startsWith("0")) return "+254" + phone.substring(1);
     if (phone.startsWith("7")) return "+254" + phone;
     return phone;
   };
-
   const formattedPhone = normalizePhone(customerPhone);
 
-  // 🆕 Log phone for debugging
-  console.log("📞 Raw phone from DB:", customerPhone);
-  console.log("📞 Formatted phone:", formattedPhone);
-
-  // Build customer SMS message
   const customerMessage = `
   Thank you for your order!
-
   Order ID: ${orderId}
   Amount: KES ${draft.totalAmount}
   Transaction: ${draft.mpesaTransactionId}
-
   We will process and keep you updated.
   -Shaddyna
   `.trim();
 
-  // Admin phone (replace with yours)
   const adminPhone = "+254711118817";
   const adminMessage = `
   New Order Received!
-
   Order ID: ${orderId}
   Customer Phone: ${formattedPhone}
   Amount: KES ${draft.totalAmount}
   Transaction: ${draft.mpesaTransactionId}
   `.trim();
 
-  // Send SMS to customer
   await sendSMS(formattedPhone, customerMessage);
-
-  // Send SMS to admin
   await sendSMS(adminPhone, adminMessage);
 
   console.log("📨 SMS notifications sent.");
-
-  /* ---------- return response ---------- */
   console.log('✅ Confirmation complete for shortRef:', accountNumber);
   return ok('Success');
+}
 
-  }
-
-  /* =================================================================
+/* =================================================================
     MAIN ENTRY
-  ================================================================= */
-  export async function POST(req: NextRequest) {
-    try {
-      await dbConnect();
-      const body = await req.json();
-      console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+================================================================= */
+export async function POST(req: NextRequest) {
+  try {
+    await dbConnect();
+    const body = await req.json();
+    console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
 
-      // M-Pesa sends TransID only in the confirmation phase
-      return body.TransID || body.TransId
-        ? await handleConfirmation(body)
-        : await handleValidation(body);
-    } catch (e) {
-      console.error('❌ C2B webhook crash:', e);
-      return fail(1, 'Server error');
-    }
+    // M-Pesa sends TransID only in the confirmation phase
+    return body.TransID || body.TransId
+      ? await handleConfirmation(body)
+      : await handleValidation(body);
+  } catch (e) {
+    console.error('❌ C2B webhook crash:', e);
+    return fail(1, 'Server error');
+  }
 }
