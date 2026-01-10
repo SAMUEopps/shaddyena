@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface OrdersTabProps {
   role: 'customer' | 'vendor' | 'admin';
@@ -317,9 +318,12 @@ export default function OrdersTab({ role }: OrdersTabProps) {
             >
               Mark Delivered
             </button>
+
           )}
         </td>
+
       </tr>
+
     );
   };
 
@@ -364,6 +368,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
           >
             View Details
           </button>
+
         </td>
       </tr>
     );
@@ -706,6 +711,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
               >
                 Vendor Orders
               </button>
+                                   
               <button
                 type="button"
                 onClick={() => setViewMode('customer')}
@@ -717,8 +723,18 @@ export default function OrdersTab({ role }: OrdersTabProps) {
               >
                 My Orders
               </button>
+     
             </div>
           )}
+                {/*}   <Link 
+                href="/vendor/earnings" 
+                className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-[#bf2c7e] rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                My Earnings
+              </Link>*/}
         </div>
         
         <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">

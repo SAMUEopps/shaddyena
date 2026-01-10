@@ -1,87 +1,5 @@
-/*import axios from "axios";
-import { NextResponse } from "next/server";
-
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { phone, amount, planId } = body;
-
-    if (!phone || !amount) {
-      return NextResponse.json(
-        { success: false, error: "Phone and amount required" },
-        { status: 400 }
-      );
-    }
-
-    // ✅ Sanitize phone (convert to 2547XXXXXXXX format)
-    let sanitizedPhone = phone.replace(/^0/, "254").replace(/^\+/, "");
-
-    // 1️⃣ Generate OAuth token
-    const auth = Buffer.from(
-      `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`
-    ).toString("base64");
-
-    const tokenResponse = await axios.get(
-      `${process.env.MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
-      { headers: { Authorization: `Basic ${auth}` } }
-    );
-
-    const access_token = tokenResponse.data.access_token;
-
-    // 2️⃣ Generate STK password
-    const timestamp = new Date()
-      .toISOString()
-      .replace(/[-T:.Z]/g, "")
-      .slice(0, 14);
-
-    const password = Buffer.from(
-      `${process.env.MPESA_SHORTCODE}${process.env.MPESA_PASSKEY}${timestamp}`
-    ).toString("base64");
-
-    // 3️⃣ Send STK Push request
-    const stkResponse = await axios.post(
-      `${process.env.MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest`,
-      {
-        BusinessShortCode: process.env.MPESA_SHORTCODE,
-        Password: password,
-        Timestamp: timestamp,
-        TransactionType: "CustomerPayBillOnline",
-        Amount: amount,
-        PartyA: sanitizedPhone,
-        PartyB: process.env.MPESA_SHORTCODE,
-        PhoneNumber: sanitizedPhone,
-        CallBackURL: process.env.MPESA_CALLBACK_URL,
-        AccountReference: planId || "Subscription",
-        TransactionDesc: "Subscription Payment",
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    console.log("✅ STK Push Response:", stkResponse.data);
-
-    return NextResponse.json({
-      success: true,
-      message: "STK Push initiated. Check your phone for the prompt.",
-      response: stkResponse.data,
-    });
-  } catch (error: any) {
-    console.error("❌ STK Push Error:", error.response?.data || error.message);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.response?.data || error.message,
-      },
-      { status: 500 }
-    );
-  }
-}*/
-
-import { NextResponse } from "next/server";
+// api/payments/subscription
+/*import { NextResponse } from "next/server";
 import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
 import Payment from "@/models/Payment";
@@ -204,5 +122,114 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+}*/
 
+import { NextResponse } from "next/server";
+import axios from "axios";
+import dbConnect from "@/lib/dbConnect";
+import Payment from "@/models/Payment";
+import User from "@/models/user";
+import { verify } from "jsonwebtoken";
+
+export async function POST(request: Request) {
+  try {
+    await dbConnect();
+
+    const cookieHeader = request.headers.get("cookie") || "";
+    const token = cookieHeader
+      .split("; ")
+      .find((c) => c.startsWith("token="))
+      ?.split("=")[1];
+
+    if (!token) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const decoded: any = verify(token, process.env.JWT_SECRET as string);
+    const userId = decoded.userId;
+
+    const { phone, amount, planId } = await request.json();
+    if (!phone || !amount || !planId) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    }
+
+    const sanitizedPhone = phone.replace(/^0/, "254").replace(/^\+/, "");
+
+    // 🔍 Find vendor + referrer
+    const vendor = await User.findById(userId).select("referredBy");
+    let referrerId = null;
+
+    if (vendor?.referredBy) {
+      const referrer = await User.findOne({
+        referralCode: vendor.referredBy,
+      }).select("_id");
+
+      if (referrer) referrerId = referrer._id;
+    }
+
+    // 🔐 M-Pesa OAuth
+    const auth = Buffer.from(
+      `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`
+    ).toString("base64");
+
+    const tokenResponse = await axios.get(
+      `${process.env.MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
+      { headers: { Authorization: `Basic ${auth}` } }
+    );
+
+    const access_token = tokenResponse.data.access_token;
+
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[-T:.Z]/g, "")
+      .slice(0, 14);
+
+    const password = Buffer.from(
+      `${process.env.MPESA_SHORTCODE}${process.env.MPESA_PASSKEY}${timestamp}`
+    ).toString("base64");
+
+    // 📲 STK Push
+    const stkResponse = await axios.post(
+      `${process.env.MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest`,
+      {
+        BusinessShortCode: process.env.MPESA_SHORTCODE,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: "CustomerPayBillOnline",
+        Amount: amount,
+        PartyA: sanitizedPhone,
+        PartyB: process.env.MPESA_SHORTCODE,
+        PhoneNumber: sanitizedPhone,
+        CallBackURL: process.env.MPESA_CALLBACK_URL,
+        AccountReference: planId,
+        TransactionDesc: "Subscription Payment",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // 🧾 Create PENDING payment (accounting-ready)
+    const payment = await Payment.create({
+      userId,
+      referrerId,
+      planId,
+      phone: sanitizedPhone,
+      amount,
+      status: "PENDING",
+      stkRequest: stkResponse.data,
+    });
+
+    return NextResponse.json({
+      success: true,
+      paymentId: payment._id,
+      message: "STK Push sent",
+    });
+  } catch (err: any) {
+    console.error(err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}

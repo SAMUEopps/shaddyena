@@ -271,6 +271,6 @@ userSchema.methods.comparePassword = async function (candidatePassword: string):
 // Virtual for full name
 userSchema.virtual('fullName').get(function () {
   return `${this.firstName} ${this.lastName}`;
-});
+}); 
 
 export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);

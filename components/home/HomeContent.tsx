@@ -19,8 +19,13 @@ import ShopsTab from '@/components/tabs/ShopsTab';
 import BecomeVendorModal from '@/components/modals/BecomeVendorModal';
 import SellerRequestsTab from '@/components/tabs/SellerRequestsTab';
 import { useSearchParams } from 'next/navigation'
-import EarningsTab from '../tabs/EarningsTab';
+import EarningsTab from '../tabs/RefferalsTab';
 import UsersTab from '../tabs/UsersTab';
+import OrderPaymentsTab from '../tabs/OrderPaymentsTab';
+import SubscriptionTab from '../tabs/SubscriptionTab';
+import ReferralEarningsTab from '../tabs/RefferalEarningsTab';
+import RefferalsTab from '../tabs/RefferalsTab';
+import ReferralsTab from '../tabs/RefferalsTab';
 
 /* ---------- helpers ---------- */
 const baseNavItems = [
@@ -30,9 +35,13 @@ const baseNavItems = [
   { id: 'shops', label: 'Shops', icon: '🏪' },
   { id: 'orders', label: 'Orders', icon: '📦' },
   { id: 'seller-requests', label: 'Seller Requests', icon: '👥' },
-  { id: 'payments', label: 'Payments', icon: '💳' },
-  { id: 'earnings', label: 'Refferals', icon: '�' },
+  { id: 'order-payments', label: 'Order Payments', icon: '💳' },
+  { id: 'order-earnings', label: 'Order Earnings', icon: '💳' },
   { id: 'users', label: 'Users', icon: '�' },
+  { id: 'refferal-earnings', label: 'Subs Earnings', icon: '�' },
+   { id: 'payments', label: 'Payments', icon: '💳' },
+  { id: 'subscription', label: 'Subscriptions', icon: '�' },
+  { id: 'refferals', label: 'Refferals', icon: '�' },
   /*{ id: 'support', label: 'Support', icon: '🛟' },*/
 ];
 
@@ -113,9 +122,12 @@ export default function Home() {
       case 'orders': return <OrdersTab role={currentUser.role} />;
       case 'seller-requests': return <SellerRequestsTab />;
       case 'payments': return <PaymentsTab />;
+      case 'order-payments': return <OrderPaymentsTab />;
       case 'support': return <SupportTab role={currentUser.role} />;
-      case 'earnings': return <EarningsTab />;
+      case 'refferals': return <ReferralsTab />;
       case 'users': return <UsersTab />;
+      case 'subscription': return <SubscriptionTab />;
+      case 'refferal-earnings': return <ReferralEarningsTab />;
       default: return <HomeTab />;
     }
   };
