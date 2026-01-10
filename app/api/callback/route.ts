@@ -198,7 +198,6 @@ import Product from '@/models/product';
 import User from '@/models/user';
 import { decodeRef, generateOrderId } from '@/lib/orderUtils';
 
-
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
@@ -218,7 +217,6 @@ export async function POST(req: NextRequest) {
         ResultDesc: stk.ResultDesc,
       });
 
-      // If ResultCode !== 0, payment failed or cancelled
       if (stk.ResultCode !== 0) {
         console.log('❌ STK Payment Failed:', stk.ResultDesc);
         return NextResponse.json({ ResultCode: 0, ResultDesc: 'STK logged' });
@@ -248,7 +246,7 @@ export async function POST(req: NextRequest) {
         accountReference,
       });
 
-      // Decode your reference
+      // Decode reference
       const decoded = decodeRef(accountReference);
       if (!decoded.ok) {
         console.error('❌ Invalid reference:', accountReference);
@@ -314,12 +312,13 @@ export async function POST(req: NextRequest) {
 
       await order.save();
 
-      // After saving order
-      const referralLedgerEntries = [];
+      /************************************************************
+       * 3️⃣ PREPARE LEDGER ENTRIES
+       ************************************************************/
+      const referralLedgerEntries: any[] = [];
 
       for (const vendor of draft.vendorSplits) {
         const vendorUser = await User.findById(vendor.vendorId);
-
         if (!vendorUser?.referredBy) continue;
 
         const referralAmount = vendor.amount * 0.005; // 0.5%
@@ -335,8 +334,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Insert both vendor payouts and referral commissions
-      const ledgerEntries = draft.vendorSplits.map((vendor: any) => ({
+      const vendorLedgerEntries = draft.vendorSplits.map((vendor: any) => ({
         type: 'VENDOR_PAYOUT',
         vendorId: vendor.vendorId,
         shopId: vendor.shopId,
@@ -349,9 +347,18 @@ export async function POST(req: NextRequest) {
         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
       }));
 
-      await Ledger.insertMany([...ledgerEntries, ...referralLedgerEntries]);
+      // Combine all ledger entries and filter out invalid entries
+      const allLedgerEntries = [...vendorLedgerEntries, ...referralLedgerEntries]
+        .filter(e => e.type && e.amount && e.orderId);
 
-      // Mark draft
+      if (allLedgerEntries.length > 0) {
+        await Ledger.insertMany(allLedgerEntries);
+        console.log(`📗 Ledger entries inserted: ${allLedgerEntries.length}`);
+      } else {
+        console.log('⚠️ No ledger entries to insert for this order.');
+      }
+
+      // Mark draft as confirmed
       draft.status = 'CONFIRMED';
       draft.mpesaTransactionId = mpesaReceiptNumber;
       await draft.save();
@@ -362,12 +369,13 @@ export async function POST(req: NextRequest) {
     }
 
     /************************************************************
-     * 3️⃣ UNKNOWN PAYLOAD
+     * 4️⃣ UNKNOWN PAYLOAD
      ************************************************************/
     console.log('⚠️ Unknown M-Pesa callback type');
     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Unknown payload' });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ CALLBACK ERROR:', error);
     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Server error' });
-  }}
+  }
+}
