@@ -660,7 +660,7 @@ async function handleConfirmation(body: any) {
       orderId,
       draftToken: draft.token,
       amount: platformAmount,
-      status: 'CONFIRMED',
+      status: 'PAID',
     });
 
     // Referral commission (0.5%) — SAME 3% bucket
