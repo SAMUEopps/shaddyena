@@ -576,10 +576,122 @@ async function handleValidation(body: any) {
   return ok();
 }
 
+async function handleConfirmation(body: any) {
+  const accountNumber = body.BillRefNumber || body.AccountNumber;
+  const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+  if (!accountNumber) return fail(1, 'Missing account number');
+
+  const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+  if (!draft) return fail(1, 'Unknown reference');
+
+  if (amount !== draft.totalAmount) {
+    draft.status = 'FAILED';
+    await draft.save();
+    return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+  }
+
+  if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+  if (draft.status === 'CONFIRMED') return ok('Already processed');
+
+  /* ---------- stock ---------- */
+  for (const it of draft.items) {
+    await Product.findByIdAndUpdate(it.productId, {
+      $inc: { stock: -it.quantity },
+    });
+  }
+
+  /* ---------- order ---------- */
+  const orderId = generateOrderId();
+
+  const order = new Order({
+    orderId,
+    draftToken: draft.token,
+    buyerId: draft.buyerId,
+    items: draft.items,
+    suborders: draft.vendorSplits.map((v: any) => ({
+      vendorId: v.vendorId,
+      shopId: v.shopId,
+      items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
+      amount: v.amount,
+      commission: v.commission, // FULL 3%
+      netAmount: v.netAmount,   // already after 3%
+      status: 'PENDING',
+    })),
+    totalAmount: draft.totalAmount,
+    platformFee: draft.vendorSplits.reduce(
+      (sum: number, v: any) => sum + v.commission,
+      0
+    ),
+    currency: draft.currency || 'KES',
+    paymentMethod: 'M_PESA',
+    paymentStatus: 'PAID',
+    status: 'PENDING',
+    mpesaTransactionId: body.TransID || body.TransId,
+  });
+
+  await order.save();
+
+  /* ---------- ledger ---------- */
+
+  const ledgerEntries: any[] = [];
+
+  for (const v of draft.vendorSplits) {
+    const totalCommission = v.commission;        // 3%
+    const referralAmount = v.amount * 0.005;     // 0.5%
+    const platformAmount = totalCommission - referralAmount; // 2.5%
+
+    // Vendor payout (net already correct)
+    ledgerEntries.push({
+      type: 'VENDOR_PAYOUT',
+      vendorId: v.vendorId,
+      shopId: v.shopId,
+      orderId,
+      draftToken: draft.token,
+      amount: v.netAmount,
+      status: 'PENDING',
+      scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
+    // Platform income (2.5%)
+    ledgerEntries.push({
+      type: 'PLATFORM_COMMISSION',
+      orderId,
+      draftToken: draft.token,
+      amount: platformAmount,
+      status: 'CONFIRMED',
+    });
+
+    // Referral commission (0.5%) — SAME 3% bucket
+    const vendorUser = await User.findById(v.vendorId);
+    if (vendorUser?.referredBy) {
+      ledgerEntries.push({
+        type: 'REFERRAL_COMMISSION',
+        referrerId: vendorUser.referredBy,
+        referredVendorId: vendorUser._id,
+        orderId,
+        draftToken: draft.token,
+        amount: referralAmount,
+        status: 'PENDING',
+        scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
+    }
+  }
+
+  await Ledger.insertMany(ledgerEntries);
+
+  /* ---------- finalize draft ---------- */
+  draft.status = 'CONFIRMED';
+  draft.mpesaTransactionId = body.TransID || body.TransId;
+  await draft.save();
+
+  return ok('Success');
+}
+
 /* =================================================================
    CONFIRMATION  (M-Pesa Confirmation phase)
 ================================================================= */
-async function handleConfirmation(body: any) {
+/*async function handleConfirmation(body: any) {
   const accountNumber = body.BillRefNumber || body.AccountNumber;
   const amount = parseInt(body.TransAmount || body.Amount, 10);
 
@@ -601,12 +713,12 @@ async function handleConfirmation(body: any) {
 
   if (draft.status === 'CONFIRMED') return ok('Already processed');
 
-  /* ---------- stock ---------- */
+  /* ---------- stock ---------- *
   for (const it of draft.items) {
     await Product.findByIdAndUpdate(it.productId, { $inc: { stock: -it.quantity } });
   }
 
-  /* ---------- order ---------- */
+  /* ---------- order ---------- *
   const orderId = generateOrderId();
   const order = new Order({
     orderId,
@@ -633,7 +745,7 @@ async function handleConfirmation(body: any) {
   });
   await order.save();
 
-  /* ---------- ledger ---------- */
+  /* ---------- ledger ---------- *
   // Vendor payouts
   const vendorLedgerEntries = draft.vendorSplits.map((v: any) => ({
     type: 'VENDOR_PAYOUT',
@@ -672,12 +784,12 @@ async function handleConfirmation(body: any) {
   // Insert all ledger entries
   await Ledger.insertMany([...vendorLedgerEntries, ...validReferralLedgerEntries]);
 
-  /* ---------- finalize draft ---------- */
+  /* ---------- finalize draft ---------- *
   draft.status = 'CONFIRMED';
   draft.mpesaTransactionId = body.TransID || body.TransId;
   await draft.save();
 
-  /* ---------- SEND SMS ---------- */
+  /* ---------- SEND SMS ---------- *
   const customerPhone = draft.shipping.phone;
   const normalizePhone = (phone: string) => {
     if (phone.startsWith("+")) return phone;
@@ -711,7 +823,7 @@ async function handleConfirmation(body: any) {
   console.log("📨 SMS notifications sent.");
   console.log('✅ Confirmation complete for shortRef:', accountNumber);
   return ok('Success');
-}
+}*/
 
 /* =================================================================
     MAIN ENTRY

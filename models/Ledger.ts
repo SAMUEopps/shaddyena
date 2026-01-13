@@ -51,7 +51,8 @@ export default mongoose.models.Ledger || mongoose.model<ILedger>('Ledger', Ledge
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface ILedger extends Document {
-  type: 'VENDOR_PAYOUT' | 'REFERRAL_COMMISSION';
+  type: 'VENDOR_PAYOUT' | 'REFERRAL_COMMISSION' | 'PLATFORM_COMMISSION';
+  //type: 'VENDOR_PAYOUT' | 'REFERRAL_COMMISSION';
   vendorId?: string; // Only for VENDOR_PAYOUT
   shopId?: string;   // Only for VENDOR_PAYOUT
   referrerId?: Types.ObjectId | string;       // Only for REFERRAL_COMMISSION, allow string temporarily
@@ -59,7 +60,7 @@ export interface ILedger extends Document {
   orderId: string;
   draftToken: string;
   amount: number;
-  commission?: number; // Only for VENDOR_PAYOUT
+  //commission?: number; // Only for VENDOR_PAYOUT
   netAmount?: number;  // Only for VENDOR_PAYOUT
   status: 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
   payoutRef?: string;
@@ -74,7 +75,8 @@ const LedgerSchema = new Schema<ILedger>(
   {
     type: {
       type: String,
-      enum: ['VENDOR_PAYOUT', 'REFERRAL_COMMISSION'],
+      //enum: ['VENDOR_PAYOUT', 'REFERRAL_COMMISSION'],
+      enum: ['VENDOR_PAYOUT', 'REFERRAL_COMMISSION', 'PLATFORM_COMMISSION'],
       required: true,
     },
     vendorId: { type: String }, // Only for VENDOR_PAYOUT
@@ -95,7 +97,7 @@ const LedgerSchema = new Schema<ILedger>(
     orderId: { type: String, required: true },
     draftToken: { type: String, required: true },
     amount: { type: Number, required: true },
-    commission: { type: Number }, // Only for VENDOR_PAYOUT
+    //commission: { type: Number }, // Only for VENDOR_PAYOUT
     netAmount: { type: Number },  // Only for VENDOR_PAYOUT
     status: {
       type: String,
