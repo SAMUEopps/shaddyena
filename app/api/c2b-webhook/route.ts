@@ -626,6 +626,7 @@ async function handleConfirmation(body: any) {
     currency: draft.currency || 'KES',
     paymentMethod: 'M_PESA',
     paymentStatus: 'PAID',
+    shipping: draft.shipping,
     status: 'PENDING',
     mpesaTransactionId: body.TransID || body.TransId,
   });
