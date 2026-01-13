@@ -519,12 +519,12 @@ async function handleConfirmation(body: any) {
 
 
 
+//////////////////////////////////////////////////////////////////////////
 
 
-
-
+/////////////////////////////////////////////////////////////////////////////
 // app/api/c2b-webhook/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+/*import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import OrderDraft from '@/models/OrderDraft';
 import Order from '@/models/Order';
@@ -536,7 +536,7 @@ import { sendSMS } from '@/lib/sms';
 
 /* =================================================================
    Helpers reused by both flows
-================================================================= */
+================================================================= *
 function fail(code: number, desc: string) {
   return NextResponse.json({ ResultCode: code, ResultDesc: desc });
 }
@@ -547,7 +547,7 @@ function ok(desc = 'Accepted') {
 
 /* =================================================================
    VALIDATION  (M-Pesa Validation phase)
-================================================================= */
+================================================================= *
 async function handleValidation(body: any) {
   const accountNumber = body.AccountNumber || body.BillRefNumber;
   const amount = parseInt(body.Amount || body.TransAmount, 10);
@@ -594,14 +594,14 @@ async function handleConfirmation(body: any) {
   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
   if (draft.status === 'CONFIRMED') return ok('Already processed');
 
-  /* ---------- stock ---------- */
+  /* ---------- stock ---------- *
   for (const it of draft.items) {
     await Product.findByIdAndUpdate(it.productId, {
       $inc: { stock: -it.quantity },
     });
   }
 
-  /* ---------- order ---------- */
+  /* ---------- order ---------- *
   const orderId = generateOrderId();
 
   const order = new Order({
@@ -633,7 +633,7 @@ async function handleConfirmation(body: any) {
 
   await order.save();
 
-  /* ---------- ledger ---------- */
+  /* ---------- ledger ---------- *
 
   const ledgerEntries: any[] = [];
 
@@ -681,7 +681,7 @@ async function handleConfirmation(body: any) {
 
   await Ledger.insertMany(ledgerEntries);
 
-  /* ---------- finalize draft ---------- */
+  /* ---------- finalize draft ---------- *
   draft.status = 'CONFIRMED';
   draft.mpesaTransactionId = body.TransID || body.TransId;
   await draft.save();
@@ -828,7 +828,7 @@ async function handleConfirmation(body: any) {
 
 /* =================================================================
     MAIN ENTRY
-================================================================= */
+================================================================= *
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
@@ -836,6 +836,206 @@ export async function POST(req: NextRequest) {
     console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
 
     // M-Pesa sends TransID only in the confirmation phase
+    return body.TransID || body.TransId
+      ? await handleConfirmation(body)
+      : await handleValidation(body);
+  } catch (e) {
+    console.error('❌ C2B webhook crash:', e);
+    return fail(1, 'Server error');
+  }
+}*/
+
+///////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////
+
+
+// app/api/c2b-webhook/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import dbConnect from '@/lib/dbConnect';
+import OrderDraft from '@/models/OrderDraft';
+import Order from '@/models/Order';
+import Ledger from '@/models/Ledger';
+import Product from '@/models/product';
+import User from '@/models/user';
+import { decodeRef, generateOrderId } from '@/lib/orderUtils';
+import { sendSMS } from '@/lib/sms';
+
+/* =================================================================
+   Helpers
+================================================================= */
+function fail(code: number, desc: string) {
+  return NextResponse.json({ ResultCode: code, ResultDesc: desc });
+}
+
+function ok(desc = 'Accepted') {
+  return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
+}
+
+/* =================================================================
+   VALIDATION
+================================================================= */
+async function handleValidation(body: any) {
+  const accountNumber = body.AccountNumber || body.BillRefNumber;
+  const amount = parseInt(body.Amount || body.TransAmount, 10);
+
+  if (!accountNumber) return fail(1, 'Missing account number');
+
+  const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+  if (!draft) return fail(1, 'Unknown reference');
+
+  const decoded = decodeRef(draft.fullRef);
+  if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
+
+  if (amount !== draft.totalAmount) {
+    console.error(`❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`);
+    return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+  }
+
+  if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+
+  if (draft.status === 'VALIDATED') return ok('Already validated');
+  if (draft.status !== 'PENDING') return fail(1, 'Already processed');
+
+  draft.status = 'VALIDATED';
+  await draft.save();
+  console.log('✅ Validation OK for shortRef:', accountNumber);
+  return ok();
+}
+
+/* =================================================================
+   CONFIRMATION
+================================================================= */
+async function handleConfirmation(body: any) {
+  const accountNumber = body.BillRefNumber || body.AccountNumber;
+  const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+  if (!accountNumber) return fail(1, 'Missing account number');
+
+  const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+  if (!draft) return fail(1, 'Unknown reference');
+
+  if (amount !== draft.totalAmount) {
+    draft.status = 'FAILED';
+    await draft.save();
+    return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+  }
+
+  if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+  if (draft.status === 'CONFIRMED') return ok('Already processed');
+
+  /* ---------- stock ---------- */
+  for (const it of draft.items) {
+    await Product.findByIdAndUpdate(it.productId, {
+      $inc: { stock: -it.quantity },
+    });
+  }
+
+
+  /* ---------- order ---------- */
+  const orderId = generateOrderId();
+
+  const ledgerEntries: any[] = [];
+
+  for (const v of draft.vendorSplits) {
+    const totalAmount = v.amount;
+    const platformShare = totalAmount * 0.025; // 2.5%
+    const referralShare = totalAmount * 0.005; // 0.5%
+    const vendorNet = totalAmount - platformShare - referralShare;
+
+    // Vendor payout
+    ledgerEntries.push({
+      type: 'VENDOR_PAYOUT',
+      vendorId: v.vendorId,
+      shopId: v.shopId,
+      orderId,
+      draftToken: draft.token,
+      amount: vendorNet,
+      netAmount: vendorNet,
+      status: 'PENDING',
+      scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
+    // Platform commission
+    ledgerEntries.push({
+      type: 'PLATFORM_COMMISSION',
+      orderId,
+      draftToken: draft.token,
+      amount: platformShare,
+      status: 'PAID',
+      scheduledAt: new Date(),
+    });
+
+    // Referral commission
+    const vendorUser = await User.findById(v.vendorId);
+    if (vendorUser?.referredBy) {
+      ledgerEntries.push({
+        type: 'REFERRAL_COMMISSION',
+        referrerId: vendorUser.referredBy,
+        referredVendorId: vendorUser._id,
+        orderId,
+        draftToken: draft.token,
+        amount: referralShare,
+        status: 'PENDING',
+        scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
+    }
+  }
+
+  await Ledger.insertMany(ledgerEntries);
+
+  // Save order with correct suborders
+  const order = new Order({
+    orderId,
+    draftToken: draft.token,
+    buyerId: draft.buyerId,
+    items: draft.items,
+    suborders: draft.vendorSplits.map((v: any) => {
+      const totalAmount = v.amount;
+      const platformShare = totalAmount * 0.025;
+      const referralShare = totalAmount * 0.005;
+      const vendorNet = totalAmount - platformShare - referralShare;
+
+      return {
+        vendorId: v.vendorId,
+        shopId: v.shopId,
+        items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
+        amount: totalAmount,
+        commission: platformShare + referralShare, // 3%
+        netAmount: vendorNet,
+        status: 'PENDING',
+      };
+    }),
+    totalAmount: draft.totalAmount,
+    platformFee: draft.vendorSplits.reduce((sum: number, v: any) => sum + v.amount * 0.025, 0),
+    currency: draft.currency || 'KES',
+    paymentMethod: 'M-PESA',
+    paymentStatus: 'PAID',
+    shipping: draft.shipping,
+    status: 'PENDING',
+    mpesaTransactionId: body.TransID || body.TransId,
+  });
+
+  await order.save();
+
+  /* ---------- finalize draft ---------- */
+  draft.status = 'CONFIRMED';
+  draft.mpesaTransactionId = body.TransID || body.TransId;
+  await draft.save();
+
+  return ok('Success');
+}
+
+/* =================================================================
+    MAIN ENTRY
+================================================================= */
+export async function POST(req: NextRequest) {
+  try {
+    await dbConnect();
+    const body = await req.json();
+    console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+
     return body.TransID || body.TransId
       ? await handleConfirmation(body)
       : await handleValidation(body);
