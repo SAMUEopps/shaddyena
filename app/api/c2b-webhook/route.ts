@@ -907,7 +907,7 @@ async function handleValidation(body: any) {
 /* =================================================================
    CONFIRMATION
 ================================================================= */
-async function handleConfirmation(body: any) {
+/*async function handleConfirmation(body: any) {
   const accountNumber = body.BillRefNumber || body.AccountNumber;
   const amount = parseInt(body.TransAmount || body.Amount, 10);
 
@@ -925,7 +925,7 @@ async function handleConfirmation(body: any) {
   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
   if (draft.status === 'CONFIRMED') return ok('Already processed');
 
-  /* ---------- stock ---------- */
+  /* ---------- stock ---------- *
   for (const it of draft.items) {
     await Product.findByIdAndUpdate(it.productId, {
       $inc: { stock: -it.quantity },
@@ -933,7 +933,7 @@ async function handleConfirmation(body: any) {
   }
 
 
-  /* ---------- order ---------- */
+  /* ---------- order ---------- *
   const orderId = generateOrderId();
 
   const ledgerEntries: any[] = [];
@@ -1019,6 +1019,143 @@ async function handleConfirmation(body: any) {
 
   await order.save();
 
+  /* ---------- finalize draft ---------- *
+  draft.status = 'CONFIRMED';
+  draft.mpesaTransactionId = body.TransID || body.TransId;
+  await draft.save();
+
+  return ok('Success');
+}*/
+
+async function handleConfirmation(body: any) {
+  const accountNumber = body.BillRefNumber || body.AccountNumber;
+  const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+  if (!accountNumber) return fail(1, 'Missing account number');
+
+  const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+  if (!draft) return fail(1, 'Unknown reference');
+
+  if (amount !== draft.totalAmount) {
+    draft.status = 'FAILED';
+    await draft.save();
+    return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+  }
+
+  if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+  if (draft.status === 'CONFIRMED') return ok('Already processed');
+
+  /* ---------- stock ---------- */
+  for (const it of draft.items) {
+    await Product.findByIdAndUpdate(it.productId, {
+      $inc: { stock: -it.quantity },
+    });
+  }
+
+  /* ---------- order ID ---------- */
+  const orderId = generateOrderId();
+
+  /* ---------- ledger ---------- */
+  const ledgerEntries: any[] = [];
+
+  for (const v of draft.vendorSplits) {
+    const totalAmount = v.amount;
+    const vendorUser = await User.findById(v.vendorId);
+
+    let platformShare: number;
+    let referralShare: number;
+
+    if (vendorUser?.referredBy) {
+      // 3% split: 2.5% platform, 0.5% referral
+      referralShare = totalAmount * 0.005;
+      platformShare = totalAmount * 0.025;
+
+      // Referral commission entry
+      ledgerEntries.push({
+        type: 'REFERRAL_COMMISSION',
+        referrerId: vendorUser.referredBy,
+        referredVendorId: vendorUser._id,
+        orderId,
+        draftToken: draft.token,
+        amount: referralShare,
+        status: 'PENDING',
+        scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
+    } else {
+      // No referral: platform gets full 3%
+      referralShare = 0;
+      platformShare = totalAmount * 0.03;
+    }
+
+    const vendorNet = totalAmount - platformShare - referralShare;
+
+    // Vendor payout entry
+    ledgerEntries.push({
+      type: 'VENDOR_PAYOUT',
+      vendorId: v.vendorId,
+      shopId: v.shopId,
+      orderId,
+      draftToken: draft.token,
+      amount: vendorNet,
+      netAmount: vendorNet,
+      status: 'PENDING',
+      scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
+    // Platform commission entry
+    ledgerEntries.push({
+      type: 'PLATFORM_COMMISSION',
+      orderId,
+      draftToken: draft.token,
+      amount: platformShare,
+      status: 'PAID',
+      scheduledAt: new Date(),
+    });
+  }
+
+  await Ledger.insertMany(ledgerEntries);
+
+  /* ---------- order ---------- */
+  const order = new Order({
+    orderId,
+    draftToken: draft.token,
+    buyerId: draft.buyerId,
+    items: draft.items,
+    suborders: await Promise.all(
+      draft.vendorSplits.map(async (v: any) => {
+        const totalAmount = v.amount;
+        const vendorUser = await User.findById(v.vendorId);
+
+        const platformShare = vendorUser?.referredBy ? totalAmount * 0.025 : totalAmount * 0.03;
+        const referralShare = vendorUser?.referredBy ? totalAmount * 0.005 : 0;
+        const vendorNet = totalAmount - platformShare - referralShare;
+
+        return {
+          vendorId: v.vendorId,
+          shopId: v.shopId,
+          items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
+          amount: totalAmount,
+          commission: platformShare + referralShare,
+          netAmount: vendorNet,
+          status: 'PENDING',
+        };
+      })
+    ),
+    totalAmount: draft.totalAmount,
+    platformFee: draft.vendorSplits.reduce((sum: number, v: any) => {
+      const vendorUser = draft.items.find((it: any) => it.vendorId === v.vendorId);
+      return sum + (vendorUser?.referredBy ? v.amount * 0.025 : v.amount * 0.03);
+    }, 0),
+    currency: draft.currency || 'KES',
+    paymentMethod: 'M-PESA',
+    paymentStatus: 'PAID',
+    shipping: draft.shipping,
+    status: 'PENDING',
+    mpesaTransactionId: body.TransID || body.TransId,
+  });
+
+  await order.save();
+
   /* ---------- finalize draft ---------- */
   draft.status = 'CONFIRMED';
   draft.mpesaTransactionId = body.TransID || body.TransId;
@@ -1026,6 +1163,7 @@ async function handleConfirmation(body: any) {
 
   return ok('Success');
 }
+
 
 /* =================================================================
     MAIN ENTRY
