@@ -216,7 +216,7 @@ const OrderSchema = new Schema<IOrder>({
     },
     deliveryDetails: {
       pickupAddress: { type: String },
-      dropoffAddress: { type: String, required: true },
+      dropoffAddress: { type: String, required: false },
       estimatedTime: { type: Date },
       actualTime: { type: Date },
       notes: { type: String },
