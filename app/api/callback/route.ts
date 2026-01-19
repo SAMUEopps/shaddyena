@@ -532,7 +532,7 @@ export async function POST(req: NextRequest) {
           amount: vendor.amount,
           commission: vendor.commission,
           netAmount: vendor.netAmount,
-          status: 'PENDING',
+          status: 'PROCESSING',
           // NEW: Delivery details
           deliveryDetails: {
             dropoffAddress: `${draft.shipping.address}, ${draft.shipping.city}, ${draft.shipping.country}`,
