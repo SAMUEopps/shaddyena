@@ -197,7 +197,7 @@ const OrderSchema = new Schema<IOrder>({
     riderPayoutStatus: { 
       type: String, 
       enum: ['PENDING', 'PROCESSING', 'PAID', 'HOLD'],
-      default: 'PENDING'
+      default: 'PROCESSING'
     },
     items: [{
       productId: { type: String, required: true },
@@ -212,7 +212,7 @@ const OrderSchema = new Schema<IOrder>({
     status: { 
       type: String, 
       enum: ['PENDING', 'PROCESSING', 'READY_FOR_PICKUP', 'ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED'],
-      default: 'PENDING'
+      default: 'PROCESSING'
     },
     deliveryDetails: {
       pickupAddress: { type: String },

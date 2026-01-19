@@ -527,7 +527,7 @@ export async function POST(req: NextRequest) {
           shopId: vendor.shopId,
           // NEW: Delivery fields
           deliveryFee: deliveryFees[vendor.vendorId] || 0,
-          riderPayoutStatus: 'PENDING',
+          riderPayoutStatus: 'PROCESSING',
           items: draft.items.filter((i: any) => i.vendorId === vendor.vendorId),
           amount: vendor.amount,
           commission: vendor.commission,
