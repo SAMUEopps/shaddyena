@@ -547,7 +547,7 @@ interface RequestBody {
   status: string;
   suborderId?: string;
   notes?: string;
-  deliveryFee: Number;
+  deliveryFee: number;
 }
 
 export async function POST(req: NextRequest) {
