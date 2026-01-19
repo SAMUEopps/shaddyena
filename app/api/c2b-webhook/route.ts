@@ -1137,7 +1137,7 @@ async function handleConfirmation(body: any) {
           amount: totalAmount,
           commission: platformShare + referralShare,
           netAmount: vendorNet,
-          status: 'PENDING',
+          status: 'PROCESSING',
         };
       })
     ),
