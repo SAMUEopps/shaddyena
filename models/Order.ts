@@ -244,7 +244,7 @@ const OrderSchema = new Schema<IOrder>({
   status: { 
     type: String, 
     enum: ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'COMPLETED', 'CANCELLED'],
-    default: 'PENDING'
+    default: 'PROCESSING'
   },
   mpesaTransactionId: { type: String }
 }, { timestamps: true });
