@@ -1672,6 +1672,18 @@ interface OrderItem {
   image?: string;
 }
 
+interface StatusBarSuborder {
+  _id?: string;
+  vendorId: string;
+  status: 'PENDING' | 'PROCESSING' | 'READY_FOR_PICKUP' | 'ASSIGNED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
+  amount: number;
+  commission: number;
+  netAmount: number;
+  deliveryFee?: number;
+  riderId?: string; // Keep as string only for StatusBar
+}
+
+
 interface Suborder {
   _id?: string;
   vendorId: string;
@@ -1968,6 +1980,39 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
       setIsGeneratingPDF(false);
     }
   };
+
+  // Add this function to transform suborders for OrderStatusBar
+const transformSubordersForStatusBar = (suborders: Suborder[]): StatusBarSuborder[] => {
+  return suborders.map(suborder => ({
+    _id: suborder._id,
+    vendorId: suborder.vendorId,
+    status: suborder.status,
+    amount: suborder.amount,
+    commission: suborder.commission,
+    netAmount: suborder.netAmount,
+    deliveryFee: suborder.deliveryFee,
+    // Transform riderId to string only
+    riderId: typeof suborder.riderId === 'string' 
+      ? suborder.riderId 
+      : suborder.riderId?._id
+  }));
+};
+
+// Also transform vendorSuborder
+const transformVendorSuborderForStatusBar = (vendorSuborder: Suborder): StatusBarSuborder => {
+  return {
+    _id: vendorSuborder._id,
+    vendorId: vendorSuborder.vendorId,
+    status: vendorSuborder.status,
+    amount: vendorSuborder.amount,
+    commission: vendorSuborder.commission,
+    netAmount: vendorSuborder.netAmount,
+    deliveryFee: vendorSuborder.deliveryFee,
+    riderId: typeof vendorSuborder.riderId === 'string' 
+      ? vendorSuborder.riderId 
+      : vendorSuborder.riderId?._id
+  };
+};
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -2390,12 +2435,23 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
 
           {/* Order Status Bar */}
           <div className="mt-6">
-            <OrderStatusBar
+            {/*<OrderStatusBar
               role={role}
               orderStatus={order.status}
               paymentStatus={order.paymentStatus}
               vendorSuborder={effectiveSuborder || null}
               suborders={order.suborders}
+              onStatusUpdate={handleStatusUpdate}
+              onSuborderSelect={setSelectedSuborderId}
+              selectedSuborderId={selectedSuborderId}
+              isLoading={updatingStatus}
+            />*/}
+            <OrderStatusBar
+              role={role}
+              orderStatus={order.status}
+              paymentStatus={order.paymentStatus}
+              vendorSuborder={vendorSuborder ? transformVendorSuborderForStatusBar(vendorSuborder.suborder) : null}
+              suborders={transformSubordersForStatusBar(order.suborders)}
               onStatusUpdate={handleStatusUpdate}
               onSuborderSelect={setSelectedSuborderId}
               selectedSuborderId={selectedSuborderId}

@@ -196,7 +196,7 @@ const OrderSchema = new Schema<IOrder>({
     deliveryFee: { type: Number, default: 0 },
     riderPayoutStatus: { 
       type: String, 
-      enum: ['PENDING', 'PAID', 'HOLD'],
+      enum: ['PENDING', 'PROCESSING', 'PAID', 'HOLD'],
       default: 'PENDING'
     },
     items: [{
