@@ -1,5 +1,5 @@
 interface SupportTabProps {
-  role: 'customer' | 'vendor' | 'admin';
+  role: 'customer' | 'vendor' | 'admin' | 'delivery';
 }
 import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from "react";
 

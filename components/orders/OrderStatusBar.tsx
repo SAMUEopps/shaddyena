@@ -5,14 +5,14 @@ import { useState } from 'react';
 interface Suborder {
   _id?: string;
   vendorId: string;
-  status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'READY_FOR_PICKUP' | 'ASSIGNED' | 'PICKED_UP' | 'IN_TRANSIT';
   amount: number;
   commission: number;
   netAmount: number;
 }
 
 interface OrderStatusBarProps {
-  role: 'customer' | 'vendor' | 'admin';
+  role: 'customer' | 'vendor' | 'admin' |'delivery';
   orderStatus: string;
   paymentStatus: string;
   vendorSuborder?: Suborder | null;

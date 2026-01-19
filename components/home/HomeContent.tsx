@@ -26,6 +26,7 @@ import SubscriptionTab from '../tabs/SubscriptionTab';
 import ReferralEarningsTab from '../tabs/RefferalEarningsTab';
 import RefferalsTab from '../tabs/RefferalsTab';
 import ReferralsTab from '../tabs/RefferalsTab';
+import DeliveryDashboard from '../delivery/DeliveryDashboard';
 
 /* ---------- helpers ---------- */
 const baseNavItems = [
@@ -34,6 +35,7 @@ const baseNavItems = [
   { id: 'products', label: 'Products', icon: '🛒' },
   { id: 'shops', label: 'Shops', icon: '🏪' },
   { id: 'orders', label: 'Orders', icon: '📦' },
+  { id: 'delivery', label: 'Delivery', icon: '�' },
   { id: 'seller-requests', label: 'Seller Requests', icon: '👥' },
   { id: 'order-payments', label: 'Order Payments', icon: '💳' },
   { id: 'order-earnings', label: 'Order Earnings', icon: '💳' },
@@ -128,6 +130,7 @@ export default function Home() {
       case 'users': return <UsersTab />;
       case 'subscription': return <SubscriptionTab />;
       case 'refferal-earnings': return <ReferralEarningsTab />;
+      case 'delivery': return  <DeliveryDashboard />;
       default: return <HomeTab />;
     }
   };

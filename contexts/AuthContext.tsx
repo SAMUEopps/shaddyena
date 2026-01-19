@@ -8,7 +8,7 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role: 'customer' | 'vendor' | 'admin' ;
+  role: 'customer' | 'vendor' | 'admin'| 'delivery' ;
   phone: string;
   avatar?: string;
   businessName?: string;

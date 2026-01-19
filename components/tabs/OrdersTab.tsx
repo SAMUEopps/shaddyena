@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Types } from 'mongoose';
 
 interface OrdersTabProps {
-  role: 'customer' | 'vendor' | 'admin';
+  role: 'customer' | 'vendor' | 'admin' |'delivery';
 }
 
 interface OrderItem {
@@ -22,12 +23,13 @@ interface OrderItem {
 interface Suborder {
   _id?: string;
   vendorId: string;
+  riderId?: Types.ObjectId;
   shopId: string;
   items: OrderItem[];
   amount: number;
   commission: number;
   netAmount: number;
-  status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'READY_FOR_PICKUP';
 }
 
 interface Order {
@@ -236,6 +238,32 @@ export default function OrdersTab({ role }: OrdersTabProps) {
     return stats;
   };
 
+  const handleVendorStatusUpdate = async (orderId: string, suborderId: string) => {
+  try {
+    const response = await fetch('/api/orders/update-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        orderId,
+        suborderId,
+        status: 'READY_FOR_PICKUP'
+      }),
+    });
+    
+    if (response.ok) {
+      fetchOrders(); // Refresh orders
+      alert('Order marked as ready for pickup!');
+    } else {
+      throw new Error('Failed to update status');
+    }
+  } catch (error) {
+    console.error('Error updating status:', error);
+    setError('Failed to update order status');
+  }
+};
+
   const handleStatusUpdate = async (orderId: string, newStatus: string, suborderId?: string) => {
     try {
       const response = await fetch('/api/orders/update-status', {
@@ -261,7 +289,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
     }
   };
 
-  const renderVendorOrderRow = (vendorOrder: { order: Order; suborder: Suborder }) => {
+  /*const renderVendorOrderRow = (vendorOrder: { order: Order; suborder: Suborder }) => {
     const { order, suborder } = vendorOrder;
     
     return (
@@ -325,7 +353,80 @@ export default function OrdersTab({ role }: OrdersTabProps) {
       </tr>
 
     );
-  };
+  };*/
+
+  const renderVendorOrderRow = (vendorOrder: { order: Order; suborder: Suborder }) => {
+  const { order, suborder } = vendorOrder;
+  
+  return (
+    <tr key={`${order._id}-${suborder.vendorId}`} className="hover:bg-gray-50">
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm font-medium text-gray-900">{order.orderId}</div>
+        <div className="text-xs text-gray-500">Vendor Suborder</div>
+        <div className="text-xs text-gray-400 mt-1">
+          {suborder.items?.length || 0} item(s)
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {formatDate(order.createdAt)}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {getBuyerName(order.buyerId)}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm text-gray-900">
+          {formatCurrency(suborder.netAmount, order.currency)}
+        </div>
+        <div className="text-xs text-gray-500">
+          Gross: {formatCurrency(suborder.amount, order.currency)}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="space-y-1">
+          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(suborder.status)}`}>
+            {suborder.status}
+          </span>
+          <div>
+            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.paymentStatus)}`}>
+              Payment: {order.paymentStatus}
+            </span>
+          </div>
+          {suborder.riderId && (
+            <div className="text-xs text-gray-600">
+              Rider assigned
+            </div>
+          )}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+        <button 
+          onClick={() => router.push(`/orders/${order._id}?vendorView=true&suborderId=${suborder._id}`)}
+          className="text-[#bf2c7e] hover:text-[#a8246e] transition-colors"
+        >
+          View Details
+        </button>
+        {suborder.status === 'PROCESSING' && (
+          <button
+            onClick={() => handleVendorStatusUpdate(order._id, suborder._id || '')}
+            className="ml-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+          >
+            Mark as Ready for Pickup
+          </button>
+        )}
+        {suborder.status === 'READY_FOR_PICKUP' && (
+          <div className="text-sm text-gray-600 mt-1">
+            Waiting for rider assignment
+          </div>
+        )}
+        {suborder.status === 'SHIPPED' && suborder.riderId && (
+          <div className="text-sm text-gray-600 mt-1">
+            Rider on the way
+          </div>
+        )}
+      </td>
+    </tr>
+  );
+};
 
   const renderCustomerOrderRow = (order: Order) => {
     const vendorCount = order.suborders.length;
