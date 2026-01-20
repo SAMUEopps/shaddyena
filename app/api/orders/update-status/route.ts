@@ -614,7 +614,15 @@ export async function POST(req: NextRequest) {
           suborder.status = 'READY_FOR_PICKUP';
           updated = true;
           console.log(`✅ Vendor marked suborder as READY_FOR_PICKUP`);
-        } else {
+        }  // Vendor can also confirm from their side
+          else if (status === 'CONFIRMED' && suborder.status === 'DELIVERED') {
+            oldStatus = suborder.status;
+            suborder.status = 'CONFIRMED';
+            suborder.deliveryDetails = suborder.deliveryDetails || {};
+            suborder.deliveryDetails.confirmedAt = new Date();
+            updated = true;
+          }
+         else {
           return NextResponse.json(
             { message: "Invalid vendor action" },
             { status: 403 }
@@ -660,6 +668,28 @@ export async function POST(req: NextRequest) {
           );
         }
       }
+
+      else if (decoded.role === "customer") {
+  // Customer can confirm delivery
+  if (status === 'CONFIRMED' && suborder.status === 'DELIVERED') {
+    oldStatus = suborder.status;
+    suborder.status = 'CONFIRMED';
+    suborder.deliveryDetails = suborder.deliveryDetails || {};
+    suborder.deliveryDetails.confirmedAt = new Date();
+    
+    // Generate confirmation code
+    const code = generateConfirmationCode();
+    suborder.deliveryDetails.confirmationCode = code;
+    
+    updated = true;
+    console.log(`✅ Customer confirmed delivery with code: ${code}`);
+  } else {
+    return NextResponse.json(
+      { message: "Invalid customer action" },
+      { status: 403 }
+    );
+  }
+}
 
       // RIDER ACTIONS (handled in separate API, but kept for completeness)
       else if (decoded.role === "delivery") {
@@ -727,6 +757,19 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Add this helper function:
+function generateConfirmationCode(): string {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  
+  for (let i = 0; i < 8; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    code += characters[randomIndex];
+  }
+  
+  return code;
 }
 
 /* ----------------------- CREATE VENDOR EARNINGS ----------------------- */

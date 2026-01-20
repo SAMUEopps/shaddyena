@@ -146,14 +146,16 @@ export interface IOrder extends Document {
     amount: number;
     commission: number;
     netAmount: number;
-    status: 'PENDING' | 'PROCESSING' | 'READY_FOR_PICKUP' | 'ASSIGNED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
+    status: 'PENDING' | 'PROCESSING' | 'READY_FOR_PICKUP' | 'ASSIGNED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED' | 'CONFIRMED';
     deliveryDetails?: {
       pickupAddress?: string;
       dropoffAddress: string;
       estimatedTime?: Date;
       actualTime?: Date;
       notes?: string;
-      confirmationCode?: string; // OTP for customer confirmation
+      confirmationCode?: string;
+      confirmedAt?: Date; // When customer confirmed
+      riderConfirmedAt?: Date; // When rider entered code
     };
   }[];
   totalAmount: number;
@@ -170,7 +172,7 @@ export interface IOrder extends Document {
     phone: string;
     instructions?: string;
   };
-  status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'COMPLETED' | 'CANCELLED' |'CONFIRMED';
   mpesaTransactionId?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -211,7 +213,7 @@ const OrderSchema = new Schema<IOrder>({
     netAmount: { type: Number, required: true },
     status: { 
       type: String, 
-      enum: ['PENDING', 'PROCESSING', 'READY_FOR_PICKUP', 'ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED'],
+      enum: ['PENDING', 'PROCESSING', 'READY_FOR_PICKUP', 'ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'CONFIRMED', 'CANCELLED'],
       default: 'PROCESSING'
     },
     deliveryDetails: {
@@ -220,7 +222,9 @@ const OrderSchema = new Schema<IOrder>({
       estimatedTime: { type: Date },
       actualTime: { type: Date },
       notes: { type: String },
-      confirmationCode: { type: String } // 4-6 digit OTP
+      confirmationCode: { type: String },
+      confirmedAt: { type: Date },
+      riderConfirmedAt: { type: Date }
     }
   }],
   totalAmount: { type: Number, required: true },
@@ -243,7 +247,7 @@ const OrderSchema = new Schema<IOrder>({
   },
   status: { 
     type: String, 
-    enum: ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'COMPLETED', 'CANCELLED'],
+    enum: ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CONFIRMED' , 'COMPLETED', 'CANCELLED'],
     default: 'PROCESSING'
   },
   mpesaTransactionId: { type: String }

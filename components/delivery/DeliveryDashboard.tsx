@@ -18,13 +18,16 @@ interface Delivery {
     _id: string;
     vendorId: string;
     shopId: string;
-    status: 'ASSIGNED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED';
+    status: 'ASSIGNED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED' | 'CONFIRMED';
     deliveryFee: number;
     deliveryDetails?: {
       pickupAddress?: string;
       dropoffAddress: string;
       estimatedTime?: string;
       notes?: string;
+      confirmationCode?: string; 
+      confirmedAt?: string; 
+      riderConfirmedAt?: string;
     };
     items: Array<{
       name: string;
@@ -92,10 +95,42 @@ export default function DeliveryDashboard() {
     }
   };
 
-  const handleDeliveryAction = async (orderId: string, suborderId: string, action: string) => {
-    setActiveAction(`${orderId}-${suborderId}-${action}`);
-    
-    try {
+
+
+
+  const handleDeliveryAction = async (orderId: string, suborderId: string, action: string,) => {
+  setActiveAction(`${orderId}-${suborderId}-${action}`);
+  
+  try {
+    if (action === 'confirm_delivery') {
+      // For confirmation, show modal or inline form
+      const code = prompt('Enter the 8-digit confirmation code from customer:');
+      if (!code) {
+        setActiveAction(null);
+        return;
+      }
+      
+      const response = await fetch('/api/orders/confirm-delivery', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId,
+          suborderId,
+          confirmationCode: code.toUpperCase(),
+        }),
+      });
+      
+      if (response.ok) {
+        alert('Delivery confirmed successfully!');
+        fetchDeliveries();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to confirm delivery');
+      }
+    } else {
+      // Original delivery actions
       const response = await fetch('/api/delivery/rider', {
         method: 'POST',
         headers: {
@@ -119,35 +154,72 @@ export default function DeliveryDashboard() {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to update delivery');
       }
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update delivery');
-    } finally {
-      setActiveAction(null);
     }
-  };
+  } catch (err) {
+    alert(err instanceof Error ? err.message : 'Failed to update delivery');
+  } finally {
+    setActiveAction(null);
+  }
+};
 
-  const getStatusColor = (status: string) => {
+  /*const getStatusColor = (status: string) => {
     switch(status) {
+      case 'CONFIRMED': return 'bg-emerald-100 text-emerald-800';
       case 'DELIVERED': return 'bg-green-100 text-green-800';
       case 'IN_TRANSIT': return 'bg-blue-100 text-blue-800';
       case 'PICKED_UP': return 'bg-purple-100 text-purple-800';
       case 'ASSIGNED': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
     }
-  };
+  };*/
 
-  const getStatusActions = (status: string) => {
-    switch(status) {
-      case 'ASSIGNED':
-        return [{ action: 'pickup', label: 'Mark as Picked Up', color: 'bg-purple-600 hover:bg-purple-700' }];
-      case 'PICKED_UP':
-        return [{ action: 'in_transit', label: 'Mark as In Transit', color: 'bg-blue-600 hover:bg-blue-700' }];
-      case 'IN_TRANSIT':
-        return [{ action: 'deliver', label: 'Mark as Delivered', color: 'bg-green-600 hover:bg-green-700' }];
-      default:
-        return [];
-    }
-  };
+  const getStatusColor = (status: string) => {
+  switch(status) {
+    case 'CONFIRMED': return 'bg-emerald-100 text-emerald-800';
+    case 'DELIVERED': return 'bg-green-100 text-green-800';
+    case 'IN_TRANSIT': return 'bg-blue-100 text-blue-800';
+    case 'PICKED_UP': return 'bg-purple-100 text-purple-800';
+    case 'ASSIGNED': return 'bg-yellow-100 text-yellow-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+};
+
+// In DeliveryDashboard, update the getStatusActions function:
+const getStatusActions = (status: string, suborder: any) => {
+  switch(status) {
+    case 'ASSIGNED':
+      return [{ action: 'pickup', label: 'Mark as Picked Up', color: 'bg-purple-600 hover:bg-purple-700' }];
+    case 'PICKED_UP':
+      return [{ action: 'in_transit', label: 'Mark as In Transit', color: 'bg-blue-600 hover:bg-blue-700' }];
+    case 'IN_TRANSIT':
+      return [{ action: 'deliver', label: 'Mark as Delivered', color: 'bg-green-600 hover:bg-green-700' }];
+    case 'DELIVERED':
+      // Show code input only if customer has generated a code
+      console.log("🎯 Checking suborder for confirmation code:", {
+        status: suborder.status,
+        hasCode: !!suborder.deliveryDetails?.confirmationCode,
+        code: suborder.deliveryDetails?.confirmationCode,
+        confirmedAt: suborder.deliveryDetails?.confirmedAt,
+        riderConfirmed: suborder.deliveryDetails?.riderConfirmedAt
+      });
+      
+      if (suborder.deliveryDetails?.confirmationCode && !suborder.deliveryDetails?.riderConfirmedAt) {
+        return [
+          { 
+            action: 'confirm_delivery', 
+            label: 'Enter Confirmation Code', 
+            color: 'bg-emerald-600 hover:bg-emerald-700' 
+          }
+        ];
+      }
+      return [];
+    case 'CONFIRMED':
+      return []; // No actions needed, already confirmed
+    default:
+      return [];
+  }
+};
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -207,6 +279,7 @@ export default function DeliveryDashboard() {
             <option value="picked_up">Picked Up</option>
             <option value="in_transit">In Transit</option>
             <option value="delivered">Delivered</option>
+             <option value="confirmed">Confirmed</option>
           </select>
           
           <button
@@ -218,7 +291,7 @@ export default function DeliveryDashboard() {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stats 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-500">Total Deliveries</h3>
@@ -252,7 +325,113 @@ export default function DeliveryDashboard() {
             )}
           </p>
         </div>
-      </div>
+      </div>*/}
+
+      {/* Stats */}
+<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+  <div className="bg-white p-4 rounded-lg shadow">
+    <h3 className="text-sm font-medium text-gray-500">Total Deliveries</h3>
+    <p className="text-2xl font-bold text-gray-900">{totalDeliveries}</p>
+  </div>
+  <div className="bg-white p-4 rounded-lg shadow">
+    <h3 className="text-sm font-medium text-gray-500">Active</h3>
+    <p className="text-2xl font-bold text-yellow-600">
+      {deliveries.reduce((count, d) => 
+        count + d.suborders.filter(so => 
+          ['ASSIGNED', 'PICKED_UP', 'IN_TRANSIT'].includes(so.status)
+        ).length, 0
+      )}
+    </p>
+  </div>
+  <div className="bg-white p-4 rounded-lg shadow">
+    <h3 className="text-sm font-medium text-gray-500">Completed</h3>
+    <p className="text-2xl font-bold text-green-600">
+      {deliveries.reduce((count, d) => 
+        count + d.suborders.filter(so => 
+          ['DELIVERED', 'CONFIRMED'].includes(so.status)
+        ).length, 0
+      )}
+    </p>
+  </div>
+  <div className="bg-white p-4 rounded-lg shadow">
+    <h3 className="text-sm font-medium text-gray-500">Earnings</h3>
+    <p className="text-2xl font-bold text-purple-600">
+      {formatCurrency(
+        deliveries.reduce((sum, d) => 
+          sum + d.suborders.reduce((subSum, so) => {
+            // Count earnings from both DELIVERED and CONFIRMED statuses
+            if (['DELIVERED', 'CONFIRMED'].includes(so.status)) {
+              return subSum + so.deliveryFee;
+            }
+            return subSum;
+          }, 0)
+        , 0)
+      )}
+    </p>
+    <p className="text-xs text-gray-500 mt-1">
+      {formatCurrency(
+        deliveries.reduce((sum, d) => 
+          sum + d.suborders.reduce((subSum, so) => {
+            // Only confirmed earnings (rider has verified)
+            if (so.status === 'CONFIRMED' && so.deliveryDetails?.riderConfirmedAt) {
+              return subSum + so.deliveryFee;
+            }
+            return subSum;
+          }, 0)
+        , 0)
+      )} confirmed
+    </p>
+  </div>
+</div>
+
+<div className="bg-white p-4 rounded-lg shadow mb-6">
+  <h3 className="text-sm font-medium text-gray-700 mb-3">Earnings Breakdown</h3>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <p className="text-xs text-gray-500">Pending Payment</p>
+      <p className="text-lg font-semibold text-yellow-600">
+        {formatCurrency(
+          deliveries.reduce((sum, d) => 
+            sum + d.suborders.reduce((subSum, so) => 
+              so.status === 'DELIVERED' && !so.deliveryDetails?.riderConfirmedAt 
+                ? subSum + so.deliveryFee 
+                : subSum, 0
+            ), 0
+          )
+        )}
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Confirmed Payment</p>
+      <p className="text-lg font-semibold text-emerald-600">
+        {formatCurrency(
+          deliveries.reduce((sum, d) => 
+            sum + d.suborders.reduce((subSum, so) => 
+              so.status === 'CONFIRMED' && so.deliveryDetails?.riderConfirmedAt 
+                ? subSum + so.deliveryFee 
+                : subSum, 0
+            ), 0
+          )
+        )}
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Total Earned</p>
+      <p className="text-lg font-semibold text-purple-600">
+        {formatCurrency(
+          deliveries.reduce((sum, d) => 
+            sum + d.suborders.reduce((subSum, so) => {
+              if (['DELIVERED', 'CONFIRMED'].includes(so.status)) {
+                return subSum + so.deliveryFee;
+              }
+              return subSum;
+            }, 0)
+          , 0)
+        )}
+      </p>
+    </div>
+  </div>
+</div>
 
       {/* Deliveries List */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -326,16 +505,18 @@ export default function DeliveryDashboard() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="space-y-2">
-                            {getStatusActions(suborder.status).map((action) => (
-                              <button
-                                key={action.action}
-                                onClick={() => handleDeliveryAction(delivery._id, suborder._id, action.action)}
-                                disabled={activeAction === `${delivery._id}-${suborder._id}-${action.action}`}
-                                className={`w-full px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${action.color} disabled:opacity-50`}
-                              >
-                                {activeAction === `${delivery._id}-${suborder._id}-${action.action}` ? 'Processing...' : action.label}
-                              </button>
-                            ))}
+                    
+
+                            {getStatusActions(suborder.status, suborder).map((action) => ( // Pass suborder
+                                <button
+                                  key={action.action}
+                                  onClick={() => handleDeliveryAction(delivery._id, suborder._id, action.action)}
+                                  disabled={activeAction === `${delivery._id}-${suborder._id}-${action.action}`}
+                                  className={`w-full px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${action.color} disabled:opacity-50`}
+                                >
+                                  {activeAction === `${delivery._id}-${suborder._id}-${action.action}` ? 'Processing...' : action.label}
+                                </button>
+                              ))}
                             
                             {suborder.status === 'IN_TRANSIT' && (
                               <div className="space-y-2 mt-2">
