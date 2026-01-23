@@ -49,6 +49,7 @@ import ClientProviders from "./ClientProvider";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import Footer from "@/components/footer/Footer";
+import { Toaster } from 'react-hot-toast';
 
 // Load Inconsolata font
 const inconsolata = Inconsolata({
@@ -78,6 +79,7 @@ export default function RootLayout({
             <div className='flex min-h-screen flex-col'>  
                 <main className="flex-1"> 
               {children}
+               <Toaster position="top-center" />
               <Footer />
               </main>
              </div>  

@@ -105,7 +105,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
     setError('');
   };
 
-  // ... rest of your component remains the same
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -549,11 +549,11 @@ const EyeClosed = () => (
             <div className="text-center text-sm text-gray-500">
               <p>
                 By creating an account, you agree to our{' '}
-                <Link href="/terms" className="text-[#bf2c7e] hover:text-[#a8256c]">
+                <Link href="" className="text-[#bf2c7e] hover:text-[#a8256c]">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="text-[#bf2c7e] hover:text-[#a8256c]">
+                <Link href="" className="text-[#bf2c7e] hover:text-[#a8256c]">
                   Privacy Policy
                 </Link>
               </p>
