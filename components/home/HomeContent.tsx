@@ -98,14 +98,14 @@ const navItems = useMemo(() => {
   if (user.role === 'customer') {
     filteredItems = filteredItems.filter(
       item =>
-        !['dashboard', 'delivery', 'seller-requests', 'users', 'subscription', 'order-payments'].includes(item.id)
+        !['dashboard', 'delivery', 'delivery-earnings', 'seller-requests', 'users', 'subscription', 'order-payments'].includes(item.id)
     );
   }
 
   // Vendor restrictions
   if (user.role === 'vendor') {
     filteredItems = filteredItems.filter(
-      item => !['seller-requests', 'users', 'delivery'].includes(item.id)
+      item => !['seller-requests', 'users', 'delivery', 'delivery-earnings'].includes(item.id)
     );
   }
 
