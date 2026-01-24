@@ -106,7 +106,7 @@ const router = useRouter();
 
   if (loading && shops.length === 0) {
     return (
-      <div className="min-h-96 flex items-center justify-center">
+      <div className="min-h-96 bg-white flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#bf2c7e]" />
       </div>
     );
@@ -114,7 +114,7 @@ const router = useRouter();
 
   return (
 
-    <div>
+    <div className='bg-white'>
         <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
