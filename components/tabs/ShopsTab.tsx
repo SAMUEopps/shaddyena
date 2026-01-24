@@ -516,7 +516,7 @@ export default function ShopsTab() {
                 )}
 
                 {/* Shop Logo - positioned overlapping nicely */}
-                <div className="absolute left-2 sm:left-4 -bottom-6 sm:-bottom-7">
+                {/*<div className="absolute left-2 sm:left-4 -bottom-6 sm:-bottom-7">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white rounded-lg shadow-md grid place-items-center border border-gray-200">
                     {shop.logo ? (
                       <Image
@@ -532,7 +532,24 @@ export default function ShopsTab() {
                       </span>
                     )}
                   </div>
+                </div>*/}
+                <div className="absolute left-2 sm:left-4 -bottom-6 sm:-bottom-7">
+                <div className="relative w-8 h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden grid place-items-center">
+                  {shop.logo ? (
+                    <Image
+                      src={shop.logo}
+                      alt={shop.businessName}
+                      fill
+                      sizes="64px"
+                      className="rounded-lg object-cover"
+                    />
+                  ) : (
+                    <span className="text-base sm:text-lg font-bold text-[#bf2c7e]">
+                      {shop.businessName.charAt(0)}
+                    </span>
+                  )}
                 </div>
+              </div>
               </div>
 
               {/* Shop Info - add padding-top to avoid overlap */}

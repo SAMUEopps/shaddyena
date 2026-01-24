@@ -38,10 +38,11 @@ const baseNavItems = [
   { id: 'delivery', label: 'Delivery', icon: '�' },
   { id: 'seller-requests', label: 'Seller Requests', icon: '👥' },
   { id: 'order-payments', label: 'Order Payments', icon: '💳' },
+  { id: 'delivery-earnings', label: 'Delivey Earnings', icon: '�' },
   { id: 'order-earnings', label: 'Order Earnings', icon: '💳' },
   { id: 'users', label: 'Users', icon: '�' },
   { id: 'refferal-earnings', label: 'Subs Earnings', icon: '�' },
-   { id: 'payments', label: 'Payments', icon: '💳' },
+  { id: 'payments', label: 'Payments', icon: '💳' },
   { id: 'subscription', label: 'Subscriptions', icon: '�' },
   { id: 'refferals', label: 'Refferals', icon: '�' },
   /*{ id: 'support', label: 'Support', icon: '🛟' },*/
@@ -67,25 +68,10 @@ export default function Home() {
   const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
   const [showVendorSuccess, setShowVendorSuccess] = useState(false);
 
-    /* ---------- handle nav items per role ---------- */
   /*const navItems = useMemo(() => {
-    if (!user) return baseNavItems;
-    // Remove dashboard for customers only
-    if (user.role === 'customer') {
-      return baseNavItems.filter(item => item.id !== 'dashboard');
-    }
-    return baseNavItems;
-  }, [user]);*/
-
-  const navItems = useMemo(() => {
   if (!user) return baseNavItems;
   
   let filteredItems = baseNavItems;
-  
-  // Remove dashboard for customers only
-  //if (user.role === 'customer') {
-  //  filteredItems = filteredItems.filter(item => item.id !== 'dashboard');
-  //}
 
   // Remove dashboard and payments for customers only
   if (user.role === 'customer') {
@@ -101,7 +87,45 @@ export default function Home() {
   }
   
   return filteredItems;
+}, [user]);*/
+
+const navItems = useMemo(() => {
+  if (!user) return baseNavItems;
+
+  let filteredItems = [...baseNavItems];
+
+  // Customer restrictions
+  if (user.role === 'customer') {
+    filteredItems = filteredItems.filter(
+      item =>
+        !['dashboard', 'delivery', 'seller-requests', 'users', 'subscription', 'order-payments'].includes(item.id)
+    );
+  }
+
+  // Vendor restrictions
+  if (user.role === 'vendor') {
+    filteredItems = filteredItems.filter(
+      item => !['seller-requests', 'users', 'delivery'].includes(item.id)
+    );
+  }
+
+  // Delivery role → only allow delivery + basics
+  if (user.role === 'delivery') {
+    filteredItems = filteredItems.filter(item =>
+      ['home', 'delivery', 'orders', 'refferals', 'order-earnings','delivery-earnings', 'refferal-earnings'].includes(item.id)
+    );
+  }
+
+  // Admin sees everything
+  if (user.role !== 'admin') {
+    filteredItems = filteredItems.filter(
+      item => !['seller-requests', 'users'].includes(item.id)
+    );
+  }
+
+  return filteredItems;
 }, [user]);
+
 
   /* ---------- render ---------- */
   const renderDashboard = () => {
