@@ -552,7 +552,7 @@ export default function HomeTab() {
   <div className="flex justify-between items-center mb-3">
     <h2 className="text-lg sm:text-xl font-bold text-gray-900">Featured Shops</h2>
     <Link 
-      href="" 
+      href="/shops" 
       className="text-[#bf2c7e] text-xs sm:text-sm font-medium hover:text-[#182155] transition-colors"
     >
       View All
