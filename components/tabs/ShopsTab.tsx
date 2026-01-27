@@ -533,23 +533,24 @@ export default function ShopsTab() {
                     )}
                   </div>
                 </div>*/}
-                  <div className="absolute left-2 sm:left-4 -bottom-6 sm:-bottom-7">
-                    <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden grid place-items-center">
-                      {shop.logo ? (
-                        <Image
-                          src={shop.logo}
-                          alt={shop.businessName}
-                          fill
-                          sizes="64px"
-                          className="rounded-lg object-cover"
-                        />
-                      ) : (
-                        <span className="text-base sm:text-lg font-bold text-[#bf2c7e]">
-                          {shop.businessName.charAt(0)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+          <div className="absolute left-2 sm:left-4 -bottom-6 sm:-bottom-7">
+            <div className="relative w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white rounded-full shadow-md border border-gray-200 overflow-hidden grid place-items-center">
+              {shop.logo ? (
+                <Image
+                  src={shop.logo}
+                  alt={shop.businessName}
+                  fill
+                  sizes="64px"
+                  className="rounded-lg object-cover"
+                />
+              ) : (
+                <span className="text-base sm:text-lg font-bold text-[#bf2c7e]">
+                  {shop.businessName.charAt(0)}
+                </span>
+              )}
+            </div>
+          </div>
+
               </div>
 
               {/* Shop Info - add padding-top to avoid overlap */}
