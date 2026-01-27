@@ -159,7 +159,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
-interface User {
+export interface User {
   _id: string;
   firstName: string;
   lastName: string;

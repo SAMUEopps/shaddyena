@@ -22,9 +22,9 @@ export default function OrdersTab({ role }: OrdersTabProps) {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-gray-900">
+            {/*<h1 className="text-2xl font-bold text-gray-900">
               {viewMode === 'vendor' ? 'Vendor Orders' : 'My Orders'}
-            </h1>
+            </h1>*/}
             
             <div className="inline-flex rounded-lg border border-gray-200 p-1">
               <button
