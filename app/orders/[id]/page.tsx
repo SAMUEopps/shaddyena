@@ -1,4 +1,5 @@
-import OrderDetails from '@/components/orders/OrderDetails';
+import OrderDetails from "@/components/orders/details/OrderDetails";
+
 
 interface OrderPageProps {
   params: {

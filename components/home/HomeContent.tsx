@@ -10,7 +10,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import Login from '@/app/login/page';
 import HomeTab from '@/components/tabs/HomeTab';
 import ProductsTab from '@/components/tabs/ProductsTab';
-import OrdersTab from '@/components/tabs/OrdersTab';
 import PaymentsTab from '@/components/tabs/PaymentsTab';
 import SupportTab from '@/components/tabs/SupportTab';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -19,14 +18,13 @@ import ShopsTab from '@/components/tabs/ShopsTab';
 import BecomeVendorModal from '@/components/modals/BecomeVendorModal';
 import SellerRequestsTab from '@/components/tabs/SellerRequestsTab';
 import { useSearchParams } from 'next/navigation'
-import EarningsTab from '../tabs/RefferalsTab';
 import UsersTab from '../tabs/UsersTab';
 import OrderPaymentsTab from '../tabs/OrderPaymentsTab';
 import SubscriptionTab from '../tabs/SubscriptionTab';
 import ReferralEarningsTab from '../tabs/RefferalEarningsTab';
-import RefferalsTab from '../tabs/RefferalsTab';
 import ReferralsTab from '../tabs/RefferalsTab';
 import DeliveryDashboard from '../delivery/DeliveryDashboard';
+import OrdersTab from '../tabs/OrdersTab/OrdersTab';
 
 /* ---------- helpers ---------- */
 const baseNavItems = [
