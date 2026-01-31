@@ -132,7 +132,7 @@ const router = useRouter();
             </div>
           </div>
         </header> 
-    <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6">
+    <div className="px-4 max-w-7xl mx-auto px-0 sm:px-4 lg:px-6">
       {/* Header - Improved mobile spacing */}
       <div className="mb-4 sm:mb-6 lg:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Discover Shops</h1>
