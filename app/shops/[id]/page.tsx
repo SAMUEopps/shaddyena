@@ -844,7 +844,7 @@ export default function ShopDetailPage() {
           <div className="relative max-w-7xl mx-auto px-3 sm:px-4 h-full flex items-end pb-4 sm:pb-6 md:pb-8">
             <div className="flex items-end space-x-4 sm:space-x-6 w-full">
               {/* Logo - Responsive sizing */}
-              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl grid place-items-center border-2 sm:border-4 border-white flex-shrink-0">
+              {/*<div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl grid place-items-center border-2 sm:border-4 border-white flex-shrink-0">
                 {shop.logo ? (
                   <Image
                     src={shop.logo}
@@ -859,7 +859,31 @@ export default function ShopDetailPage() {
                     {shop.businessName.charAt(0)}
                   </span>
                 )}
-              </div>
+              </div>*/}
+{/* Logo */}
+<div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32
+                bg-white rounded-full shadow-lg sm:shadow-xl
+                border-2 sm:border-4 border-white
+                flex-shrink-0 overflow-hidden">
+
+  {shop.logo ? (
+    <Image
+      src={shop.logo}
+      alt={shop.businessName}
+      fill
+      className="object-cover rounded-full"
+      sizes="(max-width: 640px) 64px, (max-width: 768px) 80px, (max-width: 1024px) 96px, 128px"
+    />
+  ) : (
+    <div className="w-full h-full flex items-center justify-center">
+      <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#bf2c7e]">
+        {shop.businessName.charAt(0)}
+      </span>
+    </div>
+  )}
+</div>
+
+
               
               {/* Shop Info - Improved mobile layout */}
               <div className="text-white pb-1 sm:pb-2 flex-1 min-w-0">
