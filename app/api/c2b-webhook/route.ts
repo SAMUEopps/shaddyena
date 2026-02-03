@@ -1056,7 +1056,7 @@ async function handleConfirmation(body: any) {
   const orderId = generateOrderId();
 
   /* ---------- ledger ---------- */
-  const ledgerEntries: any[] = [];
+  /*const ledgerEntries: any[] = [];
 
   for (const v of draft.vendorSplits) {
     const totalAmount = v.amount;
@@ -1110,6 +1110,119 @@ async function handleConfirmation(body: any) {
       amount: platformShare,
       status: 'PAID',
       scheduledAt: new Date(),
+    });
+  }
+
+  await Ledger.insertMany(ledgerEntries);*/
+
+    /* ---------- ledger ---------- */
+  const ledgerEntries: any[] = [];
+
+  for (const v of draft.vendorSplits) {
+    const totalAmount = v.amount;
+    const vendorUser = await User.findById(v.vendorId);
+
+    let platformShare = 0;
+    let referralShare = 0;
+
+    if (vendorUser?.referredBy) {
+      // 3% split: 2.5% platform, 0.5% referral
+      referralShare = totalAmount * 0.005;
+      platformShare = totalAmount * 0.025;
+
+      // Referral commission entry (locked for 24 hours)
+      ledgerEntries.push({
+        type: 'REFERRAL_COMMISSION',
+        referrerId: vendorUser.referredBy,
+        referredVendorId: vendorUser._id,
+        orderId,
+        draftToken: draft.token,
+        amount: referralShare,
+        netAmount: referralShare,
+        withdrawalStatus: 'LOCKED',
+        status: 'PENDING',
+        scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        metadata: {
+          percentage: 0.5,
+          description: 'Referral commission from vendor sale'
+        }
+      });
+    } else {
+      // No referral: platform gets full 3%
+      platformShare = totalAmount * 0.03;
+    }
+
+    // Platform commission entry
+    ledgerEntries.push({
+      type: 'PLATFORM_COMMISSION',
+      orderId,
+      draftToken: draft.token,
+      amount: platformShare,
+      netAmount: platformShare,
+      withdrawalStatus: 'PAID', // Platform commission is paid immediately to platform
+      status: 'PAID',
+      scheduledAt: new Date(),
+      paidAt: new Date(),
+      metadata: {
+        percentage: vendorUser?.referredBy ? 2.5 : 3,
+        description: 'Platform commission'
+      }
+    });
+
+    // Calculate 80% immediate release (after commission)
+    const commissionTotal = platformShare + referralShare;
+    const vendorEarnings = totalAmount - commissionTotal;
+    const immediateRelease = vendorEarnings * 0.8;
+    const remaining20Percent = vendorEarnings * 0.2;
+
+    // Immediate vendor payout (80%)
+    ledgerEntries.push({
+      type: 'VENDOR_PAYOUT',
+      vendorId: v.vendorId,
+      shopId: v.shopId,
+      orderId,
+      draftToken: draft.token,
+      amount: immediateRelease,
+      netAmount: immediateRelease,
+      withdrawalStatus: 'AVAILABLE', // Available for immediate withdrawal
+      status: 'PENDING',
+      scheduledAt: new Date(), // Available immediately
+      metadata: {
+        isImmediateRelease: true,
+        percentage: 80,
+        platformShare,
+        referralShare,
+        totalEarnings: vendorEarnings,
+        breakdown: {
+          totalAmount,
+          commission: commissionTotal,
+          vendorEarnings,
+          immediateRelease,
+          remaining20Percent
+        }
+      }
+    });
+
+    // Remaining 20% (locked for 24 hours)
+    ledgerEntries.push({
+      type: 'VENDOR_PAYOUT',
+      vendorId: v.vendorId,
+      shopId: v.shopId,
+      orderId,
+      draftToken: draft.token,
+      amount: remaining20Percent,
+      netAmount: remaining20Percent,
+      withdrawalStatus: 'LOCKED', // Locked for 24 hours
+      status: 'PENDING',
+      scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours hold
+      metadata: {
+        isImmediateRelease: false,
+        percentage: 20,
+        holdUntil: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        platformShare,
+        referralShare,
+        totalEarnings: vendorEarnings
+      }
     });
   }
 

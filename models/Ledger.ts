@@ -48,7 +48,13 @@ LedgerSchema.index({ scheduledAt: 1 });
 
 export default mongoose.models.Ledger || mongoose.model<ILedger>('Ledger', LedgerSchema);*/
 
-import mongoose, { Document, Schema, Types } from 'mongoose';
+
+
+
+
+
+
+/*import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface ILedger extends Document {
   type: 'VENDOR_PAYOUT' | 'REFERRAL_COMMISSION' | 'PLATFORM_COMMISSION';
@@ -120,5 +126,111 @@ LedgerSchema.index({ orderId: 1 });
 LedgerSchema.index({ draftToken: 1 });
 LedgerSchema.index({ status: 1 });
 LedgerSchema.index({ scheduledAt: 1 });
+
+export default mongoose.models.Ledger || mongoose.model<ILedger>('Ledger', LedgerSchema);*/
+
+import mongoose, { Document, Schema, Types } from 'mongoose';
+
+export interface ILedger extends Document {
+  type: 'VENDOR_PAYOUT' | 'REFERRAL_COMMISSION' | 'PLATFORM_COMMISSION';
+  vendorId?: string; 
+  shopId?: string;   
+  referrerId?: Types.ObjectId | string;
+  referredVendorId?: Types.ObjectId | string;
+  orderId: string;
+  draftToken: string;
+  amount: number;
+  netAmount?: number;
+  
+  // NEW: Withdrawal related fields
+  withdrawalStatus: 'LOCKED' | 'AVAILABLE' | 'REQUESTED' | 'PAID' | 'HOLD';
+  withdrawalRequestId?: Types.ObjectId;
+  
+  status: 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
+  payoutRef?: string;
+  failureReason?: string;
+  scheduledAt: Date;
+  paidAt?: Date;
+  
+  // NEW: Metadata for payment breakdown
+  metadata?: {
+    isImmediateRelease?: boolean;
+    percentage?: number;
+    holdUntil?: Date;
+    platformShare?: number;
+    referralShare?: number;
+    vendorShare?: number;
+  };
+  
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const LedgerSchema = new Schema<ILedger>(
+  {
+    type: {
+      type: String,
+      enum: ['VENDOR_PAYOUT', 'REFERRAL_COMMISSION', 'PLATFORM_COMMISSION'],
+      required: true,
+    },
+    vendorId: { type: String },
+    shopId: { type: String },
+    
+    referrerId: {
+      type: Schema.Types.Mixed, 
+      ref: 'User', 
+      required: function () { return this.type === 'REFERRAL_COMMISSION'; },
+    },
+    referredVendorId: {
+      type: Schema.Types.Mixed, 
+      ref: 'User',
+      required: function () { return this.type === 'REFERRAL_COMMISSION'; },
+    },
+
+    orderId: { type: String, required: true },
+    draftToken: { type: String, required: true },
+    amount: { type: Number, required: true },
+    netAmount: { type: Number },
+    
+    // NEW: Withdrawal status fields
+    withdrawalStatus: {
+      type: String,
+      enum: ['LOCKED', 'AVAILABLE', 'REQUESTED', 'PAID', 'HOLD'],
+      default: 'LOCKED'
+    },
+    withdrawalRequestId: { 
+      type: Schema.Types.ObjectId, 
+      ref: 'Withdrawal' 
+    },
+    
+    status: {
+      type: String,
+      enum: ['PENDING', 'PROCESSING', 'PAID', 'FAILED'],
+      default: 'PENDING',
+    },
+    payoutRef: { type: String },
+    failureReason: { type: String },
+    scheduledAt: { type: Date, default: Date.now },
+    paidAt: { type: Date },
+    
+    // NEW: Metadata
+    metadata: {
+      type: Schema.Types.Mixed,
+      default: {}
+    }
+  },
+  { timestamps: true }
+);
+
+// Indexes for faster queries
+LedgerSchema.index({ type: 1 });
+LedgerSchema.index({ vendorId: 1 });
+LedgerSchema.index({ referrerId: 1 });
+LedgerSchema.index({ orderId: 1 });
+LedgerSchema.index({ draftToken: 1 });
+LedgerSchema.index({ status: 1 });
+LedgerSchema.index({ withdrawalStatus: 1 });
+LedgerSchema.index({ scheduledAt: 1 });
+LedgerSchema.index({ 'metadata.isImmediateRelease': 1 });
 
 export default mongoose.models.Ledger || mongoose.model<ILedger>('Ledger', LedgerSchema);

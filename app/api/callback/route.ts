@@ -381,7 +381,7 @@ export async function POST(req: NextRequest) {
 
 
 
-import { NextRequest, NextResponse } from 'next/server';
+/*import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import OrderDraft from '@/models/OrderDraft';
 import Order from '@/models/Order';
@@ -418,7 +418,7 @@ export async function POST(req: NextRequest) {
 
     /************************************************************
      * 1️⃣ HANDLE STK PUSH CALLBACK
-     ************************************************************/
+     ************************************************************
     if (body?.Body?.stkCallback) {
       const stk = body.Body.stkCallback;
       console.log('📲 STK Callback Received:', {
@@ -439,7 +439,7 @@ export async function POST(req: NextRequest) {
 
     /************************************************************
      * 2️⃣ HANDLE C2B (PAYBILL) PAYMENT CALLBACK
-     ************************************************************/
+     ************************************************************
     if (body.TransID && body.BillRefNumber) {
       console.log('💰 C2B Payment Callback Received');
 
@@ -487,7 +487,7 @@ export async function POST(req: NextRequest) {
 
       /************************************************************
        * Update product stock
-       ************************************************************/
+       ************************************************************
       for (const item of draft.items) {
         await Product.findByIdAndUpdate(item.productId, {
           $inc: { stock: -item.quantity },
@@ -496,7 +496,7 @@ export async function POST(req: NextRequest) {
 
       /************************************************************
        * NEW: Calculate delivery fees
-       ************************************************************/
+       ************************************************************
       const deliveryFees = await calculateDeliveryFees(
         draft.vendorSplits, 
         draft.shipping
@@ -515,7 +515,7 @@ export async function POST(req: NextRequest) {
 
       /************************************************************
        * Create order and suborders WITH DELIVERY SUPPORT
-       ************************************************************/
+       ************************************************************
       const orderId = generateOrderId();
       const order = new Order({
         orderId,
@@ -553,14 +553,14 @@ export async function POST(req: NextRequest) {
 
       /************************************************************
        * NEW: Notify vendors about the order
-       ************************************************************/
+       ************************************************************
       const vendorIds = draft.vendorSplits.map((v: any) => v.vendorId);
       // You could send notifications/emails to vendors here
       console.log(`📢 Order ${orderId} created. Notifying vendors:`, vendorIds);
 
       /************************************************************
        * UPDATED: Create ledger entries with delivery fees considered
-       ************************************************************/
+       ************************************************************
       // Vendor payouts (net amount stays the same, delivery fee is separate)
       const vendorLedgerEntries = draft.vendorSplits.map((vendor: any) => ({
         type: 'VENDOR_PAYOUT',
@@ -620,7 +620,7 @@ export async function POST(req: NextRequest) {
 
       /************************************************************
        * Mark draft as confirmed
-       ************************************************************/
+       ************************************************************
       draft.status = 'CONFIRMED';
       draft.mpesaTransactionId = mpesaReceiptNumber;
       await draft.save();
@@ -638,11 +638,11 @@ export async function POST(req: NextRequest) {
 
     /************************************************************
      * 3️⃣ UNKNOWN PAYLOAD
-     ************************************************************/
+     ************************************************************
     console.log('⚠️ Unknown M-Pesa callback type');
     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Unknown payload' });
   } catch (error) {
     console.error('❌ CALLBACK ERROR:', error);
     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Server error' });
   }
-}
+}*/
