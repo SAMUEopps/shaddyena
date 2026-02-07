@@ -1186,6 +1186,10 @@ export default function OrderPaymentsTab() {
   const [activeTab, setActiveTab] = useState<'earnings' | 'orders'>('earnings');
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const [riders, setRiders] = useState<Array<{ _id: string; firstName: string; lastName: string; phone?: string }>>([]);
+  const [selectedRiders, setSelectedRiders] = useState<Record<string, string>>({}); 
+  const [assigningRider, setAssigningRider] = useState<Record<string, boolean>>({});
+
   const fetchData = useCallback(async () => {
     if (!user || user.role !== 'vendor') return;
 
@@ -1335,6 +1339,47 @@ export default function OrderPaymentsTab() {
     }
   };
 
+  const handleRiderAssignment = async (orderId: string, suborderId: string) => {
+  const riderId = selectedRiders[suborderId];
+  if (!riderId) {
+    alert('Please select a rider first');
+    return;
+  }
+
+  setAssigningRider(prev => ({ ...prev, [suborderId]: true }));
+
+  try {
+    // Update status to READY_FOR_PICKUP and assign rider in one call
+    await OrderService.updateOrderStatus({
+      orderId,
+      suborderId,
+      status: 'READY_FOR_PICKUP',
+      //riderId // Pass riderId to your service
+    });
+
+    // Or if you have a separate endpoint for rider assignment:
+    // await fetch(`/api/orders/${orderId}/suborders/${suborderId}/assign-rider`, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': `Bearer ${localStorage.getItem('token')}`
+    //   },
+    //   body: JSON.stringify({ riderId })
+    // });
+
+    fetchOrders(); // Refresh orders
+    alert('Rider assigned successfully!');
+    
+    // Clear selection for this suborder
+    setSelectedRiders(prev => ({ ...prev, [suborderId]: '' }));
+  } catch (error) {
+    console.error('Error assigning rider:', error);
+    setError('Failed to assign rider');
+  } finally {
+    setAssigningRider(prev => ({ ...prev, [suborderId]: false }));
+  }
+};
+
   const getStats = () => {
     return {
       total: vendorOrders.length,
@@ -1414,14 +1459,52 @@ export default function OrderPaymentsTab() {
           >
             View Details
           </button>
-          {suborder.status === 'PROCESSING' && (
+          {/*{suborder.status === 'PROCESSING' && (
             <button
               onClick={() => handleStatusUpdate(order._id, suborder._id || '')}
               className="ml-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
             >
               Mark as Ready for Pickup
             </button>
-          )}
+          )}*/}
+          {suborder.status === 'PROCESSING' && (
+          <div className="inline-flex items-center gap-2 ml-2">
+            <select
+              value={selectedRiders[suborder._id] || ''}
+              onChange={(e) => setSelectedRiders(prev => ({ 
+                ...prev, 
+                [suborder._id]: e.target.value 
+              }))}
+              className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] focus:border-transparent"
+              disabled={assigningRider[suborder._id]}
+            >
+              <option value="">Select Rider</option>
+              {riders.map((rider) => (
+                <option key={rider._id} value={rider._id}>
+                  {rider.firstName} {rider.lastName} {rider.phone ? `(${rider.phone})` : ''}
+                </option>
+              ))}
+            </select>
+            
+            <button
+              onClick={() => handleRiderAssignment(order._id, suborder._id || '')}
+              disabled={!selectedRiders[suborder._id] || assigningRider[suborder._id]}
+              className="px-3 py-1.5 bg-[#bf2c7e] text-white text-sm rounded-md hover:bg-[#a8246e] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+            >
+              {assigningRider[suborder._id] ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                  </svg>
+                  Assigning...
+                </>
+              ) : (
+                'Assign Rider'
+              )}
+            </button>
+          </div>
+        )}
           {suborder.status === 'READY_FOR_PICKUP' && (
             <div className="text-sm text-gray-600 mt-1">
               Waiting for rider assignment
@@ -1677,7 +1760,7 @@ function EarningsView({
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Locked Funds (20%)</p>
+              <p className="text-sm font-medium text-gray-600">Locked Funds</p>
               <p className="text-2xl font-bold text-blue-600">
                 KSh {earningsData.balance.locked.toLocaleString()}
               </p>
@@ -1688,7 +1771,7 @@ function EarningsView({
               </svg>
             </div>
           </div>
-          <p className="mt-2 text-sm text-gray-500">Available in 24 hours</p>
+          <p className="mt-2 text-sm text-gray-500">Available after delivery</p>
         </div>
 
         <div className="bg-white rounded-lg shadow p-6">
