@@ -1275,6 +1275,22 @@ export default function OrderPaymentsTab() {
     }
   };
 
+  const fetchRiders = async () => {
+  try {
+    const response = await fetch('/api/riders/available', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setRiders(data.riders || []);
+    }
+  } catch (error) {
+    console.error('Error fetching riders:', error);
+  }
+};
+
   useEffect(() => {
     if (isLoading) return;
     if (!user) {
@@ -1285,12 +1301,16 @@ export default function OrderPaymentsTab() {
       router.push('/unauthorized');
       return;
     }
+
+    fetchRiders(); 
+
     if (activeTab === 'earnings') {
       fetchData();
     } else {
       fetchOrders();
     }
-  }, [user, isLoading, fetchData, router, activeTab, currentPage, statusFilter, searchTerm]);
+  }, [user, isLoading, fetchData, router, activeTab, currentPage, statusFilter, searchTerm,]);
+
 
   const handleDateRangeChange = (newDateRange: string) => {
     setDateRange(newDateRange);
@@ -1339,7 +1359,7 @@ export default function OrderPaymentsTab() {
     }
   };
 
-  const handleRiderAssignment = async (orderId: string, suborderId: string) => {
+  /*const handleRiderAssignment = async (orderId: string, suborderId: string) => {
   const riderId = selectedRiders[suborderId];
   if (!riderId) {
     alert('Please select a rider first');
@@ -1378,6 +1398,50 @@ export default function OrderPaymentsTab() {
   } finally {
     setAssigningRider(prev => ({ ...prev, [suborderId]: false }));
   }
+};*/
+
+
+// Replace the handleStatusUpdate and handleRiderAssignment functions in your component:
+
+const handleMarkAsReady = async (orderId: string, suborderId: string) => {
+  try {
+    await OrderService.markAsReadyForPickup(orderId, suborderId);
+    await fetchOrders(); // Refresh orders
+    // Optional: Show success message
+  } catch (error) {
+    console.error('Error marking as ready:', error);
+    setError('Failed to mark order as ready for pickup');
+  }
+};
+
+// In your OrderPaymentsTab component, update the handleRiderAssignment function:
+
+const handleRiderAssignment = async (orderId: string, suborderId: string) => {
+  const riderId = selectedRiders[suborderId];
+  if (!riderId) {
+    alert('Please select a rider first');
+    return;
+  }
+
+  setAssigningRider(prev => ({ ...prev, [suborderId]: true }));
+
+  try {
+    // Use the updated OrderService method which now sends status: 'ASSIGNED'
+    await OrderService.assignRider(orderId, suborderId, riderId, 150); // Default delivery fee
+    
+    await fetchOrders(); // Refresh orders
+    
+    // Clear selection for this suborder
+    setSelectedRiders(prev => ({ ...prev, [suborderId]: '' }));
+    
+    // Optional: Show success message
+    alert('Rider assigned successfully!');
+  } catch (error) {
+    console.error('Error assigning rider:', error);
+    setError('Failed to assign rider');
+  } finally {
+    setAssigningRider(prev => ({ ...prev, [suborderId]: false }));
+  }
 };
 
   const getStats = () => {
@@ -1406,106 +1470,121 @@ export default function OrderPaymentsTab() {
     return null;
   }
 
+
+
   const renderOrderRow = (vendorOrder: VendorOrder) => {
-    const { order, suborder } = vendorOrder;
-    
-    // Convert riderId to string if it's an ObjectId
-    const riderId = suborder.riderId?.toString();
-    
-    return (
-      <tr key={`${order._id}-${suborder.vendorId}`} className="hover:bg-gray-50">
-        <td className="px-6 py-4 whitespace-nowrap">
-          <div className="text-sm font-medium text-gray-900">{order.orderId}</div>
-          <div className="text-xs text-gray-500">Vendor Suborder</div>
-          <div className="text-xs text-gray-400 mt-1">
-            {suborder.items?.length || 0} item(s)
-          </div>
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-          {OrderService.formatDate(order.createdAt)}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-          {OrderService.getBuyerName(order.buyerId)}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap">
-          <div className="text-sm text-gray-900">
-            {OrderService.formatCurrency(suborder.netAmount, order.currency)}
-          </div>
-          <div className="text-xs text-gray-500">
-            Gross: {OrderService.formatCurrency(suborder.amount, order.currency)}
-          </div>
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap">
-          <div className="space-y-1">
-            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${OrderService.getStatusColor(suborder.status)}`}>
-              {suborder.status}
+  const { order, suborder } = vendorOrder;
+  
+  // Convert riderId to string if it's an ObjectId
+  const riderId = suborder.riderId?.toString();
+  
+  return (
+    <tr key={`${order._id}-${suborder.vendorId}`} className="hover:bg-gray-50">
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm font-medium text-gray-900">{order.orderId}</div>
+        <div className="text-xs text-gray-500">Vendor Suborder</div>
+        <div className="text-xs text-gray-400 mt-1">
+          {suborder.items?.length || 0} item(s)
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {OrderService.formatDate(order.createdAt)}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {OrderService.getBuyerName(order.buyerId)}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm text-gray-900">
+          {OrderService.formatCurrency(suborder.netAmount, order.currency)}
+        </div>
+        <div className="text-xs text-gray-500">
+          Gross: {OrderService.formatCurrency(suborder.amount, order.currency)}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="space-y-1">
+          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${OrderService.getStatusColor(suborder.status)}`}>
+            {suborder.status}
+          </span>
+          <div>
+            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${OrderService.getStatusColor(order.paymentStatus)}`}>
+              Payment: {order.paymentStatus}
             </span>
-            <div>
-              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${OrderService.getStatusColor(order.paymentStatus)}`}>
-                Payment: {order.paymentStatus}
-              </span>
-            </div>
-            {riderId && (
-              <div className="text-xs text-gray-600">
-                Rider assigned
-              </div>
-            )}
           </div>
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+          {riderId && (
+            <div className="text-xs text-gray-600">
+              Rider assigned
+            </div>
+          )}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+        <div className="space-x-2">
           <button 
             onClick={() => router.push(`/orders/${order._id}?vendorView=true&suborderId=${suborder._id}`)}
             className="text-[#bf2c7e] hover:text-[#a8246e] transition-colors"
           >
             View Details
           </button>
-          {/*{suborder.status === 'PROCESSING' && (
+          
+          {/* Show Mark as Ready button for PROCESSING orders */}
+          {suborder.status === 'PROCESSING' && (
             <button
-              onClick={() => handleStatusUpdate(order._id, suborder._id || '')}
+              onClick={() => handleMarkAsReady(order._id, suborder._id || '')}
               className="ml-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
             >
               Mark as Ready for Pickup
             </button>
-          )}*/}
-          {suborder.status === 'PROCESSING' && (
-          <div className="inline-flex items-center gap-2 ml-2">
-            <select
-              value={selectedRiders[suborder._id] || ''}
-              onChange={(e) => setSelectedRiders(prev => ({ 
-                ...prev, 
-                [suborder._id]: e.target.value 
-              }))}
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] focus:border-transparent"
-              disabled={assigningRider[suborder._id]}
-            >
-              <option value="">Select Rider</option>
-              {riders.map((rider) => (
-                <option key={rider._id} value={rider._id}>
-                  {rider.firstName} {rider.lastName} {rider.phone ? `(${rider.phone})` : ''}
-                </option>
-              ))}
-            </select>
-            
-            <button
-              onClick={() => handleRiderAssignment(order._id, suborder._id || '')}
-              disabled={!selectedRiders[suborder._id] || assigningRider[suborder._id]}
-              className="px-3 py-1.5 bg-[#bf2c7e] text-white text-sm rounded-md hover:bg-[#a8246e] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
-            >
-              {assigningRider[suborder._id] ? (
-                <>
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                  </svg>
-                  Assigning...
-                </>
-              ) : (
-                'Assign Rider'
-              )}
-            </button>
-          </div>
-        )}
-          {suborder.status === 'READY_FOR_PICKUP' && (
+          )}
+
+          {/* Show rider assignment for READY_FOR_PICKUP orders without a rider */}
+          {suborder.status === 'READY_FOR_PICKUP' && !riderId && (
+            <div className="inline-flex items-center gap-2 mt-2">
+              <select
+                value={selectedRiders[suborder._id] || ''}
+                onChange={(e) =>
+                  setSelectedRiders(prev => ({
+                    ...prev,
+                    [suborder._id]: e.target.value
+                  }))
+                }
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-md
+                         focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
+                disabled={assigningRider[suborder._id]}
+              >
+                <option value="">Select Rider</option>
+                {riders.map(rider => (
+                  <option key={rider._id} value={rider._id}>
+                    {rider.firstName} {rider.lastName}
+                    {rider.phone ? ` (${rider.phone})` : ''}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                onClick={() => handleRiderAssignment(order._id, suborder._id || '')}
+                disabled={!selectedRiders[suborder._id] || assigningRider[suborder._id]}
+                className="px-3 py-1.5 bg-[#bf2c7e] text-white text-sm rounded
+                         hover:bg-[#a8246e] disabled:bg-gray-400 disabled:cursor-not-allowed
+                         transition-colors flex items-center gap-1"
+              >
+                {assigningRider[suborder._id] ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                    Assigning...
+                  </>
+                ) : (
+                  'Assign Rider'
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Show status messages */}
+          {suborder.status === 'READY_FOR_PICKUP' && !riderId && (
             <div className="text-sm text-gray-600 mt-1">
               Waiting for rider assignment
             </div>
@@ -1515,10 +1594,20 @@ export default function OrderPaymentsTab() {
               Rider on the way
             </div>
           )}
-        </td>
-      </tr>
-    );
-  };
+        </div>
+      </td>
+    </tr>
+  );
+};
+
+
+
+
+
+
+
+
+
 
   const tableHeaders = (
     <tr>
@@ -2259,3 +2348,163 @@ function WithdrawalHistory({ withdrawals }: { withdrawals: Withdrawal[] }) {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+  /*const renderOrderRow = (vendorOrder: VendorOrder) => {
+    const { order, suborder } = vendorOrder;
+    
+    // Convert riderId to string if it's an ObjectId
+    const riderId = suborder.riderId?.toString();
+    
+    return (
+      <tr key={`${order._id}-${suborder.vendorId}`} className="hover:bg-gray-50">
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="text-sm font-medium text-gray-900">{order.orderId}</div>
+          <div className="text-xs text-gray-500">Vendor Suborder</div>
+          <div className="text-xs text-gray-400 mt-1">
+            {suborder.items?.length || 0} item(s)
+          </div>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          {OrderService.formatDate(order.createdAt)}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          {OrderService.getBuyerName(order.buyerId)}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="text-sm text-gray-900">
+            {OrderService.formatCurrency(suborder.netAmount, order.currency)}
+          </div>
+          <div className="text-xs text-gray-500">
+            Gross: {OrderService.formatCurrency(suborder.amount, order.currency)}
+          </div>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="space-y-1">
+            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${OrderService.getStatusColor(suborder.status)}`}>
+              {suborder.status}
+            </span>
+            <div>
+              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${OrderService.getStatusColor(order.paymentStatus)}`}>
+                Payment: {order.paymentStatus}
+              </span>
+            </div>
+            {riderId && (
+              <div className="text-xs text-gray-600">
+                Rider assigned
+              </div>
+            )}
+          </div>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+          <button 
+            onClick={() => router.push(`/orders/${order._id}?vendorView=true&suborderId=${suborder._id}`)}
+            className="text-[#bf2c7e] hover:text-[#a8246e] transition-colors"
+          >
+            View Details
+          </button>
+          {suborder.status === 'PROCESSING' && (
+            <button
+              onClick={() => handleStatusUpdate(order._id, suborder._id || '')}
+              className="ml-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+            >
+              Mark as Ready for Pickup
+            </button>
+          )}
+         {/*} {suborder.status === 'PROCESSING' && (
+          <div className="inline-flex items-center gap-2 ml-2">
+            <select
+              value={selectedRiders[suborder._id] || ''}
+              onChange={(e) => setSelectedRiders(prev => ({ 
+                ...prev, 
+                [suborder._id]: e.target.value 
+              }))}
+              className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#bf2c7e] focus:border-transparent"
+              disabled={assigningRider[suborder._id]}
+            >
+              <option value="">Select Rider</option>
+              {riders.map((rider) => (
+                <option key={rider._id} value={rider._id}>
+                  {rider.firstName} {rider.lastName} {rider.phone ? `(${rider.phone})` : ''}
+                </option>
+              ))}
+            </select>
+            
+            <button
+              onClick={() => handleRiderAssignment(order._id, suborder._id || '')}
+              disabled={!selectedRiders[suborder._id] || assigningRider[suborder._id]}
+              className="px-3 py-1.5 bg-[#bf2c7e] text-white text-sm rounded-md hover:bg-[#a8246e] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+            >
+              {assigningRider[suborder._id] ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                  </svg>
+                  Assigning...
+                </>
+              ) : (
+                'Assign Rider'
+              )}
+            </button>
+          </div>
+        )}*
+
+        {suborder.status === 'READY_FOR_PICKUP' && !riderId && (
+        <div className="inline-flex items-center gap-2 mt-2">
+          <select
+            value={selectedRiders[suborder._id] || ''}
+            onChange={(e) =>
+              setSelectedRiders(prev => ({
+                ...prev,
+                [suborder._id]: e.target.value
+              }))
+            }
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md
+                      focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
+            disabled={assigningRider[suborder._id]}
+          >
+            <option value="">Select Rider</option>
+            {riders.map(rider => (
+              <option key={rider._id} value={rider._id}>
+                {rider.firstName} {rider.lastName}
+                {rider.phone ? ` (${rider.phone})` : ''}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={() => handleRiderAssignment(order._id, suborder._id || '')}
+            disabled={!selectedRiders[suborder._id] || assigningRider[suborder._id]}
+            className="px-3 py-1.5 bg-[#bf2c7e] text-white text-sm rounded
+                      hover:bg-[#a8246e] disabled:bg-gray-400"
+          >
+            Submit Rider
+          </button>
+        </div>
+      )}
+
+          {suborder.status === 'READY_FOR_PICKUP' && (
+            <div className="text-sm text-gray-600 mt-1">
+              Waiting for rider assignment
+            </div>
+          )}
+          {suborder.status === 'SHIPPED' && riderId && (
+            <div className="text-sm text-gray-600 mt-1">
+              Rider on the way
+            </div>
+          )}
+        </td>
+      </tr>
+    );
+  };*/

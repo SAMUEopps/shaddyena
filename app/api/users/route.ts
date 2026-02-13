@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Admin check
-    if (currentUser.role !== 'admin') {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'vendor') {
+    //if (currentUser.role !== 'admin') {
       return NextResponse.json(
         { message: 'Forbidden - Admin access required' },
         { status: 403 }
