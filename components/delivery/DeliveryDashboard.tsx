@@ -1,4 +1,4 @@
-'use client';
+/*'use client';
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -162,17 +162,6 @@ export default function DeliveryDashboard() {
   }
 };
 
-  /*const getStatusColor = (status: string) => {
-    switch(status) {
-      case 'CONFIRMED': return 'bg-emerald-100 text-emerald-800';
-      case 'DELIVERED': return 'bg-green-100 text-green-800';
-      case 'IN_TRANSIT': return 'bg-blue-100 text-blue-800';
-      case 'PICKED_UP': return 'bg-purple-100 text-purple-800';
-      case 'ASSIGNED': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };*/
-
   const getStatusColor = (status: string) => {
   switch(status) {
     case 'CONFIRMED': return 'bg-emerald-100 text-emerald-800';
@@ -291,7 +280,7 @@ const getStatusActions = (status: string, suborder: any) => {
         </div>
       </div>
 
-      {/* Stats 
+      {/* Stats *
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-500">Total Deliveries</h3>
@@ -300,17 +289,21 @@ const getStatusActions = (status: string, suborder: any) => {
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-500">Active</h3>
           <p className="text-2xl font-bold text-yellow-600">
-            {deliveries.filter(d => 
-              d.suborders.some(so => ['ASSIGNED', 'PICKED_UP', 'IN_TRANSIT'].includes(so.status))
-            ).length}
+            {deliveries.reduce((count, d) => 
+              count + d.suborders.filter(so => 
+                ['ASSIGNED', 'PICKED_UP', 'IN_TRANSIT'].includes(so.status)
+              ).length, 0
+            )}
           </p>
         </div>
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-500">Completed</h3>
           <p className="text-2xl font-bold text-green-600">
-            {deliveries.filter(d => 
-              d.suborders.some(so => so.status === 'DELIVERED')
-            ).length}
+            {deliveries.reduce((count, d) => 
+              count + d.suborders.filter(so => 
+                ['DELIVERED', 'CONFIRMED'].includes(so.status)
+              ).length, 0
+            )}
           </p>
         </div>
         <div className="bg-white p-4 rounded-lg shadow">
@@ -318,122 +311,82 @@ const getStatusActions = (status: string, suborder: any) => {
           <p className="text-2xl font-bold text-purple-600">
             {formatCurrency(
               deliveries.reduce((sum, d) => 
-                sum + d.suborders.reduce((subSum, so) => 
-                  so.status === 'DELIVERED' ? subSum + so.deliveryFee : subSum, 0
-                ), 0
-              )
+                sum + d.suborders.reduce((subSum, so) => {
+                  // Count earnings from both DELIVERED and CONFIRMED statuses
+                  if (['DELIVERED', 'CONFIRMED'].includes(so.status)) {
+                    return subSum + so.deliveryFee;
+                  }
+                  return subSum;
+                }, 0)
+              , 0)
             )}
           </p>
+          <p className="text-xs text-gray-500 mt-1">
+            {formatCurrency(
+              deliveries.reduce((sum, d) => 
+                sum + d.suborders.reduce((subSum, so) => {
+                  // Only confirmed earnings (rider has verified)
+                  if (so.status === 'CONFIRMED' && so.deliveryDetails?.riderConfirmedAt) {
+                    return subSum + so.deliveryFee;
+                  }
+                  return subSum;
+                }, 0)
+              , 0)
+            )} confirmed
+          </p>
         </div>
-      </div>*/}
+      </div>
 
-      {/* Stats */}
-<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-  <div className="bg-white p-4 rounded-lg shadow">
-    <h3 className="text-sm font-medium text-gray-500">Total Deliveries</h3>
-    <p className="text-2xl font-bold text-gray-900">{totalDeliveries}</p>
-  </div>
-  <div className="bg-white p-4 rounded-lg shadow">
-    <h3 className="text-sm font-medium text-gray-500">Active</h3>
-    <p className="text-2xl font-bold text-yellow-600">
-      {deliveries.reduce((count, d) => 
-        count + d.suborders.filter(so => 
-          ['ASSIGNED', 'PICKED_UP', 'IN_TRANSIT'].includes(so.status)
-        ).length, 0
-      )}
-    </p>
-  </div>
-  <div className="bg-white p-4 rounded-lg shadow">
-    <h3 className="text-sm font-medium text-gray-500">Completed</h3>
-    <p className="text-2xl font-bold text-green-600">
-      {deliveries.reduce((count, d) => 
-        count + d.suborders.filter(so => 
-          ['DELIVERED', 'CONFIRMED'].includes(so.status)
-        ).length, 0
-      )}
-    </p>
-  </div>
-  <div className="bg-white p-4 rounded-lg shadow">
-    <h3 className="text-sm font-medium text-gray-500">Earnings</h3>
-    <p className="text-2xl font-bold text-purple-600">
-      {formatCurrency(
-        deliveries.reduce((sum, d) => 
-          sum + d.suborders.reduce((subSum, so) => {
-            // Count earnings from both DELIVERED and CONFIRMED statuses
-            if (['DELIVERED', 'CONFIRMED'].includes(so.status)) {
-              return subSum + so.deliveryFee;
-            }
-            return subSum;
-          }, 0)
-        , 0)
-      )}
-    </p>
-    <p className="text-xs text-gray-500 mt-1">
-      {formatCurrency(
-        deliveries.reduce((sum, d) => 
-          sum + d.suborders.reduce((subSum, so) => {
-            // Only confirmed earnings (rider has verified)
-            if (so.status === 'CONFIRMED' && so.deliveryDetails?.riderConfirmedAt) {
-              return subSum + so.deliveryFee;
-            }
-            return subSum;
-          }, 0)
-        , 0)
-      )} confirmed
-    </p>
-  </div>
-</div>
+      <div className="bg-white p-4 rounded-lg shadow mb-6">
+        <h3 className="text-sm font-medium text-gray-700 mb-3">Earnings Breakdown</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <p className="text-xs text-gray-500">Pending Payment</p>
+            <p className="text-lg font-semibold text-yellow-600">
+              {formatCurrency(
+                deliveries.reduce((sum, d) => 
+                  sum + d.suborders.reduce((subSum, so) => 
+                    so.status === 'DELIVERED' && !so.deliveryDetails?.riderConfirmedAt 
+                      ? subSum + so.deliveryFee 
+                      : subSum, 0
+                  ), 0
+                )
+              )}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Confirmed Payment</p>
+            <p className="text-lg font-semibold text-emerald-600">
+              {formatCurrency(
+                deliveries.reduce((sum, d) => 
+                  sum + d.suborders.reduce((subSum, so) => 
+                    so.status === 'CONFIRMED' && so.deliveryDetails?.riderConfirmedAt 
+                      ? subSum + so.deliveryFee 
+                      : subSum, 0
+                  ), 0
+                )
+              )}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Total Earned</p>
+            <p className="text-lg font-semibold text-purple-600">
+              {formatCurrency(
+                deliveries.reduce((sum, d) => 
+                  sum + d.suborders.reduce((subSum, so) => {
+                    if (['DELIVERED', 'CONFIRMED'].includes(so.status)) {
+                      return subSum + so.deliveryFee;
+                    }
+                    return subSum;
+                  }, 0)
+                , 0)
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
 
-<div className="bg-white p-4 rounded-lg shadow mb-6">
-  <h3 className="text-sm font-medium text-gray-700 mb-3">Earnings Breakdown</h3>
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div>
-      <p className="text-xs text-gray-500">Pending Payment</p>
-      <p className="text-lg font-semibold text-yellow-600">
-        {formatCurrency(
-          deliveries.reduce((sum, d) => 
-            sum + d.suborders.reduce((subSum, so) => 
-              so.status === 'DELIVERED' && !so.deliveryDetails?.riderConfirmedAt 
-                ? subSum + so.deliveryFee 
-                : subSum, 0
-            ), 0
-          )
-        )}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs text-gray-500">Confirmed Payment</p>
-      <p className="text-lg font-semibold text-emerald-600">
-        {formatCurrency(
-          deliveries.reduce((sum, d) => 
-            sum + d.suborders.reduce((subSum, so) => 
-              so.status === 'CONFIRMED' && so.deliveryDetails?.riderConfirmedAt 
-                ? subSum + so.deliveryFee 
-                : subSum, 0
-            ), 0
-          )
-        )}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs text-gray-500">Total Earned</p>
-      <p className="text-lg font-semibold text-purple-600">
-        {formatCurrency(
-          deliveries.reduce((sum, d) => 
-            sum + d.suborders.reduce((subSum, so) => {
-              if (['DELIVERED', 'CONFIRMED'].includes(so.status)) {
-                return subSum + so.deliveryFee;
-              }
-              return subSum;
-            }, 0)
-          , 0)
-        )}
-      </p>
-    </div>
-  </div>
-</div>
-
-      {/* Deliveries List */}
+      {/* Deliveries List *
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {deliveries.length === 0 ? (
           <div className="p-8 text-center">
@@ -545,7 +498,7 @@ const getStatusActions = (status: string, suborder: any) => {
               </table>
             </div>
             
-            {/* Pagination */}
+            {/* Pagination *
             {totalPages > 1 && (
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
                 <div className="flex justify-between items-center">
@@ -573,6 +526,353 @@ const getStatusActions = (status: string, suborder: any) => {
               </div>
             )}
           </>
+        )}
+      </div>
+    </div>
+  );
+}*/
+
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { Eye, Package, MapPin, Calendar, ChevronRight } from 'lucide-react';
+
+interface Delivery {
+  _id: string;
+  orderId: string;
+  createdAt: string;
+  shipping: {
+    address: string;
+    city: string;
+    country: string;
+    phone: string;
+  };
+  suborders: {
+    _id: string;
+    vendorId: string;
+    shopId: string;
+    status: 'ASSIGNED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED' | 'CONFIRMED';
+    deliveryFee: number;
+    deliveryDetails?: {
+      pickupAddress?: string;
+      dropoffAddress: string;
+      estimatedTime?: string;
+      notes?: string;
+      confirmationCode?: string; 
+      confirmedAt?: string; 
+      riderConfirmedAt?: string;
+    };
+    items: Array<{
+      name: string;
+      quantity: number;
+      price: number;
+      image?: string;
+    }>;
+    amount: number;
+  }[];
+}
+
+interface DeliveryResponse {
+  deliveries: Delivery[];
+  totalPages: number;
+  currentPage: number;
+  total: number;
+}
+
+export default function DeliveryDashboard() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalDeliveries, setTotalDeliveries] = useState(0);
+
+  useEffect(() => {
+    if (user?.role === 'delivery') {
+      fetchDeliveries();
+    }
+  }, [statusFilter, currentPage, user]);
+
+  const fetchDeliveries = async () => {
+    if (!user || user.role !== 'delivery') return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const queryParams = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: '10',
+        ...(statusFilter !== 'all' && { status: statusFilter })
+      });
+      
+      const response = await fetch(`/api/delivery/rider?${queryParams}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch deliveries');
+      }
+      
+      const data: DeliveryResponse = await response.json();
+      setDeliveries(data.deliveries);
+      setTotalPages(data.totalPages);
+      setTotalDeliveries(data.total);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case 'CONFIRMED': return 'bg-emerald-100 text-emerald-800';
+      case 'DELIVERED': return 'bg-green-100 text-green-800';
+      case 'IN_TRANSIT': return 'bg-blue-100 text-blue-800';
+      case 'PICKED_UP': return 'bg-purple-100 text-purple-800';
+      case 'ASSIGNED': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const handleViewDelivery = (orderId: string, suborderId: string) => {
+    router.push(`/delivery/orders/${orderId}/${suborderId}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#bf2c7e]"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 p-4 rounded-lg">
+        <p className="text-red-800">Error: {error}</p>
+        <button 
+          onClick={fetchDeliveries}
+          className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Delivery Dashboard</h1>
+          <p className="text-gray-600 mt-1">View and manage your delivery assignments</p>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <select 
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff199c]"
+          >
+            <option value="all">All Status</option>
+            <option value="assigned">Assigned</option>
+            <option value="picked_up">Picked Up</option>
+            <option value="in_transit">In Transit</option>
+            <option value="delivered">Delivered</option>
+            <option value="confirmed">Confirmed</option>
+          </select>
+          
+          <button
+            onClick={fetchDeliveries}
+            className="px-4 py-2 bg-[#bf2c7e] text-white rounded-lg hover:bg-[#a8246e]"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h3 className="text-sm font-medium text-gray-500">Total Deliveries</h3>
+          <p className="text-2xl font-bold text-gray-900">{totalDeliveries}</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h3 className="text-sm font-medium text-gray-500">Active</h3>
+          <p className="text-2xl font-bold text-yellow-600">
+            {deliveries.reduce((count, d) => 
+              count + d.suborders.filter(so => 
+                ['ASSIGNED', 'PICKED_UP', 'IN_TRANSIT'].includes(so.status)
+              ).length, 0
+            )}
+          </p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h3 className="text-sm font-medium text-gray-500">Completed</h3>
+          <p className="text-2xl font-bold text-green-600">
+            {deliveries.reduce((count, d) => 
+              count + d.suborders.filter(so => 
+                ['DELIVERED', 'CONFIRMED'].includes(so.status)
+              ).length, 0
+            )}
+          </p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h3 className="text-sm font-medium text-gray-500">Earnings</h3>
+          <p className="text-2xl font-bold text-purple-600">
+            {formatCurrency(
+              deliveries.reduce((sum, d) => 
+                sum + d.suborders.reduce((subSum, so) => {
+                  if (['DELIVERED', 'CONFIRMED'].includes(so.status)) {
+                    return subSum + so.deliveryFee;
+                  }
+                  return subSum;
+                }, 0)
+              , 0)
+            )}
+          </p>
+        </div>
+      </div>
+
+      {/* Deliveries List - Card View */}
+      <div className="space-y-4">
+        {deliveries.length === 0 ? (
+          <div className="bg-white p-8 text-center rounded-lg shadow">
+            <Package className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No deliveries found</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              You don't have any delivery assignments yet.
+            </p>
+          </div>
+        ) : (
+          deliveries.map((delivery) => 
+            delivery.suborders.map((suborder) => (
+              <div 
+                key={`${delivery._id}-${suborder._id}`}
+                className="bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+              >
+                <div className="p-6">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    {/* Left Section - Order Info */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(suborder.status)}`}>
+                          {suborder.status.replace('_', ' ')}
+                        </span>
+                        <span className="text-sm font-medium text-gray-900">
+                          Order #{delivery.orderId}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                        <div className="flex items-start gap-2">
+                          <Package className="h-4 w-4 text-gray-400 mt-0.5" />
+                          <div>
+                            <p className="text-sm text-gray-600">
+                              {suborder.items.length} item(s) • {suborder.items.reduce((sum, item) => sum + item.quantity, 0)} units
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Total: {formatCurrency(suborder.amount)}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-2">
+                          <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
+                          <div>
+                            <p className="text-sm text-gray-600 truncate max-w-xs">
+                              {suborder.deliveryDetails?.dropoffAddress || delivery.shipping.address}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              📞 {delivery.shipping.phone}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-2">
+                          <Calendar className="h-4 w-4 text-gray-400 mt-0.5" />
+                          <div>
+                            <p className="text-sm text-gray-600">
+                              {formatDate(delivery.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-2">
+                          <div className="font-medium text-[#bf2c7e]">
+                            {formatCurrency(suborder.deliveryFee)}
+                          </div>
+                          <span className="text-xs text-gray-500">delivery fee</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Section - Action */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleViewDelivery(delivery._id, suborder._id)}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#bf2c7e] text-white rounded-lg hover:bg-[#a8246e] transition-colors"
+                      >
+                        <Eye className="h-4 w-4" />
+                        <span>View Details</span>
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="px-6 py-4 bg-white rounded-lg shadow">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-gray-700">
+                Showing page <span className="font-medium">{currentPage}</span> of{' '}
+                <span className="font-medium">{totalPages}</span>
+              </p>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

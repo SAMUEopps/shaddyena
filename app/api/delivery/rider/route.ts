@@ -501,6 +501,31 @@ export async function POST(req: NextRequest) {
         statusMessage = "Delivery completed. Waiting for customer confirmation";
         break;
 
+        // In the POST method, update the "pickup" case:
+        case "pickup":
+          if (suborder.status !== 'ASSIGNED') {
+            return NextResponse.json({ message: "Cannot pickup - order not assigned" }, { status: 400 });
+          }
+          
+          // Get deliveryPrice from request body
+          const { deliveryPrice, notes: pickupNotes } = await req.json();
+          
+          if (!deliveryPrice || deliveryPrice <= 0) {
+            return NextResponse.json({ message: "Please provide a valid delivery price" }, { status: 400 });
+          }
+          
+          suborder.status = 'PICKED_UP';
+          suborder.deliveryFee = deliveryPrice; // Set the delivery fee
+          suborder.deliveryDetails = suborder.deliveryDetails || {};
+          suborder.deliveryDetails.actualTime = new Date();
+          
+          if (pickupNotes) {
+            suborder.deliveryDetails.notes = pickupNotes;
+          }
+          
+          statusMessage = "Package picked up successfully";
+          break;
+
       default:
         return NextResponse.json({ message: "Invalid action" }, { status: 400 });
     }
