@@ -264,7 +264,7 @@ export async function POST(req: NextRequest) {
     );
   }
 }*/
-
+//api/delivery/rider/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import mongoose, { Types } from "mongoose"; // Import Types
@@ -502,7 +502,7 @@ export async function POST(req: NextRequest) {
         break;
 
         // In the POST method, update the "pickup" case:
-        case "pickup":
+        /*case "pickup":
           if (suborder.status !== 'ASSIGNED') {
             return NextResponse.json({ message: "Cannot pickup - order not assigned" }, { status: 400 });
           }
@@ -524,7 +524,32 @@ export async function POST(req: NextRequest) {
           }
           
           statusMessage = "Package picked up successfully";
-          break;
+          break;*/
+        // app/api/delivery/rider/route.ts (update the pickup case)
+
+        case "pickup":
+          if (suborder.status !== 'ASSIGNED') {
+            return NextResponse.json({ message: "Cannot pickup - order not assigned" }, { status: 400 });
+          }
+          
+          const { deliveryPrice, notes: pickupNotes } = await req.json();
+          
+          if (!deliveryPrice || deliveryPrice <= 0) {
+            return NextResponse.json({ message: "Please provide a valid delivery price" }, { status: 400 });
+          }
+          
+          suborder.status = 'PICKED_UP';
+          suborder.deliveryFee = deliveryPrice;
+          suborder.deliveryDetails = suborder.deliveryDetails || {};
+          suborder.deliveryDetails.actualTime = new Date();
+          suborder.deliveryDetails.pickupAddress = suborder.deliveryDetails?.pickupAddress || 'Vendor location';
+          
+          if (pickupNotes) {
+            suborder.deliveryDetails.notes = pickupNotes;
+          }
+          
+          statusMessage = "Package picked up successfully";
+          break;   
 
       default:
         return NextResponse.json({ message: "Invalid action" }, { status: 400 });

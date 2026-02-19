@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Types } from 'mongoose';
 
 interface OrdersTabProps {
@@ -371,7 +370,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
             </div>
           </div>
         </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+        {/*<td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
           <button 
             onClick={() => router.push(`/orders/${order._id}`)}
             className="text-[#bf2c7e] hover:text-[#a8246e] transition-colors"
@@ -379,7 +378,22 @@ export default function OrdersTab({ role }: OrdersTabProps) {
             View Details
           </button>
 
-        </td>
+        </td>*/}
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+        <button 
+          onClick={() => {
+            // Pass view mode as query parameter
+            const params = new URLSearchParams();
+            if (isVendor && viewMode === 'customer') {
+              params.set('viewAs', 'customer');
+            }
+            router.push(`/orders/${order._id}${params.toString() ? `?${params.toString()}` : ''}`);
+          }}
+          className="text-[#bf2c7e] hover:text-[#a8246e] transition-colors"
+        >
+          View Details
+        </button>
+      </td>
       </tr>
     );
   };

@@ -8,14 +8,10 @@ import {
   Package, 
   MapPin, 
   Phone, 
-  Calendar,
-  User,
   Store,
   Truck,
-  CheckCircle,
   Clock,
-  AlertCircle
-} from 'lucide-react';
+  CheckCircle} from 'lucide-react';
 
 interface DeliveryItem {
   name: string;
@@ -73,6 +69,7 @@ export default function DeliveryDetailPage() {
   const [pickupNotes, setPickupNotes] = useState('');
   const [otp, setOtp] = useState('');
   const [confirmationCode, setConfirmationCode] = useState('');
+  const [showConfirmationForm, setShowConfirmationForm] = useState(false);
 
   useEffect(() => {
     if (user?.role === 'delivery') {
@@ -169,7 +166,7 @@ export default function DeliveryDetailPage() {
     }
   };
 
-  const handleDeliver = async () => {
+  /*const handleDeliver = async () => {
     setActiveAction('deliver');
     
     try {
@@ -199,7 +196,75 @@ export default function DeliveryDetailPage() {
     } finally {
       setActiveAction(null);
     }
-  };
+  };*/
+
+  const handleDeliver = async () => {
+  setActiveAction('deliver');
+  
+  try {
+    const response = await fetch('/api/delivery/rider', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        orderId,
+        suborderId,
+        action: 'deliver',
+      }),
+    });
+    
+    if (response.ok) {
+      alert('Package marked as delivered! Waiting for customer confirmation.');
+      fetchDeliveryDetails();
+    } else {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to mark as delivered');
+    }
+  } catch (err) {
+    alert(err instanceof Error ? err.message : 'Failed to update delivery');
+  } finally {
+    setActiveAction(null);
+  }
+};
+
+const handleConfirmWithCode = async () => {
+  if (!confirmationCode) {
+    alert('Please enter the confirmation code');
+    return;
+  }
+
+  setActiveAction('confirm');
+  
+  try {
+    const response = await fetch('/api/orders/confirm-delivery', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        orderId,
+        suborderId,
+        confirmationCode: confirmationCode.toUpperCase().trim(),
+      }),
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert('✅ Delivery confirmed successfully! Payment will be processed.');
+      fetchDeliveryDetails();
+      setConfirmationCode('');
+      setShowConfirmationForm(false);
+    } else {
+      throw new Error(data.message || 'Invalid confirmation code');
+    }
+  } catch (err) {
+    alert(err instanceof Error ? err.message : 'Failed to confirm delivery');
+  } finally {
+    setActiveAction(null);
+  }
+};
 
   const handleConfirmDelivery = async () => {
     if (!confirmationCode) {
@@ -312,7 +377,7 @@ export default function DeliveryDetailPage() {
       </div>
 
       {/* Action Buttons */}
-      <div className="bg-white rounded-lg shadow p-6">
+      {/*<div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Delivery Actions</h2>
         
         {suborder.status === 'ASSIGNED' && !showPriceForm && (
@@ -437,6 +502,241 @@ export default function DeliveryDetailPage() {
             </div>
           </div>
         )}
+      </div>*/}
+      
+      {/* Action Buttons */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Delivery Actions</h2>
+        
+        {suborder.status === 'ASSIGNED' && !showPriceForm && (
+          <button
+            onClick={() => setShowPriceForm(true)}
+            className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            Start Pickup Process
+          </button>
+        )}
+
+        {showPriceForm && (
+          <div className="space-y-4 border-t pt-4">
+            <h3 className="font-medium text-gray-900">Enter Delivery Details</h3>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Delivery Price (KES) *
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="50"
+                value={deliveryPrice}
+                onChange={(e) => setDeliveryPrice(Number(e.target.value))}
+                className="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff199c] focus:border-transparent"
+                placeholder="Enter delivery price"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pickup Notes (Optional)
+              </label>
+              <textarea
+                value={pickupNotes}
+                onChange={(e) => setPickupNotes(e.target.value)}
+                rows={3}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff199c] focus:border-transparent"
+                placeholder="Any notes about the package condition, pickup location, etc."
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handlePickup}
+                disabled={activeAction === 'pickup' || deliveryPrice <= 0}
+                className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+              >
+                {activeAction === 'pickup' ? 'Processing...' : 'Confirm Pickup'}
+              </button>
+              <button
+                onClick={() => setShowPriceForm(false)}
+                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {suborder.status === 'PICKED_UP' && (
+          <button
+            onClick={handleInTransit}
+            disabled={activeAction === 'in_transit'}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            {activeAction === 'in_transit' ? 'Processing...' : 'Mark as In Transit'}
+          </button>
+        )}
+
+        {suborder.status === 'IN_TRANSIT' && (
+          <button
+            onClick={handleDeliver}
+            disabled={activeAction === 'deliver'}
+            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+          >
+            {activeAction === 'deliver' ? 'Processing...' : 'Mark as Delivered'}
+          </button>
+        )}
+
+        {/* Show confirmation form when customer has generated code */}
+        {/*{suborder.status === 'DELIVERED' && suborder.deliveryDetails?.confirmationCode && !suborder.deliveryDetails?.riderConfirmedAt && (
+          <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <div className="flex items-start gap-3">
+              <div className="flex-1">
+                <h3 className="font-medium text-yellow-800 mb-2">
+                  📋 Confirmation Code Required
+                </h3>
+                <p className="text-sm text-yellow-700 mb-3">
+                  The customer has confirmed receipt. Ask them for the 8-digit confirmation code to complete the delivery.
+                </p>
+                
+                {!showConfirmationForm ? (
+                  <button
+                    onClick={() => setShowConfirmationForm(true)}
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+                  >
+                    Enter Confirmation Code
+                  </button>
+                ) : (
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      placeholder="Enter 8-digit code (e.g., ABC123XY)"
+                      value={confirmationCode}
+                      onChange={(e) => setConfirmationCode(e.target.value.toUpperCase())}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent font-mono text-lg"
+                      maxLength={8}
+                      autoFocus
+                    />
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleConfirmWithCode}
+                        disabled={activeAction === 'confirm' || confirmationCode.length !== 8}
+                        className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+                      >
+                        {activeAction === 'confirm' ? 'Verifying...' : 'Verify & Complete'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowConfirmationForm(false);
+                          setConfirmationCode('');
+                        }}
+                        className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      The code is case-sensitive and should be 8 characters long.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {suborder.status === 'CONFIRMED' && (
+          <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="h-6 w-6 text-emerald-600" />
+              <div>
+                <h3 className="font-medium text-emerald-800">Delivery Complete!</h3>
+                <p className="text-sm text-emerald-600">
+                  Payment will be processed within 24 hours.
+                </p>
+                {suborder.deliveryDetails?.riderConfirmedAt && (
+                  <p className="text-xs text-emerald-500 mt-1">
+                    Verified at: {new Date(suborder.deliveryDetails.riderConfirmedAt).toLocaleString()}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}*/}
+        {suborder.status === 'DELIVERED' && suborder.deliveryDetails?.confirmationCode && !suborder.deliveryDetails?.riderConfirmedAt && (
+        <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+          <div className="flex items-start gap-3">
+            <div className="flex-1">
+              <h3 className="font-medium text-yellow-800 mb-2">
+                📋 Confirmation Code Required
+              </h3>
+              <p className="text-sm text-yellow-700 mb-3">
+                The customer has confirmed receipt. Ask them for the 8-digit confirmation code to complete the delivery.
+              </p>
+              
+              {!showConfirmationForm ? (
+                <button
+                  onClick={() => setShowConfirmationForm(true)}
+                  className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+                >
+                  Enter Confirmation Code
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Enter 8-digit code (e.g., ABC123XY)"
+                    value={confirmationCode}
+                    onChange={(e) => setConfirmationCode(e.target.value.toUpperCase())}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent font-mono text-lg"
+                    maxLength={8}
+                    autoFocus
+                  />
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleConfirmWithCode}
+                      disabled={activeAction === 'confirm' || confirmationCode.length !== 8}
+                      className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+                    >
+                      {activeAction === 'confirm' ? 'Verifying...' : 'Verify & Complete'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowConfirmationForm(false);
+                        setConfirmationCode('');
+                      }}
+                      className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    The code is case-sensitive and should be 8 characters long.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Show success message only when fully confirmed */}
+      {suborder.status === 'CONFIRMED' && (
+        <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="h-6 w-6 text-emerald-600" />
+            <div>
+              <h3 className="font-medium text-emerald-800">Delivery Complete!</h3>
+              <p className="text-sm text-emerald-600">
+                Payment will be processed within 24 hours.
+              </p>
+              {suborder.deliveryDetails?.riderConfirmedAt && (
+                <p className="text-xs text-emerald-500 mt-1">
+                  Verified at: {new Date(suborder.deliveryDetails.riderConfirmedAt).toLocaleString()}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       </div>
 
       {/* Delivery Information */}

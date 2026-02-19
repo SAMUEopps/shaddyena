@@ -126,6 +126,11 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
   const vendorView = searchParams.get('vendorView') === 'true';
   const suborderId = searchParams.get('suborderId');
   const adminView = searchParams.get('adminView') === 'true';
+  const viewAs = searchParams.get('viewAs'); 
+
+  const effectiveRole = (user?.role === 'vendor' && viewAs === 'customer') 
+  ? 'customer' 
+  : user?.role;
 
   // Add function to handle delivery confirmation
 const handleConfirmDelivery = async (suborderId?: string, code?: string) => {
@@ -465,7 +470,7 @@ const transformAllSubordersForStatusBar = (suborders: Suborder[]): StatusBarSubo
     return order.items;
   };
 
-  /*const handleStatusUpdate = async (newStatus: string, isMainOrder: boolean = false, suborderId?: string) => {
+  /*1const handleStatusUpdate = async (newStatus: string, isMainOrder: boolean = false, suborderId?: string) => {
     if (!order) return;
     
     setUpdatingStatus(true);
@@ -507,7 +512,7 @@ const transformAllSubordersForStatusBar = (suborders: Suborder[]): StatusBarSubo
     }
   };*/
 
-  const handleStatusUpdate = async (newStatus: string, isMainOrder: boolean = false, suborderId?: string) => {
+  /*2const handleStatusUpdate = async (newStatus: string, isMainOrder: boolean = false, suborderId?: string) => {
   if (!order) return;
   
   setUpdatingStatus(true);
@@ -564,6 +569,83 @@ const transformAllSubordersForStatusBar = (suborders: Suborder[]): StatusBarSubo
     
     if (response.ok) {
       alert(`Status updated to ${newStatus} successfully!`);
+      fetchOrder();
+    } else {
+      throw new Error(data.message || 'Failed to update status');
+    }
+  } catch (error) {
+    console.error('Error updating status:', error);
+    alert(error instanceof Error ? error.message : 'Failed to update order status');
+  } finally {
+    setUpdatingStatus(false);
+  }
+};*/
+
+const handleStatusUpdate = async (newStatus: string, isMainOrder: boolean = false, suborderId?: string) => {
+  if (!order) return;
+  
+  setUpdatingStatus(true);
+  setError(null);
+  
+  try {
+    // CUSTOMER CONFIRMATION - only when status is DELIVERED
+    if (newStatus === 'CONFIRMED' && user?.role === 'customer' && suborderId) {
+      console.log('Customer confirming delivery for suborder:', suborderId);
+      
+      const response = await fetch('/api/orders/confirm-delivery', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: order._id,
+          suborderId: suborderId,
+          // No confirmationCode needed - API will generate it
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert(`✅ Delivery confirmed! Your confirmation code: ${data.confirmationCode}`);
+        fetchOrder(); // Refresh the order
+      } else {
+        console.error('Confirmation failed:', data);
+        alert(data.message || 'Failed to confirm delivery');
+      }
+      return;
+    }
+    
+    // All other status updates
+    const requestBody: any = {
+      orderId: order._id,
+      status: newStatus
+    };
+
+    if (!isMainOrder && suborderId) {
+      requestBody.suborderId = suborderId;
+    } else if (user?.role === 'vendor' && vendorSuborder) {
+      requestBody.suborderId = vendorSuborder.suborder._id;
+    }
+
+    // Add riderId and deliveryFee for assignment
+    if (newStatus === 'ASSIGNED') {
+      requestBody.riderId = selectedRiderId;
+      requestBody.deliveryFee = deliveryFee;
+    }
+
+    const response = await fetch('/api/orders/update-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert(`✅ Status updated to ${newStatus} successfully!`);
       fetchOrder();
     } else {
       throw new Error(data.message || 'Failed to update status');
@@ -891,7 +973,7 @@ const transformAllSubordersForStatusBar = (suborders: Suborder[]): StatusBarSubo
               <h1 className="text-3xl font-bold text-gray-900">Order Details</h1>
               <p className="text-gray-600 mt-2">Order placed on {formatDate(order.createdAt)}</p>
               <p className="text-sm text-gray-500 mt-1">
-                Viewing as: <span className="capitalize font-medium">{role}</span>
+                Viewing as: <span className="capitalize font-medium">{effectiveRole}</span>
                 {isVendorViewingOrder && ' (Vendor View)'}
               </p>
               {isVendorViewingOrder && (
@@ -928,7 +1010,8 @@ const transformAllSubordersForStatusBar = (suborders: Suborder[]): StatusBarSubo
             />*/}
 
             <OrderStatusBar
-              role={role}
+              //role={effectiveRole}
+              role={effectiveRole as 'customer' | 'vendor' | 'admin' | 'delivery'} 
               orderStatus={order.status}
               paymentStatus={order.paymentStatus}
               vendorSuborder={vendorSuborder ? transformVendorSuborderForStatusBar(vendorSuborder.suborder) : null}

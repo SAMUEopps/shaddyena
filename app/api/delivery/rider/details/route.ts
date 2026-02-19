@@ -1,3 +1,4 @@
+//api/delivery/rider/details/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";

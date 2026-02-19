@@ -887,7 +887,9 @@ async function createRiderEarnings(order: any, suborder: any) {
 }
 */
 
-import { NextRequest, NextResponse } from "next/server";
+
+
+/*import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import Order from "@/models/Order";
 import dbConnect from "@/lib/dbConnect";
@@ -912,7 +914,7 @@ export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    /* ----------------------------- AUTHENTICATION ---------------------------- */
+    /* ----------------------------- AUTHENTICATION ---------------------------- *
     const token =
       req.cookies.get("token")?.value ||
       req.headers.get("authorization")?.split(" ")[1];
@@ -938,7 +940,7 @@ export async function POST(req: NextRequest) {
       riderId,
     });
 
-    /* -------------------------------- FIND ORDER ----------------------------- */
+    /* -------------------------------- FIND ORDER ----------------------------- *
     const order = await Order.findById(orderId);
     if (!order) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
@@ -947,7 +949,7 @@ export async function POST(req: NextRequest) {
     let updated = false;
     let oldStatus = "";
 
-    /* ============================ SUBORDER UPDATE ============================ */
+    /* ============================ SUBORDER UPDATE ============================ *
     if (suborderId) {
       const suborder = order.suborders.id(suborderId);
 
@@ -1122,7 +1124,7 @@ export async function POST(req: NextRequest) {
       console.log(`📊 Suborder status updated: ${oldStatus} → ${suborder.status}`);
     }
 
-    /* ============================== MAIN ORDER ============================== */
+    /* ============================== MAIN ORDER ============================== *
     else {
       if (!["admin", "customer"].includes(decoded.role)) {
         return NextResponse.json(
@@ -1192,7 +1194,7 @@ function generateConfirmationCode(): string {
   return code;
 }
 
-/* ----------------------- CREATE VENDOR EARNINGS ----------------------- */
+/* ----------------------- CREATE VENDOR EARNINGS ----------------------- *
 async function createVendorEarnings(order: any, suborder: any) {
   try {
     const exists = await VendorEarning.findOne({
@@ -1252,7 +1254,7 @@ async function createVendorEarnings(order: any, suborder: any) {
   }
 }
 
-/* ----------------------- CREATE RIDER EARNINGS ----------------------- */
+/* ----------------------- CREATE RIDER EARNINGS ----------------------- *
 async function createRiderEarnings(order: any, suborder: any) {
   try {
     const exists = await RiderEarning.findOne({
@@ -1299,5 +1301,493 @@ async function createRiderEarnings(order: any, suborder: any) {
   } catch (error) {
     console.error("❌ Rider earning creation failed", error);
     throw error;
+  }
+}*/
+
+
+import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+import Order from "@/models/Order";
+import dbConnect from "@/lib/dbConnect";
+import { VendorEarning, RiderEarning } from "@/models/VendorEarnings";
+import { Types } from "mongoose";
+
+interface DecodedUser {
+  userId: string;
+  role: "customer" | "vendor" | "admin" | "delivery";
+}
+
+interface RequestBody {
+  orderId: string;
+  status: string;
+  suborderId?: string;
+  notes?: string;
+  deliveryFee?: number;
+  riderId?: string;
+  viewAs?: 'customer' | 'vendor' | 'admin' | 'delivery';
+}
+
+// Helper function to generate confirmation code
+function generateConfirmationCode(): string {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  
+  for (let i = 0; i < 8; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    code += characters[randomIndex];
+  }
+  
+  return code;
+}
+
+// Helper function to create vendor earnings
+async function createVendorEarnings(order: any, suborder: any) {
+  try {
+    const exists = await VendorEarning.findOne({
+      orderId: order._id,
+      suborderId: suborder._id,
+      vendorId: suborder.vendorId,
+    });
+
+    if (exists) {
+      console.log("📘 Vendor earning already exists", {
+        suborderId: suborder._id,
+      });
+      return exists;
+    }
+
+    const vendorItems = order.items.filter(
+      (item: any) => item.vendorId === suborder.vendorId
+    );
+
+    const earning = new VendorEarning({
+      orderId: order._id,
+      vendorId: suborder.vendorId,
+      suborderId: suborder._id,
+      amount: suborder.amount,
+      commission: suborder.commission,
+      netAmount: suborder.netAmount,
+      itemsCount: vendorItems.reduce(
+        (sum: number, item: any) => sum + item.quantity,
+        0
+      ),
+      status: "PENDING",
+      orderDetails: {
+        orderId: order.orderId,
+        buyerName: typeof order.buyerId === 'object' 
+          ? `${order.buyerId.firstName} ${order.buyerId.lastName}`
+          : 'Customer',
+        buyerEmail: typeof order.buyerId === 'object' ? order.buyerId.email : '',
+        itemsCount: vendorItems.reduce((sum: number, item: any) => sum + item.quantity, 0),
+        createdAt: order.createdAt
+      },
+      vendorDetails: {
+        vendorId: suborder.vendorId,
+        businessName: '' // You might want to populate this from vendor profile
+      }
+    });
+
+    await earning.save();
+    console.log("✅ Vendor earning created", {
+      vendorId: suborder.vendorId,
+      netAmount: suborder.netAmount,
+    });
+
+    return earning;
+  } catch (error) {
+    console.error("❌ Vendor earning creation failed", error);
+    throw error;
+  }
+}
+
+// Helper function to create rider earnings
+async function createRiderEarnings(order: any, suborder: any) {
+  try {
+    const exists = await RiderEarning.findOne({
+      orderId: order._id,
+      suborderId: suborder._id,
+      riderId: suborder.riderId,
+    });
+
+    if (exists) {
+      console.log("📘 Rider earning already exists", {
+        suborderId: suborder._id,
+      });
+      return exists;
+    }
+
+    const earning = new RiderEarning({
+      riderId: suborder.riderId,
+      orderId: order._id,
+      suborderId: suborder._id,
+      deliveryFee: suborder.deliveryFee,
+      status: "PENDING",
+      orderDetails: {
+        orderId: order.orderId,
+        vendorId: suborder.vendorId,
+        vendorName: '', // Populate from vendor profile
+        pickupAddress: suborder.deliveryDetails?.pickupAddress || '',
+        dropoffAddress: suborder.deliveryDetails?.dropoffAddress || order.shipping.address,
+        createdAt: order.createdAt
+      },
+      riderDetails: {
+        riderId: suborder.riderId,
+        firstName: '', // Populate from user profile
+        lastName: ''
+      }
+    });
+
+    await earning.save();
+    console.log("✅ Rider earning created", {
+      riderId: suborder.riderId,
+      deliveryFee: suborder.deliveryFee,
+    });
+
+    return earning;
+  } catch (error) {
+    console.error("❌ Rider earning creation failed", error);
+    throw error;
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    await dbConnect();
+
+    /* ----------------------------- AUTHENTICATION ---------------------------- */
+    const token =
+      req.cookies.get("token")?.value ||
+      req.headers.get("authorization")?.split(" ")[1];
+
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET!
+    ) as DecodedUser;
+
+    const { orderId, status, suborderId, notes, deliveryFee, riderId, viewAs } =
+      (await req.json()) as RequestBody;
+
+    // Determine effective role (use viewAs if provided, otherwise use actual role)
+    const effectiveRole = viewAs || decoded.role;
+
+    console.log("📝 Status update request:", {
+      userId: decoded.userId,
+      actualRole: decoded.role,
+      effectiveRole,
+      viewAs,
+      orderId,
+      suborderId,
+      status,
+      riderId,
+      deliveryFee
+    });
+
+    /* -------------------------------- FIND ORDER ----------------------------- */
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    }
+
+    let updated = false;
+    let oldStatus = "";
+
+    /* ============================ SUBORDER UPDATE ============================ */
+    if (suborderId) {
+      const suborder = order.suborders.id(suborderId);
+
+      if (!suborder) {
+        return NextResponse.json(
+          { message: "Suborder not found" },
+          { status: 404 }
+        );
+      }
+
+      // Check permissions based on effective role
+      if (effectiveRole === "vendor") {
+        // Vendor permissions (selling to someone else)
+        if (suborder.vendorId !== decoded.userId) {
+          return NextResponse.json(
+            { message: "Forbidden - Not your suborder" },
+            { status: 403 }
+          );
+        }
+
+        // Vendor can mark as READY_FOR_PICKUP (from PROCESSING)
+        if (status === 'READY_FOR_PICKUP' && suborder.status === 'PROCESSING') {
+          oldStatus = suborder.status;
+          suborder.status = 'READY_FOR_PICKUP';
+          updated = true;
+          console.log(`✅ Vendor marked suborder as READY_FOR_PICKUP`);
+        } 
+        // Vendor can assign a rider (from READY_FOR_PICKUP)
+        else if (status === 'ASSIGNED' && suborder.status === 'READY_FOR_PICKUP' && riderId) {
+          oldStatus = suborder.status;
+          suborder.status = 'ASSIGNED';
+          suborder.riderId = new Types.ObjectId(riderId);
+          if (deliveryFee) suborder.deliveryFee = deliveryFee;
+          suborder.deliveryDetails = suborder.deliveryDetails || {};
+          suborder.deliveryDetails.assignedAt = new Date();
+          updated = true;
+          console.log(`✅ Vendor assigned rider ${riderId} to suborder`);
+        }
+        // Vendor can also mark as PROCESSING (if needed)
+        else if (status === 'PROCESSING' && suborder.status === 'PENDING') {
+          oldStatus = suborder.status;
+          suborder.status = 'PROCESSING';
+          updated = true;
+          console.log(`✅ Vendor started processing order`);
+        }
+        else {
+          return NextResponse.json(
+            { message: "Invalid vendor action" },
+            { status: 403 }
+          );
+        }
+      }
+
+      else if (effectiveRole === "admin") {
+        // Admin permissions
+        // Admin can mark as READY_FOR_PICKUP
+        if (status === 'READY_FOR_PICKUP' && suborder.status === 'PROCESSING') {
+          oldStatus = suborder.status;
+          suborder.status = 'READY_FOR_PICKUP';
+          updated = true;
+          console.log(`✅ Admin marked suborder as READY_FOR_PICKUP`);
+        }
+        // Admin can assign rider (from READY_FOR_PICKUP)
+        else if (status === 'ASSIGNED' && suborder.status === 'READY_FOR_PICKUP' && riderId) {
+          oldStatus = suborder.status;
+          suborder.status = 'ASSIGNED';
+          suborder.riderId = new Types.ObjectId(riderId);
+          if (deliveryFee) suborder.deliveryFee = deliveryFee;
+          suborder.deliveryDetails = suborder.deliveryDetails || {};
+          suborder.deliveryDetails.assignedAt = new Date();
+          updated = true;
+          console.log(`✅ Admin assigned rider ${riderId} to suborder`);
+        } 
+        // Admin can mark as IN_TRANSIT (rider picked up)
+        else if (status === 'IN_TRANSIT' && suborder.status === 'ASSIGNED') {
+          oldStatus = suborder.status;
+          suborder.status = 'IN_TRANSIT';
+          suborder.deliveryDetails = suborder.deliveryDetails || {};
+          suborder.deliveryDetails.pickedUpAt = new Date();
+          updated = true;
+          console.log(`✅ Admin marked suborder as IN_TRANSIT`);
+        }
+        // Admin confirms delivery
+        else if (status === 'DELIVERED' && (suborder.status === 'IN_TRANSIT' || suborder.status === 'ASSIGNED')) {
+          oldStatus = suborder.status;
+          suborder.status = 'DELIVERED';
+          suborder.deliveryDetails = suborder.deliveryDetails || {};
+          suborder.deliveryDetails.actualTime = new Date();
+          updated = true;
+          
+          // Create vendor earnings
+          await createVendorEarnings(order, suborder);
+          
+          // Create rider earnings
+          if (suborder.riderId && suborder.deliveryFee > 0) {
+            await createRiderEarnings(order, suborder);
+          }
+          
+          console.log(`✅ Admin confirmed delivery and created earnings`);
+        }
+        else if (status === 'CANCELLED') {
+          oldStatus = suborder.status;
+          suborder.status = 'CANCELLED';
+          updated = true;
+          console.log(`✅ Admin cancelled suborder`);
+        } else {
+          return NextResponse.json(
+            { message: "Invalid admin action for suborder" },
+            { status: 400 }
+          );
+        }
+      }
+
+      /*else if (effectiveRole === "customer") {
+        // Customer permissions (including vendors viewing as customer)
+        // Customer can confirm delivery
+        if (status === 'CONFIRMED' && suborder.status === 'DELIVERED') {
+          oldStatus = suborder.status;
+          suborder.status = 'CONFIRMED';
+          suborder.deliveryDetails = suborder.deliveryDetails || {};
+          suborder.deliveryDetails.confirmedAt = new Date();
+          
+          // Generate confirmation code
+          const code = generateConfirmationCode();
+          suborder.deliveryDetails.confirmationCode = code;
+          
+          updated = true;
+          console.log(`✅ Customer confirmed delivery with code: ${code}`);
+        } else {
+          return NextResponse.json(
+            { message: "Invalid customer action" },
+            { status: 403 }
+          );
+        }
+      }*/
+
+      else if (effectiveRole === "customer") {
+      // Customer permissions (including vendors viewing as customer)
+      // Customer can confirm delivery
+      if (status === 'CONFIRMED' && suborder.status === 'DELIVERED') {
+        oldStatus = suborder.status;
+        suborder.status = 'CONFIRMED';
+        suborder.deliveryDetails = suborder.deliveryDetails || {};
+        suborder.deliveryDetails.confirmedAt = new Date();
+        
+        // Generate confirmation code
+        const code = generateConfirmationCode();
+        suborder.deliveryDetails.confirmationCode = code;
+        
+        updated = true;
+        console.log(`✅ Customer confirmed delivery with code: ${code}`);
+        
+        // Save immediately to ensure code is in the database
+        await order.save();
+        
+        // Return the code in the response
+        return NextResponse.json({
+          success: true,
+          message: "Delivery confirmed successfully",
+          confirmationCode: code,
+          orderId: order._id,
+        });
+      } else {
+        return NextResponse.json(
+          { message: "Invalid customer action" },
+          { status: 403 }
+        );
+      }
+    }
+
+      else if (effectiveRole === "delivery") {
+        // Rider permissions
+        // Check if rider is assigned to this suborder
+        if (suborder.riderId?.toString() !== decoded.userId) {
+          return NextResponse.json(
+            { message: "Forbidden - Not your assigned delivery" },
+            { status: 403 }
+          );
+        }
+
+        // Rider can mark as PICKED_UP
+        if (status === 'PICKED_UP' && suborder.status === 'ASSIGNED') {
+          oldStatus = suborder.status;
+          suborder.status = 'PICKED_UP';
+          suborder.deliveryDetails = suborder.deliveryDetails || {};
+          suborder.deliveryDetails.pickedUpAt = new Date();
+          updated = true;
+          console.log(`✅ Rider picked up order`);
+        }
+        // Rider can mark as IN_TRANSIT
+        else if (status === 'IN_TRANSIT' && suborder.status === 'PICKED_UP') {
+          oldStatus = suborder.status;
+          suborder.status = 'IN_TRANSIT';
+          updated = true;
+          console.log(`✅ Rider marked as IN_TRANSIT`);
+        }
+        // Rider can mark as DELIVERED
+        else if (status === 'DELIVERED' && suborder.status === 'IN_TRANSIT') {
+          oldStatus = suborder.status;
+          suborder.status = 'DELIVERED';
+          suborder.deliveryDetails = suborder.deliveryDetails || {};
+          suborder.deliveryDetails.actualTime = new Date();
+          suborder.deliveryDetails.riderConfirmedAt = new Date();
+          updated = true;
+          console.log(`✅ Rider marked as DELIVERED`);
+        } else {
+          return NextResponse.json(
+            { message: "Invalid rider action" },
+            { status: 403 }
+          );
+        }
+      }
+
+      console.log(`📊 Suborder status updated: ${oldStatus} → ${suborder.status}`);
+    }
+
+    /* ============================== MAIN ORDER ============================== */
+    else {
+      if (!["admin", "customer"].includes(effectiveRole)) {
+        return NextResponse.json(
+          { message: "Forbidden" },
+          { status: 403 }
+        );
+      }
+
+      if (effectiveRole === "admin") {
+        // Admin can update main order status
+        oldStatus = order.status;
+        order.status = status as any;
+        updated = true;
+        
+        // If marking as COMPLETED, check all suborders are delivered or confirmed
+        if (status === 'COMPLETED') {
+          const allDeliveredOrConfirmed = order.suborders.every(
+            (so: any) => so.status === 'DELIVERED' || so.status === 'CONFIRMED' || so.status === 'CANCELLED'
+          );
+          
+          if (!allDeliveredOrConfirmed) {
+            return NextResponse.json(
+              { message: "Cannot complete order - not all suborders delivered or confirmed" },
+              { status: 400 }
+            );
+          }
+        }
+        
+        console.log(`📊 Main order status updated: ${oldStatus} → ${order.status}`);
+      }
+      
+      else if (effectiveRole === "customer") {
+        // Customer can cancel their order if still pending/processing
+        if (status === 'CANCELLED' && ['PENDING', 'PROCESSING'].includes(order.status)) {
+          oldStatus = order.status;
+          order.status = 'CANCELLED';
+          
+          // Also cancel all suborders that aren't already shipped/delivered
+          order.suborders.forEach((suborder: any) => {
+            if (!['SHIPPED', 'DELIVERED', 'CONFIRMED'].includes(suborder.status)) {
+              suborder.status = 'CANCELLED';
+            }
+          });
+          
+          updated = true;
+          console.log(`✅ Customer cancelled order`);
+        } else {
+          return NextResponse.json(
+            { message: "Invalid customer action for main order" },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
+    if (!updated) {
+      return NextResponse.json(
+        { message: "No changes made" },
+        { status: 400 }
+      );
+    }
+
+    await order.save();
+    console.log(`✅ Order saved successfully`);
+
+    return NextResponse.json({
+      success: true,
+      message: "Status updated successfully",
+      orderId: order._id,
+    });
+  } catch (error: any) {
+    console.error("🔥 Order status update error:", error);
+    return NextResponse.json(
+      { message: "Server error", error: error.message },
+      { status: 500 }
+    );
   }
 }

@@ -45,6 +45,13 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
   const vendorView = searchParams.get('vendorView') === 'true';
   const suborderId = searchParams.get('suborderId');
   const adminView = searchParams.get('adminView') === 'true';
+  const viewAs = searchParams.get('viewAs'); // Add this
+  
+  // Determine effective role for this view
+  const effectiveRole = (user?.role === 'vendor' && viewAs === 'customer') 
+    ? 'customer' 
+    : user?.role;
+  
 
   // User role
   const role = user?.role;
@@ -158,7 +165,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
     }
   };
 
-  const handleStatusUpdate = async (newStatus: string, isMainOrder: boolean = false, suborderId?: string) => {
+  /*const handleStatusUpdate = async (newStatus: string, isMainOrder: boolean = false, suborderId?: string) => {
     if (!order) return;
     
     setUpdatingStatus(true);
@@ -194,7 +201,8 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
       // Original logic for other status updates
       const requestBody: any = {
         orderId: order._id,
-        status: newStatus
+        status: newStatus,
+        viewAs: effectiveRole, 
       };
 
       if (!isMainOrder && suborderId) {
@@ -225,7 +233,69 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
     } finally {
       setUpdatingStatus(false);
     }
-  };
+  };*/
+
+  const handleStatusUpdate = async (newStatus: string, isMainOrder: boolean = false, suborderId?: string) => {
+  if (!order) return;
+  
+  setUpdatingStatus(true);
+  setError(null);
+  
+  try {
+    const requestBody: any = {
+      orderId: order._id,
+      status: newStatus,
+      viewAs: effectiveRole,
+    };
+
+    // Add riderId and deliveryFee if they exist (for assignment)
+    if (selectedRiderId) {
+      requestBody.riderId = selectedRiderId;
+    }
+    if (deliveryFee > 0) {
+      requestBody.deliveryFee = deliveryFee;
+    }
+
+    if (!isMainOrder && suborderId) {
+      requestBody.suborderId = suborderId;
+    } else if (user?.role === 'vendor' && vendorSuborder) {
+      requestBody.suborderId = vendorSuborder.suborder._id;
+    }
+
+    const response = await fetch('/api/orders/update-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      // Check if this is a customer confirmation that returns a code
+      if (newStatus === 'CONFIRMED' && data.confirmationCode) {
+        alert(`✅ Delivery confirmed! Your confirmation code is: ${data.confirmationCode}\n\nPlease share this code with the delivery rider.`);
+      } else {
+        alert(`Status updated to ${newStatus} successfully!`);
+      }
+      fetchOrder(); // Refresh the order to show the code
+      
+      // Clear form fields if they were used
+      if (newStatus === 'ASSIGNED') {
+        setSelectedRiderId('');
+        setDeliveryFee(0);
+      }
+    } else {
+      throw new Error(data.message || 'Failed to update status');
+    }
+  } catch (error) {
+    console.error('Error updating status:', error);
+    alert(error instanceof Error ? error.message : 'Failed to update order status');
+  } finally {
+    setUpdatingStatus(false);
+  }
+};
 
   const handleAssignRider = async () => {
     if (!order || !selectedSuborderId || !selectedRiderId || deliveryFee <= 0) {
@@ -328,14 +398,14 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
             isRider={isRider}
             isVendorViewingOrder={!!isVendorViewingOrder}
             displayItems={displayItems}
-            role={role}
+            role={effectiveRole}
           />
           
           {/* Order Status Bar */}
           <div className="mt-6">
-            {role && 
+            {effectiveRole && 
                 <OrderStatusBar
-                role={role}
+                role={effectiveRole}
                 orderStatus={order.status}
                 paymentStatus={order.paymentStatus}
                 vendorSuborder={vendorSuborder ? transformSuborderForStatusBar(vendorSuborder.suborder) : null}
@@ -406,9 +476,10 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
           {/* Right Column - Sidebar */}
           <OrderSidebar
             order={order}
-            role={role}
+            role={effectiveRole}
             effectiveSuborder={effectiveSuborder}
-            isVendor={isVendor}
+            isVendor={user?.role === 'vendor' && viewAs !== 'customer'}
+            //isVendor={isVendor}
             isAdmin={isAdmin}
             isRider={isRider}
             vendorView={vendorView}

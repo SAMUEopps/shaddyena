@@ -105,7 +105,7 @@ export default function OrderStatusBar({
             disabled={isLoading}
             className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
           >
-            {isLoading ? 'Confirming...' : 'Confirm Delivery Received'}
+            {isLoading ? 'Confirming...' : 'Confirm Delivery Received..'}
           </button>
           <p className="text-xs text-gray-500">
             Once confirmed, a delivery code will be generated for the rider.

@@ -100,12 +100,25 @@ export default function CustomerOrdersTab({ isVendorAsCustomer = false }: Custom
           </div>
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-          <button 
+          {/*<button 
             onClick={() => router.push(`/orders/${order._id}`)}
             className="text-[#bf2c7e] hover:text-[#a8246e] transition-colors"
           >
             View Details
-          </button>
+          </button>*/}
+        <button 
+          onClick={() => {
+            // Pass viewAs parameter if this is a vendor viewing as customer
+            const params = new URLSearchParams();
+            if (isVendorAsCustomer) {
+              params.set('viewAs', 'customer');
+            }
+            router.push(`/orders/${order._id}${params.toString() ? `?${params.toString()}` : ''}`);
+          }}
+          className="text-[#bf2c7e] hover:text-[#a8246e] transition-colors"
+        >
+          View Details
+        </button>
         </td>
       </tr>
     );
