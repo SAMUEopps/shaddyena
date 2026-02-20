@@ -109,7 +109,7 @@ export default function OrderStatusBar({
           📦 Package delivered. Please confirm receipt.
         </div>
         <button
-          onClick={() => onStatusUpdate('CONFIRMED', false, canConfirmSuborder._id)}
+          onClick={() => onStatusUpdate('DELIVERED', false, canConfirmSuborder._id)}
           disabled={isLoading}
           className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
         >
