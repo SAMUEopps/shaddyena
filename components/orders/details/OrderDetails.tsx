@@ -165,76 +165,6 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
     }
   };
 
-  /*const handleStatusUpdate = async (newStatus: string, isMainOrder: boolean = false, suborderId?: string) => {
-    if (!order) return;
-    
-    setUpdatingStatus(true);
-    setError(null);
-    
-    try {
-      // SPECIAL HANDLING FOR CUSTOMER CONFIRMATION
-      if (newStatus === 'CONFIRMED' && user?.role === 'customer' && suborderId) {
-        // Use the confirm-delivery API for customer confirmation
-        const response = await fetch('/api/orders/confirm-delivery', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            orderId: order._id,
-            suborderId: suborderId,
-            // No confirmationCode needed for customer - API will generate it
-          }),
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          alert(`Delivery confirmed! Your code: ${data.confirmationCode}`);
-          fetchOrder(); // Refresh the order
-        } else {
-          throw new Error(data.message || 'Failed to confirm delivery');
-        }
-        return; // Exit early
-      }
-      
-      // Original logic for other status updates
-      const requestBody: any = {
-        orderId: order._id,
-        status: newStatus,
-        viewAs: effectiveRole, 
-      };
-
-      if (!isMainOrder && suborderId) {
-        requestBody.suborderId = suborderId;
-      } else if (user?.role === 'vendor' && vendorSuborder) {
-        requestBody.suborderId = vendorSuborder.suborder._id;
-      }
-
-      const response = await fetch('/api/orders/update-status', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        alert(`Status updated to ${newStatus} successfully!`);
-        fetchOrder();
-      } else {
-        throw new Error(data.message || 'Failed to update status');
-      }
-    } catch (error) {
-      console.error('Error updating status:', error);
-      alert(error instanceof Error ? error.message : 'Failed to update order status');
-    } finally {
-      setUpdatingStatus(false);
-    }
-  };*/
-
   const handleStatusUpdate = async (newStatus: string, isMainOrder: boolean = false, suborderId?: string) => {
   if (!order) return;
   
@@ -388,6 +318,68 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
   //const isVendorViewingOrder = isVendor && vendorSuborder;
   const effectiveSuborder = isVendorViewingOrder ? vendorSuborder?.suborder : selectedSuborderData?.suborder;
 
+  // Handle delivery fee payment
+  const handleDeliveryFeePayment = async (suborderId: string, amount: number) => {
+    // Get user's phone number (you might want to store this in user profile)
+    const phone = prompt("Enter your M-Pesa phone number to pay delivery fee:");
+    if (!phone) return;
+
+    setUpdatingStatus(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/orders/pay-delivery-fee', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: order?._id,
+          suborderId,
+          phone: phone.replace(/\s/g, ''),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`✅ STK Push sent! Check your phone to complete payment of KSh ${amount}`);
+        
+        // Start polling for payment confirmation
+        startPaymentPolling(suborderId);
+      } else {
+        throw new Error(data.error || 'Failed to initiate payment');
+      }
+    } catch (error) {
+      console.error('Error initiating delivery fee payment:', error);
+      alert(error instanceof Error ? error.message : 'Failed to initiate payment');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  // Add polling function
+  const startPaymentPolling = (suborderId: string) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/orders/check-delivery-payment?orderId=${order?._id}&suborderId=${suborderId}`);
+        const data = await response.json();
+
+        if (data.paid) {
+          clearInterval(pollInterval);
+          alert('✅ Delivery fee paid successfully! You can now confirm delivery.');
+          fetchOrder(); // Refresh the order
+        }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+      }
+    }, 3000);
+
+    // Store interval to clear later
+    setTimeout(() => clearInterval(pollInterval), 60000); // Stop after 1 minute
+  };
+
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -414,6 +406,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                 onSuborderSelect={setSelectedSuborderId}
                 selectedSuborderId={selectedSuborderId}
                 isLoading={updatingStatus}
+                 onDeliveryFeePayment={handleDeliveryFeePayment} 
                 />
             }
           </div>
