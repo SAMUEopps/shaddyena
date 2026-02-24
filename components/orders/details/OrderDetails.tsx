@@ -381,7 +381,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
 
   // In OrderDetails component, update the startPaymentPolling function:
 
-const startPaymentPolling = (suborderId: string) => {
+/*const startPaymentPolling = (suborderId: string) => {
   const pollInterval = setInterval(async () => {
     try {
       const response = await fetch(`/api/orders/check-delivery-payment?orderId=${order?._id}&suborderId=${suborderId}`);
@@ -406,6 +406,68 @@ const startPaymentPolling = (suborderId: string) => {
 
   // Store interval to clear later
   setTimeout(() => clearInterval(pollInterval), 60000); // Stop after 1 minute
+};*/
+
+// In OrderDetails component, update the startPaymentPolling function:
+
+const startPaymentPolling = (suborderId: string) => {
+  let pollCount = 0;
+  const maxPolls = 40; // 2 minutes maximum
+  
+  console.log(`🔄 Starting payment polling for suborder: ${suborderId}`);
+  
+  const pollInterval = setInterval(async () => {
+    pollCount++;
+    console.log(`⏱️ Poll #${pollCount}: Checking payment status...`);
+    
+    try {
+      const response = await fetch(`/api/orders/check-delivery-payment?orderId=${order?._id}&suborderId=${suborderId}`);
+      
+      if (!response.ok) {
+        console.error(`❌ Payment check API error: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`   Response: ${errorText}`);
+        return;
+      }
+      
+      const data = await response.json();
+      console.log(`📊 Poll #${pollCount} response:`, data);
+
+      if (data.paid && data.hasCode) {
+        console.log(`✅ Payment confirmed with code: ${data.confirmationCode}`);
+        clearInterval(pollInterval);
+        
+        // Show success message with confirmation code
+        alert(`✅ Payment successful!\n\nYour confirmation code is: ${data.confirmationCode}\n\nPlease share this code with the delivery rider.`);
+        
+        // Refresh the order to show the code in UI
+        await fetchOrder();
+        console.log(`✅ Order refreshed after successful payment`);
+        
+      } else if (data.paid && !data.hasCode) {
+        console.log(`⏳ Payment confirmed but code not generated yet...`);
+      } else {
+        console.log(`⏳ Waiting for payment confirmation... (paid: ${data.paid}, hasCode: ${data.hasCode})`);
+      }
+      
+    } catch (error) {
+      console.error(`❌ Error in poll #${pollCount}:`, error);
+    }
+    
+    // Stop polling after max attempts
+    if (pollCount >= maxPolls) {
+      clearInterval(pollInterval);
+      console.log(`⏰ Polling stopped after ${maxPolls} attempts`);
+      alert('Payment processing is taking longer than expected. Please refresh the page to check status.');
+    }
+    
+  }, 3000);
+
+  // Return cleanup function
+  return () => {
+    console.log(`🧹 Cleaning up polling for suborder: ${suborderId}`);
+    clearInterval(pollInterval);
+  };
 };
 
 

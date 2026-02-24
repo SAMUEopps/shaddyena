@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
 }*/
 
 // app/api/orders/check-delivery-payment/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+/*import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import Order from '@/models/Order';
 import dbConnect from '@/lib/dbConnect';
@@ -98,6 +98,75 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     console.error('Error checking delivery payment:', error);
+    return NextResponse.json(
+      { message: 'Failed to check payment status' },
+      { status: 500 }
+    );
+  }
+}*/
+
+// app/api/orders/check-delivery-payment/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
+import Order from '@/models/Order';
+import dbConnect from '@/lib/dbConnect';
+
+export async function GET(req: NextRequest) {
+  try {
+    await dbConnect();
+
+    const token = req.cookies.get('token')?.value;
+    if (!token) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string; role: string };
+    
+    const { searchParams } = new URL(req.url);
+    const orderId = searchParams.get('orderId');
+    const suborderId = searchParams.get('suborderId');
+
+    console.log(`🔍 Payment check request: orderId=${orderId}, suborderId=${suborderId}`);
+
+    if (!orderId || !suborderId) {
+      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      console.log(`❌ Order not found: ${orderId}`);
+      return NextResponse.json({ message: 'Order not found' }, { status: 404 });
+    }
+
+    const suborder = order.suborders.id(suborderId);
+    if (!suborder) {
+      console.log(`❌ Suborder not found: ${suborderId} in order ${orderId}`);
+      return NextResponse.json({ message: 'Suborder not found' }, { status: 404 });
+    }
+
+    // Check if delivery fee is paid and confirmation code is generated
+    const isPaid = suborder.deliveryDetails?.deliveryFeePaid === true;
+    const hasCode = !!suborder.deliveryDetails?.confirmationCode;
+    const confirmationCode = suborder.deliveryDetails?.confirmationCode;
+
+    console.log(`📊 Payment check result for suborder ${suborderId}:`);
+    console.log(`   - paid: ${isPaid}`);
+    console.log(`   - hasCode: ${hasCode}`);
+    console.log(`   - confirmationCode: ${confirmationCode}`);
+    console.log(`   - status: ${suborder.status}`);
+    console.log(`   - deliveryDetails:`, JSON.stringify(suborder.deliveryDetails, null, 2));
+
+    return NextResponse.json({
+      paid: isPaid,
+      hasCode: hasCode,
+      confirmationCode: confirmationCode,
+      status: suborder.status,
+      deliveryFeePaidAt: suborder.deliveryDetails?.deliveryFeePaidAt,
+      deliveryFeeReceipt: suborder.deliveryDetails?.deliveryFeeReceipt
+    });
+
+  } catch (error) {
+    console.error('❌ Error checking delivery payment:', error);
     return NextResponse.json(
       { message: 'Failed to check payment status' },
       { status: 500 }
