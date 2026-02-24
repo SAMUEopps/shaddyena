@@ -1359,46 +1359,7 @@ export default function OrderPaymentsTab() {
     }
   };
 
-  /*const handleRiderAssignment = async (orderId: string, suborderId: string) => {
-  const riderId = selectedRiders[suborderId];
-  if (!riderId) {
-    alert('Please select a rider first');
-    return;
-  }
 
-  setAssigningRider(prev => ({ ...prev, [suborderId]: true }));
-
-  try {
-    // Update status to READY_FOR_PICKUP and assign rider in one call
-    await OrderService.updateOrderStatus({
-      orderId,
-      suborderId,
-      status: 'READY_FOR_PICKUP',
-      //riderId // Pass riderId to your service
-    });
-
-    // Or if you have a separate endpoint for rider assignment:
-    // await fetch(`/api/orders/${orderId}/suborders/${suborderId}/assign-rider`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-    //   },
-    //   body: JSON.stringify({ riderId })
-    // });
-
-    fetchOrders(); // Refresh orders
-    alert('Rider assigned successfully!');
-    
-    // Clear selection for this suborder
-    setSelectedRiders(prev => ({ ...prev, [suborderId]: '' }));
-  } catch (error) {
-    console.error('Error assigning rider:', error);
-    setError('Failed to assign rider');
-  } finally {
-    setAssigningRider(prev => ({ ...prev, [suborderId]: false }));
-  }
-};*/
 
 
 // Replace the handleStatusUpdate and handleRiderAssignment functions in your component:
@@ -1427,7 +1388,7 @@ const handleRiderAssignment = async (orderId: string, suborderId: string) => {
 
   try {
     // Use the updated OrderService method which now sends status: 'ASSIGNED'
-    await OrderService.assignRider(orderId, suborderId, riderId, 150); // Default delivery fee
+    await OrderService.assignRider(orderId, suborderId, riderId, 0); // Default delivery fee
     
     await fetchOrders(); // Refresh orders
     

@@ -1,5 +1,5 @@
 // app/api/orders/check-delivery-payment/route.ts
-import { NextRequest, NextResponse } from "next/server";
+/*import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import Order from "@/models/Order";
 import dbConnect from "@/lib/dbConnect";
@@ -47,5 +47,60 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Error checking delivery payment:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
+  }
+}*/
+
+// app/api/orders/check-delivery-payment/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
+import Order from '@/models/Order';
+import dbConnect from '@/lib/dbConnect';
+
+export async function GET(req: NextRequest) {
+  try {
+    await dbConnect();
+
+    const token = req.cookies.get('token')?.value;
+    if (!token) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
+    
+    const { searchParams } = new URL(req.url);
+    const orderId = searchParams.get('orderId');
+    const suborderId = searchParams.get('suborderId');
+
+    if (!orderId || !suborderId) {
+      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return NextResponse.json({ message: 'Order not found' }, { status: 404 });
+    }
+
+    const suborder = order.suborders.id(suborderId);
+    if (!suborder) {
+      return NextResponse.json({ message: 'Suborder not found' }, { status: 404 });
+    }
+
+    // Check if delivery fee is paid and confirmation code is generated
+    const isPaid = suborder.deliveryDetails?.deliveryFeePaid === true;
+    const hasCode = !!suborder.deliveryDetails?.confirmationCode;
+
+    return NextResponse.json({
+      paid: isPaid,
+      hasCode: hasCode,
+      confirmationCode: suborder.deliveryDetails?.confirmationCode,
+      status: suborder.status
+    });
+
+  } catch (error) {
+    console.error('Error checking delivery payment:', error);
+    return NextResponse.json(
+      { message: 'Failed to check payment status' },
+      { status: 500 }
+    );
   }
 }

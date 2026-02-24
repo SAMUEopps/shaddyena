@@ -862,6 +862,75 @@ import User from '@/models/user';
 import { decodeRef, generateOrderId } from '@/lib/orderUtils';
 import { sendSMS } from '@/lib/sms';
 
+
+// app/api/c2b-webhook/route.ts - Add delivery fee confirmation handler
+
+// Add this function to generate confirmation code
+function generateConfirmationCode(): string {
+  return Math.random().toString(36).substring(2, 10).toUpperCase();
+}
+
+// Add this handler for delivery fee confirmations
+async function handleDeliveryFeeConfirmation(body: any) {
+  const accountNumber = body.BillRefNumber || body.AccountNumber; // This will be the paymentRef (e.g., DELABC123)
+  const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+  if (!accountNumber || !accountNumber.startsWith('DEL')) {
+    return fail(1, 'Not a delivery fee payment');
+  }
+
+  const paymentRef = accountNumber;
+
+  // Find order with this delivery fee payment reference
+  const order = await Order.findOne({
+    'suborders.deliveryDetails.deliveryFeePaymentRef': paymentRef
+  });
+
+  if (!order) {
+    return fail(1, 'Unknown delivery fee reference');
+  }
+
+  // Find the specific suborder
+  const suborder = order.suborders.find(
+    (so: any) => so.deliveryDetails?.deliveryFeePaymentRef === paymentRef
+  );
+
+  if (!suborder) {
+    return fail(1, 'Suborder not found');
+  }
+
+  // Verify amount matches
+  if (amount !== suborder.deliveryFee) {
+    console.error(`❌ Delivery fee amount mismatch: got ${amount}, expected ${suborder.deliveryFee}`);
+    return fail(1, `Amount mismatch. Expected ${suborder.deliveryFee}`);
+  }
+
+  // Check if already processed
+  if (suborder.deliveryDetails?.deliveryFeePaid) {
+    return ok('Already processed');
+  }
+
+  // Generate confirmation code
+  const confirmationCode = generateConfirmationCode();
+
+  // Update suborder with payment and confirmation code
+  suborder.deliveryDetails.deliveryFeePaid = true;
+  suborder.deliveryDetails.deliveryFeePaidAt = new Date();
+  suborder.deliveryDetails.deliveryFeeReceipt = body.TransID || body.TransId;
+  suborder.deliveryDetails.confirmationCode = confirmationCode;
+  suborder.deliveryDetails.confirmedAt = new Date();
+  
+  // Update suborder status
+  suborder.status = 'CONFIRMED';
+
+  await order.save();
+
+  console.log(`✅ Delivery fee paid and confirmation code generated: ${confirmationCode}`);
+
+  return ok('Delivery fee confirmed');
+}
+
+
 /* =================================================================
    Helpers
 ================================================================= */
@@ -1100,11 +1169,33 @@ async function handleConfirmation(body: any) {
 /* =================================================================
     MAIN ENTRY
 ================================================================= */
+/*export async function POST(req: NextRequest) {
+  try {
+    await dbConnect();
+    const body = await req.json();
+    console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+
+    return body.TransID || body.TransId
+      ? await handleConfirmation(body)
+      : await handleValidation(body);
+  } catch (e) {
+    console.error('❌ C2B webhook crash:', e);
+    return fail(1, 'Server error');
+  }
+}*/
+
+// Update the main POST handler to include delivery fee handling
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
     const body = await req.json();
     console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+
+    // Check if it's a delivery fee payment (based on AccountReference starting with DEL)
+    const accountNumber = body.BillRefNumber || body.AccountNumber;
+    if (accountNumber?.startsWith('DEL')) {
+      return await handleDeliveryFeeConfirmation(body);
+    }
 
     return body.TransID || body.TransId
       ? await handleConfirmation(body)

@@ -359,7 +359,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
   };
 
   // Add polling function
-  const startPaymentPolling = (suborderId: string) => {
+  /*const startPaymentPolling = (suborderId: string) => {
     const pollInterval = setInterval(async () => {
       try {
         const response = await fetch(`/api/orders/check-delivery-payment?orderId=${order?._id}&suborderId=${suborderId}`);
@@ -377,7 +377,36 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
 
     // Store interval to clear later
     setTimeout(() => clearInterval(pollInterval), 60000); // Stop after 1 minute
-  };
+  };*/
+
+  // In OrderDetails component, update the startPaymentPolling function:
+
+const startPaymentPolling = (suborderId: string) => {
+  const pollInterval = setInterval(async () => {
+    try {
+      const response = await fetch(`/api/orders/check-delivery-payment?orderId=${order?._id}&suborderId=${suborderId}`);
+      const data = await response.json();
+
+      if (data.paid && data.hasCode) {
+        clearInterval(pollInterval);
+        
+        // Show success message with confirmation code
+        alert(`✅ Delivery fee paid successfully!\n\nYour confirmation code is: ${data.confirmationCode}\n\nPlease share this code with the delivery rider.`);
+        
+        // Refresh the order to show the code in UI
+        await fetchOrder();
+        
+        // The OrderStatusBar will automatically show the code
+        // because getCustomerActions will now find hasCodeSuborder
+      }
+    } catch (error) {
+      console.error('Error checking payment status:', error);
+    }
+  }, 3000);
+
+  // Store interval to clear later
+  setTimeout(() => clearInterval(pollInterval), 60000); // Stop after 1 minute
+};
 
 
   return (

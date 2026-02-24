@@ -428,7 +428,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized - Not a rider" }, { status: 403 });
     }
 
-    const { orderId, suborderId, action, notes, otp } = await req.json();
+    const { orderId, suborderId, action, notes, deliveryPrice, otp } = await req.json();
 
     if (!orderId || !suborderId || !action) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
@@ -463,7 +463,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Rest of your POST logic remains the same...
-    let statusMessage = "";
+    /*let statusMessage = "";
     
     switch (action) {
       case "pickup":
@@ -493,7 +493,7 @@ export async function POST(req: NextRequest) {
           if (!otp || otp !== suborder.deliveryDetails.confirmationCode) {
             return NextResponse.json({ message: "Invalid OTP" }, { status: 400 });
           }
-        }*/
+        }*
         
         suborder.status = 'DELIVERED';
         suborder.deliveryDetails = suborder.deliveryDetails || {};
@@ -524,7 +524,7 @@ export async function POST(req: NextRequest) {
           }
           
           statusMessage = "Package picked up successfully";
-          break;*/
+          break;*
         // app/api/delivery/rider/route.ts (update the pickup case)
 
         case "pickup":
@@ -553,7 +553,68 @@ export async function POST(req: NextRequest) {
 
       default:
         return NextResponse.json({ message: "Invalid action" }, { status: 400 });
-    }
+    }*/
+
+        let statusMessage = "";
+
+        switch (action) {
+          case "pickup":
+            if (suborder.status !== "ASSIGNED") {
+              return NextResponse.json(
+                { message: "Cannot pickup - order not assigned" },
+                { status: 400 }
+              );
+            }
+
+            if (!deliveryPrice || Number(deliveryPrice) <= 0) {
+              return NextResponse.json(
+                { message: "Please provide a valid delivery price" },
+                { status: 400 }
+              );
+            }
+
+            suborder.status = "PICKED_UP";
+            suborder.deliveryFee = Math.round(Number(deliveryPrice)); // ✅ Rider controls fee
+            suborder.deliveryDetails = suborder.deliveryDetails || {};
+            suborder.deliveryDetails.actualTime = new Date();
+
+            if (notes) {
+              suborder.deliveryDetails.notes = notes;
+            }
+
+            statusMessage = "Package picked up successfully";
+            break;
+
+          case "in_transit":
+            if (suborder.status !== "PICKED_UP") {
+              return NextResponse.json(
+                { message: "Cannot mark as in transit - not picked up" },
+                { status: 400 }
+              );
+            }
+
+            suborder.status = "IN_TRANSIT";
+            statusMessage = "Package marked as in transit";
+            break;
+
+          case "deliver":
+            if (suborder.status !== "IN_TRANSIT") {
+              return NextResponse.json(
+                { message: "Cannot deliver - not in transit" },
+                { status: 400 }
+              );
+            }
+
+            suborder.status = "DELIVERED";
+            suborder.deliveryDetails = suborder.deliveryDetails || {};
+            suborder.deliveryDetails.actualTime = new Date();
+
+            statusMessage = "Delivery completed. Waiting for customer confirmation";
+            break;
+
+          default:
+            return NextResponse.json({ message: "Invalid action" }, { status: 400 });
+        }
 
     if (notes) {
       suborder.deliveryDetails = suborder.deliveryDetails || {};
