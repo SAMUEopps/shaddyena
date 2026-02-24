@@ -1026,7 +1026,7 @@ async function handleDeliveryFeeConfirmation(body: any) {
   suborder.deliveryDetails.confirmedAt = new Date();
   
   // Update suborder status
-  suborder.status = 'DELIVERED';
+  suborder.status = 'CONFIRMED';
 
   await order.save();
 

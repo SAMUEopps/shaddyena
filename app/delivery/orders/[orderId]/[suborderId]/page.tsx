@@ -661,7 +661,7 @@ const handleConfirmWithCode = async () => {
             </div>
           </div>
         )}*/}
-        {suborder.status === 'DELIVERED' && suborder.deliveryDetails?.confirmationCode && !suborder.deliveryDetails?.riderConfirmedAt && (
+        {suborder.status === 'CONFIRMED' && suborder.deliveryDetails?.confirmationCode && !suborder.deliveryDetails?.riderConfirmedAt && (
         <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
           <div className="flex items-start gap-3">
             <div className="flex-1">

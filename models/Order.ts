@@ -452,7 +452,7 @@ const OrderSchema = new Schema<IOrder>({
     },
     status: { 
       type: String, 
-      enum: ['PENDING', 'PROCESSING', 'READY_FOR_PICKUP', 'ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'CONFIRMED', 'CANCELLED'],
+      enum: ['PENDING', 'PROCESSING', 'READY_FOR_PICKUP', 'ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'CONFIRMED', 'COMPLETED', 'CANCELLED'],
       default: 'PROCESSING'
     },
     deliveryDetails: {

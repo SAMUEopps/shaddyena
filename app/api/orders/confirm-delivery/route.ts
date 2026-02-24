@@ -37,86 +37,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Suborder not found" }, { status: 404 });
     }
 
-    // Generate confirmation code if customer is confirming
-    /*if (decoded.role === "customer") {
-      /*if (suborder.status !== 'DELIVERED') {
-        return NextResponse.json({ message: "Order not delivered yet" }, { status: 400 });
-      }*
-
-        if (!['IN_TRANSIT', 'DELIVERED', 'CONFIRMED'].includes(suborder.status)) {
-          return NextResponse.json({ 
-            message: "Order is not ready for confirmation. Please wait for delivery." 
-          }, { status: 400 });
-        }
-
-      // Generate new confirmation code
-      const code = generateConfirmationCode();
-      suborder.deliveryDetails = suborder.deliveryDetails || {};
-      suborder.deliveryDetails.confirmationCode = code;
-      suborder.deliveryDetails.confirmedAt = new Date();
-      //suborder.status = 'CONFIRMED';
-
-      await order.save();
-
-      return NextResponse.json({
-        success: true,
-        message: "Delivery confirmed. Share this code with the rider.",
-        confirmationCode: code,
-        status: suborder.status,
-        currentStatus: suborder.status
-      });
-    }*/
-
-    // Rider verifying the code
-    /*if (decoded.role === "delivery") {
-      if (!suborder.riderId || suborder.riderId.toString() !== decoded.userId) {
-        return NextResponse.json({ 
-          message: "Unauthorized - Not assigned to this delivery" 
-        }, { status: 403 });
-      }
-
-      /*if (suborder.status !== 'CONFIRMED') {
-        return NextResponse.json({ 
-          message: "Customer hasn't confirmed delivery yet" 
-        }, { status: 400 });
-      }*
-
-      if (!['DELIVERED', 'IN_TRANSIT'].includes(suborder.status)) {
-        return NextResponse.json({ 
-          message: "Cannot verify - order not in correct status" 
-        }, { status: 400 });
-      }
-
-      if (!suborder.deliveryDetails?.confirmationCode) {
-        return NextResponse.json({ 
-          message: "No confirmation code generated" 
-        }, { status: 400 });
-      }
-
-      // Verify the code
-      if (confirmationCode !== suborder.deliveryDetails.confirmationCode) {
-        return NextResponse.json({ 
-          message: "Invalid confirmation code" 
-        }, { status: 400 });
-      }
-
-      // Mark rider as verified the code
-      suborder.deliveryDetails.riderConfirmedAt = new Date();
-      suborder.status = 'CONFIRMED';
-      
-      // Create rider earnings now that delivery is fully confirmed
-      if (suborder.riderId && suborder.deliveryFee > 0) {
-        await createRiderEarnings(order, suborder);
-      }
-
-      await order.save();
-
-      return NextResponse.json({
-        success: true,
-        message: "Delivery successfully verified!",
-        status: suborder.status
-      });
-    }*/
 
       if (decoded.role === "customer") {
       // Allow confirmation from DELIVERED or IN_TRANSIT status
@@ -146,55 +66,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-      // app/api/orders/confirm-delivery/route.ts (update the rider section)
-
-      // Rider verifying the code
-      /*if (decoded.role === "delivery") {
-        if (!suborder.riderId || suborder.riderId.toString() !== decoded.userId) {
-          return NextResponse.json({ 
-            message: "Unauthorized - Not assigned to this delivery" 
-          }, { status: 403 });
-        }
-
-        // Allow verification if status is DELIVERED (rider marked as delivered) 
-        // and confirmation code exists
-        if (suborder.status !== 'DELIVERED') {
-          return NextResponse.json({ 
-            message: "Cannot verify - please mark as delivered first" 
-          }, { status: 400 });
-        }
-
-        if (!suborder.deliveryDetails?.confirmationCode) {
-          return NextResponse.json({ 
-            message: "Customer hasn't generated a confirmation code yet" 
-          }, { status: 400 });
-        }
-
-        // Verify the code (case insensitive comparison)
-        if (confirmationCode.toUpperCase() !== suborder.deliveryDetails.confirmationCode.toUpperCase()) {
-          return NextResponse.json({ 
-            message: "Invalid confirmation code. Please check with the customer." 
-          }, { status: 400 });
-        }
-
-        // Mark rider as verified the code
-        suborder.deliveryDetails.riderConfirmedAt = new Date();
-        suborder.status = 'CONFIRMED';
-        
-        // Create rider earnings now that delivery is fully confirmed
-        if (suborder.riderId && suborder.deliveryFee > 0) {
-          await createRiderEarnings(order, suborder);
-        }
-
-        await order.save();
-
-        return NextResponse.json({
-          success: true,
-          message: "✅ Delivery successfully verified! Payment will be processed.",
-          status: suborder.status
-        });
-      }*/
-
         // Rider verifying the code
 if (decoded.role === "delivery") {
   if (!suborder.riderId || suborder.riderId.toString() !== decoded.userId) {
@@ -204,7 +75,7 @@ if (decoded.role === "delivery") {
   }
 
   // Allow verification if status is DELIVERED and confirmation code exists
-  if (suborder.status !== 'DELIVERED') {
+  if (suborder.status !== 'CONFIRMED') {
     return NextResponse.json({ 
       message: "Cannot verify - please mark as delivered first" 
     }, { status: 400 });
@@ -225,7 +96,7 @@ if (decoded.role === "delivery") {
 
   // Mark rider as verified the code and update status to CONFIRMED
   suborder.deliveryDetails.riderConfirmedAt = new Date();
-  suborder.status = 'CONFIRMED'; // Only now change to CONFIRMED
+  suborder.status = 'COMPLETED'; // Only now change to CONFIRMED
   
   // Create rider earnings now that delivery is fully confirmed
   if (suborder.riderId && suborder.deliveryFee > 0) {
