@@ -591,10 +591,23 @@ export default function DeliveryDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalDeliveries, setTotalDeliveries] = useState(0);
+  const [totalEarnings, setTotalEarnings] = useState(0);
+
+  const fetchTotalEarnings = async () => {
+  try {
+    const response = await fetch('/api/delivery/rider/earnings');
+    if (!response.ok) throw new Error('Failed to fetch earnings');
+    const data = await response.json();
+    setTotalEarnings(data.totalEarnings);
+  } catch (err) {
+    console.error('Error fetching earnings:', err);
+  }
+};
 
   useEffect(() => {
     if (user?.role === 'delivery') {
       fetchDeliveries();
+      fetchTotalEarnings();
     }
   }, [statusFilter, currentPage, user]);
 
@@ -739,13 +752,14 @@ export default function DeliveryDashboard() {
             )}
           </p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
+        {/*<div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-500">Earnings</h3>
           <p className="text-2xl font-bold text-purple-600">
             {formatCurrency(
               deliveries.reduce((sum, d) => 
                 sum + d.suborders.reduce((subSum, so) => {
-                  if (['DELIVERED', 'CONFIRMED'].includes(so.status)) {
+                  //if (['DELIVERED', 'CONFIRMED','COMPLETED'].includes(so.status)) {
+                  if (['COMPLETED'].includes(so.status)) {
                     return subSum + so.deliveryFee;
                   }
                   return subSum;
@@ -753,7 +767,19 @@ export default function DeliveryDashboard() {
               , 0)
             )}
           </p>
-        </div>
+        </div>*/}
+        <div className="bg-white p-4 rounded-lg shadow">
+        <h3 className="text-sm font-medium text-gray-500">Total Earnings</h3>
+        <p className="text-2xl font-bold text-purple-600">
+          {formatCurrency(totalEarnings)}
+        </p>
+        <button
+          onClick={() => router.push('/delivery/withdraw')}
+          className="mt-2 text-sm text-[#bf2c7e] hover:text-[#a8246e] font-medium"
+        >
+          Withdraw Earnings →
+        </button>
+      </div>
       </div>
 
       {/* Deliveries List - Card View */}
