@@ -592,13 +592,30 @@ export default function DeliveryDashboard() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalDeliveries, setTotalDeliveries] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
+  const [earningsData, setEarningsData] = useState({
+    totalEarnings: 0,
+    pendingWithdrawals: 0,
+    completedWithdrawals: 0,
+    availableBalance: 0
+  });
+
+  /*const fetchTotalEarnings = async () => {
+    try {
+      const response = await fetch('/api/delivery/rider/earnings');
+      if (!response.ok) throw new Error('Failed to fetch earnings');
+      const data = await response.json();
+      setTotalEarnings(data.totalEarnings);
+    } catch (err) {
+      console.error('Error fetching earnings:', err);
+    }
+  };*/
 
   const fetchTotalEarnings = async () => {
   try {
     const response = await fetch('/api/delivery/rider/earnings');
     if (!response.ok) throw new Error('Failed to fetch earnings');
     const data = await response.json();
-    setTotalEarnings(data.totalEarnings);
+    setEarningsData(data);
   } catch (err) {
     console.error('Error fetching earnings:', err);
   }
@@ -768,7 +785,7 @@ export default function DeliveryDashboard() {
             )}
           </p>
         </div>*/}
-        <div className="bg-white p-4 rounded-lg shadow">
+      {/*<div className="bg-white p-4 rounded-lg shadow">
         <h3 className="text-sm font-medium text-gray-500">Total Earnings</h3>
         <p className="text-2xl font-bold text-purple-600">
           {formatCurrency(totalEarnings)}
@@ -779,8 +796,30 @@ export default function DeliveryDashboard() {
         >
           Withdraw Earnings →
         </button>
-      </div>
-      </div>
+      </div>*/}
+      <div className="bg-white p-4 rounded-lg shadow">
+  <h3 className="text-sm font-medium text-gray-500">Available Balance</h3>
+  <p className="text-2xl font-bold text-purple-600">
+    {formatCurrency(earningsData.availableBalance)}
+  </p>
+  <div className="mt-2 space-y-1">
+    <p className="text-xs text-gray-500">
+      Total Earned: {formatCurrency(earningsData.totalEarnings)}
+    </p>
+    {earningsData.pendingWithdrawals > 0 && (
+      <p className="text-xs text-yellow-600">
+        Pending: {formatCurrency(earningsData.pendingWithdrawals)}
+      </p>
+    )}
+  </div>
+  <button
+    onClick={() => router.push('/delivery/withdraw')}
+    className="mt-3 w-full text-sm bg-[#bf2c7e] text-white py-2 rounded-lg hover:bg-[#a8246e] font-medium"
+  >
+    Withdraw Earnings →
+  </button>
+</div>
+    </div>
 
       {/* Deliveries List - Card View */}
       <div className="space-y-4">

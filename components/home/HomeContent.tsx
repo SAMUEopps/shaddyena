@@ -526,6 +526,7 @@ import ReferralEarningsTab from '../tabs/RefferalEarningsTab';
 import ReferralsTab from '../tabs/RefferalsTab';
 import DeliveryDashboard from '../delivery/DeliveryDashboard';
 import OrdersTab from '../tabs/OrdersTab/OrdersTab';
+import RiderWithdrawalsPage from '../tabs/RiderWithdrawalRequest';
 
 // Define the base navigation items for the sidebar
 // Each item has an ID, label, and emoji icon
@@ -545,7 +546,7 @@ const baseNavItems = [
   { id: 'payments', label: 'Payments', icon: '💳' },
   { id: 'subscription', label: 'Subscriptions', icon: '⏱️' },
   { id: 'refferals', label: 'Referrals', icon: '👥' },
-  { id: 'withdrawals', label: 'Withdrawals', icon: '👥' },
+  { id: 'rider-withdrawals', label: 'Rider Withdrawals', icon: '👥' },
   /*{ id: 'support', label: 'Support', icon: '🛟' },*/
 ];
 
@@ -637,6 +638,7 @@ export default function Home() {
       case 'subscription': return <SubscriptionTab />;
       case 'refferal-earnings': return <ReferralEarningsTab />;
       case 'delivery': return <DeliveryDashboard />;
+      case 'rider-withdrawals': return <RiderWithdrawalsPage />;
       default: return <HomeTab />;
     }
   };

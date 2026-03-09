@@ -351,6 +351,8 @@ export interface IOrder extends Document {
   updatedAt: Date;
 }
 
+
+
 const OrderSchema = new Schema<IOrder>({
   orderId: { 
     type: String, 
@@ -568,6 +570,10 @@ const OrderSchema = new Schema<IOrder>({
   timestamps: true 
 });
 
+interface IOrderModel extends mongoose.Model<IOrder> {
+  getRiderEarnings(riderId: string): Promise<number>;
+}
+
 // Indexes for better query performance
 OrderSchema.index({ orderId: 1 });
 OrderSchema.index({ buyerId: 1 });
@@ -578,6 +584,32 @@ OrderSchema.index({ 'suborders.riderId': 1 });
 OrderSchema.index({ 'suborders.status': 1 });
 OrderSchema.index({ 'suborders.deliveryDetails.deliveryFeePaymentRef': 1 }); // Add index for payment ref queries
 OrderSchema.index({ createdAt: -1 });
+
+OrderSchema.statics.getRiderEarnings = async function (riderId: string): Promise<number> {
+  const result = await this.aggregate([
+    {
+      $match: {
+        "suborders.riderId": new mongoose.Types.ObjectId(riderId),
+        "suborders.status": "COMPLETED"
+      }
+    },
+    { $unwind: "$suborders" },
+    {
+      $match: {
+        "suborders.riderId": new mongoose.Types.ObjectId(riderId),
+        "suborders.status": "COMPLETED"
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalEarnings: { $sum: "$suborders.deliveryFee" }
+      }
+    }
+  ]);
+
+  return result[0]?.totalEarnings || 0;
+};
 
 // Pre-save hook to update deliveryFeeTotal
 OrderSchema.pre('save', function(next) {
@@ -599,4 +631,8 @@ OrderSchema.methods.getConfirmationCode = function(suborderId: string): string |
   return suborder?.deliveryDetails?.confirmationCode;
 };
 
-export default mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
+//export default mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
+const Order = (mongoose.models.Order ||
+  mongoose.model<IOrder, IOrderModel>('Order', OrderSchema)) as IOrderModel;
+
+export default Order;
