@@ -535,6 +535,7 @@ const baseNavItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'products', label: 'Products', icon: '🛒' },
   { id: 'shops', label: 'Shops', icon: '🏪' },
+    { id: 'rider-withdrawals', label: 'Rider Withdrawals', icon: '👥' },
   { id: 'orders', label: 'Orders', icon: '📦' },
   { id: 'delivery', label: 'Delivery', icon: '🚚' },
   { id: 'seller-requests', label: 'Seller Requests', icon: '👥' },
@@ -546,7 +547,7 @@ const baseNavItems = [
   { id: 'payments', label: 'Payments', icon: '💳' },
   { id: 'subscription', label: 'Subscriptions', icon: '⏱️' },
   { id: 'refferals', label: 'Referrals', icon: '👥' },
-  { id: 'rider-withdrawals', label: 'Rider Withdrawals', icon: '👥' },
+
   /*{ id: 'support', label: 'Support', icon: '🛟' },*/
 ];
 
@@ -628,6 +629,7 @@ export default function Home() {
       case 'dashboard': return renderDashboard();
       case 'products': return <ProductsTab role={currentUser.role} />;
       case 'shops': return <ShopsTab />; 
+       case 'rider-withdrawals': return <RiderWithdrawalsPage />;
       case 'orders': return <OrdersTab role={currentUser.role} />;
       case 'seller-requests': return <SellerRequestsTab />;
       case 'payments': return <PaymentsTab />;
@@ -638,7 +640,7 @@ export default function Home() {
       case 'subscription': return <SubscriptionTab />;
       case 'refferal-earnings': return <ReferralEarningsTab />;
       case 'delivery': return <DeliveryDashboard />;
-      case 'rider-withdrawals': return <RiderWithdrawalsPage />;
+      
       default: return <HomeTab />;
     }
   };
