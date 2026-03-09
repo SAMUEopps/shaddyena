@@ -855,7 +855,7 @@ export async function POST(req: NextRequest) {
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import OrderDraft from '@/models/OrderDraft';
-import Order from '@/models/Order';
+import Order, { DeliveryDetails } from '@/models/Order';
 import Ledger from '@/models/Ledger';
 import Product from '@/models/product';
 import User from '@/models/user';
@@ -932,7 +932,7 @@ function generateConfirmationCode(): string {
 
 // app/api/c2b-webhook/route.ts - Update handleDeliveryFeeConfirmation with better logging
 
-async function handleDeliveryFeeConfirmation(body: any) {
+/*async function handleDeliveryFeeConfirmation(body: any) {
   const accountNumber = body.BillRefNumber || body.AccountNumber;
   const amount = parseInt(body.TransAmount || body.Amount, 10);
   const transactionId = body.TransID || body.TransId;
@@ -1036,9 +1036,124 @@ async function handleDeliveryFeeConfirmation(body: any) {
   console.log(`   - suborder.status: ${suborder.status}`);
 
   return ok('Delivery fee confirmed');
+}*/
+
+// app/api/c2b-webhook/route.ts - Update the logging section
+// In the handleDeliveryFeeConfirmation function, update the logging:
+
+async function handleDeliveryFeeConfirmation(body: any) {
+  const accountNumber = body.BillRefNumber || body.AccountNumber;
+  const amount = parseInt(body.TransAmount || body.Amount, 10);
+  const transactionId = body.TransID || body.TransId;
+
+  console.log(`📥 Processing delivery fee payment:`);
+  console.log(`   - Account Ref: ${accountNumber}`);
+  console.log(`   - Amount: ${amount}`);
+  console.log(`   - Transaction ID: ${transactionId}`);
+
+  if (!accountNumber || !accountNumber.startsWith('DEL')) {
+    console.log(`❌ Not a delivery fee payment: ${accountNumber}`);
+    return fail(1, 'Not a delivery fee payment');
+  }
+
+  const paymentRef = accountNumber;
+  console.log(`🔍 Looking for order with paymentRef: ${paymentRef}`);
+
+  // Find order with this delivery fee payment reference
+  const order = await Order.findOne({
+    'suborders.deliveryDetails.deliveryFeePaymentRef': paymentRef
+  });
+
+  if (!order) {
+    console.log(`❌ No order found with deliveryFeePaymentRef: ${paymentRef}`);
+    
+    // Try to find any orders with suborders that might have this reference
+    const allOrders = await Order.find({}).limit(5);
+    console.log(`📊 Checking recent orders for reference:`);
+    for (const o of allOrders) {
+      // Use for...of with index to safely access suborders
+      for (let i = 0; i < o.suborders.length; i++) {
+        const so = o.suborders[i];
+        if (so.deliveryDetails?.deliveryFeePaymentRef) {
+          // Use the index or the suborder's _id if available
+          const suborderId = so._id ? so._id.toString() : `index-${i}`;
+          console.log(`   - Order ${o._id}, Suborder ${suborderId}: ${so.deliveryDetails.deliveryFeePaymentRef}`);
+        }
+      }
+    }
+    return fail(1, 'Unknown delivery fee reference');
+  }
+
+  console.log(`✅ Found order: ${order._id}`);
+  console.log(`   - Order Status: ${order.status}`);
+  console.log(`   - Buyer ID: ${order.buyerId}`);
+
+  // Find the specific suborder
+  const suborder = order.suborders.find(
+    (so: any) => so.deliveryDetails?.deliveryFeePaymentRef === paymentRef
+  );
+
+  if (!suborder) {
+    console.log(`❌ No suborder found with deliveryFeePaymentRef: ${paymentRef}`);
+    
+    // Log all suborder payment refs safely
+    order.suborders.forEach((so: any, index: number) => {
+      const suborderId = so._id ? so._id.toString() : `index-${index}`;
+      console.log(`   - Suborder ${suborderId}, Ref: ${so.deliveryDetails?.deliveryFeePaymentRef}`);
+    });
+    
+    return fail(1, 'Suborder not found');
+  }
+
+  // Use type assertion or optional chaining for _id
+  const suborderId = suborder._id ? suborder._id.toString() : 'unknown';
+  
+  console.log(`✅ Found suborder: ${suborderId}`);
+  console.log(`   - Suborder Status: ${suborder.status}`);
+  console.log(`   - Delivery Fee: ${suborder.deliveryFee}`);
+  console.log(`   - Current deliveryDetails:`, JSON.stringify(suborder.deliveryDetails, null, 2));
+
+  // Verify amount matches
+  if (amount !== suborder.deliveryFee) {
+    console.error(`❌ Delivery fee amount mismatch: got ${amount}, expected ${suborder.deliveryFee}`);
+    return fail(1, `Amount mismatch. Expected ${suborder.deliveryFee}`);
+  }
+
+  // Check if already processed
+  if (suborder.deliveryDetails?.deliveryFeePaid) {
+    console.log(`⚠️ Delivery fee already paid for suborder: ${suborderId}`);
+    console.log(`   - Paid At: ${suborder.deliveryDetails.deliveryFeePaidAt}`);
+    console.log(`   - Receipt: ${suborder.deliveryDetails.deliveryFeeReceipt}`);
+    return ok('Already processed');
+  }
+
+  // Generate confirmation code
+  const confirmationCode = generateConfirmationCode();
+  console.log(`🔑 Generated confirmation code: ${confirmationCode}`);
+
+  // Update suborder with payment and confirmation code
+  if (!suborder.deliveryDetails) {
+    suborder.deliveryDetails = {} as DeliveryDetails;
+  }
+  
+  suborder.deliveryDetails.deliveryFeePaid = true;
+  suborder.deliveryDetails.deliveryFeePaidAt = new Date();
+  suborder.deliveryDetails.deliveryFeeReceipt = transactionId;
+  suborder.deliveryDetails.confirmationCode = confirmationCode;
+  suborder.deliveryDetails.confirmedAt = new Date();
+  
+  // Update suborder status
+  suborder.status = 'CONFIRMED';
+
+  await order.save();
+
+  console.log(`✅ Successfully updated suborder:`);
+  console.log(`   - deliveryFeePaid: ${suborder.deliveryDetails.deliveryFeePaid}`);
+  console.log(`   - confirmationCode: ${suborder.deliveryDetails.confirmationCode}`);
+  console.log(`   - suborder.status: ${suborder.status}`);
+
+  return ok('Delivery fee confirmed');
 }
-
-
 /* =================================================================
    Helpers
 ================================================================= */

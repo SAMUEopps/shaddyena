@@ -248,13 +248,12 @@ export default function RiderWithdrawalsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header */}
+      
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Withdrawal Requests</h1>
         <p className="text-gray-600 mt-1">Manage rider and vendor withdrawal requests</p>
       </div>
 
-      {/* Success/Error Messages */}
       {success && (
         <div className="mb-4 p-4 bg-green-50 rounded-lg flex items-start gap-3">
           <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -269,7 +268,7 @@ export default function RiderWithdrawalsPage() {
         </div>
       )}
 
-      {/* Filters */}
+   
       <div className="bg-white rounded-lg shadow p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
@@ -304,7 +303,6 @@ export default function RiderWithdrawalsPage() {
         </div>
       </div>
 
-      {/* Requests Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -441,7 +439,6 @@ export default function RiderWithdrawalsPage() {
         </table>
       </div>
 
-      {/* Process Modal */}
       {showProcessModal && selectedRequest && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
