@@ -1530,7 +1530,7 @@ export async function POST(req: NextRequest) {
           suborder.riderId = new Types.ObjectId(riderId);
           if (deliveryFee) suborder.deliveryFee = deliveryFee;
           suborder.deliveryDetails = suborder.deliveryDetails || {};
-          suborder.deliveryDetails.assignedAt = new Date();
+          //suborder.deliveryDetails.assignedAt = new Date();
           updated = true;
           console.log(`✅ Vendor assigned rider ${riderId} to suborder`);
         }
@@ -1565,7 +1565,7 @@ export async function POST(req: NextRequest) {
           suborder.riderId = new Types.ObjectId(riderId);
           if (deliveryFee) suborder.deliveryFee = deliveryFee;
           suborder.deliveryDetails = suborder.deliveryDetails || {};
-          suborder.deliveryDetails.assignedAt = new Date();
+         // suborder.deliveryDetails.assignedAt = new Date();
           updated = true;
           console.log(`✅ Admin assigned rider ${riderId} to suborder`);
         } 
@@ -1574,7 +1574,7 @@ export async function POST(req: NextRequest) {
           oldStatus = suborder.status;
           suborder.status = 'IN_TRANSIT';
           suborder.deliveryDetails = suborder.deliveryDetails || {};
-          suborder.deliveryDetails.pickedUpAt = new Date();
+          //suborder.deliveryDetails.pickedUpAt = new Date();
           updated = true;
           console.log(`✅ Admin marked suborder as IN_TRANSIT`);
         }
@@ -1681,7 +1681,7 @@ export async function POST(req: NextRequest) {
           oldStatus = suborder.status;
           suborder.status = 'PICKED_UP';
           suborder.deliveryDetails = suborder.deliveryDetails || {};
-          suborder.deliveryDetails.pickedUpAt = new Date();
+          //suborder.deliveryDetails.pickedUpAt = new Date();
           updated = true;
           console.log(`✅ Rider picked up order`);
         }
