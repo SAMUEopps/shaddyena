@@ -643,7 +643,7 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 // Define the delivery details interface for better type safety
 export interface DeliveryDetails {
   pickupAddress?: string;
-  dropoffAddress: string;
+  dropoffAddress?: string;
   estimatedTime?: Date;
   actualTime?: Date;
   notes?: string;
