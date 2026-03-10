@@ -535,7 +535,7 @@ const baseNavItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'products', label: 'Products', icon: '🛒' },
   { id: 'shops', label: 'Shops', icon: '🏪' },
-    { id: 'rider-withdrawals', label: 'Rider Withdrawals', icon: '👥' },
+  { id: 'rider-withdrawals', label: 'Rider Withdrawals', icon: '👥' },
   { id: 'orders', label: 'Orders', icon: '📦' },
   { id: 'delivery', label: 'Delivery', icon: '🚚' },
   { id: 'seller-requests', label: 'Seller Requests', icon: '👥' },
@@ -629,7 +629,7 @@ export default function Home() {
       case 'dashboard': return renderDashboard();
       case 'products': return <ProductsTab role={currentUser.role} />;
       case 'shops': return <ShopsTab />; 
-       case 'rider-withdrawals': return <RiderWithdrawalsPage />;
+      case 'rider-withdrawals': return <RiderWithdrawalsPage />;
       case 'orders': return <OrdersTab role={currentUser.role} />;
       case 'seller-requests': return <SellerRequestsTab />;
       case 'payments': return <PaymentsTab />;
