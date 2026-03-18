@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 import { useState, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -174,11 +174,11 @@ export default function Products({ role }: ProductsTabProps) {
         
            <div className="px-4">
     <div className="px-4 sm:px-0 bg-white">
-      {/* Header Section */}
+      {/* Header Section *
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-3">
         {/*<h1 className="text-xl sm:text-2xl font-bold text-gray-900">
           {role === 'vendor' ? 'Products' : role === 'admin' ? 'All Products' : 'Products'}
-        </h1>*/}
+        </h1>*
         
         {role === 'vendor' && (
           <Link 
@@ -190,7 +190,7 @@ export default function Products({ role }: ProductsTabProps) {
         )}
       </div>
       
-      {/* Search Bar */}
+      {/* Search Bar *
       <div className="bg-white p-3 sm:p-4 rounded-lg shadow mb-4">
         <div className="flex flex-col space-y-3">
           <div className="flex-1">
@@ -203,7 +203,7 @@ export default function Products({ role }: ProductsTabProps) {
             />
           </div>
           
-          {/* Filter Toggle for Mobile */}
+          {/* Filter Toggle for Mobile *
           <div className="sm:hidden">
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -216,7 +216,7 @@ export default function Products({ role }: ProductsTabProps) {
               {showFilters ? ' ↑' : ' ↓'}
             </button>
           </div>
-          {/* Filters - Responsive Layout */}
+          {/* Filters - Responsive Layout *
           <div className={`${showFilters ? 'block' : 'hidden'} sm:flex sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0`}>
             <select 
               value={selectedCategory}
@@ -244,14 +244,14 @@ export default function Products({ role }: ProductsTabProps) {
         </div>
       </div>
 
-      {/* Products Count */}
+      {/* Products Count *
       <div className="mb-4 px-0">
         <p className="text-gray-600 text-sm sm:text-base">
           Showing {filteredProducts.length} of {products.length} products
         </p>
       </div>
       
-      {/* Products Grid */}
+      {/* Products Grid *
       {filteredProducts.length === 0 ? (
         <div className="text-center py-12 px-0">
           <div className="text-gray-400 text-5xl sm:text-6xl mb-4">🔍</div>
@@ -290,14 +290,14 @@ export default function Products({ role }: ProductsTabProps) {
                   </h3>
                 </Link>
                 
-                {/* Vendor/Shop Info */}
+                {/* Vendor/Shop Info *
                 {(product.vendor || product.shop) && (
                   <p className="text-xs text-gray-500 mt-1 line-clamp-1">
                     By {product.shop?.businessName || product.vendor?.businessName || 'Unknown Seller'}
                   </p>
                 )}
                 
-                {/* Rating */}
+                {/* Rating *
                 {product.rating && product.rating.count > 0 && (
                   <div className="flex items-center mt-1 mb-2">
                     <div className="flex text-yellow-400 text-xs">
@@ -308,7 +308,7 @@ export default function Products({ role }: ProductsTabProps) {
                   </div>
                 )}
                 
-                {/* Price and Stock */}
+                {/* Price and Stock *
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex flex-col">
                     <span className="text-[#bf2c7e] font-bold text-sm sm:text-base">
@@ -321,7 +321,7 @@ export default function Products({ role }: ProductsTabProps) {
                     )}
                   </div>
                   
-                  {/* Stock Status */}
+                  {/* Stock Status *
                   <span className={`text-xs px-1.5 py-0.5 rounded ${
                     product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
@@ -329,7 +329,7 @@ export default function Products({ role }: ProductsTabProps) {
                   </span>
                 </div>
                 
-                {/* Action Buttons */}
+                {/* Action Buttons *
                 <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
                   <button
                     onClick={() => handleAddToCart(product)}
@@ -366,14 +366,14 @@ export default function Products({ role }: ProductsTabProps) {
                       <span>Views: 156</span>
                     </div>
                   </div>
-                )}*/}
+                )}*
               </div>
             </div>
           ))}
         </div>
       )}
       
-      {/* Pagination */}
+      {/* Pagination *
       {filteredProducts.length > 0 && (
         <div className="flex justify-center mt-6 sm:mt-8 px-2">
           <nav className="flex items-center space-x-1 sm:space-x-2">
@@ -390,5 +390,27 @@ export default function Products({ role }: ProductsTabProps) {
     </div>
      </div>
      </div>
+  );
+}*/
+
+// app/products/page.tsx
+import { Suspense } from 'react';
+import ThreeTierNavbar from '@/components/New/components/ThreeTierNavbar';
+import ProductsListing from '@/components/New/components/ProductsListing';
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className='bg-[var(--color-background)]'>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)]" />
+        </div>
+      </div>
+    }>
+      <ThreeTierNavbar />
+      <main className="pt-[calc(2.5rem+4rem+3.5rem)] min-h-screen">
+        <ProductsListing />
+      </main>
+    </Suspense>
   );
 }

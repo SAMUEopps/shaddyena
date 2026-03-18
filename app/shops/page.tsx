@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -133,7 +133,7 @@ const router = useRouter();
           </div>
         </header> 
     <div className="px-4 max-w-7xl mx-auto px-0 sm:px-4 lg:px-6">
-      {/* Header - Improved mobile spacing */}
+      {/* Header - Improved mobile spacing *
       <div className="mb-4 sm:mb-6 lg:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Discover Shops</h1>
         <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
@@ -141,7 +141,7 @@ const router = useRouter();
         </p>
       </div>
 
-      {/* Search and Filters - Mobile optimized */}
+      {/* Search and Filters - Mobile optimized *
       <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8">
         <form onSubmit={handleSearch} className="grid grid-cols-1 gap-3 sm:gap-4">
           <div>
@@ -183,7 +183,7 @@ const router = useRouter();
         </form>
       </div>
 
-      {/* Shops Grid - 2 columns on mobile, responsive on larger screens */}
+      {/* Shops Grid - 2 columns on mobile, responsive on larger screens *
       {/*{shops.length === 0 ? (
         <div className="text-center py-8 sm:py-12">
           <div className="text-gray-400 text-4xl sm:text-6xl mb-3 sm:mb-4">🏪</div>
@@ -344,9 +344,9 @@ const router = useRouter();
             </div>
           )}
         </>
-      )}*/}
+      )}*
 
-          {/* Shops Grid - 2 columns on mobile, responsive on larger screens */}
+          {/* Shops Grid - 2 columns on mobile, responsive on larger screens *
       {shops.length === 0 ? (
         <div className="text-center py-8 sm:py-12">
           <div className="text-gray-400 text-4xl sm:text-6xl mb-3 sm:mb-4">🏪</div>
@@ -363,7 +363,7 @@ const router = useRouter();
               href={`/shops/${shop._id}`}
               className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300 overflow-hidden group"
             >
-              {/* Shop Banner - allow logo to overflow */}
+              {/* Shop Banner - allow logo to overflow *
               <div className="h-20 sm:h-28 md:h-32 bg-[#bf2c7e] relative overflow-visible">
                 {shop.banner ? (
                   <Image
@@ -377,7 +377,7 @@ const router = useRouter();
                   <div className="absolute inset-0 bg-[#bf2c7e] opacity-90" />
                 )}
 
-                {/* Verified Badge */}
+                {/* Verified Badge *
                 {shop.isVerified && (
                   <div className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-green-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium flex items-center">
                     <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -387,7 +387,7 @@ const router = useRouter();
                   </div>
                 )}
 
-                {/* Shop Logo - positioned overlapping nicely */}
+                {/* Shop Logo - positioned overlapping nicely *
                 {/*<div className="absolute left-2 sm:left-4 -bottom-6 sm:-bottom-7">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white rounded-lg shadow-md grid place-items-center border border-gray-200">
                     {shop.logo ? (
@@ -404,7 +404,7 @@ const router = useRouter();
                       </span>
                     )}
                   </div>
-                </div>*/}
+                </div>*
           <div className="absolute left-2 sm:left-4 -bottom-6 sm:-bottom-7">
             <div className="relative w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white rounded-full shadow-md border border-gray-200 overflow-hidden grid place-items-center">
               {shop.logo ? (
@@ -425,7 +425,7 @@ const router = useRouter();
 
               </div>
 
-              {/* Shop Info - add padding-top to avoid overlap */}
+              {/* Shop Info - add padding-top to avoid overlap *
               <div className="pt-6 sm:pt-8 md:pt-10 pb-3 sm:pb-4 px-2 sm:px-3 md:px-4">
                 <h3 className="font-semibold text-gray-900 group-hover:text-[#bf2c7e] transition-colors truncate text-sm sm:text-base">
                   {shop.businessName}
@@ -443,7 +443,7 @@ const router = useRouter();
                   </div>
                 ) : (
                   <div className="mt-1.5 sm:mt-2 text-xs text-gray-500">No reviews yet</div>
-                )}*/}
+                )}*
 
                 <div className="mt-2 sm:mt-3 flex items-center text-xs sm:text-sm text-gray-600">
                   <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -463,7 +463,7 @@ const router = useRouter();
           ))}
         </div>
 
-          {/* Pagination - Mobile optimized */}
+          {/* Pagination - Mobile optimized *
           {pagination.totalPages > 1 && (
             <div className="flex justify-center items-center space-x-1 sm:space-x-2">
               <button
@@ -511,5 +511,28 @@ const router = useRouter();
       )}
     </div>
     </div>
+  );
+}*/
+
+// app/shops/page.tsx
+import { Suspense } from 'react';
+import ThreeTierNavbar from '@/components/New/components/ThreeTierNavbar';
+import ShopsListing from '@/components/New/components/ShopListing';
+
+export default function ShopsPage() {
+  return (
+    <Suspense fallback={
+      <div className='bg-[var(--color-background)]'>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)]" />
+        </div>
+      </div>
+    }>
+      <ThreeTierNavbar />
+      <main className="pt-[calc(2.5rem+4rem+3.5rem)] min-h-screen">
+        <ShopsListing />
+         
+      </main>
+    </Suspense>
   );
 }
