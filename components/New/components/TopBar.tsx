@@ -22,8 +22,8 @@ const Topbar = ({ isDarkMode }: TopbarProps) => {
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
   const [selectedLanguage, setSelectedLanguage] = useState('EN');
 
-  const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD'];
-  const languages = ['EN', 'ES', 'FR', 'DE', 'IT', 'AR'];
+  const currencies = ['KSH', 'TSH', 'UGS'];
+  const languages = ['EN', 'KS'];
 
   useEffect(() => {
     setMounted(true);
