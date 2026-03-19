@@ -19,7 +19,7 @@ const Topbar = ({ isDarkMode }: TopbarProps) => {
   const [mounted, setMounted] = useState(false);
   const [showCurrency, setShowCurrency] = useState(false);
   const [showLanguage, setShowLanguage] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  const [selectedCurrency, setSelectedCurrency] = useState('KSH');
   const [selectedLanguage, setSelectedLanguage] = useState('EN');
 
   const currencies = ['KSH', 'TSH', 'UGS'];
