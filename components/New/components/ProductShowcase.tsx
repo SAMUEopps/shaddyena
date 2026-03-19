@@ -96,7 +96,7 @@ const ProductShowcase = () => {
 
       {/* Section Header */}
       <div className="relative mb-12">
-        <div className="text-center">
+        {/*<div className="text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-primary-soft)]/20 text-[var(--color-primary)] text-sm font-medium mb-4">
             <Sparkles className="w-4 h-4" />
             <span>Trending Now</span>
@@ -109,7 +109,7 @@ const ProductShowcase = () => {
           <p className="text-[var(--color-text-muted)] max-w-2xl mx-auto">
             Discover our hand-picked selection of premium products, just for you
           </p>
-        </div>
+        </div>*/}
 
         {/* Category Tabs */}
         <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
