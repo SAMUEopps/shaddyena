@@ -44,7 +44,7 @@ const Topbar = ({ isDarkMode }: TopbarProps) => {
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--color-primary)] rounded-full animate-ping opacity-75"></span>
               </div>
               <span className="text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] transition-colors">
-                Free shipping on orders over $50
+                Shipping done on the platform
               </span>
             </div>
             
