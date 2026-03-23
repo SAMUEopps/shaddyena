@@ -155,7 +155,8 @@ import {
   Sun,
   ChevronDown
 } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext'; 
+import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 interface MainNavbarProps {
   isDarkMode: boolean;
@@ -166,7 +167,8 @@ interface MainNavbarProps {
 const MainNavbar = ({ isDarkMode, toggleDarkMode, isScrolled }: MainNavbarProps) => {
   const [mounted, setMounted] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const { totalItems } = useCart(); // Get total items from cart
+  const { totalItems } = useCart();
+  const { wishlistItems } = useWishlist();
 
   const mainCategories = [
     { name: 'Women', href: '/category/women' },
@@ -249,7 +251,11 @@ const MainNavbar = ({ isDarkMode, toggleDarkMode, isScrolled }: MainNavbarProps)
           <div className="flex items-center space-x-3">
             <Link href="/wishlist" className="p-2 text-[var(--color-text)] hover:text-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-soft)]/30 transition-all duration-200 relative group">
               <Heart className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--color-primary)] text-white text-xs flex items-center justify-center rounded-full">5</span>
+              {wishlistItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 bg-[var(--color-primary)] text-white text-xs flex items-center justify-center rounded-full px-1">
+                  {wishlistItems.length > 99 ? '99+' : wishlistItems.length}
+                </span>
+              )}
               <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-[var(--color-primary)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
             </Link>
 

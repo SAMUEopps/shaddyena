@@ -726,6 +726,7 @@ export default ProductShowcase;*/
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   ShoppingBag, 
   Heart, 
@@ -740,7 +741,8 @@ import {
   Shield,
   CheckCircle
 } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext'; 
+import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 interface Product {
   _id: string;
@@ -766,15 +768,16 @@ interface Product {
 }
 
 const ProductShowcase = () => {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [favorites, setFavorites] = useState<string[]>([]);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('featured');
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
   
-  const { addToCart, totalItems } = useCart(); // Get cart functions
+  const { addToCart, totalItems } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   useEffect(() => {
     setMounted(true);
@@ -797,12 +800,20 @@ const ProductShowcase = () => {
     }
   };
 
-  const toggleFavorite = (productId: string) => {
-    setFavorites(prev => 
-      prev.includes(productId) 
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId]
-    );
+  const handleWishlistToggle = (product: Product) => {
+    if (isInWishlist(product._id)) {
+      removeFromWishlist(product._id);
+    } else {
+      const wishlistItem = {
+        _id: product._id,
+        name: product.name,
+        price: product.price,
+        image: product.images?.[0] || '/placeholder-image.jpg',
+        vendorId: product.vendorId,
+        shopId: product.shopId?._id || '',
+      };
+      addToWishlist(wishlistItem);
+    }
   };
 
   const handleAddToCart = (product: Product) => {
@@ -825,6 +836,15 @@ const ProductShowcase = () => {
     setTimeout(() => {
       setAddedToCart(null);
     }, 2000);
+  };
+
+  const handleProductClick = (productId: string) => {
+    router.push(`/products/${productId}`);
+  };
+
+  const handleQuickView = (e: React.MouseEvent, productId: string) => {
+    e.stopPropagation();
+    router.push(`/products/${productId}`);
   };
 
   const formatPrice = (price: number) => {
@@ -903,18 +923,20 @@ const ProductShowcase = () => {
         <>
           {/* Products Grid - 2 columns on mobile, 4 on large screens */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 sm:gap-4 lg:gap-6">
-            {products.map((product, index) => {
+            {products.map((product) => {
               const discount = product.originalPrice 
                 ? getDiscountPercentage(product.originalPrice, product.price)
                 : 0;
               const isAddedToCart = addedToCart === product._id;
+              const isInWishlistState = isInWishlist(product._id);
 
               return (
                 <div
                   key={product._id}
-                  className="group relative"
+                  className="group relative cursor-pointer"
                   onMouseEnter={() => setHoveredId(product._id)}
                   onMouseLeave={() => setHoveredId(null)}
+                  onClick={() => handleProductClick(product._id)}
                 >
                   {/* Product Card */}
                   <div className="relative bg-[var(--color-surface)] rounded-lg xs:rounded-xl sm:rounded-2xl border border-[var(--color-border)] overflow-hidden hover:shadow-lg sm:hover:shadow-2xl transition-all duration-300 sm:duration-500 hover:scale-[1.01] sm:hover:scale-[1.02] hover:border-[var(--color-primary)]/30">
@@ -946,14 +968,15 @@ const ProductShowcase = () => {
                       <div className="absolute top-1 right-1 xs:top-1.5 xs:right-1.5 sm:top-3 sm:right-3 flex flex-col gap-1 xs:gap-1 sm:gap-2">
                         <button
                           onClick={(e) => {
-                            e.preventDefault();
-                            toggleFavorite(product._id);
+                            e.stopPropagation();
+                            handleWishlistToggle(product);
                           }}
                           className="p-1 xs:p-1.5 sm:p-2 bg-white/90 backdrop-blur-sm rounded-md xs:rounded-lg shadow-md hover:scale-110 transition-transform"
+                          aria-label={isInWishlistState ? "Remove from wishlist" : "Add to wishlist"}
                         >
                           <Heart 
                             className={`w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 ${
-                              favorites.includes(product._id) 
+                              isInWishlistState 
                                 ? 'fill-[var(--color-danger)] text-[var(--color-danger)]' 
                                 : 'text-[var(--color-text-muted)]'
                             }`} 
@@ -961,11 +984,9 @@ const ProductShowcase = () => {
                         </button>
                         
                         <button 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            // Add quick view functionality here
-                          }}
+                          onClick={(e) => handleQuickView(e, product._id)}
                           className="p-1 xs:p-1.5 sm:p-2 bg-white/90 backdrop-blur-sm rounded-md xs:rounded-lg shadow-md hover:scale-110 transition-transform"
+                          aria-label="Quick view"
                         >
                           <Eye className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 text-[var(--color-text-muted)] hover:text-[var(--color-primary)]" />
                         </button>
@@ -1005,7 +1026,7 @@ const ProductShowcase = () => {
                       </div>
 
                       {/* Product Name */}
-                      <h3 className="text-[10px] xs:text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1 xs:mb-1.5 sm:mb-2 line-clamp-2 h-6 xs:h-7 sm:h-8 lg:h-10">
+                      <h3 className="text-[10px] xs:text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1 xs:mb-1.5 sm:mb-2 line-clamp-2 h-6 xs:h-7 sm:h-8 lg:h-10 group-hover:text-[var(--color-primary)] transition-colors">
                         {product.name}
                       </h3>
 
@@ -1050,7 +1071,10 @@ const ProductShowcase = () => {
                       {/* Action Buttons */}
                       <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2">
                         <button 
-                          onClick={() => handleAddToCart(product)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToCart(product);
+                          }}
                           disabled={product.stock === 0}
                           className={`flex-1 py-1 xs:py-1.5 sm:py-2 lg:py-2.5 rounded-md xs:rounded-lg sm:rounded-xl text-[8px] xs:text-[10px] sm:text-xs lg:text-sm font-medium transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 ${
                             product.stock === 0
@@ -1079,8 +1103,11 @@ const ProductShowcase = () => {
                           )}
                         </button>
                         
-                        <button 
-                          onClick={() => handleAddToCart(product)}
+                        {/*<button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToCart(product);
+                          }}
                           disabled={product.stock === 0}
                           className={`p-1 xs:p-1.5 sm:p-2 lg:p-2.5 border rounded-md xs:rounded-lg sm:rounded-xl transition-all duration-300 ${
                             product.stock === 0
@@ -1089,7 +1116,7 @@ const ProductShowcase = () => {
                           }`}
                         >
                           <Zap className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4" />
-                        </button>
+                        </button>*/}
                       </div>
                     </div>
 
@@ -1161,7 +1188,7 @@ const ProductShowcase = () => {
         </>
       )}
 
-      {/* Hide scrollbar CSS - Add to your global styles or component style */}
+      {/* Hide scrollbar CSS */}
       <style jsx>{`
         .hide-scrollbar {
           -ms-overflow-style: none;
