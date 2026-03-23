@@ -48,8 +48,9 @@ import "./globals.css";
 import ClientProviders from "./ClientProvider";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
-import Footer from "@/components/footer/Footer";
+
 import { Toaster } from 'react-hot-toast';
+import Footer from "@/components/New/components/Footer";
 
 // Load Inconsolata font
 const inconsolata = Inconsolata({
