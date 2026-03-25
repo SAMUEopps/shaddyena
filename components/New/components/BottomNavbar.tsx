@@ -400,7 +400,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     if (user.role === 'vendor' || user.role === 'admin') {
       navItems.push({
         name: 'Products',
-        href: '/?tab=products',
+        href: '/products',
         icon: <Package className="w-5 h-5" />,
         role: ['vendor', 'admin']
       });
@@ -409,7 +409,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     // Shops tab for all users
     navItems.push({
       name: 'Shops',
-      href: '/?tab=shops',
+      href: '/shops',
       icon: <Store className="w-5 h-5" />,
       role: ['customer', 'vendor', 'admin']
     });
@@ -417,7 +417,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     // Orders tab
     navItems.push({
       name: 'Orders',
-      href: '/?tab=orders',
+      href: '/orders',
       icon: <ShoppingCart className="w-5 h-5" />,
       role: ['customer', 'vendor', 'admin', 'delivery']
     });
@@ -426,7 +426,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     if (user.role === 'delivery') {
       navItems.push({
         name: 'Delivery',
-        href: '/?tab=delivery',
+        href: '/delivery',
         icon: <Truck className="w-5 h-5" />,
         role: ['delivery']
       });
@@ -436,7 +436,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     if (user.role === 'admin') {
       navItems.push({
         name: 'Seller Requests',
-        href: '/?tab=seller-requests',
+        href: '/seller-requests',
         icon: <Users className="w-5 h-5" />,
         role: ['admin']
       });
@@ -446,7 +446,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     if (user.role === 'admin') {
       navItems.push({
         name: 'Users',
-        href: '/?tab=users',
+        href: '/users',
         icon: <Users className="w-5 h-5" />,
         role: ['admin']
       });
@@ -456,7 +456,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     if (user.role === 'vendor') {
       navItems.push({
         name: 'Order Earnings',
-        href: '/?tab=order-earnings',
+        href: '/order-earnings',
         icon: <CreditCard className="w-5 h-5" />,
         role: ['vendor']
       });
@@ -465,7 +465,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     if (user.role === 'delivery') {
       navItems.push({
         name: 'Delivery Earnings',
-        href: '/?tab=delivery-earnings',
+        href: '/delivery-earnings',
         icon: <CreditCard className="w-5 h-5" />,
         role: ['delivery']
       });
@@ -474,7 +474,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     if (user.role === 'admin') {
       navItems.push({
         name: 'Order Payments',
-        href: '/?tab=order-payments',
+        href: '/order-payments',
         icon: <CreditCard className="w-5 h-5" />,
         role: ['admin']
       });
@@ -483,14 +483,14 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     // Referrals for all users
     navItems.push({
       name: 'Referrals',
-      href: '/?tab=refferals',
+      href: '/refferals',
       icon: <Users className="w-5 h-5" />,
       role: ['customer', 'vendor', 'admin', 'delivery']
     });
 
     navItems.push({
       name: 'Referral Earnings',
-      href: '/?tab=refferal-earnings',
+      href: '/refferal-earnings',
       icon: <Gift className="w-5 h-5" />,
       role: ['customer', 'vendor', 'admin', 'delivery']
     });
@@ -499,7 +499,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     if (user.role === 'vendor' || user.role === 'admin') {
       navItems.push({
         name: 'Subscriptions',
-        href: '/?tab=subscription',
+        href: '/subscription',
         icon: <Clock className="w-5 h-5" />,
         role: ['vendor', 'admin']
       });
@@ -509,7 +509,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     if (user.role === 'admin') {
       navItems.push({
         name: 'Rider Withdrawals',
-        href: '/?tab=rider-withdrawals',
+        href: '/rider-withdrawals',
         icon: <FileText className="w-5 h-5" />,
         role: ['admin']
       });
