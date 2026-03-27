@@ -46,7 +46,7 @@ export default function Page() {
       <ShopPreview />
       <ProductShowcase />
       {/* <HomeContent /> */}
-
+      
     </main>
     </Suspense>
   );
