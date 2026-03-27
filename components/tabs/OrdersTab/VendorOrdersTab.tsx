@@ -12,6 +12,7 @@ import OrderFilters from './shared/OrderFilters';
 interface VendorOrder {
   order: Order;
   suborder: Suborder;
+ 
 }
 
 export default function VendorOrdersTab() {

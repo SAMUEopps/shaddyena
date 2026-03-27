@@ -12,6 +12,7 @@ import { OrderService } from '@/components/orders/details/services/orderService'
 
 interface CustomerOrdersTabProps {
   isVendorAsCustomer?: boolean;
+ 
 }
 
 export default function CustomerOrdersTab({ isVendorAsCustomer = false }: CustomerOrdersTabProps) {

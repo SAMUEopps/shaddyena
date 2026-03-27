@@ -1,4 +1,4 @@
-{/*import { Suspense } from 'react';
+/*import { Suspense } from 'react';
 import HomeContent from '@/components/home/HomeContent';
 import Navbar from '@/components/New/components/Navbar';
 
@@ -14,10 +14,10 @@ export default function Page() {
     </div>}>
     
         <Navbar />
-      {/*<HomeContent />*
+      <HomeContent />
     </Suspense>
   );
-}*/}
+}*/
 
 // app/page.tsx
 import { Suspense } from 'react';
@@ -26,6 +26,7 @@ import HeroSection from '@/components/New/components/HeroSection';
 import ShopByCategory from '@/components/New/components/ShopByCategory';
 import ShopPreview from '@/components/New/components/ShopPreview';
 import ProductShowcase from '@/components/New/components/ProductShowcase';
+import HomeContent from '@/components/home/HomeContent';
 
 
 export default function Page() {
@@ -45,6 +46,7 @@ export default function Page() {
       <ShopPreview />
       <ProductShowcase />
       {/* <HomeContent /> */}
+
     </main>
     </Suspense>
   );
