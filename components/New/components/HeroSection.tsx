@@ -96,7 +96,7 @@ const HeroSection = () => {
   if (!mounted) return null;
 
   return (
-    <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
 
       {/* 
         Main Grid Container

@@ -2,17 +2,19 @@
   "name": "my-ecom",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:categories": "node scripts/seedCategories.js"
   },
   "dependencies": {
     "africastalking": "^0.7.7",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.3.1",
     "html2canvas": "^1.4.1",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.4",

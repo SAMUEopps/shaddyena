@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,7 +6,7 @@ import { uploadMultipleToCloudinary } from '@/lib/cloudinary';
 
 /* ------------------------------------------------------------------ */
 /* 4-level tree (the one you provided)                                */
-/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ *
 const categoryTree = {
   Electronics: {
     "Mobiles & Accessories": {
@@ -72,7 +72,7 @@ const categoryTree = {
 
 /* ------------------------------------------------------------------ */
 /* Safe accessors                                                   */
-/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ *
 function keys<T extends object>(o: T): (keyof T)[] {
   return Object.keys(o) as (keyof T)[];
 }
@@ -91,7 +91,7 @@ function getLevel4(cat: string, sub: string, subSub: string) {
 
 /* ------------------------------------------------------------------ */
 /* Types                                                              */
-/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ *
 interface ProductFormData {
   name: string;
   description: string;
@@ -115,7 +115,7 @@ interface ProductFormData {
 
 /* ------------------------------------------------------------------ */
 /* Page                                                               */
-/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ *
 export default function AddProductPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -140,7 +140,7 @@ export default function AddProductPage() {
 
   /* -------------------------------------------------------------- */
   /* Helper – deep set                                              */
-  /* -------------------------------------------------------------- */
+  /* -------------------------------------------------------------- *
   function setNested<T>(obj: T, path: string, value: unknown): T {
     const keys = path.split('.');
     const last = keys.pop()!;
@@ -153,7 +153,7 @@ export default function AddProductPage() {
 
   /* -------------------------------------------------------------- */
   /* Image Upload Handlers                                          */
-  /* -------------------------------------------------------------- */
+  /* -------------------------------------------------------------- *
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -185,7 +185,7 @@ export default function AddProductPage() {
 
   /* -------------------------------------------------------------- */
   /* Handlers                                                       */
-  /* -------------------------------------------------------------- */
+  /* -------------------------------------------------------------- *
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -203,7 +203,7 @@ export default function AddProductPage() {
     }));
   };
 
-  /* ---------- specifications ---------- */
+  /* ---------- specifications ---------- *
   const addSpecification = () =>
     setFormData(p => ({ ...p, specifications: [...p.specifications, { key: '', value: '' }] }));
   const removeSpecification = (idx: number) =>
@@ -215,13 +215,13 @@ export default function AddProductPage() {
       return { ...p, specifications: copy };
     });
 
-  /* ---------- tags ---------- */
+  /* ---------- tags ---------- *
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const tags = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
     setFormData(p => ({ ...p, tags }));
   };
 
-  /* ---------- submit ---------- */
+  /* ---------- submit ---------- *
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -251,7 +251,7 @@ export default function AddProductPage() {
 
   /* -------------------------------------------------------------- */
   /* Auth guard                                                     */
-  /* -------------------------------------------------------------- */
+  /* -------------------------------------------------------------- *
   if (!user || user.role !== 'vendor')
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -264,7 +264,7 @@ export default function AddProductPage() {
 
   /* -------------------------------------------------------------- */
   /* Dynamic dropdown options                                       */
-  /* -------------------------------------------------------------- */
+  /* -------------------------------------------------------------- *
   const level1 = keys(categoryTree);
   const level2 = formData.category ? getLevel2(formData.category) : [];
   const level3 = formData.category && formData.subcategory ? getLevel3(formData.category, formData.subcategory) : [];
@@ -274,7 +274,7 @@ export default function AddProductPage() {
 
   /* -------------------------------------------------------------- */
   /* Render                                                         */
-  /* -------------------------------------------------------------- */
+  /* -------------------------------------------------------------- *
   return (
     <div className='min-h-screen bg-gray-50'>
     <div className="max-w-4xl mx-auto p-6">
@@ -292,7 +292,7 @@ export default function AddProductPage() {
       )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
-        {/* Basic Information */}
+        {/* Basic Information *
         <div>
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Basic Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -373,7 +373,7 @@ export default function AddProductPage() {
           </div>
         </div>
 
-        {/* Image Upload */}
+        {/* Image Upload *
         <div>
           <h2 className="text-xl text-gray-700 font-semibold mb-4">Product Images</h2>
           <div className="mb-4">
@@ -420,7 +420,7 @@ export default function AddProductPage() {
           )}
         </div>
 
-        {/* Category */}
+        {/* Category *
         <div>
           <h2 className="text-xl text-gray-700 font-semibold mb-4">Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -489,7 +489,7 @@ export default function AddProductPage() {
           </div>
         </div>
 
-        {/* Specifications */}
+        {/* Specifications *
         <div>
           <h2 className="text-xl text-gray-700 font-semibold mb-4">Specifications</h2>
           {formData.specifications.map((spec, idx) => (
@@ -526,7 +526,7 @@ export default function AddProductPage() {
           </button>
         </div>
 
-        {/* Shipping */}
+        {/* Shipping *
         <div>
           <h2 className="text-xl text-gray-700 font-semibold mb-4">Shipping Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -583,7 +583,7 @@ export default function AddProductPage() {
           </div>
         </div>
 
-        {/* Tags */}
+        {/* Tags *
         <div>
           <h2 className="text-xl text-gray-700 font-semibold mb-4">Tags</h2>
           <input
@@ -613,6 +613,600 @@ export default function AddProductPage() {
         </div>
       </form>
     </div>
+    </div>
+  );
+}*/
+
+
+// app/vendor/products/add/page.tsx (updated sections)
+
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { uploadMultipleToCloudinary } from '@/lib/cloudinary';
+import axios from 'axios';
+
+// Types for dynamic categories
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  level: number;
+  parentId?: string;
+  children?: Category[];
+}
+
+export default function AddProductPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: 0,
+    originalPrice: 0,
+    categoryId: '',
+    subcategoryId: '',
+    subSubcategoryId: '',
+    subSubSubcategoryId: '',
+    images: [] as string[],
+    stock: 0,
+    sku: '',
+    brand: '',
+    specifications: [] as { key: string; value: string }[],
+    shipping: { weight: 0, dimensions: { length: 0, width: 0, height: 0 } },
+    tags: [] as string[],
+  });
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Category[]>([]);
+  const [subSubcategories, setSubSubcategories] = useState<Category[]>([]);
+  const [subSubSubcategories, setSubSubSubcategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  // Fetch top-level categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('/api/category?level=1');
+        setCategories(response.data.categories || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Fetch subcategories when category changes
+  useEffect(() => {
+    if (formData.categoryId) {
+      const fetchSubcategories = async () => {
+        try {
+          const response = await axios.get(`/api/category?parentId=${formData.categoryId}`);
+          setSubcategories(response.data.categories || []);
+        } catch (error) {
+          console.error('Error fetching subcategories:', error);
+        }
+      };
+      fetchSubcategories();
+    } else {
+      setSubcategories([]);
+    }
+    // Reset lower levels
+    setFormData(prev => ({ ...prev, subcategoryId: '', subSubcategoryId: '', subSubSubcategoryId: '' }));
+    setSubSubcategories([]);
+    setSubSubSubcategories([]);
+  }, [formData.categoryId]);
+
+  // Fetch sub-subcategories when subcategory changes
+  useEffect(() => {
+    if (formData.subcategoryId) {
+      const fetchSubSubcategories = async () => {
+        try {
+          const response = await axios.get(`/api/category?parentId=${formData.subcategoryId}`);
+          setSubSubcategories(response.data.categories || []);
+        } catch (error) {
+          console.error('Error fetching sub-subcategories:', error);
+        }
+      };
+      fetchSubSubcategories();
+    } else {
+      setSubSubcategories([]);
+    }
+    setFormData(prev => ({ ...prev, subSubcategoryId: '', subSubSubcategoryId: '' }));
+    setSubSubSubcategories([]);
+  }, [formData.subcategoryId]);
+
+  // Fetch sub-sub-subcategories when subSubcategory changes
+  useEffect(() => {
+    if (formData.subSubcategoryId) {
+      const fetchSubSubSubcategories = async () => {
+        try {
+          const response = await axios.get(`/api/category?parentId=${formData.subSubcategoryId}`);
+          setSubSubSubcategories(response.data.categories || []);
+        } catch (error) {
+          console.error('Error fetching sub-sub-subcategories:', error);
+        }
+      };
+      fetchSubSubSubcategories();
+    } else {
+      setSubSubSubcategories([]);
+    }
+    setFormData(prev => ({ ...prev, subSubSubcategoryId: '' }));
+  }, [formData.subSubcategoryId]);
+
+  // Image upload handlers
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const uploadedUrls = await uploadMultipleToCloudinary(files);
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...uploadedUrls]
+      }));
+      setImageFiles(prev => [...prev, ...files]);
+      setMessage('Images uploaded successfully!');
+    } catch (error) {
+      setMessage('Error uploading images. Please try again.');
+      console.error('Image upload error:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Form handlers
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...(prev as any)[parent],
+          [child]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Specifications handlers
+  const addSpecification = () =>
+    setFormData(p => ({ ...p, specifications: [...p.specifications, { key: '', value: '' }] }));
+  const removeSpecification = (idx: number) =>
+    setFormData(p => ({ ...p, specifications: p.specifications.filter((_, i) => i !== idx) }));
+  const handleSpecChange = (idx: number, field: 'key' | 'value', val: string) =>
+    setFormData(p => {
+      const copy = [...p.specifications];
+      copy[idx] = { ...copy[idx], [field]: val };
+      return { ...p, specifications: copy };
+    });
+
+  // Tags handler
+  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const tags = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
+    setFormData(p => ({ ...p, tags }));
+  };
+
+  // Submit handler
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setMessage('');
+
+    // Validate category selection
+    if (!formData.categoryId) {
+      setMessage('Please select a category');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/vendor/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        setMessage('Product created successfully!');
+        setTimeout(() => router.push('/?tab=dashboard'), 2000);
+      } else {
+        const err = await res.json();
+        setMessage(err.message || 'Error creating product');
+      }
+    } catch (error) {
+      setMessage('Error creating product');
+      console.error('Submit error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Auth guard
+  if (!user || user.role !== 'vendor') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900">Access Denied</h1>
+          <p className="text-gray-600">Only vendors can access this page.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadingCategories) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading categories...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className='min-h-screen bg-gray-50'>
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Add New Product</h1>
+          <button
+            onClick={() => router.push('/?tab=dashboard')}
+            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+
+        {message && (
+          <div className={`mb-4 p-3 rounded-md ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+            {message}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
+          {/* Basic Information */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-700 mb-4">Basic Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">SKU *</label>
+                <input
+                  type="text"
+                  name="sku"
+                  value={formData.sku}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                required
+                rows={4}
+                className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price (KSh) *</label>
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  required
+                  min="0"
+                  step="0.01"
+                  className="w-full text-gray-600 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Original Price (KSh)</label>
+                <input
+                  type="number"
+                  name="originalPrice"
+                  value={formData.originalPrice || ''}
+                  onChange={handleInputChange}
+                  min="0"
+                  step="0.01"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Stock *</label>
+                <input
+                  type="number"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleInputChange}
+                  required
+                  min="0"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Image Upload */}
+          <div>
+            <h2 className="text-xl text-gray-700 font-semibold mb-4">Product Images</h2>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Upload Images</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={isUploading}
+                className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md"
+              />
+              <p className="text-sm text-gray-500 mt-1">You can upload multiple images at once</p>
+            </div>
+            
+            {isUploading && (
+              <div className="mb-4 p-3 bg-blue-100 text-blue-700 rounded-md">
+                Uploading images...
+              </div>
+            )}
+
+            {formData.images.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Uploaded Images ({formData.images.length})</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {formData.images.map((url, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={url}
+                        alt={`Product ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Category Selection - Dynamic */}
+          <div>
+            <h2 className="text-xl text-gray-700 font-semibold mb-4">Category</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                <select
+                  value={formData.categoryId}
+                  onChange={(e) => setFormData(prev => ({ ...prev, categoryId: e.target.value }))}
+                  required
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+                >
+                  <option value="">-- Select Category --</option>
+                  {categories.map(cat => (
+                    <option key={cat._id} value={cat._id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {subcategories.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Subcategory</label>
+                  <select
+                    value={formData.subcategoryId}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subcategoryId: e.target.value }))}
+                    className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+                  >
+                    <option value="">-- Select Subcategory --</option>
+                    {subcategories.map(sub => (
+                      <option key={sub._id} value={sub._id}>{sub.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {subSubcategories.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Sub-subcategory</label>
+                  <select
+                    value={formData.subSubcategoryId}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subSubcategoryId: e.target.value }))}
+                    className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+                  >
+                    <option value="">-- Select Sub-subcategory --</option>
+                    {subSubcategories.map(sub => (
+                      <option key={sub._id} value={sub._id}>{sub.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {subSubSubcategories.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Sub-sub-subcategory</label>
+                  <select
+                    value={formData.subSubSubcategoryId}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subSubSubcategoryId: e.target.value }))}
+                    className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+                  >
+                    <option value="">-- Select Sub-sub-subcategory --</option>
+                    {subSubSubcategories.map(sub => (
+                      <option key={sub._id} value={sub._id}>{sub.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Specifications */}
+          <div>
+            <h2 className="text-xl text-gray-700 font-semibold mb-4">Specifications</h2>
+            {formData.specifications.map((spec, idx) => (
+              <div key={idx} className="flex items-center space-x-2 mb-2">
+                <input
+                  type="text"
+                  placeholder="Key"
+                  value={spec.key}
+                  onChange={e => handleSpecChange(idx, 'key', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder="Value"
+                  value={spec.value}
+                  onChange={e => handleSpecChange(idx, 'value', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeSpecification(idx)}
+                  className="px-3 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addSpecification}
+              className="mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+            >
+              Add Specification
+            </button>
+          </div>
+
+          {/* Shipping */}
+          <div>
+            <h2 className="text-xl text-gray-700 font-semibold mb-4">Shipping Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Weight (grams) *</label>
+                <input
+                  type="number"
+                  name="shipping.weight"
+                  value={formData.shipping.weight}
+                  onChange={handleInputChange}
+                  required
+                  min="0"
+                  className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Length (cm) *</label>
+                  <input
+                    type="number"
+                    name="shipping.dimensions.length"
+                    value={formData.shipping.dimensions.length}
+                    onChange={handleInputChange}
+                    required
+                    min="0"
+                    className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Width (cm) *</label>
+                  <input
+                    type="number"
+                    name="shipping.dimensions.width"
+                    value={formData.shipping.dimensions.width}
+                    onChange={handleInputChange}
+                    required
+                    min="0"
+                    className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Height (cm) *</label>
+                  <input
+                    type="number"
+                    name="shipping.dimensions.height"
+                    value={formData.shipping.dimensions.height}
+                    onChange={handleInputChange}
+                    required
+                    min="0"
+                    className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div>
+            <h2 className="text-xl text-gray-700 font-semibold mb-4">Tags</h2>
+            <input
+              type="text"
+              placeholder="Enter tags separated by commas (e.g., electronics, gadget, wireless)"
+              onChange={handleTagsChange}
+              className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e]"
+            />
+            <p className="text-sm text-gray-500 mt-1">Current tags: {formData.tags.join(', ') || 'None'}</p>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <button
+              type="button"
+              onClick={() => router.push('/?tab=dashboard')}
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading || isUploading}
+              className="bg-[#bf2c7e] text-white px-4 py-2 rounded-md hover:bg-[#e5178a] disabled:opacity-50"
+            >
+              {isLoading ? 'Creating Product...' : 'Create Product'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
