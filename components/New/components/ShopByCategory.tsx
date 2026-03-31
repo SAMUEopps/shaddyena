@@ -564,6 +564,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, ArrowRight, Sparkles, ShoppingBag } from 'lucide-react';
 import axios from 'axios';
+import CategoryCard from './CategoryCard';
 
 interface CategoryMetadata {
   productCount: number;
@@ -730,6 +731,13 @@ const ShopByCategory = () => {
         </div>
         
         <div className="flex items-center gap-2">
+          <Link 
+            href="/categories"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-[var(--color-primary-alt)] bg-[var(--color-surface)] text-[var(--color-primary)] hover:bg-[var(--color-primary-alt)] hover:text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[var(--color-primary)]/20 group"
+          >
+            <span className="text-sm text-[var(--color-primary-alt)] hover:text-white font-semibold tracking-wide">All Categories</span>
+            <ChevronRight className="w-5 h-5 text-[var(--color-primary-alt)] group-hover:text-white transform group-hover:translate-x-1 transition-all duration-300" />
+          </Link>
           <button
             onClick={() => scroll('left')}
             className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex items-center justify-center text-[var(--color-text)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all duration-300 hover:scale-110"
@@ -755,7 +763,7 @@ const ShopByCategory = () => {
           className="flex overflow-x-auto gap-6 pb-0 scrollbar-hide snap-x snap-mandatory"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {categories.map((category) => {
+          {/*{categories.map((category) => {
             const productCount = getProductCount(category);
             const featured = isFeatured(category);
             
@@ -766,10 +774,10 @@ const ShopByCategory = () => {
                 className="group relative min-w-[320px] sm:min-w-[360px] snap-start"
               >
                 <div className="relative bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
-                  {/* Header with gradient */}
+                  {/* Header with gradient *
                   <div className={`absolute top-0 left-0 right-0 h-20 opacity-90 bg-gradient-to-r ${category.gradient}`}>
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]"></div>
-                    {/* Decorative sparkles for featured categories */}
+                    {/* Decorative sparkles for featured categories *
                     {featured && (
                       <div className="absolute top-2 right-2">
                         <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
@@ -777,7 +785,7 @@ const ShopByCategory = () => {
                     )}
                   </div>
 
-                  {/* Category Title and Stats */}
+                  {/* Category Title and Stats *
                   <div className="relative z-10 p-4 pb-2">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -797,7 +805,7 @@ const ShopByCategory = () => {
                           )}
                         </div>
                       </div>
-                      {/* Category Icon */}
+                      {/* Category Icon *
                       {category.icon && (
                         <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                           <span className="text-xl">{category.icon}</span>
@@ -806,7 +814,7 @@ const ShopByCategory = () => {
                     </div>
                   </div>
 
-                  {/* Subcategories Grid - 2x2 layout */}
+                  {/* Subcategories Grid - 2x2 layout *
                   <div className="relative p-4 pt-2">
                     {category.children && category.children.length > 0 ? (
                       <div className="grid grid-cols-2 gap-3">
@@ -822,7 +830,7 @@ const ShopByCategory = () => {
                                 window.location.href = `/category/${sub.slug}`;
                               }}
                             >
-                              {/* Subcategory Image/Icon */}
+                              {/* Subcategory Image/Icon *
                               <div className="relative h-24 w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
                                 {sub.image ? (
                                   <Image
@@ -838,7 +846,7 @@ const ShopByCategory = () => {
                                 )}
                                 <div className={`absolute inset-0 bg-gradient-to-t ${category.gradient} opacity-0 group-hover/sub:opacity-30 transition-opacity duration-300`}></div>
                                 
-                                {/* Product count badge */}
+                                {/* Product count badge *
                                 {subProductCount > 0 && (
                                   <div className="absolute top-1 right-1 bg-black/60 backdrop-blur-sm text-white text-xs px-1.5 py-0.5 rounded-full font-medium">
                                     {formatProductCount(subProductCount)}
@@ -846,14 +854,14 @@ const ShopByCategory = () => {
                                 )}
                               </div>
 
-                              {/* Subcategory Name */}
+                              {/* Subcategory Name *
                               <div className="p-2 text-center">
                                 <p className="text-xs font-medium text-[var(--color-text)] group-hover/sub:text-[var(--color-primary)] transition-colors line-clamp-2">
                                   {sub.name}
                                 </p>
                               </div>
 
-                              {/* Hover effect shine */}
+                              {/* Hover effect shine *
                               <div className="absolute inset-0 opacity-0 group-hover/sub:opacity-100 pointer-events-none overflow-hidden">
                                 <div className="absolute top-0 -inset-full h-full w-1/2 transform -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine"></div>
                               </div>
@@ -870,7 +878,7 @@ const ShopByCategory = () => {
                     )}
                   </div>
 
-                  {/* Bottom Bar with View All */}
+                  {/* Bottom Bar with View All *
                   <div className="relative px-5 pb-5">
                     <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">
                       <div className="flex items-center gap-1">
@@ -885,12 +893,21 @@ const ShopByCategory = () => {
                     </div>
                   </div>
 
-                  {/* Animated border on hover */}
+                  {/* Animated border on hover *
                   <div className={`absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-[var(--color-primary)]/50 transition-all duration-500 pointer-events-none`}></div>
                 </div>
               </Link>
             );
-          })}
+          })}*/}
+            {categories.map((category) => (
+              <CategoryCard
+                key={category._id}
+                category={category}
+                getProductCount={getProductCount}
+                isFeatured={isFeatured}
+                formatProductCount={formatProductCount}
+              />
+            ))}
         </div>
       </div>
 

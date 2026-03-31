@@ -862,7 +862,7 @@ const ProductShowcase = () => {
   if (!mounted) return null;
 
   return (
-    <section className="relative max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+    <section className="relative max-w-7xl mx-auto px-4 xs:px-4 sm:px-6 lg:px-8 py-4 sm:py-12 lg:py-4">
 
       {/* Section Header with Cart Counter */}
       {/*<div className="relative mb-6 sm:mb-8 lg:mb-12">

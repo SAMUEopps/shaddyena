@@ -707,7 +707,9 @@ import {
   Zap,
   Menu,
   X,
-  Grid3x3
+  Grid3x3,
+  BellDotIcon,
+  BellIcon
 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -773,7 +775,7 @@ const MainNavbar = ({ isDarkMode, toggleDarkMode, isScrolled }: MainNavbarProps)
         
         const sortedCategories = topLevelCategories
           .sort((a: Category, b: Category) => (a.order || 0) - (b.order || 0))
-          .slice(0, 5);
+          .slice(0, 4);
         
         setCategories(sortedCategories);
       }
@@ -1131,6 +1133,10 @@ const MainNavbar = ({ isDarkMode, toggleDarkMode, isScrolled }: MainNavbarProps)
                     {totalItems > 99 ? '99+' : totalItems}
                   </span>
                 )}
+              </Link>
+
+              <Link href="/notification" className="p-2 text-[var(--color-text)] hover:text-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-soft)]/20 transition-all duration-200">
+                <BellIcon className="w-5 h-5" />
               </Link>
 
               <Link href="/profile" className="p-2 text-[var(--color-text)] hover:text-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-soft)]/20 transition-all duration-200">
