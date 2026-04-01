@@ -93,7 +93,7 @@ export default async function CategoriesPage() {
       })
         .sort({ 'rating.average': -1, createdAt: -1 })
         .limit(4)
-        .populate('shopId', 'businessName logo');
+        //.populate('shopId', 'businessName logo');
       
       return {
         category: category.toObject(),
