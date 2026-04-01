@@ -2119,16 +2119,16 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
         href: '/',
         icon: <LayoutDashboard className="w-5 h-5" />
       });
-      navItems.push({
+      /*navItems.push({
         name: 'Delivery',
         href: '/delivery',
         icon: <Truck className="w-5 h-5" />
-      });
-      navItems.push({
+      });*/
+      /*navItems.push({
         name: 'Delivery Earnings',
         href: '/delivery-earnings',
         icon: <CreditCard className="w-5 h-5" />
-      });
+      });*/
     }
 
     // Admin-specific items (only non-admin portal items)
@@ -2177,7 +2177,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
         { name: 'Add Product', href: '/vendor/products/add' },
         { name: 'Manage Inventory', href: '/vendor/inventory' },
         { name: 'Analytics', href: '/vendor/analytics' },
-        { name: 'Earnings', href: '/vendor/earnings' },
+        { name: 'Vendor Earnings', href: '/vendor/earnings' },
       ]
     };
   };
@@ -2192,8 +2192,8 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
       items: [
         { name: 'My Deliveries', href: '/delivery/assignments' },
         { name: 'Delivery History', href: '/delivery/history' },
-        { name: 'Earnings', href: '/delivery-earnings' },
-        { name: 'Support', href: '/delivery/support' },
+        { name: 'Delivery Earnings', href: '/delivery-earnings' },
+        { name: 'Delivery Support', href: '/delivery/support' },
       ]
     };
   };

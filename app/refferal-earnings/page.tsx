@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -122,7 +122,7 @@ export default function RefferalEarningsTab() {
       
       /*if (user?.role === 'vendor') {
         await fetchVendorEarnings();
-      } else*/
+      } else*
         
         if (user?.role === 'admin') {
         await fetchAdminStats();
@@ -178,7 +178,7 @@ export default function RefferalEarningsTab() {
     } catch (error) {
       console.error("Error fetching transactions:", error);
     }
-  };*/
+  };*
 
   const fetchAdminStats = async () => {
     if (user?.role !== 'admin') return;
@@ -272,7 +272,7 @@ export default function RefferalEarningsTab() {
   // -------------------------------
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* Header *
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl text-gray-800 font-bold">Earnings</h2>
@@ -298,11 +298,11 @@ export default function RefferalEarningsTab() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content *
       <div className="space-y-8">
-        {/* Payment Summary Cards */}
+        {/* Payment Summary Cards *
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* VENDOR VIEW */}
+          {/* VENDOR VIEW *
           {user?.role === 'vendor' && (
             <>
               {/* Vendor Subscription Card *
@@ -311,7 +311,7 @@ export default function RefferalEarningsTab() {
                 <p className="text-gray-600 mb-3">Monthly Vendor Subscription Fee</p>
                 <p className="text-3xl font-bold text-blue-600">{formatCurrency(subscriptionAmount)}</p>
                 <p className="text-gray-500 text-sm mt-2">Next payment due in 15 days</p>
-              </div>*/}
+              </div>*
 
               {/* Vendor Earnings Card *
               <div 
@@ -354,9 +354,9 @@ export default function RefferalEarningsTab() {
                     </p>
                   </div>
                 )}
-              </div>*/}
+              </div>*
 
-              {/* Referral Earnings Card */}
+              {/* Referral Earnings Card *
               <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg text-gray-700 font-semibold">Referral Earnings</h3>
@@ -383,10 +383,10 @@ export default function RefferalEarningsTab() {
             </>
           )}
 
-          {/* ADMIN VIEW */}
+          {/* ADMIN VIEW *
           {user?.role === 'admin' && (
             <>
-              {/* Pending Withdrawals Card */}
+              {/* Pending Withdrawals Card *
               <div 
                 className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer border-2 border-transparent hover:border-[#bf2c7e]"
                 onClick={handleAdminWithdrawalsClick}
@@ -417,7 +417,7 @@ export default function RefferalEarningsTab() {
                 </div>
               </div>
 
-              {/* Processed Withdrawals Card */}
+              {/* Processed Withdrawals Card *
               <div className="bg-white p-6 rounded-lg shadow">
                 <h3 className="text-lg text-gray-700 font-semibold mb-2">Processed Withdrawals</h3>
                 <div className="space-y-3">
@@ -442,7 +442,7 @@ export default function RefferalEarningsTab() {
                 </div>
               </div>
 
-              {/* Referral Program Card */}
+              {/* Referral Program Card *
               <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
                 <h3 className="text-lg text-gray-700 font-semibold mb-2">Referral Program</h3>
                 <div className="space-y-3">
@@ -460,10 +460,10 @@ export default function RefferalEarningsTab() {
             </>
           )}
 
-          {/* USER VIEW (Non-vendor, non-admin) */}
+          {/* USER VIEW (Non-vendor, non-admin) *
           {!['vendor', 'admin'].includes(user?.role || '') && (
             <>
-              {/* Referral Earnings Card */}
+              {/* Referral Earnings Card *
               <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg text-gray-700 font-semibold">Referral Earnings</h3>
@@ -488,7 +488,7 @@ export default function RefferalEarningsTab() {
                 </div>
               </div>
 
-              {/* Your Referral Code */}
+              {/* Your Referral Code *
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <h3 className="text-lg text-gray-700 font-semibold mb-2">Your Referral Code</h3>
                 <div className="flex items-center mb-4">
@@ -504,7 +504,7 @@ export default function RefferalEarningsTab() {
           )}
         </div>
 
-        {/* Recent Transactions/Requests Section */}
+        {/* Recent Transactions/Requests Section *
         {user?.role === 'vendor' && transactions.length > 0 && (
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="flex justify-between items-center mb-6">
@@ -572,7 +572,7 @@ export default function RefferalEarningsTab() {
           </div>
         )}
 
-        {/* Admin Recent Withdrawal Requests */}
+        {/* Admin Recent Withdrawal Requests *
         {user?.role === 'admin' && withdrawalRequests.length > 0 && (
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="flex justify-between items-center mb-6">
@@ -651,7 +651,7 @@ export default function RefferalEarningsTab() {
           </div>
         )}
 
-        {/* Referral Payments Table (for all users) */}
+        {/* Referral Payments Table (for all users) *
         {referralEarnings.payments.length > 0 && (
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="flex justify-between items-center mb-6">
@@ -685,7 +685,7 @@ export default function RefferalEarningsTab() {
                           </div>
                           <div className="text-sm text-gray-500">
                             {payment.referredVendor.email}
-                          </div>*/}
+                          </div>*
                         </div>
                       </td>
                       <td className="py-4 px-4">
@@ -730,7 +730,7 @@ export default function RefferalEarningsTab() {
           </div>
         )}
 
-        {/* Empty States */}
+        {/* Empty States *
         {user?.role === 'admin' && withdrawalRequests.length === 0 && (
           <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -740,6 +740,735 @@ export default function RefferalEarningsTab() {
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No Pending Withdrawals</h3>
             <p className="text-gray-600 mb-6">All withdrawal requests are currently processed.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}*/
+
+'use client';
+
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  DollarSign,
+  TrendingUp,
+  Gift,
+  Users,
+  Clock,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  Wallet,
+  Award,
+  Sparkles,
+  Calendar,
+  Mail,
+  Phone,
+  Building,
+  UserCheck,
+  Star,
+  Zap,
+  Rocket,
+  Crown,
+  Target,
+  Heart,
+  BarChart3,
+  PieChart,
+  CreditCard,
+  AlertCircle,
+  ChevronRight,
+  Download,
+  Filter,
+  Eye
+} from 'lucide-react';
+
+// -------------------------------
+// TYPES
+// -------------------------------
+interface ReferralPayment {
+  paymentId: string;
+  amount: number;
+  referralBonus: number;
+  user: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+  };
+  referredVendor: {
+    businessName: string;
+    email: string;
+  };
+  createdAt: string;
+}
+
+interface ReferralEarningsSummary {
+  totalEarnings: number;
+  totalReferrals: number;
+  pendingReferrals: number;
+  completedReferrals: number;
+  thisMonthEarnings: number;
+  payments: ReferralPayment[];
+}
+
+interface VendorEarningsSummary {
+  availableEarnings: number;
+  withdrawnEarnings: number;
+  totalEarnings: number;
+  hasPendingRequest: boolean;
+  pendingAmount: number;
+  pendingRequestAmount: number;
+}
+
+interface VendorTransaction {
+  _id: string;
+  orderId: string;
+  amount: number;
+  commission: number;
+  netAmount: number;
+  status: string;
+  createdAt: string;
+  withdrawalRequestId?: string;
+}
+
+interface WithdrawalStats {
+  PENDING?: { count: number; totalAmount: number };
+  APPROVED?: { count: number; totalAmount: number };
+  REJECTED?: { count: number; totalAmount: number };
+  PROCESSED?: { count: number; totalAmount: number };
+}
+
+interface WithdrawalRequest {
+  _id: string;
+  vendorId: string;
+  vendorDetails: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    mpesaNumber?: string;
+    businessName?: string;
+  };
+  totalAmount: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'PROCESSED';
+  createdAt: string;
+}
+
+// -------------------------------
+// MAIN COMPONENT
+// -------------------------------
+export default function RefferalEarningsTab() {
+  const { user, refreshUser } = useAuth();
+  const router = useRouter();
+  
+  const [loading, setLoading] = useState(true);
+  
+  // Vendor/Admin Earnings State
+  const [vendorEarnings, setVendorEarnings] = useState<VendorEarningsSummary>({
+    availableEarnings: 0,
+    withdrawnEarnings: 0,
+    totalEarnings: 0,
+    hasPendingRequest: false,
+    pendingAmount: 0,
+    pendingRequestAmount: 0
+  });
+  const [withdrawalStats, setWithdrawalStats] = useState<WithdrawalStats>({});
+  const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
+  const [transactions, setTransactions] = useState<VendorTransaction[]>([]);
+  
+  // Referral Earnings State
+  const [referralEarnings, setReferralEarnings] = useState<ReferralEarningsSummary>({
+    totalEarnings: 0,
+    totalReferrals: 0,
+    pendingReferrals: 0,
+    completedReferrals: 0,
+    thisMonthEarnings: 0,
+    payments: []
+  });
+  
+  const [subscriptionAmount] = useState<number>(3000);
+
+  // -------------------------------
+  // FETCH DATA
+  // -------------------------------
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      
+      // Always fetch referral earnings
+      await fetchReferralEarnings();
+      
+      if (user?.role === 'admin') {
+        await fetchAdminStats();
+      }
+      
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+      toast.error("Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchReferralEarnings = async () => {
+    try {
+      const response = await fetch("/api/payments/referral-earnings", {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setReferralEarnings(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch referral earnings:", error);
+    }
+  };
+
+  const fetchAdminStats = async () => {
+    if (user?.role !== 'admin') return;
+    
+    try {
+      const response = await fetch("/api/earnings/admin/withdrawal-requests?limit=5");
+      if (response.ok) {
+        const data = await response.json();
+        setWithdrawalStats(data.stats || {});
+        setWithdrawalRequests(data.requests || []);
+      }
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+    }
+  };
+
+  // -------------------------------
+  // UTILITY FUNCTIONS
+  // -------------------------------
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-KE', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  // -------------------------------
+  // HANDLERS
+  // -------------------------------
+  const handleRefresh = async () => {
+    await refreshUser();
+    await fetchAllData();
+    toast.success('Data updated!');
+  };
+
+  const handleAdminWithdrawalsClick = () => {
+    if (user?.role === 'admin') {
+      router.push('/admin/withdrawal-requests');
+    }
+  };
+
+  // Calculate admin totals
+  const totalPendingRequests = withdrawalStats.PENDING?.count || 0;
+  const totalPendingAmount = withdrawalStats.PENDING?.totalAmount || 0;
+  const totalProcessedAmount = withdrawalStats.PROCESSED?.totalAmount || 0;
+  const totalRequests = Object.values(withdrawalStats).reduce((sum, stat) => sum + (stat?.count || 0), 0);
+
+  // -------------------------------
+  // USE EFFECT
+  // -------------------------------
+  useEffect(() => {
+    if (user) {
+      fetchAllData();
+    }
+  }, [user]);
+
+  // -------------------------------
+  // LOADING STATE
+  // -------------------------------
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--color-background)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)]"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // -------------------------------
+  // RENDER
+  // -------------------------------
+  return (
+    <div className="min-h-screen bg-[var(--color-background)]">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary)]/10 via-[var(--color-primary-soft)]/5 to-transparent py-12 md:py-16">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--color-primary)]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[var(--color-primary-alt)]/5 rounded-full blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          {/* Back Button */}
+          <div className="mb-6">
+            <button
+              onClick={() => router.back()}
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-all duration-300 group"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              <span>Go Back</span>
+            </button>
+          </div>
+          
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center justify-center p-3 bg-[var(--color-primary)]/10 rounded-2xl mb-6 animate-bounce-subtle">
+              <Wallet className="w-10 h-10 text-[var(--color-primary)]" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-text)] mb-4">
+              {user?.role === 'admin' ? 'Payment Management' : 'Your Earnings'}
+            </h1>
+            <p className="text-lg text-[var(--color-text-muted)] mb-6">
+              {user?.role === 'admin' 
+                ? 'Manage vendor withdrawals and track referral payments'
+                : 'Track your referral earnings and commission payments'}
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <div className="flex items-center space-x-2 bg-[var(--color-surface)] px-4 py-2 rounded-full border border-[var(--color-border)]">
+                <Gift className="w-4 h-4 text-[var(--color-primary)]" />
+                <span className="text-sm">20% Commission</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-[var(--color-surface)] px-4 py-2 rounded-full border border-[var(--color-border)]">
+                <Clock className="w-4 h-4 text-[var(--color-primary)]" />
+                <span className="text-sm">Real-time Tracking</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-[var(--color-surface)] px-4 py-2 rounded-full border border-[var(--color-border)]">
+                <TrendingUp className="w-4 h-4 text-[var(--color-primary)]" />
+                <span className="text-sm">Unlimited Earnings</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Stats Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          
+          {/* ADMIN VIEW */}
+          {user?.role === 'admin' && (
+            <>
+              {/* Pending Withdrawals Card */}
+              <div 
+                className="group bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300 cursor-pointer"
+                onClick={handleAdminWithdrawalsClick}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-yellow-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                    <Clock className="w-6 h-6 text-yellow-500" />
+                  </div>
+                  <span className="px-2 py-1 bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs rounded-full">
+                    Click to manage
+                  </span>
+                </div>
+                <p className="text-3xl font-bold text-[var(--color-text)] mb-1">
+                  {totalPendingRequests}
+                </p>
+                <p className="text-sm text-[var(--color-text-muted)] mb-3">Pending Withdrawal Requests</p>
+                <div className="border-t border-[var(--color-border)] pt-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[var(--color-text-muted)]">Total Amount:</span>
+                    <span className="font-semibold text-yellow-500">{formatCurrency(totalPendingAmount)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm mt-1">
+                    <span className="text-[var(--color-text-muted)]">Total Requests:</span>
+                    <span className="font-semibold text-[var(--color-text)]">{totalRequests}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Processed Withdrawals Card */}
+              <div className="group bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-green-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                    <CheckCircle className="w-6 h-6 text-green-500" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-[var(--color-text)] mb-1">
+                  {formatCurrency(totalProcessedAmount)}
+                </p>
+                <p className="text-sm text-[var(--color-text-muted)] mb-3">Total Processed Payments</p>
+                <div className="border-t border-[var(--color-border)] pt-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[var(--color-text-muted)]">Completed:</span>
+                    <span className="font-semibold text-green-500">{withdrawalStats.PROCESSED?.count || 0}</span>
+                  </div>
+                  <div className="flex justify-between text-sm mt-1">
+                    <span className="text-[var(--color-text-muted)]">Approved:</span>
+                    <span className="font-semibold text-blue-500">{withdrawalStats.APPROVED?.count || 0}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Referral Program Stats Card */}
+              <div className="group bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 border border-purple-500/20 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                    <Award className="w-6 h-6 text-purple-500" />
+                  </div>
+                </div>
+                <p className="text-2xl font-bold text-[var(--color-text)] mb-1">20% Commission</p>
+                <p className="text-sm text-[var(--color-text-muted)] mb-3">On vendor subscriptions</p>
+                <div className="border-t border-purple-500/20 pt-3">
+                  <p className="text-sm text-[var(--color-text-muted)]">
+                    Monitor referral activity and earnings across the platform
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* USER VIEW (Non-admin, non-vendor) */}
+          {!['admin'].includes(user?.role || '') && (
+            <>
+              {/* Total Referral Earnings Card */}
+              <div className="group bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-2xl p-6 border border-green-500/20 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-green-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                    <DollarSign className="w-6 h-6 text-green-500" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-[var(--color-text)] mb-1">
+                  {formatCurrency(referralEarnings.totalEarnings)}
+                </p>
+                <p className="text-sm text-[var(--color-text-muted)] mb-3">Total Referral Earnings</p>
+                <div className="flex gap-2">
+                  <span className="px-2 py-1 bg-green-500/10 text-green-500 text-xs rounded-full">
+                    {referralEarnings.completedReferrals} Completed
+                  </span>
+                  <span className="px-2 py-1 bg-yellow-500/10 text-yellow-500 text-xs rounded-full">
+                    {referralEarnings.pendingReferrals} Pending
+                  </span>
+                </div>
+              </div>
+
+              {/* Referral Stats Card */}
+              <div className="group bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                    <Users className="w-6 h-6 text-blue-500" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-[var(--color-text)] mb-1">
+                  {referralEarnings.totalReferrals}
+                </p>
+                <p className="text-sm text-[var(--color-text-muted)] mb-3">Total Referrals</p>
+                <div className="border-t border-[var(--color-border)] pt-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[var(--color-text-muted)]">This Month:</span>
+                    <span className="font-semibold text-[var(--color-primary)]">
+                      {formatCurrency(referralEarnings.thisMonthEarnings)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Monthly Earnings Card */}
+              <div className="group bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                    <Calendar className="w-6 h-6 text-purple-500" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-[var(--color-text)] mb-1">
+                  {formatCurrency(referralEarnings.thisMonthEarnings)}
+                </p>
+                <p className="text-sm text-[var(--color-text-muted)] mb-3">This Month's Earnings</p>
+                <div className="border-t border-[var(--color-border)] pt-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-[var(--color-text-muted)]">Commission Rate:</span>
+                    <span className="font-semibold text-green-500">20%</span>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Referral Payments Table */}
+        {referralEarnings.payments.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-[var(--color-text)] flex items-center">
+                  <span className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] w-1 h-8 rounded-full mr-3"></span>
+                  Referral Payment History
+                </h2>
+                <p className="text-[var(--color-text-muted)] mt-1">
+                  All your referral commission payments
+                </p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleRefresh}
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl text-sm text-[var(--color-text)] hover:border-[var(--color-primary)] transition-colors"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Refresh</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-[var(--color-background-soft)]">
+                    <tr className="border-b border-[var(--color-border)]">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--color-text)]">Referred Vendor</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--color-text)]">Referred By</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--color-text)]">Subscription</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--color-text)]">Your Bonus (20%)</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--color-text)]">Date</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--color-text)]">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--color-border)]">
+                    {referralEarnings.payments.map((payment) => (
+                      <tr key={payment.paymentId} className="hover:bg-[var(--color-background-soft)] transition-colors">
+                        <td className="px-6 py-4">
+                          <div>
+                            {/*<p className="font-medium text-[var(--color-text)]">
+                              {payment.referredVendor.businessName}
+                            </p>*/}
+                            {/*<p className="text-sm text-[var(--color-text-muted)]">
+                              {payment.referredVendor.email}
+                            </p>*/}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="font-medium text-[var(--color-text)]">
+                              {payment.user.firstName} {payment.user.lastName}
+                            </p>
+                            <p className="text-sm text-[var(--color-text-muted)]">
+                              {payment.user.phone}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="font-medium text-[var(--color-text)]">
+                            {formatCurrency(payment.amount)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-lg font-bold text-green-600">
+                              {formatCurrency(payment.referralBonus)}
+                            </span>
+                            <span className="px-2 py-0.5 text-xs bg-green-500/10 text-green-500 rounded-full">
+                              20%
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-[var(--color-text-muted)]">
+                          {formatDate(payment.createdAt)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center space-x-1 px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-sm">
+                            <CheckCircle className="w-3 h-3" />
+                            <span>Paid</span>
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Admin Recent Withdrawal Requests */}
+        {user?.role === 'admin' && withdrawalRequests.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-[var(--color-text)] flex items-center">
+                  <span className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] w-1 h-8 rounded-full mr-3"></span>
+                  Recent Withdrawal Requests
+                </h2>
+                <p className="text-[var(--color-text-muted)] mt-1">
+                  Pending and recent vendor withdrawal requests
+                </p>
+              </div>
+              <button 
+                onClick={() => router.push('/admin/withdrawal-requests')}
+                className="inline-flex items-center space-x-2 text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] font-medium"
+              >
+                <span>View All</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-[var(--color-background-soft)]">
+                    <tr className="border-b border-[var(--color-border)]">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--color-text)]">Vendor</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--color-text)]">Date</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--color-text)]">Amount</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--color-text)]">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--color-text)]">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--color-border)]">
+                    {withdrawalRequests.map((request) => (
+                      <tr key={request._id} className="hover:bg-[var(--color-background-soft)] transition-colors">
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="font-medium text-[var(--color-text)]">
+                              {request.vendorDetails?.firstName} {request.vendorDetails?.lastName}
+                            </p>
+                            <p className="text-sm text-[var(--color-text-muted)]">{request.vendorDetails?.email}</p>
+                            {request.vendorDetails?.businessName && (
+                              <p className="text-xs text-[var(--color-text-muted)]">{request.vendorDetails.businessName}</p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-[var(--color-text-muted)]">
+                          {formatDate(request.createdAt)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="font-bold text-green-600">
+                            {formatCurrency(request.totalAmount)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                            request.status === 'PENDING' 
+                              ? 'bg-yellow-500/10 text-yellow-500'
+                              : request.status === 'APPROVED'
+                              ? 'bg-blue-500/10 text-blue-500'
+                              : request.status === 'PROCESSED'
+                              ? 'bg-green-500/10 text-green-500'
+                              : 'bg-red-500/10 text-red-500'
+                          }`}>
+                            {request.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() => router.push(`/admin/withdrawal-requests/${request._id}`)}
+                            className="inline-flex items-center space-x-1 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] font-medium"
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span>Review</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* How It Works Section */}
+        <div className="bg-gradient-to-r from-[var(--color-primary)]/5 to-[var(--color-primary-alt)]/5 rounded-2xl p-8 border border-[var(--color-border)]">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">How Referral Earnings Work</h2>
+            <p className="text-[var(--color-text-muted)]">Simple steps to start earning</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-[var(--color-primary)]/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <span className="text-3xl font-bold text-[var(--color-primary)]">1</span>
+              </div>
+              <h3 className="font-semibold text-[var(--color-text)] mb-2">Share Your Link</h3>
+              <p className="text-sm text-[var(--color-text-muted)]">
+                Share your unique referral link with potential vendors
+              </p>
+            </div>
+            
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <span className="text-3xl font-bold text-green-500">2</span>
+              </div>
+              <h3 className="font-semibold text-[var(--color-text)] mb-2">They Subscribe</h3>
+              <p className="text-sm text-[var(--color-text-muted)]">
+                When they subscribe as vendors using your link
+              </p>
+            </div>
+            
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-purple-500/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <span className="text-3xl font-bold text-purple-500">3</span>
+              </div>
+              <h3 className="font-semibold text-[var(--color-text)] mb-2">Earn 20% Bonus</h3>
+              <p className="text-sm text-[var(--color-text-muted)]">
+                Receive 20% of their subscription amount as referral bonus
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-8 pt-6 border-t border-[var(--color-border)] text-center">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-[var(--color-primary)]/10 rounded-lg">
+              <Award className="w-5 h-5 text-[var(--color-primary)]" />
+              <span className="text-[var(--color-text)] font-medium">Commission Rate:</span>
+              <span className="text-[var(--color-primary)] font-bold">20%</span>
+            </div>
+            <p className="text-sm text-[var(--color-text-muted)] mt-3">
+              Of every vendor subscription through your referral
+            </p>
+          </div>
+        </div>
+
+        {/* Empty State for No Payments */}
+        {referralEarnings.payments.length === 0 && user?.role !== 'admin' && (
+          <div className="bg-[var(--color-surface)] rounded-2xl p-12 text-center border border-[var(--color-border)]">
+            <div className="inline-flex p-4 bg-[var(--color-primary)]/10 rounded-full mb-4">
+              <Gift className="w-12 h-12 text-[var(--color-primary)]" />
+            </div>
+            <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">No Earnings Yet</h3>
+            <p className="text-[var(--color-text-muted)] mb-4">
+              You haven't received any referral payments yet.
+            </p>
+            <Link
+              href="/referrals"
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-xl hover:bg-[var(--color-primary-hover)] transition-all duration-300"
+            >
+              <span>Start Referring</span>
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
+
+        {/* Empty State for Admin */}
+        {user?.role === 'admin' && withdrawalRequests.length === 0 && (
+          <div className="bg-[var(--color-surface)] rounded-2xl p-12 text-center border border-[var(--color-border)]">
+            <div className="inline-flex p-4 bg-green-500/10 rounded-full mb-4">
+              <CheckCircle className="w-12 h-12 text-green-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">All Caught Up!</h3>
+            <p className="text-[var(--color-text-muted)]">
+              No pending withdrawal requests at the moment.
+            </p>
           </div>
         )}
       </div>

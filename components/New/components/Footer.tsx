@@ -54,6 +54,7 @@ const Footer = () => {
     company: [
       { name: 'About', href: '/about' },
       { name: 'Careers', href: '/careers', badge: 'Hiring' },
+      { name: 'Hiring', href: '/hiring', },
       { name: 'Press', href: '/press' },
       { name: 'Contact', href: '/contact' },
     ],
