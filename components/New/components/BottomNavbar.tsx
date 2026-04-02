@@ -2090,21 +2090,21 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
 
     // Vendor-specific items
     if (user.role === 'vendor') {
-      navItems.push({
+      /*navItems.push({
         name: 'Vendor Dashboard',
         href: '/vendor-dashboard',
         icon: <LayoutDashboard className="w-5 h-5" />
-      });
+      });*/
       navItems.push({
         name: 'Products',
         href: '/products',
         icon: <Package className="w-5 h-5" />
       });
-      navItems.push({
+      /*navItems.push({
         name: 'Order Earnings',
         href: '/order-earnings',
         icon: <CreditCard className="w-5 h-5" />
-      });
+      });*/
       navItems.push({
         name: 'Subscriptions',
         href: '/subscription',
@@ -2174,6 +2174,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
       title: 'Vendor Tools',
       icon: <Building className="w-5 h-5" />,
       items: [
+        { name: 'Vendor Dashboard', href: '/vendor-dashboard'},
         { name: 'Add Product', href: '/vendor/products/add' },
         { name: 'Manage Inventory', href: '/vendor/inventory' },
         { name: 'Analytics', href: '/vendor/analytics' },
