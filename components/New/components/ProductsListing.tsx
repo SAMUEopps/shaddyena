@@ -865,7 +865,7 @@ const ProductsListing = () => {
               return (
                 <Link
                   key={`product-${product._id}-${index}`}
-                  href={`/product/${product._id}`}
+                  href={`/products/${product._id}`}
                   className="group relative bg-[var(--color-surface)] rounded-lg xs:rounded-xl sm:rounded-2xl border border-[var(--color-border)] overflow-hidden hover:shadow-lg sm:hover:shadow-2xl transition-all duration-300 sm:duration-500 hover:scale-[1.01] sm:hover:scale-[1.02] hover:border-[var(--color-primary)]/30"
                 >
                   {/* Image Container - Responsive height */}

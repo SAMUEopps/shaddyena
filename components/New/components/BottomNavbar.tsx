@@ -2245,6 +2245,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
         { name: 'All Customers Management', href: '/admin/customers' },
         { name: 'All Vendors Management', href: '/admin/vendors' },
         { name: 'All Admins Management', href: '/admin/admins' },
+        { name: 'Categories Management', href: '/admin/categories ' },
         { name: 'Orders Management', href: '/admin/orders' },
         { name: 'Products Management', href: '/admin/products' },
         { name: 'New Sellers Requests', href: '/admin/seller-requests' },
