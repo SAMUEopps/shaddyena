@@ -901,26 +901,24 @@ const ProductShowcase = () => {
         </div>
       </div>*/}
 
-      <div className="flex items-center justify-between mb-3">
-  <div className="flex items-center gap-3">
-    <div>
-      <h2 className="text-2xl font-bold text-[var(--color-primary-alt)]">
-        Featured Products
-      </h2>
-    </div>
-  </div>
-  
-  <div className="flex items-center gap-4">
-    {/* All Shops Link */}
-    <Link 
-      href="/products"
-      className="flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-[var(--color-primary-alt)] bg-[var(--color-surface)] text-[var(--color-primary)] hover:bg-[var(--color-primary-alt)] hover:text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[var(--color-primary)]/20 group"
-    >
-      <span className="text-sm text-[var(--color-primary-alt)] hover:text-white font-semibold tracking-wide">All Products</span>
-      <ChevronRight className="w-5 h-5 text-[var(--color-primary-alt)] group-hover:text-white transform group-hover:translate-x-1 transition-all duration-300" />
-    </Link>
-  </div>
-</div>
+      <div className="flex items-center justify-between mb-2 xs:mb-3 sm:mb-4">
+        {/* Title */}
+        <div>
+          <h2 className="text-base xs:text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-primary-alt)] leading-tight">
+            Featured Products
+          </h2>
+        </div>
+        
+        {/* Button */}
+        <Link 
+          href="/products"
+          className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 px-2 xs:px-3 sm:px-4 lg:px-5 py-1 xs:py-1.5 sm:py-2 lg:py-2.5 rounded-full border border-[var(--color-primary-alt)] bg-[var(--color-surface)] text-[var(--color-primary-alt)] text-[9px] xs:text-[10px] sm:text-xs lg:text-sm font-semibold transition-all duration-300 hover:bg-[var(--color-primary-alt)] hover:text-white hover:scale-105"
+        >
+          <span className="hidden xs:inline">All Products</span>
+          <span className="xs:hidden">All</span>
+          <ChevronRight className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 transition-transform duration-300" />
+        </Link>
+      </div>
 
       {/* Loading State */}
       {loading ? (
