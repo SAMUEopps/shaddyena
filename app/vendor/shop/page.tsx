@@ -646,7 +646,7 @@ export default function VendorShopPage() {
   );
 }*/
 
-"use client";
+/*"use client";
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -931,7 +931,7 @@ export default function VendorShopPage() {
     <span className="text-sm font-medium">Back</span>
   </button>
 </div>
-        {/* Header Section */}
+        {/* Header Section *
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Shop Management</h1>
           <div className="flex flex-col xs:flex-row gap-2 sm:gap-3">
@@ -954,7 +954,7 @@ export default function VendorShopPage() {
         )}
 
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm sm:shadow p-4 sm:p-6">
-          {/* Logo Upload */}
+          {/* Logo Upload *
           <div className="mb-6">
             <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Shop Logo</h2>
             <div className="flex flex-col sm:flex-row sm:items-start gap-4">
@@ -1009,7 +1009,7 @@ export default function VendorShopPage() {
             </div>
           </div>
 
-          {/* Banner Upload */}
+          {/* Banner Upload *
           <div className="mb-6">
             <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Shop Banner</h2>
             <div className="space-y-4">
@@ -1062,7 +1062,7 @@ export default function VendorShopPage() {
             </div>
           </div>
 
-          {/* Basic Information */}
+          {/* Basic Information *
           <div className="mb-6">
             <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Basic Information</h2>
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
@@ -1104,7 +1104,7 @@ export default function VendorShopPage() {
             </div>
           </div>
 
-          {/* Location Information */}
+          {/* Location Information *
           <div className="mb-6">
             <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Location</h2>
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
@@ -1147,7 +1147,7 @@ export default function VendorShopPage() {
             </div>
           </div>
 
-          {/* Contact Information */}
+          {/* Contact Information *
           <div className="mb-6">
             <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Contact Information</h2>
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
@@ -1185,11 +1185,11 @@ export default function VendorShopPage() {
                   disabled={!isEditing}
                   className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-[#bf2c7e] focus:border-[#bf2c7e] text-sm sm:text-base"
                 />
-              </div>*/}
+              </div>*
             </div>
           </div>
 
-          {/* Operating Hours */}
+          {/* Operating Hours *
           <div className="mb-6">
             <h2 className="text-lg sm:text-xl text-gray-700 font-semibold mb-3 sm:mb-4">Operating Hours</h2>
             <div className="space-y-2 sm:space-y-3">
@@ -1228,7 +1228,7 @@ export default function VendorShopPage() {
             </div>
           </div>
 
-          {/* Social Media */}
+          {/* Social Media *
           <div className="mb-6">
             <h2 className="text-lg sm:text-xl font-semibold mb-3 text-gray-700 sm:mb-4">Social Media</h2>
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
@@ -1250,7 +1250,7 @@ export default function VendorShopPage() {
             </div>
           </div>
 
-          {/* Policies */}
+          {/* Policies *
           <div className="mb-6">
             <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Policies</h2>
             <div className="space-y-3 sm:space-y-4">
@@ -1290,6 +1290,930 @@ export default function VendorShopPage() {
               </button>
             </div>
           )}
+        </form>
+      </div>
+    </div>
+  );
+}*/
+
+"use client";
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
+import {
+  ArrowLeft,
+  Store,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  Upload,
+  X,
+  CheckCircle,
+  AlertCircle,
+  Edit,
+  Save,
+  Trash2,
+  Globe,
+  Sparkles,
+  Building2,
+  Calendar,
+  DollarSign,
+  Package,
+  Shield,
+  Truck,
+  FileText,
+  Camera,
+  Image as ImageIcon
+} from 'lucide-react';
+
+interface ShopData {
+  businessName: string;
+  businessType: string;
+  description?: string;
+  logo?: string;
+  banner?: string;
+  location: {
+    address: string;
+    city: string;
+    country: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  contact: {
+    phone: string;
+    email: string;
+  };
+  operatingHours: {
+    day: string;
+    open: string;
+    close: string;
+    isClosed: boolean;
+  }[];
+  socialMedia?: {
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    youtube?: string;
+  };
+  policies: {
+    returnPolicy?: string;
+    shippingPolicy?: string;
+    privacyPolicy?: string;
+  };
+}
+
+const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+export default function VendorShopPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [shopData, setShopData] = useState<ShopData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [hasShop, setHasShop] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [activeTab, setActiveTab] = useState('basic');
+
+  useEffect(() => {
+    fetchShopData();
+  }, []);
+
+  const fetchShopData = async () => {
+    try {
+      const response = await fetch('/api/vendor/shop');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.exists) {
+          setShopData(data.shop);
+          setHasShop(true);
+        } else if (data.prefilledData) {
+          setShopData({
+            businessName: data.prefilledData.businessName || '',
+            businessType: data.prefilledData.businessType || '',
+            location: {
+              address: '',
+              city: '',
+              country: 'Kenya'
+            },
+            contact: {
+              phone: data.prefilledData.phone || '',
+              email: data.prefilledData.email || ''
+            },
+            operatingHours: daysOfWeek.map(day => ({
+              day,
+              open: '09:00',
+              close: '17:00',
+              isClosed: day === 'Sunday'
+            })),
+            policies: {}
+          });
+          setHasShop(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching shop data:', error);
+      setMessage({ type: 'error', text: 'Error loading shop data' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (file: File, type: 'logo' | 'banner') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    if (type === 'logo') {
+      setUploadingLogo(true);
+    } else {
+      setUploadingBanner(true);
+    }
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      
+      setShopData(prev => prev ? { ...prev, [type]: data.url } : null);
+      setMessage({ type: 'success', text: `${type === 'logo' ? 'Logo' : 'Banner'} uploaded successfully!` });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setMessage({ type: 'error', text: `Error uploading ${type}` });
+    } finally {
+      if (type === 'logo') {
+        setUploadingLogo(false);
+      } else {
+        setUploadingBanner(false);
+      }
+    }
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setMessage({ type: 'error', text: 'Please select an image file' });
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage({ type: 'error', text: 'Image must be less than 5MB' });
+        return;
+      }
+
+      handleImageUpload(file, 'logo');
+    }
+  };
+
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setMessage({ type: 'error', text: 'Please select an image file' });
+        return;
+      }
+      
+      if (file.size > 10 * 1024 * 1024) {
+        setMessage({ type: 'error', text: 'Banner image must be less than 10MB' });
+        return;
+      }
+
+      handleImageUpload(file, 'banner');
+    }
+  };
+
+  const removeImage = (type: 'logo' | 'banner') => {
+    setShopData(prev => prev ? { ...prev, [type]: undefined } : null);
+    setMessage({ type: 'success', text: `${type === 'logo' ? 'Logo' : 'Banner'} removed successfully!` });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setShopData(prev => {
+      if (!prev) return prev;
+      
+      if (name.includes('.')) {
+        const [parent, child] = name.split('.');
+        return {
+          ...prev,
+          [parent]: {
+            ...((prev[parent as keyof ShopData] && typeof prev[parent as keyof ShopData] === 'object') ? prev[parent as keyof ShopData] as object : {}),
+            [child]: value
+          }
+        };
+      }
+      
+      return { ...prev, [name]: value };
+    });
+  };
+
+  const handleOperatingHoursChange = (index: number, field: string, value: string | boolean) => {
+    setShopData(prev => {
+      if (!prev) return prev;
+      const updatedHours = [...prev.operatingHours];
+      updatedHours[index] = { ...updatedHours[index], [field]: value };
+      return { ...prev, operatingHours: updatedHours };
+    });
+  };
+
+  const handleSocialMediaChange = (platform: string, value: string) => {
+    setShopData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        socialMedia: {
+          ...prev.socialMedia,
+          [platform]: value
+        }
+      };
+    });
+  };
+
+  const handlePolicyChange = (policy: string, value: string) => {
+    setShopData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        policies: {
+          ...prev.policies,
+          [policy]: value
+        }
+      };
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setMessage({ type: 'info', text: 'Saving shop information...' });
+
+    try {
+      const method = hasShop ? 'PUT' : 'POST';
+      const response = await fetch('/api/vendor/shop', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(shopData)
+      });
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Shop saved successfully!' });
+        setIsEditing(false);
+        fetchShopData();
+        setTimeout(() => setMessage(null), 3000);
+      } else {
+        const error = await response.json();
+        setMessage({ type: 'error', text: error.message || 'Error saving shop' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Error saving shop' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const formatTime = (time: string) => {
+    return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const tabs = [
+    { id: 'basic', label: 'Basic Info', icon: <Store className="w-4 h-4" /> },
+    { id: 'location', label: 'Location', icon: <MapPin className="w-4 h-4" /> },
+    { id: 'hours', label: 'Hours', icon: <Clock className="w-4 h-4" /> },
+    { id: 'social', label: 'Social Media', icon: <Globe className="w-4 h-4" /> },
+    { id: 'policies', label: 'Policies', icon: <Shield className="w-4 h-4" /> },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)] mx-auto mb-4" />
+          <p className="text-[var(--color-text-muted)]">Loading shop data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== 'vendor') {
+    return (
+      <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="inline-flex p-4 bg-red-500/10 rounded-full mb-4">
+            <AlertCircle className="w-12 h-12 text-red-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-[var(--color-text)] mb-2">Access Denied</h1>
+          <p className="text-[var(--color-text-muted)] mb-6">Only vendors can access this page.</p>
+          <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-xl hover:bg-[var(--color-primary-hover)] transition-all duration-300">
+            Go to Home
+            <ArrowLeft className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[var(--color-background)]">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary)]/10 via-[var(--color-primary-soft)]/5 to-transparent py-8 md:py-12">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-primary)]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[var(--color-primary-alt)]/5 rounded-full blur-3xl" />
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--color-primary)]/10 rounded-full mb-4">
+                <Store className="w-4 h-4 text-[var(--color-primary)]" />
+                <span className="text-sm text-[var(--color-primary)] font-medium">Shop Management</span>
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-text)]">
+                {hasShop ? 'Manage Your Shop' : 'Create Your Shop'}
+              </h1>
+              <p className="text-[var(--color-text-muted)] mt-2">
+                {hasShop 
+                  ? 'Update your shop information and settings' 
+                  : 'Set up your shop to start selling products'}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              {!isEditing && hasShop && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] text-white rounded-xl font-medium hover:shadow-lg hover:scale-105 transition-all duration-300"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit Shop
+                </button>
+              )}
+              <button
+                onClick={() => router.push('/vendor-dashboard')}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-all duration-300 group"
+              >
+                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                <span>Dashboard</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        {/* Message Alert */}
+        {message && (
+          <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 animate-slide-in ${
+            message.type === 'success' ? 'bg-green-500/10 border border-green-500/20 text-green-600' :
+            message.type === 'error' ? 'bg-red-500/10 border border-red-500/20 text-red-600' :
+            'bg-blue-500/10 border border-blue-500/20 text-blue-600'
+          }`}>
+            {message.type === 'success' && <CheckCircle className="w-5 h-5" />}
+            {message.type === 'error' && <AlertCircle className="w-5 h-5" />}
+            {message.type === 'info' && <Store className="w-5 h-5" />}
+            <span>{message.text}</span>
+          </div>
+        )}
+
+        {/* Image Upload Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Logo Upload Card */}
+          <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden">
+            <div className="px-5 py-3 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+              <h3 className="font-semibold text-[var(--color-text)] flex items-center gap-2">
+                <Camera className="w-4 h-4 text-[var(--color-primary)]" />
+                Shop Logo
+              </h3>
+            </div>
+            <div className="p-5">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative w-32 h-32 bg-[var(--color-background-soft)] rounded-2xl border-2 border-dashed border-[var(--color-border)] flex items-center justify-center overflow-hidden group">
+                  {shopData?.logo ? (
+                    <>
+                      <Image
+                        src={shopData.logo}
+                        alt="Shop Logo"
+                        fill
+                        className="object-cover"
+                      />
+                      {isEditing && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => removeImage('logo')}
+                            className="p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center">
+                      <Store className="w-10 h-10 text-[var(--color-text-muted)]/50 mx-auto mb-1" />
+                      <span className="text-xs text-[var(--color-text-muted)]">No Logo</span>
+                    </div>
+                  )}
+                </div>
+                
+                {isEditing && (
+                  <div className="text-center">
+                    <label className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-xl text-sm font-medium hover:bg-[var(--color-primary)]/20 cursor-pointer transition-all duration-300">
+                      {uploadingLogo ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-[var(--color-primary)] border-t-transparent" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          Upload Logo
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                        disabled={uploadingLogo}
+                        className="hidden"
+                      />
+                    </label>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-2">
+                      PNG, JPG up to 5MB
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Banner Upload Card */}
+          <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden">
+            <div className="px-5 py-3 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+              <h3 className="font-semibold text-[var(--color-text)] flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-[var(--color-primary)]" />
+                Shop Banner
+              </h3>
+            </div>
+            <div className="p-5">
+              <div className="relative w-full h-32 bg-[var(--color-background-soft)] rounded-xl border-2 border-dashed border-[var(--color-border)] flex items-center justify-center overflow-hidden group">
+                {shopData?.banner ? (
+                  <>
+                    <Image
+                      src={shopData.banner}
+                      alt="Shop Banner"
+                      fill
+                      className="object-cover"
+                    />
+                    {isEditing && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => removeImage('banner')}
+                          className="p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center">
+                    <ImageIcon className="w-10 h-10 text-[var(--color-text-muted)]/50 mx-auto mb-1" />
+                    <span className="text-xs text-[var(--color-text-muted)]">No Banner</span>
+                  </div>
+                )}
+              </div>
+              
+              {isEditing && (
+                <div className="text-center mt-3">
+                  <label className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-xl text-sm font-medium hover:bg-[var(--color-primary)]/20 cursor-pointer transition-all duration-300">
+                    {uploadingBanner ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-[var(--color-primary)] border-t-transparent" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        Upload Banner
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBannerChange}
+                      disabled={uploadingBanner}
+                      className="hidden"
+                    />
+                  </label>
+                  <p className="text-xs text-[var(--color-text-muted)] mt-2">
+                    PNG, JPG up to 10MB (1200x300px recommended)
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Form */}
+        <form onSubmit={handleSubmit}>
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Section Navigation */}
+            <div className="lg:w-64 flex-shrink-0">
+              <div className="sticky top-24 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-4">
+                <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-4 px-2">
+                  Sections
+                </h3>
+                <nav className="space-y-1">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        document.getElementById(tab.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
+                        activeTab === tab.id
+                          ? 'bg-gradient-to-r from-[var(--color-primary)]/10 to-[var(--color-primary-alt)]/10 text-[var(--color-primary)] border-l-2 border-[var(--color-primary)]'
+                          : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-background-soft)]'
+                      }`}
+                    >
+                      {tab.icon}
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            </div>
+
+            {/* Form Content */}
+            <div className="flex-1 space-y-6">
+              {/* Basic Information */}
+              <div id="basic" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+                <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+                  <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-[var(--color-primary)]" />
+                    Basic Information
+                  </h2>
+                </div>
+                <div className="p-6 space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                      Business Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="businessName"
+                      value={shopData?.businessName || ''}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      required
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                      Business Type <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="businessType"
+                      value={shopData?.businessType || ''}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      required
+                      placeholder="e.g., Retail, Wholesale, Service Provider"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      name="description"
+                      value={shopData?.description || ''}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      rows={4}
+                      placeholder="Tell customers about your business, what you offer, and what makes you special..."
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                      Contact Phone <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="contact.phone"
+                      value={shopData?.contact.phone || ''}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      required
+                      placeholder="+254 700 000 000"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                      Contact Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="contact.email"
+                      value={shopData?.contact.email || ''}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      required
+                      placeholder="shop@example.com"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Location */}
+              <div id="location" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+                <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+                  <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-[var(--color-primary)]" />
+                    Location
+                  </h2>
+                </div>
+                <div className="p-6 space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                      Street Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="location.address"
+                      value={shopData?.location.address || ''}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      required
+                      placeholder="123 Main Street"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                        City <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="location.city"
+                        value={shopData?.location.city || ''}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        required
+                        placeholder="Nairobi"
+                        className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                        Country <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="location.country"
+                        value={shopData?.location.country || 'Kenya'}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        required
+                        className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Operating Hours */}
+              <div id="hours" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+                <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+                  <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-[var(--color-primary)]" />
+                    Operating Hours
+                  </h2>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-3">
+                    {shopData?.operatingHours.map((hours, index) => (
+                      <div key={hours.day} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-[var(--color-background-soft)] rounded-xl">
+                        <span className="w-24 font-medium text-[var(--color-text)] text-sm">{hours.day}</span>
+                        <div className="flex-1 flex items-center gap-3">
+                          <input
+                            type="time"
+                            value={hours.open}
+                            onChange={(e) => handleOperatingHoursChange(index, 'open', e.target.value)}
+                            disabled={!isEditing || hours.isClosed}
+                            className="px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg text-[var(--color-text)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          />
+                          <span className="text-[var(--color-text-muted)]">to</span>
+                          <input
+                            type="time"
+                            value={hours.close}
+                            onChange={(e) => handleOperatingHoursChange(index, 'close', e.target.value)}
+                            disabled={!isEditing || hours.isClosed}
+                            className="px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg text-[var(--color-text)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          />
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={hours.isClosed}
+                            onChange={(e) => handleOperatingHoursChange(index, 'isClosed', e.target.checked)}
+                            disabled={!isEditing}
+                            className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                          />
+                          <span className="text-sm text-[var(--color-text-muted)]">Closed</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Media */}
+              <div id="social" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+                <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+                  <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                    <Globe className="w-5 h-5 text-[var(--color-primary)]" />
+                    Social Media
+                  </h2>
+                </div>
+                <div className="p-6 space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2 flex items-center gap-2">
+                      <Facebook className="w-4 h-4 text-[#1877f2]" />
+                      Facebook
+                    </label>
+                    <input
+                      type="url"
+                      value={shopData?.socialMedia?.facebook || ''}
+                      onChange={(e) => handleSocialMediaChange('facebook', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="https://facebook.com/yourpage"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2 flex items-center gap-2">
+                      <Instagram className="w-4 h-4 text-[#e4405f]" />
+                      Instagram
+                    </label>
+                    <input
+                      type="url"
+                      value={shopData?.socialMedia?.instagram || ''}
+                      onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="https://instagram.com/yourpage"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2 flex items-center gap-2">
+                      <Twitter className="w-4 h-4 text-[#1da1f2]" />
+                      Twitter
+                    </label>
+                    <input
+                      type="url"
+                      value={shopData?.socialMedia?.twitter || ''}
+                      onChange={(e) => handleSocialMediaChange('twitter', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="https://twitter.com/yourpage"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2 flex items-center gap-2">
+                      <Youtube className="w-4 h-4 text-red-600" />
+                      YouTube
+                    </label>
+                    <input
+                      type="url"
+                      value={shopData?.socialMedia?.youtube || ''}
+                      onChange={(e) => handleSocialMediaChange('youtube', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="https://youtube.com/c/yourchannel"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Policies */}
+              <div id="policies" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+                <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+                  <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-[var(--color-primary)]" />
+                    Shop Policies
+                  </h2>
+                </div>
+                <div className="p-6 space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                      Return Policy
+                    </label>
+                    <textarea
+                      value={shopData?.policies?.returnPolicy || ''}
+                      onChange={(e) => handlePolicyChange('returnPolicy', e.target.value)}
+                      disabled={!isEditing}
+                      rows={3}
+                      placeholder="Describe your return policy..."
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                      Shipping Policy
+                    </label>
+                    <textarea
+                      value={shopData?.policies?.shippingPolicy || ''}
+                      onChange={(e) => handlePolicyChange('shippingPolicy', e.target.value)}
+                      disabled={!isEditing}
+                      rows={3}
+                      placeholder="Describe your shipping policy..."
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                      Privacy Policy
+                    </label>
+                    <textarea
+                      value={shopData?.policies?.privacyPolicy || ''}
+                      onChange={(e) => handlePolicyChange('privacyPolicy', e.target.value)}
+                      disabled={!isEditing}
+                      rows={3}
+                      placeholder="Describe your privacy policy..."
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all disabled:opacity-70 disabled:cursor-not-allowed resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              {isEditing && (
+                <div className="flex flex-col sm:flex-row justify-end gap-4 pt-4 pb-8">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditing(false);
+                      fetchShopData();
+                    }}
+                    className="px-6 py-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] rounded-xl font-medium hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-all duration-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  >
+                    {isSaving ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-5 h-5" />
+                        Save Changes
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </form>
       </div>
     </div>

@@ -2091,8 +2091,8 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
     // Vendor-specific items
     if (user.role === 'vendor') {
       navItems.push({
-        name: 'Dashboard',
-        href: '/',
+        name: 'Vendor Dashboard',
+        href: '/vendor-dashboard',
         icon: <LayoutDashboard className="w-5 h-5" />
       });
       navItems.push({
