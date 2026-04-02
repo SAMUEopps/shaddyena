@@ -556,7 +556,7 @@ export default function ShopDetailPage() {
   );
 }*/
 
-"use client";
+/*"use client";
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -766,7 +766,7 @@ export default function ShopDetailPage() {
       style: 'currency',
       currency: 'Ksh',
     }).format(price);
-  };*/
+  };
 
   const formatPrice = (price: number) => {
   return `Ksh ${price.toLocaleString()}`;
@@ -800,7 +800,7 @@ export default function ShopDetailPage() {
 
   return (
     <div className='bg-white'>
-      {/* Navigation Bar with Back Button */}
+      {/* Navigation Bar with Back Button *
       <nav className="sticky top-0 z-40 bg-white border-b border-gray-200 px-3 sm:px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center">
           <button
@@ -819,13 +819,13 @@ export default function ShopDetailPage() {
           </button>
           <div className="ml-4 flex-1 min-w-0">
             <h1 className="text-sm font-medium text-gray-900 truncate">{shop.businessName} shop</h1>
-            {/*<p className="text-xs text-gray-500 truncate">{shop.businessType}</p>*/}
+            {/*<p className="text-xs text-gray-500 truncate">{shop.businessType}</p>*
           </div>
         </div>
       </nav>
 
       <div className="min-h-screen bg-gray-50">
-        {/* Banner - Improved mobile sizing */}
+        {/* Banner - Improved mobile sizing *
         <div className="relative h-48 sm:h-56 md:h-64 bg-[#bf2c7e]">     
           {shop.banner ? (
             <Image
@@ -843,7 +843,7 @@ export default function ShopDetailPage() {
           
           <div className="relative max-w-7xl mx-auto px-3 sm:px-4 h-full flex items-end pb-4 sm:pb-6 md:pb-8">
             <div className="flex items-end space-x-4 sm:space-x-6 w-full">
-              {/* Logo - Responsive sizing */}
+              {/* Logo - Responsive sizing *
               {/*<div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl grid place-items-center border-2 sm:border-4 border-white flex-shrink-0">
                 {shop.logo ? (
                   <Image
@@ -859,8 +859,8 @@ export default function ShopDetailPage() {
                     {shop.businessName.charAt(0)}
                   </span>
                 )}
-              </div>*/}
-{/* Logo */}
+              </div>*
+{/* Logo *
 <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32
                 bg-white rounded-full shadow-lg sm:shadow-xl
                 border-2 sm:border-4 border-white
@@ -885,7 +885,7 @@ export default function ShopDetailPage() {
 
 
               
-              {/* Shop Info - Improved mobile layout */}
+              {/* Shop Info - Improved mobile layout *
               <div className="text-white pb-1 sm:pb-2 flex-1 min-w-0">
                 <div className="flex items-center space-x-2 sm:space-x-3 mb-1 sm:mb-2">
                   <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold truncate">
@@ -918,9 +918,9 @@ export default function ShopDetailPage() {
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content *
         <div className="max-w-7xl mx-auto px-0 sm:px-4 py-4 sm:py-6 md:py-8">
-          {/* Navigation Tabs - Improved mobile scrolling */}
+          {/* Navigation Tabs - Improved mobile scrolling *
           <div className="mb-4 sm:mb-6 md:mb-8 overflow-hidden">
             <div className="border-b border-gray-200">
               <nav className="flex overflow-x-auto scrollbar-hide px-3 sm:px-6">
@@ -942,7 +942,7 @@ export default function ShopDetailPage() {
               </nav>
             </div>
 
-            {/* Tab Content */}
+            {/* Tab Content *
             <div className="p-3 sm:p-6">
 
               {activeTab === 'products' && (
@@ -1009,7 +1009,7 @@ export default function ShopDetailPage() {
                   </h3>
                 </Link>
                 
-                {/* Rating */}
+                {/* Rating *
                 {product.rating && product.rating.count > 0 && (
                   <div className="flex items-center mt-1 mb-1 sm:mb-2">
                     <div className="flex text-yellow-400 text-xs sm:text-sm">
@@ -1020,7 +1020,7 @@ export default function ShopDetailPage() {
                   </div>
                 )}
                 
-                {/* Price */}
+                {/* Price *
                 <div className="flex items-center justify-between mt-2 sm:mt-3">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1">
                     <span className="text-[#bf2c7e] font-bold text-sm sm:text-base">
@@ -1033,7 +1033,7 @@ export default function ShopDetailPage() {
                     )}
                   </div>
                   
-                  {/* Stock Status */}
+                  {/* Stock Status *
                   <span className={`text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded ${
                     product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
@@ -1046,21 +1046,21 @@ export default function ShopDetailPage() {
                   <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                     {product.category}
                   </span>
-                </div>*/}
+                </div>*
                 
-                {/* Description - Hidden on mobile */}
+                {/* Description - Hidden on mobile *
                 <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mt-2 hidden sm:block">
                   {product.description}
                 </p>
                 
-                {/* Action Buttons */}
+                {/* Action Buttons *
                 <div className="flex justify-between items-center mt-3 sm:mt-4">
                   {/*<Link 
                     href={`/products/${product._id}`}
                     className="bg-[#182155] text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs sm:text-sm hover:bg-[#2a3170] transition-colors flex-1 mr-2 text-center"
                   >
                     View
-                  </Link>*/}
+                  </Link>*
                   <button
                 onClick={() => handleAddToCart(product)}
                 disabled={product.stock === 0}
@@ -1092,7 +1092,7 @@ export default function ShopDetailPage() {
           ))}
         </div>
 
-        {/* Pagination - Mobile optimized */}
+        {/* Pagination - Mobile optimized *
         {pagination.pages > 1 && (
           <div className="flex justify-center items-center space-x-2 sm:space-x-3 mt-6 sm:mt-8">
             <button
@@ -1275,6 +1275,809 @@ export default function ShopDetailPage() {
               )}
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}*/
+
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
+import {
+  ArrowLeft,
+  Heart,
+  ShoppingBag,
+  MapPin,
+  Mail,
+  Phone,
+  Globe,
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  Clock,
+  Calendar,
+  CheckCircle,
+  Star,
+  Package,
+  Store,
+  Truck,
+  RotateCcw,
+  ShieldCheck,
+  ChevronRight,
+  Sparkles,
+  Info,
+  Building2,
+  Award,
+  ExternalLink
+} from 'lucide-react';
+
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  images: string[];
+  stock: number;
+  vendorId: string;
+  shopId: string;
+  category: string;
+  rating?: {
+    average: number;
+    count: number;
+  };
+  isActive: boolean;
+  isApproved: boolean;
+}
+
+interface Shop {
+  _id: string;
+  businessName: string;
+  businessType: string;
+  description?: string;
+  logo?: string;
+  banner?: string;
+  location: {
+    address: string;
+    city: string;
+    country: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  contact: {
+    phone: string;
+    email: string;
+    website?: string;
+  };
+  operatingHours: {
+    day: string;
+    open: string;
+    close: string;
+    isClosed: boolean;
+  }[];
+  socialMedia?: {
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    youtube?: string;
+  };
+  policies: {
+    returnPolicy?: string;
+    shippingPolicy?: string;
+    privacyPolicy?: string;
+  };
+  isVerified: boolean;
+  rating?: {
+    average: number;
+    count: number;
+  };
+  vendorId: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+  };
+}
+
+export default function ShopDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const [shop, setShop] = useState<Shop | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('products');
+  const [mounted, setMounted] = useState(false);
+
+  const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 12,
+    total: 0,
+    pages: 0
+  });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const fetchShop = async () => {
+      try {
+        const response = await fetch(`/api/shops/${params.id}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          setShop(data.shop);
+        }
+      } catch (error) {
+        console.error('Error fetching shop:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (params.id) {
+      fetchShop();
+    }
+  }, [params.id]);
+
+  useEffect(() => {
+    if (shop) {
+      fetchShopProducts();
+    }
+  }, [shop, pagination.page]);
+
+  const fetchShopProducts = async () => {
+    if (!shop) return;
+    
+    setProductsLoading(true);
+    try {
+      const response = await fetch(
+        `/api/shops/${shop._id}/products?page=${pagination.page}&limit=${pagination.limit}`
+      );
+      const data = await response.json();
+      
+      if (response.ok) {
+        setProducts(data.products);
+        setPagination(prev => ({
+          ...prev,
+          total: data.pagination.total,
+          pages: data.pagination.pages
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching shop products:', error);
+    } finally {
+      setProductsLoading(false);
+    }
+  };
+
+  const handleWishlistToggle = (product: Product) => {
+    if (isInWishlist(product._id)) {
+      removeFromWishlist(product._id);
+    } else {
+      addToWishlist({
+        _id: product._id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0] || '',
+        vendorId: product.vendorId,
+        shopId: product.shopId
+      });
+    }
+  };
+
+  const handleAddToCart = (product: Product) => {
+    addToCart({
+      _id: product._id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0] || '',
+      vendorId: product.vendorId,
+      shopId: product.shopId,
+      sku: product._id,
+      quantity: 1
+    });
+  };
+
+  const formatPrice = (price: number) => {
+    return `KSh ${price.toLocaleString()}`;
+  };
+
+  const formatTime = (time: string) => {
+    return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const renderStars = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    return (
+      <div className="flex items-center gap-0.5">
+        {[...Array(fullStars)].map((_, i) => (
+          <Star key={`full-${i}`} className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+        ))}
+        {hasHalfStar && (
+          <div className="relative">
+            <Star className="w-3 h-3 sm:w-4 sm:h-4 text-gray-300" />
+            <div className="absolute inset-0 overflow-hidden w-1/2">
+              <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+            </div>
+          </div>
+        )}
+        {[...Array(emptyStars)].map((_, i) => (
+          <Star key={`empty-${i}`} className="w-3 h-3 sm:w-4 sm:h-4 text-gray-300" />
+        ))}
+      </div>
+    );
+  };
+
+  const tabs = [
+    { id: 'products', label: 'Products', icon: <Package className="w-4 h-4" /> },
+    { id: 'about', label: 'About', icon: <Info className="w-4 h-4" /> },
+    { id: 'hours', label: 'Hours', icon: <Clock className="w-4 h-4" /> },
+    { id: 'contact', label: 'Contact', icon: <Mail className="w-4 h-4" /> },
+    { id: 'policies', label: 'Policies', icon: <ShieldCheck className="w-4 h-4" /> },
+  ];
+
+  if (!mounted || loading) {
+    return (
+      <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)] mx-auto mb-4" />
+          <p className="text-[var(--color-text-muted)]">Loading shop...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!shop) {
+    return (
+      <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="text-6xl mb-4">🏪</div>
+          <h1 className="text-2xl font-bold text-[var(--color-text)] mb-2">Shop Not Found</h1>
+          <p className="text-[var(--color-text-muted)] mb-6">The shop you're looking for doesn't exist or has been removed.</p>
+          <Link 
+            href="/shops" 
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-xl hover:bg-[var(--color-primary-hover)] transition-all duration-300"
+          >
+            Browse Shops
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[var(--color-background)]">
+      {/* Hero Section with Banner */}
+      <div className="relative">
+        {/* Banner Image */}
+        <div className="relative h-48 sm:h-56 md:h-64 lg:h-80 w-full overflow-hidden">
+          {shop.banner ? (
+            <Image
+              src={shop.banner}
+              alt={shop.businessName}
+              fill
+              className="object-cover"
+              priority
+              sizes="100vw"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)]" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+          
+          {/* Back Button */}
+          <button
+            onClick={() => router.back()}
+            className="absolute top-4 left-4 z-10 flex items-center gap-2 px-3 py-2 bg-white/90 backdrop-blur-sm rounded-xl text-gray-700 hover:bg-white transition-all duration-300 group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-medium hidden sm:inline">Back</span>
+          </button>
+        </div>
+
+        {/* Shop Info Card - Overlapping Banner */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 sm:-mt-16 md:-mt-20 relative z-10">
+          <div className="bg-[var(--color-surface)] rounded-2xl shadow-xl border border-[var(--color-border)] p-4 sm:p-6 md:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6">
+              {/* Logo */}
+              {/*<div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-2xl shadow-lg border-4 border-white overflow-hidden flex-shrink-0 -mt-12 sm:-mt-16">
+                {shop.logo ? (
+                  <Image
+                    src={shop.logo}
+                    alt={shop.businessName}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-alt)]">
+                    <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
+                      {shop.businessName.charAt(0)}
+                    </span>
+                  </div>
+                )}
+              </div>*/}
+
+              {/* Logo */}
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full shadow-lg border-4 border-white overflow-hidden flex-shrink-0 -mt-12 sm:-mt-16">
+                {shop.logo ? (
+                  <Image
+                    src={shop.logo}
+                    alt={shop.businessName}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-alt)]">
+                    <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
+                      {shop.businessName.charAt(0)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Shop Details */}
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[var(--color-text)] truncate">
+                    {shop.businessName}
+                  </h1>
+                  {shop.isVerified && (
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-green-500/10 text-green-600 rounded-full text-xs font-medium">
+                      <CheckCircle className="w-3 h-3" />
+                      <span>Verified</span>
+                    </div>
+                  )}
+                </div>
+                
+                <p className="text-sm text-[var(--color-text-muted)] mb-2">
+                  {shop.businessType}
+                </p>
+                
+                {shop.rating && shop.rating.average > 0 && (
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-1">
+                      {renderStars(shop.rating.average)}
+                      <span className="text-sm font-semibold text-[var(--color-text)] ml-1">
+                        {shop.rating.average.toFixed(1)}
+                      </span>
+                    </div>
+                    <span className="text-xs text-[var(--color-text-muted)]">
+                      {shop.rating.count} {shop.rating.count === 1 ? 'review' : 'reviews'}
+                    </span>
+                    <div className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
+                      <Package className="w-3 h-3" />
+                      <span>{pagination.total} products</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Contact Button */}
+              <div className="flex-shrink-0">
+                <a
+                  href={`mailto:${shop.contact.email}`}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--color-primary)] text-white rounded-xl font-medium hover:bg-[var(--color-primary-hover)] transition-all duration-300 hover:scale-105"
+                >
+                  <Mail className="w-4 h-4" />
+                  <span className="hidden sm:inline">Contact Shop</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Location & Contact Quick Info */}
+            <div className="mt-4 pt-4 border-t border-[var(--color-border)] flex flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                <MapPin className="w-4 h-4 text-[var(--color-primary)]" />
+                <span>{shop.location.city}, {shop.location.country}</span>
+              </div>
+              <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                                <Phone className="w-4 h-4 text-[var(--color-primary)]" />
+                <span>{shop.contact.phone}</span>
+              </div>
+              {shop.contact.website && (
+                <a 
+                  href={shop.contact.website} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-[var(--color-primary)] hover:underline"
+                >
+                  <Globe className="w-4 h-4" />
+                  <span>Website</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        {/* Tabs Navigation */}
+        <div className="border-b border-[var(--color-border)] mb-6 md:mb-8">
+          <nav className="flex overflow-x-auto scrollbar-hide gap-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-sm font-medium transition-all duration-300 rounded-t-xl whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-b-2 border-[var(--color-primary)]'
+                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)]'
+                }`}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Tab Content */}
+        <div className="min-h-[400px]">
+          {/* Products Tab */}
+          {activeTab === 'products' && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-semibold text-[var(--color-text)]">
+                  All Products ({pagination.total})
+                </h3>
+              </div>
+
+              {productsLoading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden animate-pulse">
+                      <div className="bg-[var(--color-border)] h-40 sm:h-48"></div>
+                      <div className="p-3 space-y-2">
+                        <div className="bg-[var(--color-border)] h-4 rounded w-3/4"></div>
+                        <div className="bg-[var(--color-border)] h-3 rounded w-1/2"></div>
+                        <div className="bg-[var(--color-border)] h-5 rounded w-1/3"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : products.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    {products.map((product) => (
+                      <div
+                        key={product._id}
+                        className="group bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden hover:shadow-xl hover:border-[var(--color-primary)]/50 transition-all duration-300 hover:-translate-y-1"
+                      >
+                        {/* Product Image */}
+                        <Link href={`/products/${product._id}`} className="block relative aspect-square overflow-hidden bg-[var(--color-background-soft)]">
+                          {product.images && product.images.length > 0 ? (
+                            <Image
+                              src={product.images[0]}
+                              alt={product.name}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Package className="w-12 h-12 text-[var(--color-text-muted)]/30" />
+                            </div>
+                          )}
+                          {product.originalPrice && product.originalPrice > product.price && (
+                            <div className="absolute top-2 left-2 px-2 py-0.5 bg-red-500 text-white text-xs font-medium rounded-full">
+                              SALE
+                            </div>
+                          )}
+                          {product.stock === 0 && (
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                              <span className="px-3 py-1 bg-white/90 text-gray-800 text-sm font-medium rounded-full">Out of Stock</span>
+                            </div>
+                          )}
+                        </Link>
+
+                        {/* Product Info */}
+                        <div className="p-3 space-y-2">
+                          <Link href={`/products/${product._id}`}>
+                            <h3 className="font-semibold text-[var(--color-text)] text-sm line-clamp-2 hover:text-[var(--color-primary)] transition-colors">
+                              {product.name}
+                            </h3>
+                          </Link>
+
+                          {/* Rating */}
+                          {product.rating && product.rating.count > 0 && (
+                            <div className="flex items-center gap-1">
+                              {renderStars(product.rating.average)}
+                              <span className="text-xs text-[var(--color-text-muted)]">({product.rating.count})</span>
+                            </div>
+                          )}
+
+                          {/* Price */}
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="text-[var(--color-primary)] font-bold text-sm">
+                                {formatPrice(product.price)}
+                              </span>
+                              {product.originalPrice && product.originalPrice > product.price && (
+                                <span className="text-xs text-[var(--color-text-muted)] line-through ml-1">
+                                  {formatPrice(product.originalPrice)}
+                                </span>
+                              )}
+                            </div>
+                            <div className={`text-xs px-1.5 py-0.5 rounded ${
+                              product.stock > 10 ? 'bg-green-500/10 text-green-600' :
+                              product.stock > 0 ? 'bg-yellow-500/10 text-yellow-600' : 'bg-red-500/10 text-red-600'
+                            }`}>
+                              {product.stock > 10 ? 'In Stock' : product.stock > 0 ? `${product.stock} left` : 'Out'}
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex items-center gap-2 pt-2">
+                            <button
+                              onClick={() => handleAddToCart(product)}
+                              disabled={product.stock === 0}
+                              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] text-white rounded-lg text-xs font-medium hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <ShoppingBag className="w-3 h-3" />
+                              <span>Cart</span>
+                            </button>
+                            <button
+                              onClick={() => handleWishlistToggle(product)}
+                              className={`p-1.5 rounded-lg transition-all duration-300 ${
+                                isInWishlist(product._id)
+                                  ? 'bg-red-500/10 text-red-500'
+                                  : 'bg-[var(--color-background-soft)] text-[var(--color-text-muted)] hover:bg-red-500/10 hover:text-red-500'
+                              }`}
+                            >
+                              <Heart className={`w-4 h-4 ${isInWishlist(product._id) ? 'fill-red-500' : ''}`} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {pagination.pages > 1 && (
+                    <div className="flex justify-center items-center gap-3 mt-8">
+                      <button
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                        disabled={pagination.page === 1}
+                        className="px-4 py-2 border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-text)] bg-[var(--color-surface)] hover:border-[var(--color-primary)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      <span className="text-sm text-[var(--color-text-muted)]">
+                        Page {pagination.page} of {pagination.pages}
+                      </span>
+                      <button
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                        disabled={pagination.page === pagination.pages}
+                        className="px-4 py-2 border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-text)] bg-[var(--color-surface)] hover:border-[var(--color-primary)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="inline-flex p-4 bg-[var(--color-surface)] rounded-full mb-4">
+                    <Package className="w-12 h-12 text-[var(--color-text-muted)]/30" />
+                  </div>
+                  <h3 className="text-lg font-medium text-[var(--color-text)] mb-1">No products yet</h3>
+                  <p className="text-sm text-[var(--color-text-muted)]">This shop hasn't added any products.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* About Tab */}
+          {activeTab === 'about' && (
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
+                <h3 className="text-lg font-semibold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-[var(--color-primary)]" />
+                  About {shop.businessName}
+                </h3>
+                <p className="text-[var(--color-text-muted)] leading-relaxed">
+                  {shop.description || 'No description provided.'}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
+                  <h4 className="font-semibold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-[var(--color-primary)]" />
+                    Location
+                  </h4>
+                  <p className="text-[var(--color-text-muted)] text-sm">{shop.location.address}</p>
+                  <p className="text-[var(--color-text-muted)] text-sm mt-1">
+                    {shop.location.city}, {shop.location.country}
+                  </p>
+                </div>
+
+                <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
+                  <h4 className="font-semibold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                    <Store className="w-4 h-4 text-[var(--color-primary)]" />
+                    Vendor Information
+                  </h4>
+                  <p className="text-[var(--color-text-muted)] text-sm">
+                    {shop.vendorId.firstName} {shop.vendorId.lastName}
+                  </p>
+                  <p className="text-[var(--color-text-muted)] text-sm">{shop.vendorId.email}</p>
+                  {shop.vendorId.phone && (
+                    <p className="text-[var(--color-text-muted)] text-sm">{shop.vendorId.phone}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Hours Tab */}
+          {activeTab === 'hours' && (
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+                <div className="bg-[var(--color-primary)]/10 px-6 py-4 border-b border-[var(--color-border)]">
+                  <h3 className="font-semibold text-[var(--color-text)] flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-[var(--color-primary)]" />
+                    Operating Hours
+                  </h3>
+                </div>
+                <div className="divide-y divide-[var(--color-border)]">
+                  {shop.operatingHours.map((hours) => (
+                    <div key={hours.day} className="flex justify-between items-center px-6 py-3">
+                      <span className="font-medium text-[var(--color-text)]">{hours.day}</span>
+                      {hours.isClosed ? (
+                        <span className="text-red-500 font-medium">Closed</span>
+                      ) : (
+                        <span className="text-[var(--color-text-muted)]">
+                          {formatTime(hours.open)} - {formatTime(hours.close)}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Contact Tab */}
+          {activeTab === 'contact' && (
+            <div className="max-w-2xl mx-auto space-y-6">
+              <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
+                <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-[var(--color-primary)]" />
+                  Contact Information
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-5 h-5 text-[var(--color-primary)]" />
+                    <a href={`tel:${shop.contact.phone}`} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
+                      {shop.contact.phone}
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-[var(--color-primary)]" />
+                    <a href={`mailto:${shop.contact.email}`} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
+                      {shop.contact.email}
+                    </a>
+                  </div>
+                  {shop.contact.website && (
+                    <div className="flex items-center gap-3">
+                      <Globe className="w-5 h-5 text-[var(--color-primary)]" />
+                      <a 
+                        href={shop.contact.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+                      >
+                        {shop.contact.website}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {shop.socialMedia && Object.values(shop.socialMedia).some(v => v) && (
+                <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
+                  <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-[var(--color-primary)]" />
+                    Follow Us
+                  </h3>
+                  <div className="flex gap-4">
+                    {shop.socialMedia.facebook && (
+                      <a href={shop.socialMedia.facebook} target="_blank" rel="noopener noreferrer" 
+                         className="p-2 bg-[var(--color-background-soft)] rounded-lg text-[var(--color-text-muted)] hover:text-[#1877f2] hover:bg-[#1877f2]/10 transition-all duration-300">
+                        <Facebook className="w-5 h-5" />
+                      </a>
+                    )}
+                    {shop.socialMedia.instagram && (
+                      <a href={shop.socialMedia.instagram} target="_blank" rel="noopener noreferrer"
+                         className="p-2 bg-[var(--color-background-soft)] rounded-lg text-[var(--color-text-muted)] hover:text-[#e4405f] hover:bg-[#e4405f]/10 transition-all duration-300">
+                        <Instagram className="w-5 h-5" />
+                      </a>
+                    )}
+                    {shop.socialMedia.twitter && (
+                      <a href={shop.socialMedia.twitter} target="_blank" rel="noopener noreferrer"
+                         className="p-2 bg-[var(--color-background-soft)] rounded-lg text-[var(--color-text-muted)] hover:text-[#1da1f2] hover:bg-[#1da1f2]/10 transition-all duration-300">
+                        <Twitter className="w-5 h-5" />
+                      </a>
+                    )}
+                    {shop.socialMedia.youtube && (
+                      <a href={shop.socialMedia.youtube} target="_blank" rel="noopener noreferrer"
+                         className="p-2 bg-[var(--color-background-soft)] rounded-lg text-[var(--color-text-muted)] hover:text-[#ff0000] hover:bg-[#ff0000]/10 transition-all duration-300">
+                        <Youtube className="w-5 h-5" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Policies Tab */}
+          {activeTab === 'policies' && (
+            <div className="max-w-3xl mx-auto space-y-6">
+              {shop.policies.returnPolicy && (
+                <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
+                  <h3 className="font-semibold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                    <RotateCcw className="w-5 h-5 text-[var(--color-primary)]" />
+                    Return Policy
+                  </h3>
+                  <p className="text-[var(--color-text-muted)] leading-relaxed">{shop.policies.returnPolicy}</p>
+                </div>
+              )}
+              
+              {shop.policies.shippingPolicy && (
+                <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
+                  <h3 className="font-semibold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                    <Truck className="w-5 h-5 text-[var(--color-primary)]" />
+                    Shipping Policy
+                  </h3>
+                  <p className="text-[var(--color-text-muted)] leading-relaxed">{shop.policies.shippingPolicy}</p>
+                </div>
+              )}
+              
+              {shop.policies.privacyPolicy && (
+                <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
+                  <h3 className="font-semibold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-[var(--color-primary)]" />
+                    Privacy Policy
+                  </h3>
+                  <p className="text-[var(--color-text-muted)] leading-relaxed">{shop.policies.privacyPolicy}</p>
+                </div>
+              )}
+              
+              {!shop.policies.returnPolicy && !shop.policies.shippingPolicy && !shop.policies.privacyPolicy && (
+                <div className="text-center py-12">
+                  <div className="inline-flex p-4 bg-[var(--color-surface)] rounded-full mb-4">
+                    <ShieldCheck className="w-12 h-12 text-[var(--color-text-muted)]/30" />
+                  </div>
+                  <p className="text-[var(--color-text-muted)]">No policies have been added yet.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
