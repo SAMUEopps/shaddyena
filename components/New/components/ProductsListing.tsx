@@ -544,8 +544,11 @@ import {
   SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
-  Eye
+  Eye,
+  CheckCircle
 } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
+
 
 interface Product {
   _id: string;
@@ -577,6 +580,8 @@ const ProductsListing = () => {
   const [mounted, setMounted] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
+  const [addedToCart, setAddedToCart] = useState<string | null>(null);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
     limit: 12,
@@ -592,6 +597,7 @@ const ProductsListing = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+
   
   // Available categories
   const [categories, setCategories] = useState<string[]>([]);
@@ -632,6 +638,27 @@ const ProductsListing = () => {
       setLoading(false);
     }
   };
+
+  const handleAddToCart = (product: Product) => {
+  const cartItem = {
+    _id: product._id,
+    name: product.name,
+    price: product.price,
+    quantity: 1,
+    image: product.images?.[0] || '/placeholder-image.jpg',
+    vendorId: product.shopId?._id || '',
+    shopId: product.shopId?._id || '',
+    sku: `SKU-${product._id}`,
+  };
+
+  addToCart(cartItem);
+
+  // feedback
+  setAddedToCart(product._id);
+  setTimeout(() => {
+    setAddedToCart(null);
+  }, 2000);
+};
 
   const handleSearch = () => {
     fetchProducts(1);
@@ -861,6 +888,7 @@ const ProductsListing = () => {
               const discount = product.originalPrice 
                 ? getDiscountPercentage(product.originalPrice, product.price)
                 : 0;
+                  const isAdded = addedToCart === product._id;
 
               return (
                 <Link
@@ -975,10 +1003,44 @@ const ProductsListing = () => {
                     </div>
 
                     {/* Add to Cart Button - Responsive */}
-                    <button className="w-full bg-[var(--color-primary-alt)] text-white py-1.5 xs:py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[8px] xs:text-[10px] sm:text-sm font-medium hover:shadow-md hover:shadow-[var(--color-primary)]/30 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-1 xs:gap-1.5 sm:gap-2">
+                    {/*<button className="w-full bg-[var(--color-primary-alt)] text-white py-1.5 xs:py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[8px] xs:text-[10px] sm:text-sm font-medium hover:shadow-md hover:shadow-[var(--color-primary)]/30 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-1 xs:gap-1.5 sm:gap-2">
                       <ShoppingBag className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4" />
                       <span className="hidden xs:inline">Add to Cart</span>
                       <span className="xs:hidden">Add</span>
+                    </button>*/}
+                 
+
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleAddToCart(product);
+                      }}
+                      disabled={product.stock === 0}
+                      className={`w-full py-1.5 xs:py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[8px] xs:text-[10px] sm:text-sm font-medium transition-all duration-300 flex items-center justify-center gap-1 xs:gap-1.5 sm:gap-2 ${
+                        product.stock === 0
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : isAdded
+                          ? 'bg-green-500 text-white hover:shadow-md hover:shadow-green-500/30'
+                          : 'bg-[var(--color-primary-alt)] text-white hover:shadow-md hover:shadow-[var(--color-primary)]/30'
+                      }`}
+                    >
+                      {isAdded ? (
+                        <>
+                          <CheckCircle className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4" />
+                          <span className="hidden xs:inline">Added!</span>
+                          <span className="xs:hidden">✓</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBag className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4" />
+                          <span className="hidden xs:inline">
+                            {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                          </span>
+                          <span className="xs:hidden">
+                            {product.stock === 0 ? 'Sold' : 'Add'}
+                          </span>
+                        </>
+                      )}
                     </button>
                   </div>
 
