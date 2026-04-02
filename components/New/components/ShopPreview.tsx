@@ -349,58 +349,26 @@ const ShopPreview = () => {
 
   return (
     <section className="relative max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-0 sm:py-12 lg:py-0">
-      {/* Section Header - Optional but looks nice */}
-      {/*<div className="text-center mb-6 sm:mb-8 lg:mb-12">
-        <h2 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--color-primary-alt)] mb-1 sm:mb-2">
-          Featured Shops
-        </h2>
-        <p className="text-xs xs:text-sm text-[var(--color-text-muted)]">
-          Discover amazing vendors on Shaddyna
-        </p>
-      </div>*/}
-      {/*<div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
- 
-          <div>
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-3">
+        <div>
           <h2 className="text-2xl font-bold text-[var(--color-primary-alt)]">
             Featured Shops
           </h2>
-       
-          </div>
         </div>
-        
-        <div className="flex items-center gap-2">
-
-          
-          <button
-            onClick={() => scroll()}
-            className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-primary)] shadow-md flex items-center justify-center text-[var(--color-text)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all duration-300 hover:scale-110"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      </div>*/}
-<div className="flex items-center justify-between mb-3">
-  <div className="flex items-center gap-3">
-    <div>
-      <h2 className="text-2xl font-bold text-[var(--color-primary-alt)]">
-        Featured Shops
-      </h2>
+      </div>
+      
+      <div className="flex items-center gap-4">
+        {/* All Shops Link */}
+        <Link 
+          href="/shops"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-[var(--color-primary-alt)] bg-[var(--color-surface)] text-[var(--color-primary)] hover:bg-[var(--color-primary-alt)] hover:text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[var(--color-primary)]/20 group"
+        >
+          <span className="text-sm text-[var(--color-primary-alt)] hover:text-white font-semibold tracking-wide">All Shops</span>
+          <ChevronRight className="w-5 h-5 text-[var(--color-primary-alt)] group-hover:text-white transform group-hover:translate-x-1 transition-all duration-300" />
+        </Link>
+      </div>
     </div>
-  </div>
-  
-  <div className="flex items-center gap-4">
-    {/* All Shops Link */}
-    <Link 
-      href="/shops"
-      className="flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-[var(--color-primary-alt)] bg-[var(--color-surface)] text-[var(--color-primary)] hover:bg-[var(--color-primary-alt)] hover:text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[var(--color-primary)]/20 group"
-    >
-      <span className="text-sm text-[var(--color-primary-alt)] hover:text-white font-semibold tracking-wide">All Shops</span>
-      <ChevronRight className="w-5 h-5 text-[var(--color-primary-alt)] group-hover:text-white transform group-hover:translate-x-1 transition-all duration-300" />
-    </Link>
-  </div>
-</div>
       {/* Loading State */}
       {loading ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 sm:gap-4 lg:gap-6">
@@ -556,30 +524,6 @@ const ShopPreview = () => {
               </Link>
             ))}
           </div>
-
-          {/* View All Shops CTA - Responsive sizing */}
-          {/*<div className="relative mt-8 sm:mt-10 lg:mt-12 text-center">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 bg-gradient-to-r from-[var(--color-primary)]/5 to-[var(--color-primary-alt)]/5 rounded-full blur-2xl sm:blur-3xl"></div>
-            </div>
-            
-            <Link
-              href="/shops"
-              className="relative inline-flex items-center gap-1.5 sm:gap-3 bg-[var(--color-primary-alt)] text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm lg:text-base hover:bg-[var(--color-primary-hover)] transition-all duration-300 hover:shadow-lg sm:hover:shadow-2xl hover:shadow-[var(--color-primary)]/30 transform hover:scale-105 group"
-            >
-              <span className="hidden xs:inline">Explore All Shops</span>
-              <span className="xs:hidden">All Shops</span>
-              <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 group-hover:translate-x-1 transition-transform" />
-              <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 flex h-2 w-2 sm:h-3 sm:w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-primary)] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 sm:h-3 sm:w-3 bg-[var(--color-primary)]"></span>
-              </span>
-            </Link>
-            
-            <p className="mt-2 sm:mt-3 lg:mt-4 text-[10px] sm:text-xs lg:text-sm text-[var(--color-text-muted)]">
-              Join 1000+ trusted vendors on Shaddyna
-            </p>
-          </div>*/}
         </>
       )}
     </section>
