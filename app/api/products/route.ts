@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Product from '@/models/product';
 import '@/models/shop';
 import dbConnect from '@/lib/dbConnect';
+import '@/models/user';
 
 
 export async function GET(req: NextRequest) {

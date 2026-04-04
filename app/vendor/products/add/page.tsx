@@ -1390,7 +1390,7 @@ export default function AddProductPage() {
     setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  /*const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
@@ -1411,7 +1411,43 @@ export default function AddProductPage() {
           : value 
       }));
     }
-  };
+  };*/
+
+  const handleInputChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => {
+  const { name, value } = e.target;
+  const keys = name.split('.');
+
+  setFormData((prev) => {
+    const newData: any = { ...prev };
+    let current = newData;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      current[keys[i]] = { ...current[keys[i]] };
+      current = current[keys[i]];
+    }
+
+    const lastKey = keys[keys.length - 1];
+
+    // Handle numbers properly
+    const isNumberField = [
+      'price',
+      'originalPrice',
+      'stock',
+      'shipping.weight',
+      'shipping.dimensions.length',
+      'shipping.dimensions.width',
+      'shipping.dimensions.height'
+    ].includes(name);
+
+    current[lastKey] = isNumberField
+      ? parseFloat(value) || 0
+      : value;
+
+    return newData;
+  });
+};
 
   const addSpecification = () =>
     setFormData(p => ({ ...p, specifications: [...p.specifications, { key: '', value: '' }] }));

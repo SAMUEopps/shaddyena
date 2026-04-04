@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Shop from '@/models/shop';
 import dbConnect from '@/lib/dbConnect';
-
+import '@/models/user';
 
 export async function GET(request: NextRequest) {
   try {
