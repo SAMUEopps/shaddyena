@@ -577,7 +577,7 @@ export default function OrderStatusBar({
   );
 }*/
 
-'use client';
+/*'use client';
 
 import { useState } from 'react';
 import { Types } from 'mongoose';
@@ -1066,7 +1066,7 @@ export default function OrderStatusBar({
 
   return (
     <div className="space-y-4">
-      {/* Status Display */}
+      {/* Status Display *
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-3 flex-wrap">
@@ -1106,7 +1106,7 @@ export default function OrderStatusBar({
           </div>
         </div>
 
-        {/* Suborder Selector (Admin & Rider) */}
+        {/* Suborder Selector (Admin & Rider) *
         {(role === 'admin' || role === 'delivery') && suborders.length > 0 && (
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Manage Suborder:</span>
@@ -1126,7 +1126,7 @@ export default function OrderStatusBar({
         )}
       </div>
 
-      {/* Instructions */}
+      {/* Instructions *
       <div className={`p-4 rounded-lg ${
         role === 'vendor' ? 'bg-blue-50 border border-blue-200' : 
         role === 'delivery' ? 'bg-green-50 border border-green-200' : 
@@ -1189,6 +1189,449 @@ export default function OrderStatusBar({
                   <li>• Monitor delivery progress through each status</li>
                   <li>• Mark main order as <strong>Completed</strong> when all suborders are delivered/confirmed</li>
                   <li>• Use <strong>Cancel</strong> only for problematic orders</li>
+                </>
+              )}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}*/
+
+
+'use client';
+
+import { useState } from 'react';
+import { Types } from 'mongoose';
+import { 
+  Package, 
+  Truck, 
+  CheckCircle, 
+  Clock, 
+  XCircle,
+  AlertCircle,
+  CreditCard,
+  UserCheck,
+  MapPin,
+  DollarSign
+} from 'lucide-react';
+
+export interface StatusBarSuborder {
+  _id?: string;
+  vendorId: string;
+  status: 'PENDING' | 'PROCESSING' | 'READY_FOR_PICKUP' | 'ASSIGNED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED' | 'CONFIRMED' | 'SHIPPED';
+  amount: number;
+  commission: number;
+  netAmount: number;
+  deliveryFee?: number;
+  riderId?: string | Types.ObjectId | undefined;
+  deliveryDetails?: {
+    pickupAddress?: string;
+    dropoffAddress?: string;
+    estimatedTime?: string;
+    actualTime?: string;
+    notes?: string;
+    confirmationCode?: string;
+    confirmedAt?: string | Date;
+    riderConfirmedAt?: string | Date;
+    deliveryFeePaymentRef?: string;
+    deliveryFeePaid?: boolean;
+    deliveryFeePaidAt?: Date;
+    deliveryFeeReceipt?: string;
+    deliveryFeePaymentFailed?: boolean;
+    deliveryFeePaymentError?: string;
+  };
+}
+
+interface OrderStatusBarProps {
+  role: 'customer' | 'vendor' | 'admin' | 'delivery';
+  orderStatus: string;
+  paymentStatus: string;
+  vendorSuborder?: StatusBarSuborder | null;
+  suborders?: StatusBarSuborder[];
+  onStatusUpdate: (status: string, isMainOrder?: boolean, suborderId?: string) => Promise<void>;
+  onSuborderSelect?: (suborderId: string) => void;
+  selectedSuborderId?: string | null;
+  isLoading?: boolean;
+  onDeliveryFeePayment?: (suborderId: string, amount: number) => Promise<void>;
+}
+
+export default function OrderStatusBar({
+  role,
+  orderStatus,
+  paymentStatus,
+  vendorSuborder,
+  suborders = [],
+  onStatusUpdate,
+  onSuborderSelect,
+  selectedSuborderId,
+  isLoading = false,
+  onDeliveryFeePayment
+}: OrderStatusBarProps) {
+  const [localSelectedSuborderId, setLocalSelectedSuborderId] = useState<string | null>(selectedSuborderId || null);
+
+  const effectiveSuborder = role === 'vendor' 
+    ? vendorSuborder 
+    : localSelectedSuborderId 
+      ? suborders.find(so => so._id === localSelectedSuborderId)
+      : null;
+
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case 'CONFIRMED':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'DELIVERED':
+      case 'COMPLETED':
+      case 'PAID': 
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'IN_TRANSIT':
+      case 'SHIPPED': 
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'PICKED_UP':
+      case 'ASSIGNED':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'READY_FOR_PICKUP':
+      case 'PROCESSING': 
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'PENDING':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'CANCELLED':
+      case 'FAILED':
+      case 'REFUNDED': 
+        return 'bg-red-100 text-red-800 border-red-200';
+      default: 
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch(status) {
+      case 'CONFIRMED':
+      case 'DELIVERED':
+      case 'COMPLETED':
+        return <CheckCircle className="w-4 h-4" />;
+      case 'IN_TRANSIT':
+      case 'SHIPPED':
+        return <Truck className="w-4 h-4" />;
+      case 'PICKED_UP':
+      case 'ASSIGNED':
+        return <UserCheck className="w-4 h-4" />;
+      case 'READY_FOR_PICKUP':
+      case 'PROCESSING':
+        return <Package className="w-4 h-4" />;
+      case 'PENDING':
+        return <Clock className="w-4 h-4" />;
+      case 'CANCELLED':
+        return <XCircle className="w-4 h-4" />;
+      default:
+        return <AlertCircle className="w-4 h-4" />;
+    }
+  };
+
+  const getCustomerActions = () => {
+    if (role !== 'customer') return null;
+
+    const needsPaymentSuborder = suborders.find(so => 
+      so.status === 'DELIVERED' && 
+      so.deliveryFee && 
+      so.deliveryFee > 0 && 
+      !so.deliveryDetails?.deliveryFeePaid
+    );
+    
+    const canConfirmSuborder = suborders.find(so => 
+      so.status === 'DELIVERED' && 
+      (!so.deliveryFee || so.deliveryFee === 0 || so.deliveryDetails?.deliveryFeePaid) &&
+      !so.deliveryDetails?.confirmationCode
+    );
+    
+    const hasCodeSuborder = suborders.find(so => 
+      so.deliveryDetails?.confirmationCode && !so.deliveryDetails?.riderConfirmedAt
+    );
+    
+    const confirmedSuborder = suborders.find(so => 
+      so.status === 'CONFIRMED' || so.deliveryDetails?.riderConfirmedAt
+    );
+
+    if (needsPaymentSuborder) {
+      return (
+        <div className="p-5 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl border-2 border-yellow-200">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-yellow-100 rounded-lg">
+              <DollarSign className="w-5 h-5 text-yellow-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-yellow-800">Delivery Fee Payment Required</h3>
+              <p className="text-sm text-yellow-700 mt-1">
+                Please pay the delivery fee of <span className="font-bold text-lg">KSh {needsPaymentSuborder.deliveryFee}</span> to confirm delivery.
+              </p>
+              <button
+                onClick={() => onDeliveryFeePayment?.(needsPaymentSuborder._id!, needsPaymentSuborder.deliveryFee!)}
+                disabled={isLoading}
+                className="mt-4 w-full px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-500 text-white rounded-xl font-medium hover:opacity-90 transition-all duration-300 disabled:opacity-50"
+              >
+                {isLoading ? 'Processing...' : `Pay KSh ${needsPaymentSuborder.deliveryFee} via M-PESA`}
+              </button>
+              <p className="text-xs text-gray-500 mt-3">
+                This fee goes to the delivery rider. Payment is via M-PESA.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    if (canConfirmSuborder) {
+      return (
+        <div className="p-5 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-emerald-100 rounded-lg">
+              <Package className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-emerald-800">Package Delivered</h3>
+              <p className="text-sm text-emerald-700 mt-1">Please confirm you've received your order.</p>
+              <button
+                onClick={() => onStatusUpdate('CONFIRMED', false, canConfirmSuborder._id)}
+                disabled={isLoading}
+                className="mt-4 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl font-medium hover:opacity-90 transition-all duration-300 disabled:opacity-50"
+              >
+                {isLoading ? 'Confirming...' : 'Confirm Delivery Received'}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    if (hasCodeSuborder?.deliveryDetails?.confirmationCode) {
+      return (
+        <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+          <div className="text-center">
+            <div className="inline-flex p-3 bg-blue-100 rounded-full mb-3">
+              <CheckCircle className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="font-semibold text-blue-800">Confirmation Code Generated</h3>
+            <div className="mt-3 p-3 bg-white rounded-xl border border-blue-200">
+              <p className="text-xs text-blue-600 mb-1">Share this code with the delivery rider</p>
+              <p className="font-mono text-2xl font-bold text-blue-700 tracking-wider">
+                {hasCodeSuborder.deliveryDetails.confirmationCode}
+              </p>
+            </div>
+            <p className="text-xs text-yellow-600 mt-3">
+              ⏳ Waiting for rider to verify the code...
+            </p>
+          </div>
+        </div>
+      );
+    }
+    
+    if (confirmedSuborder) {
+      return (
+        <div className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-emerald-600" />
+            <div>
+              <p className="font-medium text-emerald-800">Delivery fully confirmed by both parties!</p>
+              {confirmedSuborder.deliveryDetails?.riderConfirmedAt && (
+                <p className="text-xs text-emerald-600 mt-1">
+                  Verified at: {new Date(confirmedSuborder.deliveryDetails.riderConfirmedAt).toLocaleString()}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    return null;
+  };
+
+  const getVendorActions = () => {
+    if (role !== 'vendor' || !effectiveSuborder) return null;
+
+    switch (effectiveSuborder.status) {
+      case 'PROCESSING':
+        return (
+          <button
+            onClick={() => onStatusUpdate('READY_FOR_PICKUP', false, effectiveSuborder._id)}
+            disabled={isLoading}
+            className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-medium hover:opacity-90 transition-all duration-300 disabled:opacity-50"
+          >
+            {isLoading ? 'Updating...' : 'Mark as Ready for Pickup'}
+          </button>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getRiderActions = () => {
+    if (role !== 'delivery' || !effectiveSuborder) return null;
+
+    switch (effectiveSuborder.status) {
+      case 'ASSIGNED':
+        return (
+          <button
+            onClick={() => onStatusUpdate('PICKED_UP', false, effectiveSuborder._id)}
+            disabled={isLoading}
+            className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl font-medium hover:opacity-90 transition-all duration-300 disabled:opacity-50"
+          >
+            {isLoading ? 'Processing...' : 'Mark as Picked Up'}
+          </button>
+        );
+      
+      case 'PICKED_UP':
+        return (
+          <button
+            onClick={() => onStatusUpdate('IN_TRANSIT', false, effectiveSuborder._id)}
+            disabled={isLoading}
+            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-medium hover:opacity-90 transition-all duration-300 disabled:opacity-50"
+          >
+            {isLoading ? 'Processing...' : 'Mark as In Transit'}
+          </button>
+        );
+      
+      case 'IN_TRANSIT':
+        return (
+          <button
+            onClick={() => onStatusUpdate('DELIVERED', false, effectiveSuborder._id)}
+            disabled={isLoading}
+            className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-medium hover:opacity-90 transition-all duration-300 disabled:opacity-50"
+          >
+            {isLoading ? 'Processing...' : 'Mark as Delivered'}
+          </button>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Main Status Bar */}
+      <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          {/* Status Badges */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(
+              role === 'customer' ? orderStatus : 
+              role === 'vendor' && effectiveSuborder ? effectiveSuborder.status : 
+              orderStatus
+            )}`}>
+              {getStatusIcon(role === 'customer' ? orderStatus : 
+                role === 'vendor' && effectiveSuborder ? effectiveSuborder.status : 
+                orderStatus)}
+              <span>
+                {role === 'customer' 
+                  ? `Order: ${orderStatus.replace('_', ' ')}`
+                  : role === 'vendor' && effectiveSuborder 
+                    ? `Your Status: ${effectiveSuborder.status.replace('_', ' ')}` 
+                    : orderStatus.replace('_', ' ')}
+              </span>
+            </div>
+            
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(paymentStatus)}`}>
+              <CreditCard className="w-4 h-4" />
+              <span>Payment: {paymentStatus}</span>
+            </div>
+            
+            {effectiveSuborder?.deliveryFee && effectiveSuborder.deliveryFee > 0 && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                <Truck className="w-4 h-4" />
+                <span>Delivery: KSh {effectiveSuborder.deliveryFee}</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3">
+            {getVendorActions()}
+            {getRiderActions()}
+          </div>
+        </div>
+        
+        {/* Suborder Selector */}
+        {(role === 'admin' || role === 'delivery') && suborders.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-sm text-[var(--color-text-muted)]">Manage Suborder:</span>
+              <select
+                value={localSelectedSuborderId || ''}
+                onChange={(e) => {
+                  setLocalSelectedSuborderId(e.target.value);
+                  onSuborderSelect?.(e.target.value);
+                }}
+                className="px-4 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+              >
+                <option value="">Select Vendor Order</option>
+                {suborders.map((suborder, index) => (
+                  <option key={suborder._id} value={suborder._id}>
+                    Vendor {index + 1} - {suborder.status.replace('_', ' ')} (KSh {suborder.netAmount})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Customer Actions Section */}
+      {role === 'customer' && getCustomerActions()}
+      
+      {/* Instructions Card */}
+      <div className="p-5 bg-gradient-to-r from-[var(--color-primary)]/5 to-[var(--color-primary-alt)]/5 rounded-2xl border border-[var(--color-border)]">
+        <div className="flex items-start gap-3">
+          <AlertCircle className={`w-5 h-5 mt-0.5 ${
+            role === 'vendor' ? 'text-blue-500' : 
+            role === 'delivery' ? 'text-green-500' : 
+            role === 'customer' ? 'text-indigo-500' :
+            'text-purple-500'
+          }`} />
+          <div>
+            <h4 className={`font-semibold ${
+              role === 'vendor' ? 'text-blue-700' : 
+              role === 'delivery' ? 'text-green-700' : 
+              role === 'customer' ? 'text-indigo-700' :
+              'text-purple-700'
+            }`}>
+              {role === 'vendor' ? 'Vendor Instructions' : 
+               role === 'delivery' ? 'Delivery Instructions' : 
+               role === 'customer' ? 'Order Information' :
+               'Admin Controls'}
+            </h4>
+            <ul className={`text-sm mt-2 space-y-1 ${
+              role === 'vendor' ? 'text-blue-600' : 
+              role === 'delivery' ? 'text-green-600' : 
+              role === 'customer' ? 'text-indigo-600' :
+              'text-purple-600'
+            }`}>
+              {role === 'vendor' ? (
+                <>
+                  <li>• Mark as <strong>Ready for Pickup</strong> when package is prepared</li>
+                  <li>• Rider will be assigned by admin after marking as ready</li>
+                  <li>• Your earnings will be available 24 hours after delivery confirmation</li>
+                </>
+              ) : role === 'delivery' ? (
+                <>
+                  <li>• Mark as <strong>Picked Up</strong> after collecting from vendor</li>
+                  <li>• Mark as <strong>In Transit</strong> when en route to customer</li>
+                  <li>• Mark as <strong>Delivered</strong> after successful delivery</li>
+                  <li>• Ask customer for <strong>confirmation code</strong> after delivery</li>
+                </>
+              ) : role === 'customer' ? (
+                <>
+                  <li>• Track each vendor's package status separately</li>
+                  <li>• Click <strong>Confirm Delivery Received</strong> after verifying items</li>
+                  <li>• A unique <strong>confirmation code</strong> will be generated</li>
+                  <li>• Share the code with the delivery rider for verification</li>
+                </>
+              ) : (
+                <>
+                  <li>• Assign a rider when vendor marks order as <strong>Ready for Pickup</strong></li>
+                  <li>• Monitor delivery progress through each status</li>
+                  <li>• Mark main order as <strong>Completed</strong> when all suborders are delivered</li>
                 </>
               )}
             </ul>

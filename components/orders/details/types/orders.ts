@@ -251,6 +251,7 @@ export interface Order {
   // Note: Order-level status might differ from suborder-level status
   status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'COMPLETED' | 'CANCELLED' | 'CONFIRMED';
   mpesaTransactionId?: string;
+  isViewed?: boolean;
 }
 
 export interface ApiResponse {

@@ -766,6 +766,7 @@ export default function CustomerOrdersTab({ isVendorAsCustomer = false }: Custom
   const getStats = (): Stats => {
     // @ts-ignore
     const unreadCount = orders.filter(o => !o.isViewed).length;
+
     return {
       total: orders.length,
       pending: orders.filter(o => o.status === 'PENDING').length,

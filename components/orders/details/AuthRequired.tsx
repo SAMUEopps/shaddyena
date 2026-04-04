@@ -1,4 +1,4 @@
-import Link from 'next/link';
+/*import Link from 'next/link';
 
 export default function AuthRequired() {
   return (
@@ -24,6 +24,56 @@ export default function AuthRequired() {
           >
             Go Home
           </Link>
+        </div>
+      </div>
+    </div>
+  );
+}*/
+
+'use client';
+
+import Link from 'next/link';
+import { ShieldAlert, LogIn, Home } from 'lucide-react';
+
+export default function AuthRequired() {
+  return (
+    <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center p-4">
+      <div className="relative max-w-md w-full">
+        {/* Background Decoration */}
+        <div className="absolute -top-20 -right-20 w-64 h-64 bg-[var(--color-primary)]/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[var(--color-primary-alt)]/5 rounded-full blur-3xl" />
+        
+        <div className="relative bg-[var(--color-surface)] rounded-2xl shadow-xl border border-[var(--color-border)] p-8 text-center">
+          {/* Icon */}
+          <div className="inline-flex p-4 bg-gradient-to-r from-red-500/10 to-rose-500/10 rounded-2xl mb-6">
+            <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-rose-500 rounded-full flex items-center justify-center animate-bounce-subtle">
+              <ShieldAlert className="w-8 h-8 text-white" />
+            </div>
+          </div>
+          
+          <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">
+            Authentication Required
+          </h3>
+          <p className="text-[var(--color-text-muted)] mb-6">
+            Please log in to view order details and access your account.
+          </p>
+          
+          <div className="flex gap-3 justify-center">
+            <Link 
+              href="/login"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] text-white rounded-xl font-medium hover:opacity-90 transition-all duration-300 hover:scale-105"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Log In</span>
+            </Link>
+            <Link 
+              href="/"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] rounded-xl font-medium hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-all duration-300"
+            >
+              <Home className="w-4 h-4" />
+              <span>Go Home</span>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

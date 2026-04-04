@@ -1,4 +1,4 @@
-import { OrderItem } from '@/components/orders/details/types/orders';
+/*import { OrderItem } from '@/components/orders/details/types/orders';
 import { OrderService } from '@/components/orders/details/services/orderService';
 
 interface OrderSummaryProps {
@@ -64,6 +64,94 @@ export default function OrderSummary({
             ))
           )}
         </div>
+      </div>
+    </div>
+  );
+}*/
+
+// components/orders/details/OrderSummary.tsx
+'use client';
+
+import { OrderItem } from '@/components/orders/details/types/orders';
+import { OrderService } from '@/components/orders/details/services/orderService';
+import { Package, ShoppingBag } from 'lucide-react';
+
+interface OrderSummaryProps {
+  items: OrderItem[];
+  orderId: string;
+  isVendorViewingOrder: boolean;
+  currency?: string;
+}
+
+export default function OrderSummary({ 
+  items, 
+  orderId, 
+  isVendorViewingOrder,
+  currency = 'KES'
+}: OrderSummaryProps) {
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  
+  return (
+    <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden">
+      <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-[var(--color-primary)]" />
+              {isVendorViewingOrder ? 'Your Order Items' : 'Order Summary'}
+            </h2>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">
+              {isVendorViewingOrder 
+                ? `Showing ${items.length} item${items.length !== 1 ? 's' : ''} from your store`
+                : `Order ID: ${orderId}`}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm font-medium text-[var(--color-text)]">{totalItems} items</p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="p-6">
+        {items.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="inline-flex p-4 bg-[var(--color-background-soft)] rounded-full mb-4">
+              <Package className="w-12 h-12 text-[var(--color-text-muted)]/50" />
+            </div>
+            <p className="text-[var(--color-text-muted)]">No items found</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {items.map((item, index) => (
+              <div key={index} className="flex gap-4 py-4 border-b border-[var(--color-border)] last:border-0">
+                <div className="flex-shrink-0 w-20 h-20 bg-[var(--color-background-soft)] rounded-xl flex items-center justify-center overflow-hidden">
+                  {item.image ? (
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <Package className="w-8 h-8 text-[var(--color-text-muted)]/50" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-[var(--color-text)]">{item.name}</h3>
+                  <p className="text-sm text-[var(--color-text-muted)] mt-1">Qty: {item.quantity}</p>
+                  {!isVendorViewingOrder && (
+                    <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                      Vendor: {item.vendorId.substring(0, 8)}...
+                    </p>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-bold text-[var(--color-primary)]">
+                    {OrderService.formatCurrency(item.price * item.quantity, currency)}
+                  </p>
+                  <p className="text-xs text-[var(--color-text-muted)]">
+                    {OrderService.formatCurrency(item.price, currency)} each
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
