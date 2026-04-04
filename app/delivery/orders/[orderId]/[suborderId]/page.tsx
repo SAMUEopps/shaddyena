@@ -1364,7 +1364,10 @@ export default function DeliveryDetailPage() {
             )}
 
             {/* DELIVERED - Show confirmation form */}
-            {suborder.status === 'DELIVERED' && suborder.deliveryDetails?.confirmationCode && !suborder.deliveryDetails?.riderConfirmedAt && (
+            {/*{suborder.status === 'DELIVERED' && suborder.deliveryDetails?.confirmationCode && !suborder.deliveryDetails?.riderConfirmedAt && (*/}
+            {(suborder.status === 'DELIVERED' || suborder.status === 'CONFIRMED') && 
+              suborder.deliveryDetails?.confirmationCode && 
+              !suborder.deliveryDetails?.riderConfirmedAt && (
               <div className="p-5 bg-yellow-500/10 rounded-xl border-2 border-yellow-500/30">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-yellow-100 rounded-lg">

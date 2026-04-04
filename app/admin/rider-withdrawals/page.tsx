@@ -745,7 +745,7 @@ export default function RiderWithdrawalsPage() {
       {/* Process Modal */}
       {showProcessModal && selectedRequest && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => {
+          <div className="fixed inset-0 bg-black/50" onClick={() => {
             setShowProcessModal(false);
             setSelectedRequest(null);
             setMpesaReceipt('');
@@ -753,7 +753,7 @@ export default function RiderWithdrawalsPage() {
           }}></div>
           
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="inline-block align-bottom bg-[var(--color-surface)] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-bottom bg-[var(--color-surface)] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative" onClick={(e) => e.stopPropagation()}>
               <div className="px-6 pt-6 pb-4">
                 <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-green-500/10 mb-4">
                   <Send className="h-7 w-7 text-green-500" />
@@ -847,10 +847,10 @@ export default function RiderWithdrawalsPage() {
       {/* Details Modal */}
       {showDetailsModal && selectedRequest && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowDetailsModal(false)}></div>
+          <div className="fixed inset-0 bg-black/50" onClick={() => setShowDetailsModal(false)}></div>
           
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="inline-block align-bottom bg-[var(--color-surface)] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div className="inline-block align-bottom bg-[var(--color-surface)] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full relative" onClick={(e) => e.stopPropagation()}>
               <div className="relative bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] px-6 py-6">
                 <button
                   onClick={() => setShowDetailsModal(false)}

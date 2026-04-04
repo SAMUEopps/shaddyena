@@ -45,7 +45,7 @@ export default function Page() {
       <ShopByCategory />
       <ShopPreview />
       <ProductShowcase />
-      <HomeContent /> 
+      {/*<HomeContent /> */}
     </main>
     </Suspense>
   );
