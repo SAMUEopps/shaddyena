@@ -172,12 +172,20 @@ export default function MyDeliveriesPage() {
     price?: string
   ) => {
     setActionLoading(`${deliveryId}-${suborderId}`);
+
+    let mappedAction;
+
+    if (action === 'accept') mappedAction = 'pickup';
+    else if (action === 'pickup') mappedAction = 'in_transit'; // 🔥 FIX
+    else if (action === 'deliver') mappedAction = 'deliver';
+
     
     try {
       let payload: any = {
         orderId: deliveryId,
         suborderId: suborderId,
-        action: action === 'accept' ? 'pickup' : action === 'pickup' ? 'pickup' : 'deliver'
+        //action: action === 'accept' ? 'pickup' : action === 'pickup' ? 'pickup' : 'deliver'
+        action: mappedAction
       };
       
       if (action === 'pickup' && price) {
