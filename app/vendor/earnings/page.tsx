@@ -3,8 +3,47 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from "next/link";
 import WithdrawalRequestModal from '@/components/WithdrawalRequestModal';
 import AvailableFunds from '@/components/AvailableFunds';
+import { OrderService } from '@/components/orders/details/services/orderService';
+import type { Order as ImportedOrder, Suborder as ImportedSuborder } from '@/components/orders/details/types/orders';
+import {
+  TrendingUp,
+  Wallet,
+  Clock,
+  Lock,
+  Gift,
+  Package,
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  RefreshCw,
+  Eye,
+  Truck,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  DollarSign,
+  Calendar,
+  ShoppingBag,
+  Star,
+  ArrowUpRight,
+  ArrowDownRight,
+  FileText,
+  User,
+  MapPin,
+  Phone,
+  CreditCard
+} from 'lucide-react';
+
+// Types
+interface VendorOrder {
+  order: ImportedOrder;
+  suborder: ImportedSuborder;
+}
 
 interface EarningsData {
   totalEarnings: number;
@@ -36,6 +75,7 @@ interface EarningsData {
     status: string;
     customerName: string;
     isWithdrawable: boolean;
+    suborderId?: string;
   }>;
 }
 
@@ -79,20 +119,67 @@ interface AvailableFund {
   withdrawalStatus: string;
 }
 
-export default function VendorEarningsPage() {
+// Stat Card Component
+const StatCard = ({ title, value, icon: Icon, color, subtitle, onClick, buttonText }: any) => (
+  <div className="group bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-xl transition-all duration-300 hover:border-[var(--color-primary)]/30">
+    <div className="flex items-start justify-between">
+      <div>
+        <p className="text-sm font-medium text-[var(--color-text-muted)]">{title}</p>
+        <p className={`text-2xl font-bold ${color} mt-1`}>{value}</p>
+        {subtitle && <p className="text-xs text-[var(--color-text-muted)] mt-2">{subtitle}</p>}
+      </div>
+      <div className={`p-3 rounded-xl bg-gradient-to-br ${color === 'text-green-600' ? 'from-green-500/10 to-emerald-500/10' : 
+        color === 'text-yellow-600' ? 'from-yellow-500/10 to-amber-500/10' :
+        color === 'text-blue-600' ? 'from-blue-500/10 to-cyan-500/10' :
+        color === 'text-purple-600' ? 'from-purple-500/10 to-pink-500/10' :
+        'from-gray-500/10 to-slate-500/10'} group-hover:scale-110 transition-transform`}>
+        <Icon className={`w-6 h-6 ${color}`} />
+      </div>
+    </div>
+    {onClick && (
+      <button
+        onClick={onClick}
+        className="mt-4 w-full px-4 py-2 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] text-white rounded-xl font-medium hover:opacity-90 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50"
+      >
+        {buttonText || 'Request Withdrawal'}
+      </button>
+    )}
+    {buttonText === 'View Locked Funds' && (
+      <Link
+        href="/vendor/locked-funds"
+        className="inline-block mt-4 w-full text-center px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-all duration-300"
+      >
+        View Locked Funds
+      </Link>
+    )}
+  </div>
+);
+
+// Main Component
+export default function OrderPaymentsTab() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const [earningsData, setEarningsData] = useState<EarningsData | null>(null);
+  const [vendorOrders, setVendorOrders] = useState<VendorOrder[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [availableFunds, setAvailableFunds] = useState<AvailableFund[]>([]);
   const [selectedFunds, setSelectedFunds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState('last30days');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
   const [withdrawalTab, setWithdrawalTab] = useState<'history' | 'available'>('history');
+  const [activeTab, setActiveTab] = useState<'earnings' | 'orders'>('earnings');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [riders, setRiders] = useState<Array<{ _id: string; firstName: string; lastName: string; phone?: string }>>([]);
+  const [selectedRiders, setSelectedRiders] = useState<Record<string, string>>({}); 
+  const [assigningRider, setAssigningRider] = useState<Record<string, boolean>>({});
 
   const fetchData = useCallback(async () => {
     if (!user || user.role !== 'vendor') return;
@@ -101,499 +188,825 @@ export default function VendorEarningsPage() {
       setLoading(true);
       setError(null);
       
-      // Fetch earnings data
-      const earningsParams = new URLSearchParams({
-        dateRange,
-        status: statusFilter,
-      });
-
+      const earningsParams = new URLSearchParams({ dateRange, status: statusFilter });
       const earningsResponse = await fetch(`/api/vendor/earnings?${earningsParams}`);
-      if (!earningsResponse.ok) {
-        const errorData = await earningsResponse.json().catch(() => ({ message: 'Failed to fetch earnings' }));
-        throw new Error(errorData.message || 'Failed to fetch earnings');
-      }
+      if (!earningsResponse.ok) throw new Error('Failed to fetch earnings');
       const earnings = await earningsResponse.json();
 
-      // Fetch withdrawal data
       const withdrawalsResponse = await fetch('/api/vendor/withdraw');
-      if (!withdrawalsResponse.ok) {
-        const errorData = await withdrawalsResponse.json().catch(() => ({ message: 'Failed to fetch withdrawals' }));
-        throw new Error(errorData.message || 'Failed to fetch withdrawals');
-      }
+      if (!withdrawalsResponse.ok) throw new Error('Failed to fetch withdrawals');
       const withdrawalData = await withdrawalsResponse.json();
 
-      // Fetch available funds
       const fundsResponse = await fetch('/api/vendor/funds/available');
-      if (!fundsResponse.ok) {
-        const errorData = await fundsResponse.json().catch(() => ({ message: 'Failed to fetch available funds' }));
-        throw new Error(errorData.message || 'Failed to fetch available funds');
-      }
+      if (!fundsResponse.ok) throw new Error('Failed to fetch available funds');
       const funds = await fundsResponse.json();
 
       setEarningsData({
         ...earnings,
         balance: withdrawalData.balance || {
-          available: 0,
-          pendingWithdrawals: 0,
-          netAvailable: 0,
-          locked: 0,
-          referral: 0
+          available: 0, pendingWithdrawals: 0, netAvailable: 0, locked: 0, referral: 0
         }
       });
       setWithdrawals(withdrawalData.withdrawals || []);
       setAvailableFunds(funds || []);
     } catch (err) {
-      console.error('Error fetching data:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
   }, [user, dateRange, statusFilter, refreshKey]);
 
+  const fetchOrders = async () => {
+    if (!user || user.role !== 'vendor') return;
+    
+    setOrdersLoading(true);
+    try {
+      const data = await OrderService.fetchOrders('/api/orders/vendor', {
+        page: currentPage.toString(),
+        limit: '10',
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(searchTerm && { search: searchTerm })
+      });
+      
+      const flattened: VendorOrder[] = [];
+      data.orders.forEach((order: any) => {
+        order.suborders.forEach((suborder: any) => {
+          flattened.push({ order, suborder });
+        });
+      });
+      setVendorOrders(flattened);
+      setTotalPages(data.totalPages);
+      setTotalOrders(data.total);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  const fetchRiders = async () => {
+    try {
+      const response = await fetch('/api/riders/available');
+      if (response.ok) {
+        const data = await response.json();
+        setRiders(data.riders || []);
+      }
+    } catch (error) {
+      console.error('Error fetching riders:', error);
+    }
+  };
+
   useEffect(() => {
     if (isLoading) return;
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-    if (user.role !== 'vendor') {
-      router.push('/unauthorized');
-      return;
-    }
-    fetchData();
-  }, [user, isLoading, fetchData, router]);
+    if (!user) { router.push('/login'); return; }
+    if (user.role !== 'vendor') { router.push('/unauthorized'); return; }
+    fetchRiders();
+    if (activeTab === 'earnings') fetchData();
+    else fetchOrders();
+  }, [user, isLoading, activeTab, currentPage, statusFilter, searchTerm, refreshKey]);
 
-  const handleDateRangeChange = (newDateRange: string) => {
-    setDateRange(newDateRange);
-  };
-
-  const handleStatusFilterChange = (newStatus: string) => {
-    setStatusFilter(newStatus);
-  };
-
-  const handleFundSelection = (fundId: string) => {
-    setSelectedFunds(prev => 
-      prev.includes(fundId) 
-        ? prev.filter(id => id !== fundId)
-        : [...prev, fundId]
-    );
-  };
-
-  const handleSelectAllAvailable = () => {
-    const availableFundsFiltered = availableFunds.filter(fund => fund.withdrawalStatus === 'AVAILABLE');
-    if (selectedFunds.length === availableFundsFiltered.length) {
-      setSelectedFunds([]);
-    } else {
-      setSelectedFunds(availableFundsFiltered.map(f => f._id));
+  const handleMarkAsReady = async (orderId: string, suborderId: string) => {
+    try {
+      await OrderService.markAsReadyForPickup(orderId, suborderId);
+      await fetchOrders();
+    } catch (error) {
+      setError('Failed to mark order as ready for pickup');
     }
   };
 
-  const handleWithdrawalSuccess = () => {
-    setShowWithdrawalModal(false);
-    setSelectedFunds([]);
-    setRefreshKey(prev => prev + 1); // Trigger refresh
+  const handleRiderAssignment = async (orderId: string, suborderId: string) => {
+    const riderId = selectedRiders[suborderId];
+    if (!riderId) { alert('Please select a rider first'); return; }
+
+    setAssigningRider(prev => ({ ...prev, [suborderId]: true }));
+    try {
+      await OrderService.assignRider(orderId, suborderId, riderId, 0);
+      await fetchOrders();
+      setSelectedRiders(prev => ({ ...prev, [suborderId]: '' }));
+      alert('Rider assigned successfully!');
+    } catch (error) {
+      setError('Failed to assign rider');
+    } finally {
+      setAssigningRider(prev => ({ ...prev, [suborderId]: false }));
+    }
   };
+
+  const getStats = () => ({
+    total: vendorOrders.length,
+    pending: vendorOrders.filter(vo => vo.suborder.status === 'PENDING').length,
+    processing: vendorOrders.filter(vo => vo.suborder.status === 'PROCESSING').length,
+    readyForPickup: vendorOrders.filter(vo => vo.suborder.status === 'READY_FOR_PICKUP').length,
+    shipped: vendorOrders.filter(vo => vo.suborder.status === 'SHIPPED').length,
+    delivered: vendorOrders.filter(vo => vo.suborder.status === 'DELIVERED').length,
+    cancelled: vendorOrders.filter(vo => vo.suborder.status === 'CANCELLED').length,
+  });
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#bf2c7e]"></div>
-          <p className="mt-4 text-gray-600">Loading authentication...</p>
+      <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center">
+        <div className="relative">
+          <div className="absolute inset-0 bg-[var(--color-primary)]/20 rounded-full blur-xl animate-pulse" />
+          <div className="relative w-16 h-16 border-4 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin" />
         </div>
       </div>
     );
   }
 
-  if (!user || user.role !== 'vendor') {
-    return null; // Router will handle redirect
-  }
+  if (!user || user.role !== 'vendor') return null;
 
+  const stats = getStats();
+
+  return (
+    <div className="min-h-screen bg-[var(--color-background)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-[var(--color-primary)]/10 rounded-xl">
+              <TrendingUp className="w-6 h-6 text-[var(--color-primary)]" />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-text)]">Vendor Dashboard</h1>
+          </div>
+          <p className="text-[var(--color-text-muted)]">Manage your orders, earnings and withdrawal requests</p>
+        </div>
+
+        {/* Main Tabs */}
+        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] mb-8 overflow-hidden">
+          <div className="border-b border-[var(--color-border)]">
+            <nav className="flex gap-1 p-1">
+              <button
+                onClick={() => setActiveTab('earnings')}
+                className={`flex-1 py-3 px-4 text-sm font-medium rounded-xl transition-all duration-300 ${
+                  activeTab === 'earnings'
+                    ? 'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] text-white shadow-lg'
+                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-background-soft)]'
+                }`}
+              >
+                Earnings & Payments
+              </button>
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`flex-1 py-3 px-4 text-sm font-medium rounded-xl transition-all duration-300 ${
+                  activeTab === 'orders'
+                    ? 'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] text-white shadow-lg'
+                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-background-soft)]'
+                }`}
+              >
+                Order Management
+              </button>
+            </nav>
+          </div>
+
+          <div className="p-6">
+            {activeTab === 'earnings' ? (
+              <EarningsView
+                earningsData={earningsData}
+                withdrawals={withdrawals}
+                availableFunds={availableFunds}
+                selectedFunds={selectedFunds}
+                withdrawalTab={withdrawalTab}
+                loading={loading}
+                error={error}
+                dateRange={dateRange}
+                statusFilter={statusFilter}
+                user={user}
+                onDateRangeChange={setDateRange}
+                onStatusFilterChange={setStatusFilter}
+                onFundSelection={(id: string) => setSelectedFunds(prev => 
+                  prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+                )}
+                onSelectAllAvailable={() => {
+                  const available = availableFunds.filter(f => f.withdrawalStatus === 'AVAILABLE');
+                  setSelectedFunds(prev => prev.length === available.length ? [] : available.map(f => f._id));
+                }}
+                onWithdrawalClick={() => setShowWithdrawalModal(true)}
+                onWithdrawalTabChange={setWithdrawalTab}
+                onRefresh={() => setRefreshKey(prev => prev + 1)}
+              />
+            ) : (
+              <OrdersView
+                vendorOrders={vendorOrders}
+                ordersLoading={ordersLoading}
+                error={error}
+                searchTerm={searchTerm}
+                statusFilter={statusFilter}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalOrders={totalOrders}
+                stats={stats}
+                selectedRiders={selectedRiders}
+                assigningRider={assigningRider}
+                riders={riders}
+                onSearchChange={setSearchTerm}
+                onStatusFilterChange={setStatusFilter}
+                onPageChange={setCurrentPage}
+                onRefresh={fetchOrders}
+                onMarkAsReady={handleMarkAsReady}
+                onRiderAssignment={handleRiderAssignment}
+                onSelectedRiderChange={(suborderId: string, riderId: string) => 
+                  setSelectedRiders(prev => ({ ...prev, [suborderId]: riderId }))
+                }
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Withdrawal Modal */}
+        {showWithdrawalModal && (
+          <WithdrawalRequestModal
+            selectedFunds={selectedFunds.map(id => availableFunds.find(f => f._id === id)!).filter(Boolean)}
+            onClose={() => {
+              setShowWithdrawalModal(false);
+              setSelectedFunds([]);
+            }}
+            onSuccess={() => {
+              setShowWithdrawalModal(false);
+              setSelectedFunds([]);
+              setRefreshKey(prev => prev + 1);
+            }}
+            defaultMpesaNumber={user.mpesaNumber || ''}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Earnings View Component
+function EarningsView({
+  earningsData,
+  withdrawals,
+  availableFunds,
+  selectedFunds,
+  withdrawalTab,
+  loading,
+  error,
+  dateRange,
+  statusFilter,
+  user,
+  onDateRangeChange,
+  onStatusFilterChange,
+  onFundSelection,
+  onSelectAllAvailable,
+  onWithdrawalClick,
+  onWithdrawalTabChange,
+  onRefresh
+}: any) {
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#bf2c7e]"></div>
-          <p className="mt-4 text-gray-600">Loading earnings data...</p>
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="relative">
+          <div className="absolute inset-0 bg-[var(--color-primary)]/20 rounded-full blur-xl animate-pulse" />
+          <div className="relative w-12 h-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin" />
         </div>
+        <p className="mt-4 text-[var(--color-text-muted)]">Loading earnings data...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-red-50 p-6 rounded-lg max-w-md">
-          <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Data</h3>
-          <p className="text-red-600 mb-4">{error}</p>
-          <div className="flex gap-2">
-            <button 
-              onClick={fetchData}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Try Again
-            </button>
-            <button 
-              onClick={() => router.push('/vendor')}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              Go Back
-            </button>
-          </div>
-        </div>
+      <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 text-center">
+        <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-red-600 mb-2">Error Loading Data</h3>
+        <p className="text-red-500/80 mb-4">{error}</p>
+        <button 
+          onClick={onRefresh}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-300"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Try Again
+        </button>
       </div>
     );
   }
 
   if (!earningsData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-yellow-50 p-6 rounded-lg">
-          <p className="text-yellow-800">No earnings data available</p>
-          <button 
-            onClick={fetchData}
-            className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
-          >
-            Refresh
-          </button>
-        </div>
+      <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-8 text-center">
+        <p className="text-yellow-600">No earnings data available</p>
+        <button onClick={onRefresh} className="mt-4 px-5 py-2.5 bg-yellow-500 text-white rounded-xl">Refresh</button>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Vendor Earnings & Withdrawals</h1>
-          <p className="text-gray-600">Manage your earnings and withdrawal requests</p>
-        </div>
+  const totalSelectedAmount = selectedFunds.reduce((sum: number, id: string) => {
+    const fund = availableFunds.find((f: any) => f._id === id);
+    return sum + (fund?.netAmount || 0);
+  }, 0);
 
-        {/* Balance Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Available Balance</p>
-                <p className="text-2xl font-bold text-green-600">
-                  KSh {earningsData.balance.available.toLocaleString()}
-                </p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-full">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
+  return (
+    <div className="space-y-6">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        <StatCard 
+          title="Available Balance" 
+          value={`KSh ${earningsData.balance.available.toLocaleString()}`}
+          icon={Wallet}
+          color="text-green-600"
+          onClick={onWithdrawalClick}
+          buttonText="Request Withdrawal"
+          subtitle={earningsData.balance.netAvailable > 0 ? `${earningsData.balance.netAvailable.toLocaleString()} KSh withdrawable` : ''}
+        />
+        <StatCard 
+          title="Pending Withdrawals" 
+          value={`KSh ${earningsData.balance.pendingWithdrawals.toLocaleString()}`}
+          icon={Clock}
+          color="text-yellow-600"
+          subtitle="Awaiting admin approval"
+        />
+        <StatCard 
+          title="Locked Funds" 
+          value={`KSh ${earningsData.balance.locked.toLocaleString()}`}
+          icon={Lock}
+          color="text-blue-600"
+          buttonText="View Locked Funds"
+          subtitle="Available after delivery"
+        />
+        <StatCard 
+          title="Referral Earnings" 
+          value={`KSh ${earningsData.balance.referral.toLocaleString()}`}
+          icon={Gift}
+          color="text-purple-600"
+          subtitle="From referred vendors"
+        />
+        <StatCard 
+          title="Total Orders" 
+          value={earningsData.totalOrders}
+          icon={Package}
+          color="text-gray-600"
+        />
+      </div>
+
+      {/* Withdrawal Tabs */}
+      <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden">
+        <div className="border-b border-[var(--color-border)]">
+          <div className="flex gap-1 p-1">
             <button
-              onClick={() => setShowWithdrawalModal(true)}
-              disabled={earningsData.balance.netAvailable <= 0}
-              className={`mt-4 w-full px-4 py-2 rounded-lg font-medium transition-colors ${
-                earningsData.balance.netAvailable > 0
-                  ? 'bg-[#bf2c7e] text-white hover:bg-[#a8246e]'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              onClick={() => onWithdrawalTabChange('history')}
+              className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-xl transition-all duration-300 ${
+                withdrawalTab === 'history'
+                  ? 'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] text-white shadow-lg'
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-background-soft)]'
               }`}
             >
-              Request Withdrawal
+              Withdrawal History
+            </button>
+            <button
+              onClick={() => onWithdrawalTabChange('available')}
+              className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-xl transition-all duration-300 ${
+                withdrawalTab === 'available'
+                  ? 'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] text-white shadow-lg'
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-background-soft)]'
+              }`}
+            >
+              Available Funds ({availableFunds.filter((f: any) => f.withdrawalStatus === 'AVAILABLE').length})
             </button>
           </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pending Withdrawals</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  KSh {earningsData.balance.pendingWithdrawals.toLocaleString()}
-                </p>
-              </div>
-              <div className="bg-yellow-100 p-3 rounded-full">
-                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <p className="mt-2 text-sm text-gray-500">Awaiting admin approval</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Locked Funds (20%)</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  KSh {earningsData.balance.locked.toLocaleString()}
-                </p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-full">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-            </div>
-            <p className="mt-2 text-sm text-gray-500">Available in 24 hours</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Referral Earnings</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  KSh {earningsData.balance.referral.toLocaleString()}
-                </p>
-              </div>
-              <div className="bg-purple-100 p-3 rounded-full">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-            </div>
-            <p className="mt-2 text-sm text-gray-500">From referred vendors</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {earningsData.totalOrders}
-                </p>
-              </div>
-              <div className="bg-gray-100 p-3 rounded-full">
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* Withdrawal Tabs */}
-        <div className="bg-white rounded-lg shadow mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
-              <button
-                onClick={() => setWithdrawalTab('history')}
-                className={`py-4 px-6 text-sm font-medium border-b-2 ${
-                  withdrawalTab === 'history'
-                    ? 'border-[#bf2c7e] text-[#bf2c7e]'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Withdrawal History
-              </button>
-              <button
-                onClick={() => setWithdrawalTab('available')}
-                className={`py-4 px-6 text-sm font-medium border-b-2 ${
-                  withdrawalTab === 'available'
-                    ? 'border-[#bf2c7e] text-[#bf2c7e]'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Available Funds
-              </button>
-            </nav>
-          </div>
+        <div className="p-6">
+          {withdrawalTab === 'history' ? (
+            <WithdrawalHistory withdrawals={withdrawals} />
+          ) : (
+            <AvailableFunds 
+              funds={availableFunds}
+              selectedFunds={selectedFunds}
+              onSelectFund={onFundSelection}
+              onSelectAll={onSelectAllAvailable}
+              onRequestWithdrawal={onWithdrawalClick}
+              totalSelected={totalSelectedAmount}
+            />
+          )}
+        </div>
+      </div>
 
-          <div className="p-6">
-            {withdrawalTab === 'history' ? (
-              <WithdrawalHistory withdrawals={withdrawals} />
+      {/* Filters */}
+      <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-text)] mb-2 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-[var(--color-primary)]" />
+              Date Range
+            </label>
+            <select 
+              value={dateRange}
+              onChange={(e) => onDateRangeChange(e.target.value)}
+              className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+            >
+              <option value="last7days">Last 7 Days</option>
+              <option value="last30days">Last 30 Days</option>
+              <option value="last90days">Last 90 Days</option>
+              <option value="thisMonth">This Month</option>
+              <option value="lastMonth">Last Month</option>
+              <option value="thisYear">This Year</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-text)] mb-2 flex items-center gap-2">
+              <Filter className="w-4 h-4 text-[var(--color-primary)]" />
+              Order Status
+            </label>
+            <select 
+              value={statusFilter}
+              onChange={(e) => onStatusFilterChange(e.target.value)}
+              className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+            >
+              <option value="all">All Orders</option>
+              <option value="delivered">Delivered</option>
+              <option value="shipped">Shipped</option>
+              <option value="processing">Processing</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Monthly Earnings Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-6">
+          <h2 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-[var(--color-primary)]" />
+            Monthly Earnings
+          </h2>
+          <div className="h-64">
+            {earningsData.monthlyEarnings?.length > 0 ? (
+              <div className="flex items-end justify-between h-full space-x-2">
+                {earningsData.monthlyEarnings.map((month: any, index: number) => {
+                  const maxEarning = Math.max(...earningsData.monthlyEarnings.map((m: any) => m.earnings || 0), 1);
+                  const height = Math.max(20, (month.earnings / maxEarning) * 200);
+                  return (
+                    <div key={index} className="flex-1 flex flex-col items-center group">
+                      <div className="relative w-full">
+                        <div 
+                          className="bg-gradient-to-t from-[var(--color-primary)] to-[var(--color-primary-alt)] rounded-t-lg transition-all duration-300 group-hover:opacity-80"
+                          style={{ height: `${height}px` }}
+                        >
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-[var(--color-primary)] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            KSh {month.earnings.toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-xs text-[var(--color-text-muted)] mt-3">{month.month}</p>
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
-              <AvailableFunds 
-                funds={availableFunds}
-                selectedFunds={selectedFunds}
-                onSelectFund={handleFundSelection}
-                onSelectAll={handleSelectAllAvailable}
-                onRequestWithdrawal={() => setShowWithdrawalModal(true)}
-                totalSelected={selectedFunds.reduce((sum, id) => {
-                  const fund = availableFunds.find(f => f._id === id);
-                  return sum + (fund?.netAmount || 0);
-                }, 0)}
-              />
+              <div className="h-full flex items-center justify-center">
+                <p className="text-[var(--color-text-muted)]">No monthly earnings data available</p>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
-              <select 
-                value={dateRange}
-                onChange={(e) => handleDateRangeChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
-              >
-                <option value="last7days">Last 7 Days</option>
-                <option value="last30days">Last 30 Days</option>
-                <option value="last90days">Last 90 Days</option>
-                <option value="thisMonth">This Month</option>
-                <option value="lastMonth">Last Month</option>
-                <option value="thisYear">This Year</option>
-              </select>
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Order Status</label>
-              <select 
-                value={statusFilter}
-                onChange={(e) => handleStatusFilterChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#bf2c7e]"
-              >
-                <option value="all">All Orders</option>
-                <option value="delivered">Delivered</option>
-                <option value="shipped">Shipped</option>
-                <option value="processing">Processing</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Earnings Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Monthly Earnings Chart */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Monthly Earnings</h2>
-            <div className="h-64">
-              {earningsData.monthlyEarnings && earningsData.monthlyEarnings.length > 0 ? (
-                <div className="flex items-end justify-between h-full space-x-2">
-                  {earningsData.monthlyEarnings.map((month, index) => (
-                    <div key={index} className="flex-1 flex flex-col items-center">
-                      <div 
-                        className="bg-[#bf2c7e] w-full rounded-t transition-all duration-300 hover:opacity-80"
-                        style={{ 
-                          height: `${Math.max(
-                            10, 
-                            (month.earnings / Math.max(...earningsData.monthlyEarnings.map(m => m.earnings || 1))) * 100
-                          )}%` 
-                        }}
-                        title={`KSh ${month.earnings.toLocaleString()}`}
-                      ></div>
-                      <p className="text-xs text-gray-600 mt-2">{month.month}</p>
-                      <p className="text-xs text-gray-500">KSh {month.earnings.toLocaleString()}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="h-full flex items-center justify-center">
-                  <p className="text-gray-500">No monthly earnings data available</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Top Products */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Top Products</h2>
-            {earningsData.topProducts && earningsData.topProducts.length > 0 ? (
-              <div className="space-y-4">
-                {earningsData.topProducts.map((product, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{product.productName}</p>
-                      <p className="text-xs text-gray-500">{product.quantitySold} units sold</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-900">KSh {product.totalRevenue.toLocaleString()}</p>
-                    </div>
+        {/* Top Products */}
+        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-6">
+          <h2 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+            <Star className="w-5 h-5 text-[var(--color-primary)]" />
+            Top Products
+          </h2>
+          {earningsData.topProducts?.length > 0 ? (
+            <div className="space-y-4">
+              {earningsData.topProducts.map((product: any, index: number) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-[var(--color-background-soft)] rounded-xl">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-[var(--color-text)]">{product.productName}</p>
+                    <p className="text-xs text-[var(--color-text-muted)]">{product.quantitySold} units sold</p>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="h-64 flex items-center justify-center">
-                <p className="text-gray-500">No top products data available</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Transactions */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Transactions</h2>
-          </div>
-          {earningsData.recentTransactions && earningsData.recentTransactions.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Order ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Commission
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Net Earnings
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {earningsData.recentTransactions.map((transaction, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {transaction.orderId}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(transaction.date).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {transaction.customerName}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        KSh {transaction.amount.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        KSh {transaction.commission.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
-                        KSh {transaction.netAmount.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          transaction.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                          transaction.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
-                          transaction.status === 'PROCESSING' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {transaction.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  <p className="text-sm font-bold text-[var(--color-primary)]">
+                    KSh {product.totalRevenue.toLocaleString()}
+                  </p>
+                </div>
+              ))}
             </div>
           ) : (
-            <div className="p-6 text-center">
-              <p className="text-gray-500">No recent transactions available</p>
+            <div className="h-64 flex items-center justify-center">
+              <p className="text-[var(--color-text-muted)]">No top products data available</p>
             </div>
           )}
         </div>
       </div>
 
-      {showWithdrawalModal && (
-        <WithdrawalRequestModal
-          selectedFunds={selectedFunds.map(id => availableFunds.find(f => f._id === id)!).filter(Boolean)}
-          onClose={() => {
-            setShowWithdrawalModal(false);
-            setSelectedFunds([]);
-          }}
-          onSuccess={handleWithdrawalSuccess}
-          defaultMpesaNumber={user.mpesaNumber || ''}
-        />
-      )}
+      {/* Recent Transactions */}
+      <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-[var(--color-border)]">
+          <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+            <FileText className="w-5 h-5 text-[var(--color-primary)]" />
+            Recent Transactions
+          </h2>
+        </div>
+        {earningsData.recentTransactions?.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[var(--color-background-soft)]">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Order ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Customer</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Commission</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Net Earnings</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--color-border)]">
+                {earningsData.recentTransactions.map((transaction: any, index: number) => (
+                  <tr key={index} className="hover:bg-[var(--color-background-soft)] transition-colors">
+                    <td className="px-6 py-4 text-sm font-mono text-[var(--color-text)]">{transaction.orderId}</td>
+                    <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">{new Date(transaction.date).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 text-sm text-[var(--color-text)]">{transaction.customerName}</td>
+                    <td className="px-6 py-4 text-sm text-[var(--color-text)]">KSh {transaction.amount.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-sm text-red-500">-KSh {transaction.commission.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-sm font-semibold text-green-600">KSh {transaction.netAmount.toLocaleString()}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                        transaction.status === 'DELIVERED' ? 'bg-green-500/10 text-green-600' :
+                        transaction.status === 'SHIPPED' ? 'bg-blue-500/10 text-blue-600' :
+                        transaction.status === 'PROCESSING' ? 'bg-yellow-500/10 text-yellow-600' :
+                        'bg-gray-500/10 text-gray-600'
+                      }`}>
+                        {transaction.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="p-12 text-center">
+            <p className="text-[var(--color-text-muted)]">No recent transactions available</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Orders View Component
+function OrdersView({
+  vendorOrders,
+  ordersLoading,
+  error,
+  searchTerm,
+  statusFilter,
+  currentPage,
+  totalPages,
+  totalOrders,
+  stats,
+  selectedRiders,
+  assigningRider,
+  riders,
+  onSearchChange,
+  onStatusFilterChange,
+  onPageChange,
+  onRefresh,
+  onMarkAsReady,
+  onRiderAssignment,
+  onSelectedRiderChange
+}: any) {
+  if (ordersLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="relative">
+          <div className="absolute inset-0 bg-[var(--color-primary)]/20 rounded-full blur-xl animate-pulse" />
+          <div className="relative w-12 h-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin" />
+        </div>
+        <p className="mt-4 text-[var(--color-text-muted)]">Loading orders...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-[var(--color-text)]">Vendor Orders</h2>
+          <p className="text-sm text-[var(--color-text-muted)]">{totalOrders} total orders</p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]" />
+            <input
+              type="text"
+              placeholder="Search order ID or customer..."
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-10 pr-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 w-full sm:w-64"
+            />
+          </div>
+          
+          <select 
+            value={statusFilter}
+            onChange={(e) => onStatusFilterChange(e.target.value)}
+            className="px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+          >
+            <option value="all">All Status</option>
+            <option value="PENDING">Pending</option>
+            <option value="PROCESSING">Processing</option>
+            <option value="READY_FOR_PICKUP">Ready for Pickup</option>
+            <option value="SHIPPED">Shipped</option>
+            <option value="DELIVERED">Delivered</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+          
+          <button
+            onClick={onRefresh}
+            className="p-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl hover:border-[var(--color-primary)] transition-colors"
+          >
+            <RefreshCw className="w-5 h-5 text-[var(--color-text-muted)]" />
+          </button>
+        </div>
+      </div>
+      
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+        <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-4 text-center">
+          <p className="text-xs text-[var(--color-text-muted)]">Total</p>
+          <p className="text-2xl font-bold text-[var(--color-text)]">{stats.total}</p>
+        </div>
+        <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-4 text-center">
+          <p className="text-xs text-[var(--color-text-muted)]">Pending</p>
+          <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+        </div>
+        <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-4 text-center">
+          <p className="text-xs text-[var(--color-text-muted)]">Processing</p>
+          <p className="text-2xl font-bold text-blue-600">{stats.processing}</p>
+        </div>
+        <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-4 text-center">
+          <p className="text-xs text-[var(--color-text-muted)]">Ready</p>
+          <p className="text-2xl font-bold text-purple-600">{stats.readyForPickup}</p>
+        </div>
+        <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-4 text-center">
+          <p className="text-xs text-[var(--color-text-muted)]">Shipped</p>
+          <p className="text-2xl font-bold text-cyan-600">{stats.shipped}</p>
+        </div>
+        <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-4 text-center">
+          <p className="text-xs text-[var(--color-text-muted)]">Delivered</p>
+          <p className="text-2xl font-bold text-green-600">{stats.delivered}</p>
+        </div>
+        <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-4 text-center">
+          <p className="text-xs text-[var(--color-text-muted)]">Cancelled</p>
+          <p className="text-2xl font-bold text-red-600">{stats.cancelled}</p>
+        </div>
+      </div>
+      
+      {/* Orders Table */}
+      <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden">
+        {vendorOrders.length === 0 ? (
+          <div className="p-12 text-center">
+            <div className="inline-flex p-4 bg-[var(--color-background-soft)] rounded-full mb-4">
+              <Package className="w-12 h-12 text-[var(--color-text-muted)]/50" />
+            </div>
+            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">No vendor orders yet</h3>
+            <p className="text-[var(--color-text-muted)]">You haven't received any orders from customers yet.</p>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[var(--color-background-soft)] border-b border-[var(--color-border)]">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Order ID</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Date</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Customer</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Items & Amount</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Status</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--color-border)]">
+                  {vendorOrders.map((vendorOrder: VendorOrder, idx: number) => {
+                    const { order, suborder } = vendorOrder;
+                    const riderId = suborder.riderId?.toString();
+                    const itemCount = suborder.items?.length || order.items.filter((i: any) => i.vendorId === suborder.vendorId).length;
+                    
+                    return (
+                      <tr key={`${order._id}-${suborder.vendorId}`} className="hover:bg-[var(--color-background-soft)] transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="font-mono text-sm font-medium text-[var(--color-text)]">{order.orderId}</div>
+                          <div className="text-xs text-[var(--color-text-muted)] mt-1">{itemCount} item(s)</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">
+                          {OrderService.formatDate(order.createdAt)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-medium text-[var(--color-text)]">{OrderService.getBuyerName(order.buyerId)}</div>
+                          <div className="text-xs text-[var(--color-text-muted)]">{order.shipping.phone}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-bold text-[var(--color-primary)]">
+                            {OrderService.formatCurrency(suborder.netAmount, order.currency)}
+                          </div>
+                          <div className="text-xs text-[var(--color-text-muted)]">
+                            Gross: {OrderService.formatCurrency(suborder.amount, order.currency)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-1">
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                              suborder.status === 'DELIVERED' ? 'bg-green-500/10 text-green-600' :
+                              suborder.status === 'CONFIRMED' ? 'bg-emerald-500/10 text-emerald-600' :
+                              suborder.status === 'SHIPPED' ? 'bg-blue-500/10 text-blue-600' :
+                              suborder.status === 'IN_TRANSIT' ? 'bg-cyan-500/10 text-cyan-600' :
+                              suborder.status === 'READY_FOR_PICKUP' ? 'bg-purple-500/10 text-purple-600' :
+                              suborder.status === 'PROCESSING' ? 'bg-yellow-500/10 text-yellow-600' :
+                              suborder.status === 'PENDING' ? 'bg-gray-500/10 text-gray-600' :
+                              'bg-red-500/10 text-red-600'
+                            }`}>
+                              {suborder.status === 'READY_FOR_PICKUP' ? 'Ready for Pickup' : suborder.status}
+                            </span>
+                            {riderId && <div className="text-xs text-[var(--color-text-muted)] flex items-center gap-1"><Truck className="w-3 h-3" /> Rider assigned</div>}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-wrap gap-2">
+                            <Link
+                              href={`/orders/${order._id}?vendorView=true&suborderId=${suborder._id}`}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-[var(--color-primary)] bg-[var(--color-primary)]/10 rounded-lg hover:bg-[var(--color-primary)]/20 transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              View
+                            </Link>
+                            
+                            {suborder.status === 'PROCESSING' && (
+                              <button
+                                onClick={() => onMarkAsReady(order._id, suborder._id || '')}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-white bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg hover:opacity-90 transition-all duration-300"
+                              >
+                                <Package className="w-3.5 h-3.5" />
+                                Mark Ready
+                              </button>
+                            )}
+
+                            {suborder.status === 'READY_FOR_PICKUP' && !riderId && (
+                              <div className="flex items-center gap-2">
+                                <select
+                                  value={selectedRiders[suborder._id || ''] || ''}
+                                  onChange={(e) => onSelectedRiderChange(suborder._id || '', e.target.value)}
+                                  className="px-2 py-1.5 text-sm bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                                  disabled={assigningRider[suborder._id || '']}
+                                >
+                                  <option value="">Select Rider</option>
+                                  {riders.map((rider: any) => (
+                                    <option key={rider._id} value={rider._id}>
+                                      {rider.firstName} {rider.lastName}
+                                    </option>
+                                  ))}
+                                </select>
+                                <button
+                                  onClick={() => onRiderAssignment(order._id, suborder._id || '')}
+                                  disabled={!selectedRiders[suborder._id || ''] || assigningRider[suborder._id || '']}
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-white bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] rounded-lg hover:opacity-90 transition-all duration-300 disabled:opacity-50"
+                                >
+                                  {assigningRider[suborder._id || ''] ? (
+                                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <Truck className="w-3.5 h-3.5" />
+                                  )}
+                                  Assign
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-[var(--color-border)] flex items-center justify-between">
+                <div className="text-sm text-[var(--color-text-muted)]">
+                  Page {currentPage} of {totalPages}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg hover:border-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg hover:border-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -603,74 +1016,63 @@ function WithdrawalHistory({ withdrawals }: { withdrawals: Withdrawal[] }) {
   if (withdrawals.length === 0) {
     return (
       <div className="text-center py-12">
-        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <h3 className="mt-4 text-lg font-medium text-gray-900">No withdrawal history</h3>
-        <p className="mt-1 text-gray-500">You haven't made any withdrawal requests yet.</p>
+        <div className="inline-flex p-4 bg-[var(--color-background-soft)] rounded-full mb-4">
+          <Clock className="w-12 h-12 text-[var(--color-text-muted)]/50" />
+        </div>
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">No withdrawal history</h3>
+        <p className="text-[var(--color-text-muted)]">You haven't made any withdrawal requests yet.</p>
       </div>
     );
   }
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead>
-          <tr className="bg-gray-50">
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MPESA</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+      <table className="w-full">
+        <thead className="bg-[var(--color-background-soft)]">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Date</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Order ID</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Amount</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Type</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">Status</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase">MPESA</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="divide-y divide-[var(--color-border)]">
           {withdrawals.map((withdrawal) => (
-            <tr key={withdrawal._id} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <tr key={withdrawal._id} className="hover:bg-[var(--color-background-soft)] transition-colors">
+              <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">
                 {new Date(withdrawal.createdAt).toLocaleDateString()}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {withdrawal.orderId}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-4 text-sm font-mono text-[var(--color-text)]">{withdrawal.orderId}</td>
+              <td className="px-6 py-4 text-sm font-semibold text-[var(--color-text)]">
                 KSh {withdrawal.amount.toLocaleString()}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  withdrawal.type === 'IMMEDIATE'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-blue-100 text-blue-800'
+              <td className="px-6 py-4">
+                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                  withdrawal.type === 'IMMEDIATE' ? 'bg-green-500/10 text-green-600' : 'bg-blue-500/10 text-blue-600'
                 }`}>
                   {withdrawal.type}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                  withdrawal.status === 'PROCESSED'
-                    ? 'bg-green-100 text-green-800'
-                    : withdrawal.status === 'APPROVED'
-                    ? 'bg-blue-100 text-blue-800'
-                    : withdrawal.status === 'PENDING'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-red-100 text-red-800'
+              <td className="px-6 py-4">
+                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                  withdrawal.status === 'PROCESSED' ? 'bg-green-500/10 text-green-600' :
+                  withdrawal.status === 'APPROVED' ? 'bg-blue-500/10 text-blue-600' :
+                  withdrawal.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-600' :
+                  'bg-red-500/10 text-red-600'
                 }`}>
                   {withdrawal.status}
                 </span>
                 {withdrawal.adminNotes && (
-                  <p className="text-xs text-gray-500 mt-1">{withdrawal.adminNotes}</p>
+                  <p className="text-xs text-[var(--color-text-muted)] mt-1">{withdrawal.adminNotes}</p>
                 )}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">
                 {withdrawal.vendor.mpesaNumber}
                 {withdrawal.mpesaReceipt && (
-                  <p className="text-xs text-green-600">Receipt: {withdrawal.mpesaReceipt}</p>
+                  <p className="text-xs text-green-600 mt-1">Receipt: {withdrawal.mpesaReceipt}</p>
                 )}
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-500">
-                {withdrawal.reason || '-'}
               </td>
             </tr>
           ))}

@@ -655,7 +655,7 @@ export default function VendorOrdersTab() {
                               View
                             </button>
                             
-                            {canMarkReady && (
+                            {/*{canMarkReady && (
                               <button
                                 onClick={() => handleStatusUpdate(order._id, suborder._id || '')}
                                 disabled={isUpdating}
@@ -668,7 +668,7 @@ export default function VendorOrdersTab() {
                                 )}
                                 Ready for Pickup
                               </button>
-                            )}
+                            )}*/}
                             
                             {suborder.status === 'READY_FOR_PICKUP' && (
                               <div className="text-xs text-[var(--color-text-muted)] bg-yellow-500/10 px-2 py-1 rounded-lg flex items-center gap-1">
