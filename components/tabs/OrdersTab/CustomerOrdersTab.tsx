@@ -754,9 +754,9 @@ export default function CustomerOrdersTab({ isVendorAsCustomer = false }: Custom
   const sortedOrders = useMemo(() => {
     if (!sortUnreadFirst) return orders;
     return [...orders].sort((a, b) => {
-      // @ts-ignore - isViewed might not be in your Order type yet
+      
       const aViewed = a.isViewed ?? false;
-      // @ts-ignore
+      
       const bViewed = b.isViewed ?? false;
       // Unread (false) comes first
       return Number(aViewed) - Number(bViewed);
@@ -764,7 +764,7 @@ export default function CustomerOrdersTab({ isVendorAsCustomer = false }: Custom
   }, [orders, sortUnreadFirst]);
 
   const getStats = (): Stats => {
-    // @ts-ignore
+
     const unreadCount = orders.filter(o => !o.isViewed).length;
 
     return {
@@ -1075,7 +1075,7 @@ export default function CustomerOrdersTab({ isVendorAsCustomer = false }: Custom
                   {sortedOrders.map((order) => {
                     const vendorCount = order.suborders.length;
                     const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
-                    // @ts-ignore
+            
                     const isUnread = !order.isViewed;
                     
                     return (
