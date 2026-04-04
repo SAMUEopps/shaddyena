@@ -1109,7 +1109,7 @@ export default function CheckoutPage() {
           // Redirect after 3 seconds
           setTimeout(() => {
             clearCart();
-            router.push('/?tab=orders');
+            router.push('/orders');
           }, 3000);
         } else if (data.status === 'FAILED') {
           // Payment failed
@@ -1210,7 +1210,7 @@ export default function CheckoutPage() {
         
         setTimeout(() => {
           clearCart();
-          router.push('/?tab=orders');
+          router.push('/orders');
         }, 3000);
       } else {
         setPaymentStatus('failed');
@@ -1428,7 +1428,7 @@ export default function CheckoutPage() {
                     Continue Shopping
                   </Link>
                   <Link
-                    href="/?tab=orders"
+                    href="/orders"
                     className="flex-1 bg-[#bf2c7e] text-white px-6 py-3 rounded-lg hover:bg-[#a8256c] transition-colors font-medium text-center flex items-center justify-center"
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
