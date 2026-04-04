@@ -1108,7 +1108,7 @@ export default function EditProductPage() {
       if (response.ok) {
         setMessage({ type: 'success', text: 'Product updated successfully! Redirecting...' });
         setTimeout(() => {
-          router.push('/vendor/dashboard');
+          router.push('/vendor-dashboard');
         }, 2000);
       } else {
         const error = await response.json();

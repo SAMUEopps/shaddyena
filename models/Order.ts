@@ -716,6 +716,7 @@ export interface IOrder extends Document {
   mpesaTransactionId?: string;
   createdAt: Date;
   updatedAt: Date;
+  isViewed: boolean;
   
   // Methods
   isDeliveryFeePaid(suborderId: string): boolean;
@@ -1001,6 +1002,14 @@ OrderSchema.methods.getConfirmationCode = function(suborderId: string): string |
   const suborder = this.suborders.id(suborderId);
   return suborder?.deliveryDetails?.confirmationCode;
 };
+
+OrderSchema.add({
+  isViewed: { 
+    type: Boolean, 
+    default: false,
+    index: true // Add index for faster queries
+  }
+});
 
 // Create or get the model
 const Order = (mongoose.models.Order as IOrderModel) || 

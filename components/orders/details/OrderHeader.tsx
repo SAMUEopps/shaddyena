@@ -22,7 +22,7 @@ export default function OrderHeader({
     <>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <Link 
-          href={isRider ? "/delivery/dashboard" : "/?tab=orders"}
+          href={isRider ? "/delivery/dashboard" : "/orders"}
           className="inline-flex items-center text-[#bf2c7e] hover:text-[#a8246e] transition-colors"
         >
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
