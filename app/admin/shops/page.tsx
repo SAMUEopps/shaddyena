@@ -586,8 +586,8 @@ export default function ShopsTab() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {shops.map((shop) => {
+           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 sm:gap-4 lg:gap-6">
+              {/*{shops.map((shop) => {
                 const statusBadge = getStatusBadge(shop.isActive);
                 const verificationBadge = getVerificationBadge(shop.isVerified);
                 
@@ -596,7 +596,7 @@ export default function ShopsTab() {
                     key={shop._id}
                     className="group bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden hover:shadow-xl hover:border-[var(--color-primary)] transition-all duration-300"
                   >
-                    {/* Banner Area */}
+                    {/* Banner Area *
                     <div className="relative h-32 bg-gradient-to-r from-[var(--color-primary)]/20 to-[var(--color-primary-alt)]/20">
                       {shop.banner ? (
                         <img
@@ -610,7 +610,7 @@ export default function ShopsTab() {
                         </div>
                       )}
                       
-                      {/* Status Badges */}
+                      {/* Status Badges *
                       <div className="absolute top-3 right-3 flex space-x-2">
                         <div className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center space-x-1 backdrop-blur-md ${statusBadge.bg} ${statusBadge.text}`}>
                           {statusBadge.icon}
@@ -618,7 +618,7 @@ export default function ShopsTab() {
                         </div>
                       </div>
                       
-                      {/* Logo */}
+                      {/* Logo *
                       <div className="absolute -bottom-8 left-4">
                         <div className="w-16 h-16 rounded-xl bg-[var(--color-surface)] border-4 border-[var(--color-border)] overflow-hidden shadow-lg">
                           {shop.logo ? (
@@ -638,7 +638,7 @@ export default function ShopsTab() {
                       </div>
                     </div>
                     
-                    {/* Content */}
+                    {/* Content *
                     <div className="pt-10 p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div>
@@ -659,19 +659,19 @@ export default function ShopsTab() {
                         {shop.description || 'No description provided'}
                       </p>
                       
-                      {/* Location */}
+                      {/* Location *
                       <div className="flex items-center space-x-2 text-xs text-[var(--color-text-muted)] mb-2">
                         <MapPin className="w-3 h-3" />
                         <span>{shop.location.city}, {shop.location.country}</span>
                       </div>
                       
-                      {/* Vendor Info */}
+                      {/* Vendor Info *
                       <div className="flex items-center space-x-2 text-xs text-[var(--color-text-muted)] mb-3">
                         <Users className="w-3 h-3" />
                         <span>{shop.vendorId?.firstName} {shop.vendorId?.lastName}</span>
                       </div>
                       
-                      {/* Verification Badge */}
+                      {/* Verification Badge *
                       <div className="mb-4">
                         <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium ${verificationBadge.bg} ${verificationBadge.text}`}>
                           {verificationBadge.icon}
@@ -679,7 +679,7 @@ export default function ShopsTab() {
                         </div>
                       </div>
                       
-                      {/* Actions */}
+                      {/* Actions *
                       <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">
                         <div className="flex items-center space-x-2">
                           <button
@@ -726,7 +726,164 @@ export default function ShopsTab() {
                     </div>
                   </div>
                 );
-              })}
+              })}*/}
+
+              {shops.map((shop) => {
+  const statusBadge = getStatusBadge(shop.isActive);
+  const verificationBadge = getVerificationBadge(shop.isVerified);
+  
+  return (
+    <div
+      key={shop._id}
+      className="group bg-[var(--color-surface)] rounded-lg xs:rounded-xl sm:rounded-2xl border border-[var(--color-border)] overflow-hidden hover:shadow-lg sm:hover:shadow-xl hover:border-[var(--color-primary)]/50 transition-all duration-300 hover:-translate-y-0.5 xs:hover:-translate-y-1"
+    >
+      {/* Banner Area - Responsive height */}
+      <div className="relative h-16 xs:h-20 sm:h-24 lg:h-32 bg-gradient-to-r from-[var(--color-primary)]/20 to-[var(--color-primary-alt)]/20">
+        {shop.banner ? (
+          <Image
+            src={shop.banner}
+            alt={shop.businessName}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Store className="w-6 h-6 xs:w-8 xs:h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-[var(--color-primary)]/40" />
+          </div>
+        )}
+        
+        {/* Status Badges - Responsive positioning and sizing */}
+        <div className="absolute top-1 right-1 xs:top-1.5 xs:right-1.5 sm:top-2 sm:right-2 lg:top-3 lg:right-3 flex gap-1 xs:gap-1.5 sm:gap-2">
+          <div className={`px-1 xs:px-1.5 sm:px-2 py-0.5 xs:py-0.5 sm:py-1 rounded-md xs:rounded-lg text-[8px] xs:text-[10px] sm:text-xs font-medium flex items-center gap-0.5 xs:gap-1 backdrop-blur-md ${statusBadge.bg} ${statusBadge.text}`}>
+            {statusBadge.icon}
+            <span className="hidden xs:inline">{statusBadge.label}</span>
+            <span className="xs:hidden">{statusBadge.label?.charAt(0)}</span>
+          </div>
+        </div>
+        
+        {/* Logo - Circular and responsive sizing */}
+        <div className="absolute -bottom-3 xs:-bottom-4 sm:-bottom-5 lg:-bottom-6 left-2 xs:left-3 sm:left-4">
+          <div className="relative w-8 h-8 xs:w-10 xs:h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full bg-[var(--color-surface)] border-2 xs:border-2 sm:border-3 lg:border-4 border-[var(--color-border)] overflow-hidden shadow-md sm:shadow-lg">
+            {shop.logo ? (
+              <Image
+                src={shop.logo}
+                alt={shop.businessName}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 32px, (max-width: 1024px) 56px, 64px"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] flex items-center justify-center">
+                <span className="text-white font-bold text-xs xs:text-sm sm:text-base lg:text-xl">
+                  {shop.businessName.charAt(0)}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {/* Content - Responsive padding */}
+      <div className="pt-4 xs:pt-5 sm:pt-6 lg:pt-8 p-2 xs:p-2.5 sm:p-3 lg:p-4">
+        {/* Shop Name and Rating */}
+        <div className="flex items-start justify-between gap-1 xs:gap-1.5 sm:gap-2 mb-1 xs:mb-1.5 sm:mb-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-[10px] xs:text-xs sm:text-sm lg:text-base font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors truncate">
+              {shop.businessName}
+            </h3>
+            <p className="text-[8px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)] truncate">
+              {shop.businessType}
+            </p>
+          </div>
+          <div className="flex items-center gap-0.5 xs:gap-1 flex-shrink-0">
+            {getRatingStars(shop.rating?.average || 0)}
+            <span className="text-[8px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)] ml-0.5 xs:ml-1">
+              ({shop.rating?.count || 0})
+            </span>
+          </div>
+        </div>
+        
+        {/* Description - Responsive text sizing */}
+        <p className="text-[8px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)] line-clamp-2 mb-1.5 xs:mb-2 sm:mb-3">
+          {shop.description || 'No description provided'}
+        </p>
+        
+        {/* Location - Responsive sizing */}
+        <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 text-[8px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)] mb-1 xs:mb-1.5 sm:mb-2">
+          <MapPin className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+          <span className="truncate">{shop.location.city}, {shop.location.country}</span>
+        </div>
+        
+        {/* Vendor Info - Responsive sizing */}
+        <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 text-[8px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)] mb-1.5 xs:mb-2 sm:mb-3">
+          <Users className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+          <span className="truncate">{shop.vendorId?.firstName} {shop.vendorId?.lastName}</span>
+        </div>
+        
+        {/* Verification Badge - Responsive sizing */}
+        <div className="mb-2 xs:mb-2.5 sm:mb-3 lg:mb-4">
+          <div className={`inline-flex items-center gap-0.5 xs:gap-1 px-1 xs:px-1.5 sm:px-2 py-0.5 xs:py-0.5 sm:py-1 rounded-md xs:rounded-lg text-[8px] xs:text-[10px] sm:text-xs font-medium ${verificationBadge.bg} ${verificationBadge.text}`}>
+            {verificationBadge.icon}
+            <span className="hidden xs:inline">{verificationBadge.label}</span>
+            <span className="xs:hidden">{verificationBadge.label?.charAt(0)}</span>
+          </div>
+        </div>
+        
+        {/* Actions - Responsive sizing */}
+        <div className="flex items-center justify-between pt-2 xs:pt-2.5 sm:pt-3 border-t border-[var(--color-border)]">
+          <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2">
+            <button
+              onClick={() => handleViewDetails(shop)}
+              className="p-1 xs:p-1.5 sm:p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors rounded-lg hover:bg-[var(--color-primary)]/10"
+              title="View Details"
+            >
+              <Eye className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />
+            </button>
+            <button
+              onClick={() => handleToggleActive(shop._id, shop.isActive)}
+              className={`p-1 xs:p-1.5 sm:p-2 transition-colors rounded-lg ${
+                shop.isActive 
+                  ? 'text-red-500 hover:bg-red-500/10' 
+                  : 'text-green-500 hover:bg-green-500/10'
+              }`}
+              title={shop.isActive ? 'Deactivate' : 'Activate'}
+            >
+              {shop.isActive ? 
+                <XCircle className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" /> : 
+                <CheckCircle className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />
+              }
+            </button>
+            <button
+              onClick={() => handleToggleVerify(shop._id, shop.isVerified)}
+              className={`p-1 xs:p-1.5 sm:p-2 transition-colors rounded-lg ${
+                shop.isVerified 
+                  ? 'text-amber-500 hover:bg-amber-500/10' 
+                  : 'text-emerald-500 hover:bg-emerald-500/10'
+              }`}
+              title={shop.isVerified ? 'Unverify' : 'Verify'}
+            >
+              {shop.isVerified ? 
+                <AlertCircle className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" /> : 
+                <Verified className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />
+              }
+            </button>
+            <button
+              onClick={() => handleDeleteClick(shop)}
+              className="p-1 xs:p-1.5 sm:p-2 text-red-500 hover:bg-red-500/10 transition-colors rounded-lg"
+              title="Delete Shop"
+            >
+              <Trash2 className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />
+            </button>
+          </div>
+          <span className="text-[7px] xs:text-[8px] sm:text-[10px] lg:text-xs text-[var(--color-text-muted)]">
+            {formatDate(shop.createdAt)}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+})}
             </div>
 
             {/* Pagination */}
