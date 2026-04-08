@@ -315,7 +315,7 @@ const Topbar = ({ isDarkMode }: TopbarProps) => {
 
     {/* Language Selector */}
     <div className="relative z-[110]">
-      <button
+      {/*<button
         onClick={() => {
           setShowLanguage(!showLanguage);
           setShowCurrency(false);
@@ -325,7 +325,7 @@ const Topbar = ({ isDarkMode }: TopbarProps) => {
         <Globe className="w-4 h-4" />
         <span>{selectedLanguage}</span>
         <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showLanguage ? 'rotate-180' : ''}`} />
-      </button>
+      </button>*/}
 
       {showLanguage && (
         <div className="absolute top-full left-0 mt-1 w-24 bg-[var(--color-surface)] rounded-lg shadow-2xl border border-[var(--color-border)] overflow-hidden z-[120] animate-in fade-in slide-in-from-top-2 duration-200">
