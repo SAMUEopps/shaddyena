@@ -917,7 +917,7 @@ const ShopByCategory = () => {
       </div>
 
       {/* Optional: View All Categories Link */}
-      {categories.length >= 4 && (
+      {/*{categories.length >= 4 && (
         <div className="text-center mt-8">
           <Link
             href="/categories"
@@ -927,7 +927,7 @@ const ShopByCategory = () => {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-      )}
+      )}*/}
 
       <style jsx>{`
         @keyframes shine {
