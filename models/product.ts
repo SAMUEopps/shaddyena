@@ -230,7 +230,7 @@ productSchema.index({ price: 1 });
 export default mongoose.models.Product || mongoose.model<IProduct>('Product', productSchema);*/
 
 // models/Product.ts (updated)
-import mongoose, { Document, Schema } from 'mongoose';
+/*import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IProduct extends Document {
   name: string;
@@ -341,4 +341,221 @@ productSchema.index({ name: 'text', description: 'text', tags: 'text' });
 productSchema.index({ price: 1 });
 productSchema.index({ sku: 1 }, { unique: true });
 
-export default mongoose.models.Product || mongoose.model<IProduct>('Product', productSchema);
+export default mongoose.models.Product || mongoose.model<IProduct>('Product', productSchema);*/
+
+import mongoose, { Document, Schema } from 'mongoose';
+
+export interface IProduct extends Document {
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  categoryId: mongoose.Types.ObjectId;
+  categoryPath: string;
+  subcategoryId?: mongoose.Types.ObjectId;
+  subSubcategoryId?: mongoose.Types.ObjectId;
+  subSubSubcategoryId?: mongoose.Types.ObjectId;
+  images: string[];
+  stock: number;
+  sku: string;
+  brand?: string;
+  specifications: {
+    key: string;
+    value: string;
+  }[];
+  variants?: {
+    name: string;
+    options: {
+      name: string;
+      price?: number;
+      stock: number;
+      sku: string;
+    }[];
+  }[];
+  shipping: {
+    weight?: number;
+    dimensions?: {
+      length?: number;
+      width?: number;
+      height?: number;
+    };
+  };
+  isActive: boolean;
+  isApproved: boolean;
+  rating?: {
+    average: number;
+    count: number;
+  };
+  vendorId: mongoose.Types.ObjectId;
+  shopId: mongoose.Types.ObjectId;
+  shopName: string;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const productSchema = new Schema<IProduct>(
+  {
+    name: { type: String, required: true, trim: true },
+
+    description: { type: String, required: true, trim: true },
+
+    price: { type: Number, required: true, min: 0 },
+
+    originalPrice: { type: Number, min: 0 },
+
+    // 🔥 MAIN CATEGORY (REQUIRED)
+    categoryId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
+      required: true,
+    },
+
+    // 🔥 FULL PATH (FOR FAST FILTERING)
+    categoryPath: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // ✅ SAFE OPTIONAL CATEGORY LEVELS
+    subcategoryId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
+      set: (v: any) => (v === "" || v === null ? undefined : v),
+    },
+
+    subSubcategoryId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
+      set: (v: any) => (v === "" || v === null ? undefined : v),
+    },
+
+    subSubSubcategoryId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
+      set: (v: any) => (v === "" || v === null ? undefined : v),
+    },
+
+    images: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+
+    stock: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+    },
+
+    sku: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+
+    brand: {
+      type: String,
+      trim: true,
+    },
+
+    specifications: [
+      {
+        key: { type: String, required: true, trim: true },
+        value: { type: String, required: true, trim: true },
+      },
+    ],
+
+    variants: [
+      {
+        name: { type: String, required: true, trim: true },
+        options: [
+          {
+            name: { type: String, required: true, trim: true },
+            price: { type: Number, min: 0 },
+            stock: { type: Number, required: true, default: 0, min: 0 },
+            sku: { type: String, required: true, trim: true },
+          },
+        ],
+      },
+    ],
+
+    shipping: {
+      weight: { type: Number, min: 0 },
+      dimensions: {
+        length: { type: Number, min: 0 },
+        width: { type: Number, min: 0 },
+        height: { type: Number, min: 0 },
+      },
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
+    isApproved: {
+      type: Boolean,
+      default: true,
+    },
+
+    rating: {
+      average: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5,
+      },
+      count: {
+        type: Number,
+        default: 0,
+      },
+    },
+
+    vendorId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+
+    shopId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Shop',
+      required: true,
+    },
+
+    shopName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    tags: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+
+// 🔍 INDEXES (optimized)
+productSchema.index({ categoryId: 1 });
+productSchema.index({ categoryPath: 1 });
+productSchema.index({ vendorId: 1 });
+productSchema.index({ shopId: 1 });
+productSchema.index({ isActive: 1, isApproved: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ sku: 1 }, { unique: true });
+productSchema.index({ name: 'text', description: 'text', tags: 'text' });
+
+export default mongoose.models.Product ||
+  mongoose.model<IProduct>('Product', productSchema);

@@ -517,7 +517,7 @@ export async function GET(req: NextRequest) {
 }
 
 // ================= POST: Create Product =================
-export async function POST(req: NextRequest) {
+/*export async function POST(req: NextRequest) {
   console.log('🚀 [POST /vendor/products] Request started');
 
   try {
@@ -660,6 +660,149 @@ export async function POST(req: NextRequest) {
 
     if (error.code === 11000) {
       console.warn('⚠️ Duplicate key error (likely SKU)');
+      return NextResponse.json({ message: 'SKU already exists' }, { status: 400 });
+    }
+
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+  }
+}*/
+
+// ================= POST: Create Product =================
+export async function POST(req: NextRequest) {
+  console.log('🚀 [POST /vendor/products] Request started');
+
+  try {
+    await dbConnect();
+    console.log('✅ Database connected');
+
+    // ================= AUTH =================
+    const token = req.cookies.get('token')?.value;
+    if (!token) {
+      return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+    }
+
+    let decoded: any;
+    try {
+      decoded = verify(token, process.env.JWT_SECRET as string);
+    } catch (err) {
+      return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
+    }
+
+    if (decoded.role !== 'vendor') {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
+    }
+
+    const vendorObjectId = toObjectId(decoded.userId);
+    if (!vendorObjectId) {
+      return NextResponse.json({ message: 'Invalid vendor ID' }, { status: 400 });
+    }
+
+    // ================= SHOP =================
+    const shop = await Shop.findOne({ vendorId: vendorObjectId });
+    if (!shop) {
+      return NextResponse.json(
+        { message: 'Shop not found. Please create a shop first.' },
+        { status: 400 }
+      );
+    }
+
+    // ================= REQUEST BODY =================
+    let productData = await req.json();
+
+    console.log('📦 Incoming product:', productData.name);
+
+    // 🔥 CLEAN EMPTY VALUES (VERY IMPORTANT)
+    Object.keys(productData).forEach((key) => {
+      if (productData[key] === "" || productData[key] === null) {
+        delete productData[key];
+      }
+    });
+
+    // ================= VALIDATION =================
+    if (!productData.categoryId) {
+      return NextResponse.json({ message: 'Category is required' }, { status: 400 });
+    }
+
+    // ================= CATEGORY =================
+    const category = await Category.findById(productData.categoryId);
+    if (!category) {
+      return NextResponse.json({ message: 'Invalid category' }, { status: 400 });
+    }
+
+    console.log('✅ Category:', category.name);
+
+    // ================= BUILD CATEGORY PATH =================
+    let categoryPathParts: string[] = [category.name];
+
+    const safeFindCategory = async (id: any) => {
+      if (!id) return null;
+      return await Category.findById(id);
+    };
+
+    const sub = await safeFindCategory(productData.subcategoryId);
+    if (sub) {
+      categoryPathParts.push(sub.name);
+      console.log('➡️ Subcategory:', sub.name);
+    }
+
+    const subSub = await safeFindCategory(productData.subSubcategoryId);
+    if (subSub) {
+      categoryPathParts.push(subSub.name);
+      console.log('➡️ Sub-Subcategory:', subSub.name);
+    }
+
+    const subSubSub = await safeFindCategory(productData.subSubSubcategoryId);
+    if (subSubSub) {
+      categoryPathParts.push(subSubSub.name);
+      console.log('➡️ Level 4:', subSubSub.name);
+    }
+
+    const categoryPath = categoryPathParts.join('/');
+    console.log('📂 Final category path:', categoryPath);
+
+    // ================= CREATE PRODUCT =================
+    const product = await Product.create({
+      ...productData,
+      categoryPath,
+      vendorId: vendorObjectId,
+      shopId: shop._id,
+      shopName: shop.businessName,
+    });
+
+    console.log('✅ Product created:', product._id);
+
+    // ================= UPDATE CATEGORY COUNTS =================
+    const updateCount = async (id: any, label: string) => {
+      if (!id) return;
+
+      try {
+        await Category.findByIdAndUpdate(id, {
+          $inc: { 'metadata.productCount': 1 },
+        });
+        console.log(`📊 Updated ${label}`);
+      } catch (err) {
+        console.error(`❌ Failed updating ${label}`, err);
+      }
+    };
+
+    await updateCount(productData.categoryId, 'category');
+    await updateCount(productData.subcategoryId, 'subcategory');
+    await updateCount(productData.subSubcategoryId, 'subSubcategory');
+    await updateCount(productData.subSubSubcategoryId, 'subSubSubcategory');
+
+    console.log('🎉 Product creation completed');
+
+    return NextResponse.json(
+      {
+        message: 'Product created successfully',
+        product,
+      },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    console.error('🔥 Fatal error:', error);
+
+    if (error.code === 11000) {
       return NextResponse.json({ message: 'SKU already exists' }, { status: 400 });
     }
 
