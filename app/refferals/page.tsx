@@ -432,7 +432,7 @@ export default function ReferralsTab() {
   );
 }*/
 
-'use client';
+/*'use client';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -655,13 +655,13 @@ export default function ReferralsTab() {
   // -------------------------------
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
-      {/* Hero Section */}
+      {/* Hero Section *
       <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary)]/10 via-[var(--color-primary-soft)]/5 to-transparent py-12 md:py-16">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--color-primary)]/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-[var(--color-primary-alt)]/5 rounded-full blur-3xl"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          {/* Back Button */}
+          {/* Back Button *
           <div className="mb-6">
             <button
               onClick={() => router.back()}
@@ -701,9 +701,9 @@ export default function ReferralsTab() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Stats Cards */}
+        {/* Stats Cards *
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {/* Total Referrals */}
+          {/* Total Referrals *
           <div className="group bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-[var(--color-primary)]/10 rounded-xl group-hover:scale-110 transition-transform">
@@ -717,7 +717,7 @@ export default function ReferralsTab() {
             <p className="text-sm text-[var(--color-text-muted)]">People joined using your code</p>
           </div>
 
-          {/* Total Earnings */}
+          {/* Total Earnings *
           <div className="group bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-green-500/10 rounded-xl group-hover:scale-110 transition-transform">
@@ -733,7 +733,7 @@ export default function ReferralsTab() {
             </p>
           </div>
 
-          {/* People Referred */}
+          {/* People Referred *
           <div className="group bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform">
@@ -748,7 +748,7 @@ export default function ReferralsTab() {
           </div>
         </div>
 
-        {/* Referral Link Section */}
+        {/* Referral Link Section *
         <div className="mb-12 bg-gradient-to-r from-[var(--color-primary)]/5 to-[var(--color-primary-alt)]/5 rounded-2xl p-8 border border-[var(--color-border)]">
           <div className="text-center mb-6">
             <div className="inline-flex p-3 bg-[var(--color-primary)]/10 rounded-xl mb-4">
@@ -758,7 +758,7 @@ export default function ReferralsTab() {
             <p className="text-[var(--color-text-muted)]">Share this link with friends and earn rewards</p>
           </div>
 
-          {/* Referral Code */}
+          {/* Referral Code *
           <div className="mb-6">
             <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
               Your Referral Code
@@ -786,7 +786,7 @@ export default function ReferralsTab() {
             </div>
           </div>
 
-          {/* Referral Link */}
+          {/* Referral Link *
           <div className="mb-6">
             <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
               Your Referral Link
@@ -820,7 +820,7 @@ export default function ReferralsTab() {
             </p>
           </div>
 
-          {/* Share Buttons */}
+          {/* Share Buttons *
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Join using my referral link: ${referralLink}`)}`, '_blank')}
@@ -838,7 +838,7 @@ export default function ReferralsTab() {
             </button>
           </div>
 
-          {/* Refresh Button */}
+          {/* Refresh Button *
           <div className="mt-6 text-center">
             <button
               onClick={handleRefresh}
@@ -850,7 +850,7 @@ export default function ReferralsTab() {
           </div>
         </div>
 
-        {/* Referred Users List */}
+        {/* Referred Users List *
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -910,7 +910,7 @@ export default function ReferralsTab() {
           )}
         </div>
 
-        {/* Referred By Section */}
+        {/* Referred By Section *
         {referralData?.referredByUser && (
           <div className="mb-12 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-2xl p-6 border border-green-500/20">
             <div className="flex items-start space-x-4">
@@ -930,7 +930,7 @@ export default function ReferralsTab() {
           </div>
         )}
 
-        {/* How It Works Section */}
+        {/* How It Works Section *
         <div className="bg-[var(--color-surface)] rounded-2xl p-8 border border-[var(--color-border)]">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">How Referral Earnings Work</h2>
@@ -981,7 +981,7 @@ export default function ReferralsTab() {
           </div>
         </div>
 
-        {/* Earnings Preview (if there are payments) */}
+        {/* Earnings Preview (if there are payments) *
         {referralEarnings.payments && referralEarnings.payments.length > 0 && (
           <div className="mt-12">
             <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6 flex items-center">
@@ -1002,7 +1002,7 @@ export default function ReferralsTab() {
                         </p>
                         {/*<p className="text-sm text-[var(--color-text-muted)]">
                           From {payment.referredVendor.businessName}
-                        </p>*/}
+                        </p>*
                       </div>
                     </div>
                     <div className="text-right">
@@ -1020,6 +1020,606 @@ export default function ReferralsTab() {
           </div>
         )}
       </div>
+    </div>
+  );
+}*/
+
+'use client';
+
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  Users,
+  TrendingUp,
+  Gift,
+  Copy,
+  Share2,
+  RefreshCw,
+  CheckCircle,
+  Link2,
+  UserPlus,
+  DollarSign,
+  Calendar,
+  Mail,
+  MessageCircle,
+  Award,
+  Sparkles,
+  Crown,
+  Target,
+  Rocket,
+  Star,
+  Clock,
+  ChevronRight,
+  Info,
+  Heart
+} from 'lucide-react';
+
+// -------------------------------
+// TYPES
+// -------------------------------
+interface ReferredUser {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  createdAt: string;
+}
+
+interface ReferralData {
+  referrals: ReferredUser[];
+  referredByUser?: {
+    firstName: string;
+    lastName: string;
+    referralCode: string;
+  };
+}
+
+interface ReferralPayment {
+  paymentId: string;
+  amount: number;
+  referralBonus: number;
+  user: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+  };
+  referredVendor: {
+    businessName: string;
+    email: string;
+  };
+  createdAt: string;
+}
+
+interface ReferralEarningsSummary {
+  totalEarnings: number;
+  totalReferrals: number;
+  pendingReferrals: number;
+  completedReferrals: number;
+  thisMonthEarnings: number;
+  payments: ReferralPayment[];
+}
+
+// -------------------------------
+// MAIN COMPONENT
+// -------------------------------
+export default function ReferralsTab() {
+  const { user, refreshUser } = useAuth();
+  const router = useRouter();
+  
+  const [loading, setLoading] = useState(true);
+  const [referralData, setReferralData] = useState<ReferralData | null>(null);
+  const [referralEarnings, setReferralEarnings] = useState<ReferralEarningsSummary>({
+    totalEarnings: 0,
+    totalReferrals: 0,
+    pendingReferrals: 0,
+    completedReferrals: 0,
+    thisMonthEarnings: 0,
+    payments: []
+  });
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  // -------------------------------
+  // FETCH DATA
+  // -------------------------------
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      await fetchReferralData();
+      await fetchReferralEarnings();
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+      toast.error("Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchReferralData = async () => {
+    try {
+      const response = await fetch('/api/referrals');
+      if (response.ok) {
+        const data = await response.json();
+        setReferralData(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch referral data:', error);
+    }
+  };
+
+  const fetchReferralEarnings = async () => {
+    try {
+      const response = await fetch("/api/payments/referral-earnings", {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setReferralEarnings(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch referral earnings:", error);
+    }
+  };
+
+  // -------------------------------
+  // UTILITY FUNCTIONS
+  // -------------------------------
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-KE', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const copyToClipboard = async (text: string, type: 'code' | 'link') => {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (type === 'code') {
+        setCopiedCode(true);
+        setTimeout(() => setCopiedCode(false), 2000);
+        toast.success('Referral code copied!');
+      } else {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2000);
+        toast.success('Referral link copied!');
+      }
+    } catch (err) {
+      toast.error('Failed to copy');
+    }
+  };
+
+  const referralLink = typeof window !== 'undefined' 
+    ? `${window.location.origin}/register${user?.referralCode ? `?ref=${user.referralCode}` : ''}`
+    : '';
+
+  // -------------------------------
+  // HANDLERS
+  // -------------------------------
+  const handleRefresh = async () => {
+    await refreshUser();
+    await fetchAllData();
+    toast.success('Data updated!');
+  };
+
+  // -------------------------------
+  // USE EFFECT
+  // -------------------------------
+  useEffect(() => {
+    if (user) {
+      fetchAllData();
+    }
+  }, [user]);
+
+  // -------------------------------
+  // LOADING STATE
+  // -------------------------------
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--color-background)]">
+        <div className="max-w-7xl mx-auto px-4 xs:px-4 sm:px-6 lg:px-8 py-8 xs:py-12 sm:py-16">
+          <div className="flex justify-center items-center h-48 xs:h-56 sm:h-64">
+            <div className="animate-spin rounded-full h-8 w-8 xs:h-10 xs:w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-[var(--color-primary)]"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // -------------------------------
+  // RENDER
+  // -------------------------------
+  return (
+    <div className="min-h-screen bg-[var(--color-background)]">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary)]/10 via-[var(--color-primary-soft)]/5 to-transparent py-8 xs:py-10 sm:py-12 md:py-16">
+        <div className="absolute top-0 right-0 w-48 h-48 xs:w-64 xs:h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 bg-[var(--color-primary)]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 xs:w-64 xs:h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 bg-[var(--color-primary-alt)]/5 rounded-full blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 xs:px-4 sm:px-6 lg:px-8 relative">
+          {/* Back Button */}
+          <div className="mb-4 xs:mb-5 sm:mb-6">
+            <button
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-1.5 xs:gap-2 px-3 xs:px-3.5 sm:px-4 py-1.5 xs:py-2 sm:py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg xs:rounded-xl text-[10px] xs:text-xs sm:text-sm text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-all duration-300 group"
+            >
+              <ArrowLeft className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 group-hover:-translate-x-1 transition-transform" />
+              <span>Go Back</span>
+            </button>
+          </div>
+          
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center justify-center p-2 xs:p-2.5 sm:p-3 bg-[var(--color-primary)]/10 rounded-xl xs:rounded-2xl mb-3 xs:mb-4 sm:mb-6 animate-bounce-subtle">
+              <Gift className="w-6 h-6 xs:w-8 xs:h-8 sm:w-10 sm:h-10 text-[var(--color-primary)]" />
+            </div>
+            <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-text)] mb-2 xs:mb-3 sm:mb-4">
+              Refer & Earn
+            </h1>
+            <p className="text-xs xs:text-sm sm:text-base md:text-lg text-[var(--color-text-muted)] mb-4 xs:mb-5 sm:mb-6">
+              Share your referral link and earn 20% commission on every vendor subscription
+            </p>
+            <div className="flex flex-wrap gap-2 xs:gap-3 sm:gap-4 justify-center">
+              <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 bg-[var(--color-surface)] px-2 xs:px-3 sm:px-4 py-1 xs:py-1.5 sm:py-2 rounded-full border border-[var(--color-border)]">
+                <Award className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-[var(--color-primary)]" />
+                <span className="text-[9px] xs:text-[10px] sm:text-xs">20% Commission</span>
+              </div>
+              <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 bg-[var(--color-surface)] px-2 xs:px-3 sm:px-4 py-1 xs:py-1.5 sm:py-2 rounded-full border border-[var(--color-border)]">
+                <Users className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-[var(--color-primary)]" />
+                <span className="text-[9px] xs:text-[10px] sm:text-xs">Unlimited Referrals</span>
+              </div>
+              <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 bg-[var(--color-surface)] px-2 xs:px-3 sm:px-4 py-1 xs:py-1.5 sm:py-2 rounded-full border border-[var(--color-border)]">
+                <Clock className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-[var(--color-primary)]" />
+                <span className="text-[9px] xs:text-[10px] sm:text-xs">Lifetime Earnings</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 xs:px-4 sm:px-6 lg:px-8 py-6 xs:py-8 sm:py-10 md:py-12">
+        {/* Stats Cards - 1 column on mobile, 3 on desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 xs:gap-4 sm:gap-5 md:gap-6 mb-6 xs:mb-8 sm:mb-10 md:mb-12">
+          {/* Total Referrals */}
+          <div className="group bg-[var(--color-surface)] rounded-xl xs:rounded-2xl p-4 xs:p-5 sm:p-6 border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-2 xs:mb-3 sm:mb-4">
+              <div className="p-2 xs:p-2.5 sm:p-3 bg-[var(--color-primary)]/10 rounded-lg xs:rounded-xl group-hover:scale-110 transition-transform">
+                <Users className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-[var(--color-primary)]" />
+              </div>
+              <span className="text-[9px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)]">Total</span>
+            </div>
+            <p className="text-xl xs:text-2xl sm:text-3xl font-bold text-[var(--color-text)] mb-0.5 xs:mb-1">
+              {user?.referralCount || 0}
+            </p>
+            <p className="text-[8px] xs:text-[9px] sm:text-xs text-[var(--color-text-muted)]">People joined using your code</p>
+          </div>
+
+          {/* Total Earnings */}
+          <div className="group bg-[var(--color-surface)] rounded-xl xs:rounded-2xl p-4 xs:p-5 sm:p-6 border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-2 xs:mb-3 sm:mb-4">
+              <div className="p-2 xs:p-2.5 sm:p-3 bg-green-500/10 rounded-lg xs:rounded-xl group-hover:scale-110 transition-transform">
+                <DollarSign className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-green-500" />
+              </div>
+              <span className="text-[9px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)]">Earned</span>
+            </div>
+            <p className="text-xl xs:text-2xl sm:text-3xl font-bold text-[var(--color-text)] mb-0.5 xs:mb-1">
+              {formatCurrency(referralEarnings.totalEarnings)}
+            </p>
+            <p className="text-[8px] xs:text-[9px] sm:text-xs text-[var(--color-text-muted)]">
+              From {referralEarnings.completedReferrals} completed referrals
+            </p>
+          </div>
+
+          {/* People Referred */}
+          <div className="group bg-[var(--color-surface)] rounded-xl xs:rounded-2xl p-4 xs:p-5 sm:p-6 border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-2 xs:mb-3 sm:mb-4">
+              <div className="p-2 xs:p-2.5 sm:p-3 bg-purple-500/10 rounded-lg xs:rounded-xl group-hover:scale-110 transition-transform">
+                <UserPlus className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-purple-500" />
+              </div>
+              <span className="text-[9px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)]">Active</span>
+            </div>
+            <p className="text-xl xs:text-2xl sm:text-3xl font-bold text-[var(--color-text)] mb-0.5 xs:mb-1">
+              {referralData?.referrals?.length || 0}
+            </p>
+            <p className="text-[8px] xs:text-[9px] sm:text-xs text-[var(--color-text-muted)]">People who joined using your link</p>
+          </div>
+        </div>
+
+        {/* Referral Link Section */}
+        <div className="mb-8 xs:mb-10 sm:mb-12 bg-gradient-to-r from-[var(--color-primary)]/5 to-[var(--color-primary-alt)]/5 rounded-xl xs:rounded-2xl p-4 xs:p-5 sm:p-6 md:p-8 border border-[var(--color-border)]">
+          <div className="text-center mb-4 xs:mb-5 sm:mb-6">
+            <div className="inline-flex p-2 xs:p-2.5 sm:p-3 bg-[var(--color-primary)]/10 rounded-lg xs:rounded-xl mb-2 xs:mb-3 sm:mb-4">
+              <Sparkles className="w-5 h-5 xs:w-6 xs:h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[var(--color-primary)]" />
+            </div>
+            <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold text-[var(--color-text)] mb-1 xs:mb-1.5 sm:mb-2">Your Referral Link</h2>
+            <p className="text-[10px] xs:text-xs sm:text-sm text-[var(--color-text-muted)]">Share this link with friends and earn rewards</p>
+          </div>
+
+          {/* Referral Code */}
+          <div className="mb-4 xs:mb-5 sm:mb-6">
+            <label className="block text-[10px] xs:text-xs sm:text-sm font-medium text-[var(--color-text)] mb-1 xs:mb-1.5 sm:mb-2">
+              Your Referral Code
+            </label>
+            <div className="flex flex-col xs:flex-row gap-2 xs:gap-0">
+              <div className="flex-1 px-3 xs:px-3.5 sm:px-4 py-2 xs:py-2.5 sm:py-3 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg xs:rounded-l-xl xs:rounded-r-none text-[var(--color-text)] font-mono text-xs xs:text-sm sm:text-base">
+                {user?.referralCode || 'N/A'}
+              </div>
+              <button
+                onClick={() => copyToClipboard(user?.referralCode || '', 'code')}
+                className="px-4 xs:px-5 sm:px-6 py-2 xs:py-2.5 sm:py-3 bg-[var(--color-primary)] text-white rounded-lg xs:rounded-r-xl xs:rounded-l-none hover:bg-[var(--color-primary-hover)] transition-all duration-300 flex items-center justify-center gap-1.5 xs:gap-2 text-[10px] xs:text-xs sm:text-sm"
+              >
+                {copiedCode ? (
+                  <>
+                    <CheckCircle className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                    <span>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                    <span>Copy Code</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Referral Link */}
+          <div className="mb-4 xs:mb-5 sm:mb-6">
+            <label className="block text-[10px] xs:text-xs sm:text-sm font-medium text-[var(--color-text)] mb-1 xs:mb-1.5 sm:mb-2">
+              Your Referral Link
+            </label>
+            <div className="flex flex-col xs:flex-row gap-2 xs:gap-0">
+              <input
+                type="text"
+                value={referralLink}
+                readOnly
+                className="flex-1 px-3 xs:px-3.5 sm:px-4 py-2 xs:py-2.5 sm:py-3 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg xs:rounded-l-xl xs:rounded-r-none text-[9px] xs:text-[10px] sm:text-xs text-[var(--color-text)] truncate"
+              />
+              <button
+                onClick={() => copyToClipboard(referralLink, 'link')}
+                className="px-4 xs:px-5 sm:px-6 py-2 xs:py-2.5 sm:py-3 bg-gray-800 text-white rounded-lg xs:rounded-r-xl xs:rounded-l-none hover:bg-gray-900 transition-all duration-300 flex items-center justify-center gap-1.5 xs:gap-2 text-[10px] xs:text-xs sm:text-sm"
+              >
+                {copiedLink ? (
+                  <>
+                    <CheckCircle className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                    <span>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                    <span>Copy Link</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-[8px] xs:text-[9px] sm:text-xs text-[var(--color-text-muted)] mt-1 xs:mt-1.5 sm:mt-2">
+              Share this link with friends and earn 20% of their vendor subscription!
+            </p>
+          </div>
+
+          {/* Share Buttons */}
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
+            <button
+              onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Join using my referral link: ${referralLink}`)}`, '_blank')}
+              className="flex items-center justify-center gap-1.5 xs:gap-2 px-3 xs:px-4 py-2 xs:py-2.5 sm:py-3 bg-green-500 text-white rounded-lg xs:rounded-xl hover:bg-green-600 transition-all duration-300 hover:scale-105 text-[10px] xs:text-xs sm:text-sm"
+            >
+              <MessageCircle className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+              <span>Share on WhatsApp</span>
+            </button>
+            <button
+              onClick={() => window.open(`mailto:?subject=Join with my referral&body=Join using my referral link: ${referralLink}`, '_blank')}
+              className="flex items-center justify-center gap-1.5 xs:gap-2 px-3 xs:px-4 py-2 xs:py-2.5 sm:py-3 bg-blue-500 text-white rounded-lg xs:rounded-xl hover:bg-blue-600 transition-all duration-300 hover:scale-105 text-[10px] xs:text-xs sm:text-sm"
+            >
+              <Mail className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+              <span>Share by Email</span>
+            </button>
+          </div>
+
+          {/* Refresh Button */}
+          <div className="mt-4 xs:mt-5 sm:mt-6 text-center">
+            <button
+              onClick={handleRefresh}
+              className="inline-flex items-center gap-1.5 xs:gap-2 px-3 xs:px-4 py-1.5 xs:py-2 text-[10px] xs:text-xs sm:text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+            >
+              <RefreshCw className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />
+              <span>Refresh Data</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Referred Users List */}
+        <div className="mb-8 xs:mb-10 sm:mb-12">
+          <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-2 xs:gap-3 mb-4 xs:mb-5 sm:mb-6">
+            <div>
+              <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold text-[var(--color-text)] flex items-center">
+                <span className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] w-1 h-5 xs:h-6 sm:h-8 rounded-full mr-2 xs:mr-3"></span>
+                People You've Referred
+              </h2>
+              <p className="text-[9px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)] mt-0.5 xs:mt-1">
+                Users who joined using your referral code
+              </p>
+            </div>
+            <span className="px-2 xs:px-2.5 sm:px-3 py-0.5 xs:py-1 sm:py-1 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full text-[9px] xs:text-[10px] sm:text-xs font-medium">
+              {referralData?.referrals?.length || 0} referrals
+            </span>
+          </div>
+
+          {referralData?.referrals && referralData.referrals.length > 0 ? (
+            <div className="bg-[var(--color-surface)] rounded-lg xs:rounded-xl border border-[var(--color-border)] overflow-hidden">
+              <div className="divide-y divide-[var(--color-border)]">
+                {referralData.referrals.map((referral) => (
+                  <div key={referral._id} className="p-3 xs:p-3.5 sm:p-4 hover:bg-[var(--color-background-soft)] transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 xs:gap-3 sm:gap-4">
+                        <div className="w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] rounded-full flex items-center justify-center text-white font-bold text-xs xs:text-sm sm:text-base">
+                          {referral.firstName.charAt(0)}{referral.lastName.charAt(0)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] xs:text-xs sm:text-sm font-semibold text-[var(--color-text)] truncate">
+                            {referral.firstName} {referral.lastName}
+                          </p>
+                          <p className="text-[8px] xs:text-[9px] sm:text-xs text-[var(--color-text-muted)] truncate">{referral.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 xs:gap-3">
+                        <div className="flex items-center gap-0.5 xs:gap-1 text-[8px] xs:text-[9px] sm:text-xs text-[var(--color-text-muted)]">
+                          <Calendar className="w-2.5 h-2.5 xs:w-3 xs:h-3" />
+                          <span>Joined {formatDate(referral.createdAt)}</span>
+                        </div>
+                        <div className="px-2 xs:px-2.5 py-0.5 xs:py-1 bg-green-500/10 text-green-500 rounded-full text-[8px] xs:text-[9px] sm:text-xs font-medium">
+                          Active
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-[var(--color-surface)] rounded-lg xs:rounded-xl p-8 xs:p-10 sm:p-12 text-center border border-[var(--color-border)]">
+              <div className="inline-flex p-3 xs:p-3.5 sm:p-4 bg-[var(--color-primary)]/10 rounded-full mb-3 xs:mb-4">
+                <UserPlus className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-[var(--color-primary)]" />
+              </div>
+              <h3 className="text-base xs:text-lg sm:text-xl font-semibold text-[var(--color-text)] mb-1 xs:mb-2">No Referrals Yet</h3>
+              <p className="text-[10px] xs:text-xs sm:text-sm text-[var(--color-text-muted)] mb-3 xs:mb-4">No one has joined using your referral code yet.</p>
+              <p className="text-[9px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)]">Share your link to start earning rewards!</p>
+            </div>
+          )}
+        </div>
+
+        {/* Referred By Section */}
+        {referralData?.referredByUser && (
+          <div className="mb-8 xs:mb-10 sm:mb-12 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl xs:rounded-2xl p-4 xs:p-5 sm:p-6 border border-green-500/20">
+            <div className="flex items-start gap-3 xs:gap-4">
+              <div className="p-2 xs:p-2.5 sm:p-3 bg-green-500/10 rounded-lg xs:rounded-xl flex-shrink-0">
+                <Heart className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-green-500" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-xs xs:text-sm sm:text-base md:text-lg font-semibold text-[var(--color-text)] mb-1 xs:mb-2">You were referred by</h3>
+                <p className="text-[10px] xs:text-xs sm:text-sm text-[var(--color-text)] mb-0.5 xs:mb-1">
+                  {referralData.referredByUser.firstName} {referralData.referredByUser.lastName}
+                </p>
+                <p className="text-[8px] xs:text-[9px] sm:text-xs text-[var(--color-text-muted)] break-all">
+                  Referral Code: <span className="font-mono text-[var(--color-primary)]">{referralData.referredByUser.referralCode}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* How It Works Section */}
+        <div className="bg-[var(--color-surface)] rounded-xl xs:rounded-2xl p-5 xs:p-6 sm:p-7 md:p-8 border border-[var(--color-border)]">
+          <div className="text-center mb-6 xs:mb-7 sm:mb-8">
+            <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold text-[var(--color-text)] mb-1 xs:mb-2">How Referral Earnings Work</h2>
+            <p className="text-[10px] xs:text-xs sm:text-sm text-[var(--color-text-muted)]">Simple steps to start earning</p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 xs:gap-7 sm:gap-8">
+            <div className="text-center group">
+              <div className="w-16 h-16 xs:w-18 xs:h-18 sm:w-20 sm:h-20 bg-[var(--color-primary)]/10 rounded-full flex items-center justify-center mx-auto mb-3 xs:mb-4 group-hover:scale-110 transition-transform">
+                <span className="text-2xl xs:text-3xl font-bold text-[var(--color-primary)]">1</span>
+              </div>
+              <h3 className="text-xs xs:text-sm sm:text-base font-semibold text-[var(--color-text)] mb-1 xs:mb-2">Share Your Link</h3>
+              <p className="text-[9px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)] px-2">
+                Share your unique referral link with friends, family, or potential vendors
+              </p>
+            </div>
+            
+            <div className="text-center group">
+              <div className="w-16 h-16 xs:w-18 xs:h-18 sm:w-20 sm:h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-3 xs:mb-4 group-hover:scale-110 transition-transform">
+                <span className="text-2xl xs:text-3xl font-bold text-green-500">2</span>
+              </div>
+              <h3 className="text-xs xs:text-sm sm:text-base font-semibold text-[var(--color-text)] mb-1 xs:mb-2">They Subscribe</h3>
+              <p className="text-[9px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)] px-2">
+                When they sign up as a vendor using your referral link
+              </p>
+            </div>
+            
+            <div className="text-center group">
+              <div className="w-16 h-16 xs:w-18 xs:h-18 sm:w-20 sm:h-20 bg-purple-500/10 rounded-full flex items-center justify-center mx-auto mb-3 xs:mb-4 group-hover:scale-110 transition-transform">
+                <span className="text-2xl xs:text-3xl font-bold text-purple-500">3</span>
+              </div>
+              <h3 className="text-xs xs:text-sm sm:text-base font-semibold text-[var(--color-text)] mb-1 xs:mb-2">Earn 20% Bonus</h3>
+              <p className="text-[9px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)] px-2">
+                Receive 20% of their subscription amount as referral bonus
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-6 xs:mt-7 sm:mt-8 pt-5 xs:pt-6 sm:pt-6 border-t border-[var(--color-border)] text-center">
+            <div className="inline-flex items-center gap-1.5 xs:gap-2 px-3 xs:px-3.5 sm:px-4 py-1.5 xs:py-2 sm:py-2 bg-[var(--color-primary)]/10 rounded-lg">
+              <Award className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-[var(--color-primary)]" />
+              <span className="text-[10px] xs:text-xs sm:text-sm text-[var(--color-text)] font-medium">Commission Rate:</span>
+              <span className="text-[10px] xs:text-xs sm:text-sm text-[var(--color-primary)] font-bold">20%</span>
+            </div>
+            <p className="text-[8px] xs:text-[9px] sm:text-xs text-[var(--color-text-muted)] mt-2 xs:mt-3">
+              Of every vendor subscription through your referral
+            </p>
+          </div>
+        </div>
+
+        {/* Earnings Preview (if there are payments) */}
+        {referralEarnings.payments && referralEarnings.payments.length > 0 && (
+          <div className="mt-8 xs:mt-10 sm:mt-12">
+            <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold text-[var(--color-text)] mb-4 xs:mb-5 sm:mb-6 flex items-center">
+              <span className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] w-1 h-5 xs:h-6 sm:h-8 rounded-full mr-2 xs:mr-3"></span>
+              Recent Earnings
+            </h2>
+            <div className="bg-[var(--color-surface)] rounded-lg xs:rounded-xl border border-[var(--color-border)] overflow-hidden">
+              <div className="divide-y divide-[var(--color-border)]">
+                {referralEarnings.payments.slice(0, 5).map((payment) => (
+                  <div key={payment.paymentId} className="p-3 xs:p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 xs:gap-3">
+                      <div className="p-1.5 xs:p-2 bg-green-500/10 rounded-lg flex-shrink-0">
+                        <DollarSign className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-green-500" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] xs:text-xs sm:text-sm font-medium text-[var(--color-text)]">
+                          {formatCurrency(payment.referralBonus)} Bonus
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2">
+                      <p className="text-[8px] xs:text-[9px] sm:text-xs text-[var(--color-text-muted)]">
+                        {formatDate(payment.createdAt)}
+                      </p>
+                      <span className="text-[8px] xs:text-[9px] sm:text-xs px-2 py-0.5 xs:py-1 bg-green-500/10 text-green-500 rounded-full">
+                        Completed
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Add bounce animation */}
+      <style jsx global>{`
+        @keyframes bounce-subtle {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
+        }
+        .animate-bounce-subtle {
+          animation: bounce-subtle 2s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }
