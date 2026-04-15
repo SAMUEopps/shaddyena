@@ -449,6 +449,19 @@ export default function SubscriptionPayment() {
         '🏷️ Clearance campaigns',
         '🎁 Gift Cards support'
       ]
+    },
+    {
+    id: 'elite',
+    name: 'Elite Vendor',
+    price: 15000,
+    period: 'month',
+    features: [
+        'Everything in Pro',
+        'Top homepage placement',
+        'Sponsored product slots',
+        'Dedicated account manager',
+        'Early access to new features'
+    ]
     }
   ];
 
