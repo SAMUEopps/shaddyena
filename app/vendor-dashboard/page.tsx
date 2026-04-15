@@ -625,7 +625,10 @@ import {
   Box,
   Heart,
   Share2,
-  AlertCircle
+  AlertCircle,
+  SubscriptIcon,
+  BellElectricIcon,
+  BellDot
 } from 'lucide-react';
 
 interface Product {
@@ -891,7 +894,7 @@ export default function VendorDashboard() {
         </div>
 
         {/* Quick Actions - Stack on mobile */}
-        <div className="grid grid-cols-1 gap-3 xs:gap-4 md:grid-cols-3 md:gap-6 mb-6 xs:mb-8">
+        <div className="grid grid-cols-1 gap-3 xs:gap-4 md:grid-cols-4 md:gap-6 mb-6 xs:mb-8">
           <button
             onClick={() => router.push('/vendor/shop')}
             className="group bg-gradient-to-r from-[var(--color-primary)]/5 to-[var(--color-primary-alt)]/5 rounded-xl xs:rounded-2xl border border-[var(--color-border)] p-3 xs:p-4 sm:p-5 hover:border-[var(--color-primary)]/50 transition-all duration-300 text-left"
@@ -935,6 +938,22 @@ export default function VendorDashboard() {
               <div className="flex-1">
                 <h3 className="text-xs xs:text-sm sm:text-base font-semibold text-[var(--color-text)]">Analytics</h3>
                 <p className="text-[10px] xs:text-xs text-[var(--color-text-muted)] mt-0.5 xs:mt-1">View sales insights and performance</p>
+              </div>
+              <ArrowUpRight className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-[var(--color-text-muted)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </div>
+          </button>
+
+          <button
+            onClick={() => router.push('/subscriptions')}
+            className="group bg-gradient-to-r from-[var(--color-primary)]/5 to-[var(--color-primary-alt)]/5 rounded-xl xs:rounded-2xl border border-[var(--color-border)] p-3 xs:p-4 sm:p-5 hover:border-[var(--color-primary)]/50 transition-all duration-300 text-left"
+          >
+            <div className="flex items-center gap-2 xs:gap-3 sm:gap-4">
+              <div className="p-2 xs:p-2.5 sm:p-3 bg-[var(--color-primary)]/10 rounded-lg xs:rounded-xl group-hover:scale-110 transition-transform">
+                <BellDot className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-[var(--color-primary)]" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xs xs:text-sm sm:text-base font-semibold text-[var(--color-text)]">Subscriptions</h3>
+                <p className="text-[10px] xs:text-xs text-[var(--color-text-muted)] mt-0.5 xs:mt-1">Manage Subscriptions</p>
               </div>
               <ArrowUpRight className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-[var(--color-text-muted)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </div>
