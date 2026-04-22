@@ -11,6 +11,7 @@ export interface SubscriptionFeatures {
   maxBestSellersPerMonth: number;
   maxNewArrivalsPerMonth: number;
   maxClearanceItemsPerMonth: number;
+  maxGiftCardsPerMonth: number; // <-- ADD THIS
 }
 
 export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeatures> = {
@@ -24,6 +25,7 @@ export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeature
     maxBestSellersPerMonth: 0,
     maxNewArrivalsPerMonth: 5,
     maxClearanceItemsPerMonth: 0,
+    maxGiftCardsPerMonth: 0, // <-- ADD THIS
   },
   growth: {
     canFeatureTodayDeals: true,
@@ -35,6 +37,7 @@ export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeature
     maxBestSellersPerMonth: 15,
     maxNewArrivalsPerMonth: 20,
     maxClearanceItemsPerMonth: 10,
+    maxGiftCardsPerMonth: 0, // <-- ADD THIS
   },
   pro: {
     canFeatureTodayDeals: true,
@@ -46,6 +49,7 @@ export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeature
     maxBestSellersPerMonth: 50,
     maxNewArrivalsPerMonth: 100,
     maxClearanceItemsPerMonth: 30,
+    maxGiftCardsPerMonth: 50, // <-- ADD THIS
   },
   elite: {
     canFeatureTodayDeals: true,
@@ -57,5 +61,6 @@ export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeature
     maxBestSellersPerMonth: 200,
     maxNewArrivalsPerMonth: 500,
     maxClearanceItemsPerMonth: 100,
+    maxGiftCardsPerMonth: 200, // <-- ADD THIS
   },
 };
