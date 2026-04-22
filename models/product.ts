@@ -386,6 +386,34 @@ export interface IProduct extends Document {
     average: number;
     count: number;
   };
+
+    // NEW: Subscription-based categorization
+  subscriptionCategories: {
+    isTodayDeal: boolean;
+    isBestSeller: boolean;
+    isNewArrival: boolean;
+    isClearance: boolean;
+    isGiftCard: boolean;
+  };
+  
+  // For Today's Deals
+  dealDiscount?: number;
+  dealExpiry?: Date;
+  dealStartDate?: Date;
+  
+  // For Clearance
+  clearanceReason?: 'overstock' | 'old_inventory' | 'seasonal' | 'discontinued';
+  originalStockCount?: number;
+  
+  // For Gift Cards
+  isGiftCardProduct?: boolean;
+  giftCardValues?: number[];
+  
+  // Tracking for limits
+  featuredAt?: Date;
+  featuredExpiresAt?: Date;
+  monthlyFeatureCount?: number;
+
   vendorId: mongoose.Types.ObjectId;
   shopId: mongoose.Types.ObjectId;
   shopName: string;
@@ -540,6 +568,33 @@ const productSchema = new Schema<IProduct>(
         trim: true,
       },
     ],
+
+
+
+        subscriptionCategories: {
+      isTodayDeal: { type: Boolean, default: false },
+      isBestSeller: { type: Boolean, default: false },
+      isNewArrival: { type: Boolean, default: false },
+      isClearance: { type: Boolean, default: false },
+      isGiftCard: { type: Boolean, default: false },
+    },
+    
+    dealDiscount: { type: Number, min: 0, max: 100 },
+    dealExpiry: { type: Date },
+    dealStartDate: { type: Date },
+    
+    clearanceReason: { 
+      type: String, 
+      enum: ['overstock', 'old_inventory', 'seasonal', 'discontinued'] 
+    },
+    originalStockCount: { type: Number },
+    
+    isGiftCardProduct: { type: Boolean, default: false },
+    giftCardValues: [{ type: Number }],
+    
+    featuredAt: { type: Date },
+    featuredExpiresAt: { type: Date },
+    monthlyFeatureCount: { type: Number, default: 0 },
   },
   {
     timestamps: true,
@@ -556,6 +611,12 @@ productSchema.index({ isActive: 1, isApproved: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ sku: 1 }, { unique: true });
 productSchema.index({ name: 'text', description: 'text', tags: 'text' });
+
+productSchema.index({ 'subscriptionCategories.isTodayDeal': 1, dealExpiry: 1 });
+productSchema.index({ 'subscriptionCategories.isBestSeller': 1 });
+productSchema.index({ 'subscriptionCategories.isNewArrival': 1, createdAt: -1 });
+productSchema.index({ 'subscriptionCategories.isClearance': 1 });
+productSchema.index({ 'subscriptionCategories.isGiftCard': 1 });
 
 export default mongoose.models.Product ||
   mongoose.model<IProduct>('Product', productSchema);

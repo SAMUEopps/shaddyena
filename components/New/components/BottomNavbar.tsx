@@ -2287,11 +2287,22 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
               }))
             }))
       },
-      {
+      /*{
         title: 'Quick Links',
         icon: <Tag className="w-5 h-5" />,
         items: [
           { name: "Today's Deals", href: '/deals' },
+          { name: 'Best Sellers', href: '/best-sellers' },
+          { name: 'New Arrivals', href: '/new-arrivals' },
+          { name: 'Clearance', href: '/clearance' },
+          { name: 'Gift Cards', href: '/gift-cards' },
+        ]
+      }*/
+      {
+        title: 'Quick Links',
+        icon: <Tag className="w-5 h-5" />,
+        items: [
+          { name: "Today's Deals", href: '/todays-deals' },
           { name: 'Best Sellers', href: '/best-sellers' },
           { name: 'New Arrivals', href: '/new-arrivals' },
           { name: 'Clearance', href: '/clearance' },
