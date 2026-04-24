@@ -1520,7 +1520,7 @@ export default function ProductDetailPage() {
                 <img
                   src={product.images[selectedImage]}
                   alt={product.name}
-                  className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                  className="h-full w-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
                 <div className="h-full w-full flex items-center justify-center">
