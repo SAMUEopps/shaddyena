@@ -191,11 +191,21 @@ export interface IUser extends Document {
   referredBy?: Types.ObjectId; // Changed from string to ObjectId
   referralCount: number;
   referrals: Types.ObjectId[]; // ADD THIS FIELD
-// In the User schema, add:
-hasPendingVendorRequest: {
-  type: Boolean,
-  default: false
-}
+  riderProfile?: {
+    isApproved: boolean;
+    vehicleType?: string;
+    vehicleModel?: string;
+    vehiclePlate?: string;
+    licenseNumber?: string;
+    rating?: number;
+    totalDeliveries?: number;
+    joinedAt?: Date;
+  };
+  // In the User schema, add:
+  hasPendingVendorRequest: {
+    type: Boolean,
+    default: false
+  };
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -221,6 +231,16 @@ const userSchema = new Schema<IUser>(
     mpesaNumber: { type: String, trim: true },
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    riderProfile: {
+      isApproved: { type: Boolean, default: false },
+      vehicleType: { type: String },
+      vehicleModel: { type: String },
+      vehiclePlate: { type: String },
+      licenseNumber: { type: String },
+      rating: { type: Number, default: 0 },
+      totalDeliveries: { type: Number, default: 0 },
+      joinedAt: { type: Date },
+    },
     // Referral schema - FIXED
     referralCode: {
       type: String,
