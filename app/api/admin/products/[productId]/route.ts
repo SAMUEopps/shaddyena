@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-
 import Product from '@/models/product';
 import dbConnect from '@/lib/dbConnect';
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
     await dbConnect();
 
-    const { productId } = params;
+    const { productId } = await params;
 
-    // Find and delete the product
     const deletedProduct = await Product.findByIdAndDelete(productId);
 
     if (!deletedProduct) {
