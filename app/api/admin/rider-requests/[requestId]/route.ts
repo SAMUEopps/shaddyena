@@ -6,10 +6,12 @@ import RiderRequest from '@/models/RiderRequest';
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { requestId: string } }
+  { params }: { params: Promise<{ requestId: string }> }
 ) {
   try {
     await dbConnect();
+
+    const { requestId } = await params;
 
     // Extract JWT token from cookies
     const token = req.cookies.get('token')?.value;
@@ -40,7 +42,6 @@ export async function PUT(
       );
     }
 
-    const { requestId } = params;
     const body = await req.json();
     const { action, adminNotes } = body;
 
@@ -133,7 +134,7 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { requestId: string } }
+  { params }: { params: Promise<{ requestId: string }> }
 ) {
   try {
     await dbConnect();
@@ -167,7 +168,7 @@ export async function DELETE(
       );
     }
 
-    const { requestId } = params;
+    const { requestId } = await params;
 
     const riderRequest = await RiderRequest.findById(requestId);
 
