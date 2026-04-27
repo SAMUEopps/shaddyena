@@ -1515,7 +1515,8 @@ import {
   ChevronRight,
   Download,
   Filter,
-  Eye
+  Eye,
+  ArrowLeftToLine
 } from 'lucide-react';
 
 // -------------------------------
@@ -1934,6 +1935,21 @@ export default function RefferalEarningsTab() {
                   </div>
                 </div>
               </div>
+
+            <div className="group bg-[var(--color-surface)] rounded-xl xs:rounded-2xl p-4 xs:p-5 sm:p-6 border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center justify-between mb-2 xs:mb-3 sm:mb-4">
+                <div className="p-2 xs:p-2.5 sm:p-3 bg-orange-500/10 rounded-lg xs:rounded-xl group-hover:scale-110 transition-transform">
+                  <ArrowLeftToLine className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-orange-500" />
+                </div>
+                <span className="text-[9px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)]">Withdraw</span>
+              </div>
+              <Link href="/referral-withdrawals">
+                <p className="text-xl xs:text-2xl sm:text-3xl font-bold text-[var(--color-text)] mb-0.5 xs:mb-1">
+                  Withdraw
+                </p>
+                <p className="text-[8px] xs:text-[9px] sm:text-xs text-[var(--color-text-muted)]">Request your earnings</p>
+              </Link>
+            </div>
             </>
           )}
         </div>
