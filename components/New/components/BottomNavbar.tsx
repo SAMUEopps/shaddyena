@@ -2107,7 +2107,7 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
       });*/
       navItems.push({
         name: 'Subscriptions',
-        href: '/subscription',
+        href: '/subscriptions',
         icon: <Clock className="w-5 h-5" />
       });
     }
@@ -2143,11 +2143,11 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
         href: '/products',
         icon: <Package className="w-5 h-5" />
       });
-      navItems.push({
+      /*navItems.push({
         name: 'Subscriptions',
         href: '/subscription',
         icon: <Clock className="w-5 h-5" />
-      });
+      });*/
     }
 
     // Referral items for all roles
