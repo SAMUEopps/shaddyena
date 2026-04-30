@@ -848,11 +848,36 @@ export async function POST(req: NextRequest) {
 ///////////////////////////////////////////////////////////////
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //////////////////////////////////////////////////////////////
 
 
 // app/api/c2b-webhook/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+/*import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import OrderDraft from '@/models/OrderDraft';
 import Order, { DeliveryDetails } from '@/models/Order';
@@ -1041,7 +1066,7 @@ function generateConfirmationCode(): string {
 // app/api/c2b-webhook/route.ts - Update the logging section
 // In the handleDeliveryFeeConfirmation function, update the logging:
 
-async function handleDeliveryFeeConfirmation(body: any) {
+/*async function handleDeliveryFeeConfirmation(body: any) {
   const accountNumber = body.BillRefNumber || body.AccountNumber;
   const amount = parseInt(body.TransAmount || body.Amount, 10);
   const transactionId = body.TransID || body.TransId;
@@ -1156,7 +1181,7 @@ async function handleDeliveryFeeConfirmation(body: any) {
 }
 /* =================================================================
    Helpers
-================================================================= */
+================================================================= *
 function fail(code: number, desc: string) {
   return NextResponse.json({ ResultCode: code, ResultDesc: desc });
 }
@@ -1167,7 +1192,7 @@ function ok(desc = 'Accepted') {
 
 /* =================================================================
    VALIDATION
-================================================================= */
+================================================================= *
 async function handleValidation(body: any) {
   const accountNumber = body.AccountNumber || body.BillRefNumber;
   const amount = parseInt(body.Amount || body.TransAmount, 10);
@@ -1216,17 +1241,17 @@ async function handleConfirmation(body: any) {
   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
   if (draft.status === 'CONFIRMED') return ok('Already processed');
 
-  /* ---------- stock ---------- */
+  /* ---------- stock ---------- *
   for (const it of draft.items) {
     await Product.findByIdAndUpdate(it.productId, {
       $inc: { stock: -it.quantity },
     });
   }
 
-  /* ---------- order ID ---------- */
+  /* ---------- order ID ---------- *
   const orderId = generateOrderId();
 
-  /* ---------- ledger ---------- */
+  /* ---------- ledger ---------- *
   const ledgerEntries: any[] = [];
 
   for (const v of draft.vendorSplits) {
@@ -1339,6 +1364,603 @@ async function handleConfirmation(body: any) {
 
   await Ledger.insertMany(ledgerEntries);
 
+  /* ---------- order ---------- *
+  const order = new Order({
+    orderId,
+    draftToken: draft.token,
+    buyerId: draft.buyerId,
+    items: draft.items,
+    suborders: await Promise.all(
+      draft.vendorSplits.map(async (v: any) => {
+        const totalAmount = v.amount;
+        const vendorUser = await User.findById(v.vendorId);
+
+        const platformShare = vendorUser?.referredBy ? totalAmount * 0.025 : totalAmount * 0.03;
+        const referralShare = vendorUser?.referredBy ? totalAmount * 0.005 : 0;
+        const vendorNet = totalAmount - platformShare - referralShare;
+
+        return {
+          vendorId: v.vendorId,
+          shopId: v.shopId,
+          items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
+          amount: totalAmount,
+          commission: platformShare + referralShare,
+          netAmount: vendorNet,
+          status: 'PROCESSING',
+        };
+      })
+    ),
+    totalAmount: draft.totalAmount,
+    platformFee: draft.vendorSplits.reduce((sum: number, v: any) => {
+      const vendorUser = draft.items.find((it: any) => it.vendorId === v.vendorId);
+      return sum + (vendorUser?.referredBy ? v.amount * 0.025 : v.amount * 0.03);
+    }, 0),
+    currency: draft.currency || 'KES',
+    paymentMethod: 'M-PESA',
+    paymentStatus: 'PAID',
+    shipping: draft.shipping,
+    status: 'PENDING',
+    mpesaTransactionId: body.TransID || body.TransId,
+  });
+
+  await order.save();
+
+  /* ---------- finalize draft ---------- *
+  draft.status = 'CONFIRMED';
+  draft.mpesaTransactionId = body.TransID || body.TransId;
+  await draft.save();
+
+  return ok('Success');
+}
+
+
+/* =================================================================
+    MAIN ENTRY
+================================================================= */
+/*export async function POST(req: NextRequest) {
+  try {
+    await dbConnect();
+    const body = await req.json();
+    console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+
+    return body.TransID || body.TransId
+      ? await handleConfirmation(body)
+      : await handleValidation(body);
+  } catch (e) {
+    console.error('❌ C2B webhook crash:', e);
+    return fail(1, 'Server error');
+  }
+}*
+
+// Update the main POST handler to include delivery fee handling
+export async function POST(req: NextRequest) {
+  try {
+    await dbConnect();
+    const body = await req.json();
+    console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+
+    // Check if it's a delivery fee payment (based on AccountReference starting with DEL)
+    const accountNumber = body.BillRefNumber || body.AccountNumber;
+    if (accountNumber?.startsWith('DEL')) {
+      return await handleDeliveryFeeConfirmation(body);
+    }
+
+    return body.TransID || body.TransId
+      ? await handleConfirmation(body)
+      : await handleValidation(body);
+  } catch (e) {
+    console.error('❌ C2B webhook crash:', e);
+    return fail(1, 'Server error');
+  }
+}*/
+
+
+
+// app/api/c2b-webhook/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import dbConnect from '@/lib/dbConnect';
+import OrderDraft from '@/models/OrderDraft';
+import Order, { DeliveryDetails } from '@/models/Order';
+import Ledger from '@/models/Ledger';
+import Product from '@/models/product';
+import User from '@/models/user';
+import Payment from '@/models/Payment';
+import VendorSubscription from '@/models/VendorSubscription';
+import SubscriptionPlan from '@/models/SubscriptionPlan';
+import { decodeRef, generateOrderId } from '@/lib/orderUtils';
+import { sendSMS } from '@/lib/sms';
+
+function generateConfirmationCode(): string {
+  return Math.random().toString(36).substring(2, 10).toUpperCase();
+}
+
+/* =================================================================
+   SUBSCRIPTION PAYMENT HANDLER
+================================================================= */
+async function handleSubscriptionPayment(body: any) {
+  const accountNumber = body.BillRefNumber || body.AccountNumber;
+  const amount = parseInt(body.TransAmount || body.Amount, 10);
+  const transactionId = body.TransID || body.TransId;
+  const phoneNumber = body.MSISDN || body.PhoneNumber;
+
+  console.log(`📥 Processing subscription payment:`);
+  console.log(`   - Account Ref: ${accountNumber}`);
+  console.log(`   - Amount: ${amount}`);
+  console.log(`   - Transaction ID: ${transactionId}`);
+  console.log(`   - Phone: ${phoneNumber}`);
+
+  // Format: SUB-{planId}-{userId}
+  if (!accountNumber || !accountNumber.startsWith('SUB-')) {
+    console.log(`❌ Not a subscription payment: ${accountNumber}`);
+    return fail(1, 'Not a subscription payment');
+  }
+
+  const parts = accountNumber.split('-');
+  if (parts.length !== 3) {
+    console.log(`❌ Invalid subscription reference format: ${accountNumber}`);
+    return fail(1, 'Invalid subscription reference');
+  }
+
+  const [, planId, userId] = parts;
+  console.log(`🔍 Looking for payment with planId: ${planId}, userId: ${userId}`);
+
+  // Find the pending payment record
+  const payment = await Payment.findOne({
+    _id: planId, // The planId in the reference is actually the payment _id
+    userId,
+    status: 'PENDING'
+  });
+
+  if (!payment) {
+    console.log(`❌ No pending payment found for reference: ${accountNumber}`);
+    return fail(1, 'Payment reference not found');
+  }
+
+  // Verify amount matches
+  if (amount !== payment.amount) {
+    console.error(`❌ Amount mismatch: got ${amount}, expected ${payment.amount}`);
+    payment.status = 'FAILED';
+    await payment.save();
+    return fail(1, `Amount mismatch. Expected ${payment.amount}`);
+  }
+
+  // Update payment status
+  payment.status = 'PAID';
+  payment.mpesaReceipt = transactionId;
+  payment.stkCallback = body;
+  await payment.save();
+
+  console.log(`✅ Payment recorded successfully: ${payment._id}`);
+
+  // Now activate the subscription
+  await activateSubscription(payment, transactionId);
+
+  // Send confirmation SMS
+  const user = await User.findById(userId);
+  if (user && user.phone) {
+    const plan = await SubscriptionPlan.findById(payment.planId);
+    const message = `✅ Payment of KES ${amount} for ${plan?.name || 'subscription'} plan received successfully! Your subscription is now active. Thank you for choosing our platform.`;
+    await sendSMS(user.phone, message).catch(console.error);
+  }
+
+  return ok('Subscription payment confirmed');
+}
+
+async function activateSubscription(payment: any, transactionId: string) {
+  const userId = payment.userId;
+  const planId = payment.planId;
+  const amount = payment.amount;
+
+  // Get the subscription plan details
+  const subscriptionPlan = await SubscriptionPlan.findById(planId);
+  if (!subscriptionPlan) {
+    console.error('❌ Subscription plan not found:', planId);
+    throw new Error('Plan not found');
+  }
+
+  // Calculate new subscription dates
+  const today = new Date();
+  const periodInDays = subscriptionPlan.period === 'month' ? 30 : 
+                      subscriptionPlan.period === 'quarter' ? 90 : 365;
+  const endDate = new Date(today);
+  endDate.setDate(endDate.getDate() + periodInDays);
+
+  const planTier = subscriptionPlan.name.toLowerCase().includes('basic') ? 'basic' :
+                  subscriptionPlan.name.toLowerCase().includes('growth') ? 'growth' :
+                  subscriptionPlan.name.toLowerCase().includes('pro') ? 'pro' : 'elite';
+
+  // Find or create vendor subscription
+  let vendorSubscription = await VendorSubscription.findOne({ vendorId: userId });
+
+  if (vendorSubscription) {
+    // Log the current state before update
+    console.log(`📊 Current subscription state for vendor ${userId}:`);
+    console.log(`   - Tier: ${vendorSubscription.tier}`);
+    console.log(`   - Status: ${vendorSubscription.status}`);
+    console.log(`   - End Date: ${vendorSubscription.endDate}`);
+    console.log(`   - Payment History Count: ${vendorSubscription.paymentHistory.length}`);
+
+    const oldTier = vendorSubscription.tier;
+    const oldEndDate = vendorSubscription.endDate;
+    const isActive = new Date(oldEndDate) > today;
+
+    if (isActive && vendorSubscription.status === 'active') {
+      // Active subscription - extend the end date
+      const newEndDate = new Date(oldEndDate);
+      newEndDate.setDate(newEndDate.getDate() + periodInDays);
+      vendorSubscription.endDate = newEndDate;
+      console.log(`📅 Extending subscription: ${oldEndDate} → ${newEndDate}`);
+    } else {
+      // Expired or cancelled subscription - start new
+      vendorSubscription.startDate = today;
+      vendorSubscription.endDate = endDate;
+      vendorSubscription.status = 'active';
+      console.log(`🔄 Reactivating subscription from ${today} to ${endDate}`);
+    }
+
+    // Update tier if changed
+    vendorSubscription.tier = planTier;
+    vendorSubscription.paymentId = payment._id;
+    
+    // Add to payment history
+    vendorSubscription.paymentHistory.push({
+      paymentId: payment._id,
+      planId: planId,
+      amount: amount,
+      paidAt: today,
+      validUntil: vendorSubscription.endDate,
+    });
+
+    // Reset monthly usage if tier changed or subscription was inactive
+    if (oldTier !== planTier || !isActive) {
+      vendorSubscription.monthlyUsage = {
+        todayDealsUsed: 0,
+        bestSellersUsed: 0,
+        newArrivalsUsed: 0,
+        clearanceUsed: 0,
+        giftCardsCreated: 0,
+        month: today,
+        lastResetAt: today,
+      };
+      console.log(`🔄 Reset monthly usage for tier change or reactivation`);
+    }
+
+    // Clear any grace period
+    vendorSubscription.gracePeriodEndsAt = undefined;
+    
+    await vendorSubscription.save();
+
+    console.log(`✅ Subscription updated for vendor ${userId}:`);
+    console.log(`   - New Tier: ${vendorSubscription.tier}`);
+    console.log(`   - New End Date: ${vendorSubscription.endDate}`);
+    console.log(`   - Status: ${vendorSubscription.status}`);
+  } else {
+    // Create new subscription
+    vendorSubscription = await VendorSubscription.create({
+      vendorId: userId,
+      tier: planTier,
+      status: 'active',
+      startDate: today,
+      endDate: endDate,
+      autoRenew: false,
+      paymentId: payment._id,
+      paymentHistory: [{
+        paymentId: payment._id,
+        planId: planId,
+        amount: amount,
+        paidAt: today,
+        validUntil: endDate,
+      }],
+      monthlyUsage: {
+        todayDealsUsed: 0,
+        bestSellersUsed: 0,
+        newArrivalsUsed: 0,
+        clearanceUsed: 0,
+        giftCardsCreated: 0,
+        month: today,
+        lastResetAt: today,
+      },
+      featuredProducts: [],
+    });
+
+    console.log(`✨ New subscription created for vendor ${userId}:`);
+    console.log(`   - Tier: ${vendorSubscription.tier}`);
+    console.log(`   - End Date: ${vendorSubscription.endDate}`);
+  }
+
+  // Process referral bonus if applicable
+  if (payment.referrerId && !payment.referralBonusPaid) {
+    const referralBonus = amount * 0.1; // 10% referral bonus
+    payment.referralBonus = referralBonus;
+    payment.referralBonusPaid = true;
+    await payment.save();
+
+    // Add to referrer's ledger
+    await Ledger.create({
+      type: 'REFERRAL_BONUS',
+      userId: payment.referrerId,
+      amount: referralBonus,
+      netAmount: referralBonus,
+      withdrawalStatus: 'AVAILABLE',
+      status: 'PAID',
+      paidAt: new Date(),
+      metadata: {
+        referredUserId: userId,
+        paymentId: payment._id,
+        subscriptionPlan: planTier,
+        description: `Referral bonus for ${subscriptionPlan.name} subscription`
+      }
+    });
+
+    console.log(`💰 Referral bonus of KES ${referralBonus} credited to ${payment.referrerId}`);
+
+    // Notify referrer
+    const referrer = await User.findById(payment.referrerId);
+    if (referrer && referrer.phone) {
+      const message = `🎉 Congratulations! You've earned KES ${referralBonus} referral bonus from ${vendorSubscription.tier} subscription purchase.`;
+      await sendSMS(referrer.phone, message).catch(console.error);
+    }
+  }
+
+  return vendorSubscription;
+}
+
+/* =================================================================
+   DELIVERY FEE HANDLER
+================================================================= */
+async function handleDeliveryFeeConfirmation(body: any) {
+  const accountNumber = body.BillRefNumber || body.AccountNumber;
+  const amount = parseInt(body.TransAmount || body.Amount, 10);
+  const transactionId = body.TransID || body.TransId;
+
+  console.log(`📥 Processing delivery fee payment:`);
+  console.log(`   - Account Ref: ${accountNumber}`);
+  console.log(`   - Amount: ${amount}`);
+  console.log(`   - Transaction ID: ${transactionId}`);
+
+  if (!accountNumber || !accountNumber.startsWith('DEL')) {
+    console.log(`❌ Not a delivery fee payment: ${accountNumber}`);
+    return fail(1, 'Not a delivery fee payment');
+  }
+
+  const paymentRef = accountNumber;
+  console.log(`🔍 Looking for order with paymentRef: ${paymentRef}`);
+
+  // Find order with this delivery fee payment reference
+  const order = await Order.findOne({
+    'suborders.deliveryDetails.deliveryFeePaymentRef': paymentRef
+  });
+
+  if (!order) {
+    console.log(`❌ No order found with deliveryFeePaymentRef: ${paymentRef}`);
+    return fail(1, 'Unknown delivery fee reference');
+  }
+
+  console.log(`✅ Found order: ${order._id}`);
+
+  // Find the specific suborder
+  const suborder = order.suborders.find(
+    (so: any) => so.deliveryDetails?.deliveryFeePaymentRef === paymentRef
+  );
+
+  if (!suborder) {
+    console.log(`❌ No suborder found with deliveryFeePaymentRef: ${paymentRef}`);
+    return fail(1, 'Suborder not found');
+  }
+
+  const suborderId = suborder._id ? suborder._id.toString() : 'unknown';
+  
+  console.log(`✅ Found suborder: ${suborderId}`);
+  console.log(`   - Delivery Fee: ${suborder.deliveryFee}`);
+
+  // Verify amount matches
+  if (amount !== suborder.deliveryFee) {
+    console.error(`❌ Delivery fee amount mismatch: got ${amount}, expected ${suborder.deliveryFee}`);
+    return fail(1, `Amount mismatch. Expected ${suborder.deliveryFee}`);
+  }
+
+  // Check if already processed
+  if (suborder.deliveryDetails?.deliveryFeePaid) {
+    console.log(`⚠️ Delivery fee already paid for suborder: ${suborderId}`);
+    return ok('Already processed');
+  }
+
+  // Generate confirmation code
+  const confirmationCode = generateConfirmationCode();
+
+  // Update suborder with payment and confirmation code
+  if (!suborder.deliveryDetails) {
+    suborder.deliveryDetails = {} as DeliveryDetails;
+  }
+  
+  suborder.deliveryDetails.deliveryFeePaid = true;
+  suborder.deliveryDetails.deliveryFeePaidAt = new Date();
+  suborder.deliveryDetails.deliveryFeeReceipt = transactionId;
+  suborder.deliveryDetails.confirmationCode = confirmationCode;
+  suborder.deliveryDetails.confirmedAt = new Date();
+  
+  // Update suborder status
+  suborder.status = 'CONFIRMED';
+
+  await order.save();
+
+  console.log(`✅ Successfully updated suborder with confirmation code: ${confirmationCode}`);
+
+  return ok('Delivery fee confirmed');
+}
+
+/* =================================================================
+   ORDER PAYMENT HANDLERS
+================================================================= */
+async function handleValidation(body: any) {
+  const accountNumber = body.AccountNumber || body.BillRefNumber;
+  const amount = parseInt(body.Amount || body.TransAmount, 10);
+
+  if (!accountNumber) return fail(1, 'Missing account number');
+
+  const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+  if (!draft) return fail(1, 'Unknown reference');
+
+  const decoded = decodeRef(draft.fullRef);
+  if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
+
+  if (amount !== draft.totalAmount) {
+    console.error(`❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`);
+    return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+  }
+
+  if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+
+  if (draft.status === 'VALIDATED') return ok('Already validated');
+  if (draft.status !== 'PENDING') return fail(1, 'Already processed');
+
+  draft.status = 'VALIDATED';
+  await draft.save();
+  console.log('✅ Validation OK for shortRef:', accountNumber);
+  return ok();
+}
+
+async function handleConfirmation(body: any) {
+  const accountNumber = body.BillRefNumber || body.AccountNumber;
+  const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+  if (!accountNumber) return fail(1, 'Missing account number');
+
+  const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+  if (!draft) return fail(1, 'Unknown reference');
+
+  if (amount !== draft.totalAmount) {
+    draft.status = 'FAILED';
+    await draft.save();
+    return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+  }
+
+  if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+  if (draft.status === 'CONFIRMED') return ok('Already processed');
+
+  /* ---------- stock ---------- */
+  for (const it of draft.items) {
+    await Product.findByIdAndUpdate(it.productId, {
+      $inc: { stock: -it.quantity },
+    });
+  }
+
+  /* ---------- order ID ---------- */
+  const orderId = generateOrderId();
+
+  /* ---------- ledger ---------- */
+  const ledgerEntries: any[] = [];
+
+  for (const v of draft.vendorSplits) {
+    const totalAmount = v.amount;
+    const vendorUser = await User.findById(v.vendorId);
+
+    let platformShare = 0;
+    let referralShare = 0;
+
+    if (vendorUser?.referredBy) {
+      // 3% split: 2.5% platform, 0.5% referral
+      referralShare = totalAmount * 0.005;
+      platformShare = totalAmount * 0.025;
+
+      // Referral commission entry (locked for 24 hours)
+      ledgerEntries.push({
+        type: 'REFERRAL_COMMISSION',
+        referrerId: vendorUser.referredBy,
+        referredVendorId: vendorUser._id,
+        orderId,
+        draftToken: draft.token,
+        amount: referralShare,
+        netAmount: referralShare,
+        withdrawalStatus: 'LOCKED',
+        status: 'PENDING',
+        scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        metadata: {
+          percentage: 0.5,
+          description: 'Referral commission from vendor sale'
+        }
+      });
+    } else {
+      // No referral: platform gets full 3%
+      platformShare = totalAmount * 0.03;
+    }
+
+    // Platform commission entry
+    ledgerEntries.push({
+      type: 'PLATFORM_COMMISSION',
+      orderId,
+      draftToken: draft.token,
+      amount: platformShare,
+      netAmount: platformShare,
+      withdrawalStatus: 'PAID',
+      status: 'PAID',
+      scheduledAt: new Date(),
+      paidAt: new Date(),
+      metadata: {
+        percentage: vendorUser?.referredBy ? 2.5 : 3,
+        description: 'Platform commission'
+      }
+    });
+
+    // Calculate 80% immediate release (after commission)
+    const commissionTotal = platformShare + referralShare;
+    const vendorEarnings = totalAmount - commissionTotal;
+    const immediateRelease = vendorEarnings * 0.8;
+    const remaining20Percent = vendorEarnings * 0.2;
+
+    // Immediate vendor payout (80%)
+    ledgerEntries.push({
+      type: 'VENDOR_PAYOUT',
+      vendorId: v.vendorId,
+      shopId: v.shopId,
+      orderId,
+      draftToken: draft.token,
+      amount: immediateRelease,
+      netAmount: immediateRelease,
+      withdrawalStatus: 'AVAILABLE',
+      status: 'PENDING',
+      scheduledAt: new Date(),
+      metadata: {
+        isImmediateRelease: true,
+        percentage: 80,
+        platformShare,
+        referralShare,
+        totalEarnings: vendorEarnings,
+        breakdown: {
+          totalAmount,
+          commission: commissionTotal,
+          vendorEarnings,
+          immediateRelease,
+          remaining20Percent
+        }
+      }
+    });
+
+    // Remaining 20% (locked for 24 hours)
+    ledgerEntries.push({
+      type: 'VENDOR_PAYOUT',
+      vendorId: v.vendorId,
+      shopId: v.shopId,
+      orderId,
+      draftToken: draft.token,
+      amount: remaining20Percent,
+      netAmount: remaining20Percent,
+      withdrawalStatus: 'LOCKED',
+      status: 'PENDING',
+      scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      metadata: {
+        isImmediateRelease: false,
+        percentage: 20,
+        holdUntil: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        platformShare,
+        referralShare,
+        totalEarnings: vendorEarnings
+      }
+    });
+  }
+
+  await Ledger.insertMany(ledgerEntries);
+
   /* ---------- order ---------- */
   const order = new Order({
     orderId,
@@ -1388,41 +2010,46 @@ async function handleConfirmation(body: any) {
   return ok('Success');
 }
 
+/* =================================================================
+   HELPERS
+================================================================= */
+function fail(code: number, desc: string) {
+  return NextResponse.json({ ResultCode: code, ResultDesc: desc });
+}
+
+function ok(desc = 'Accepted') {
+  return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
+}
 
 /* =================================================================
-    MAIN ENTRY
+   MAIN C2B WEBHOOK HANDLER
 ================================================================= */
-/*export async function POST(req: NextRequest) {
-  try {
-    await dbConnect();
-    const body = await req.json();
-    console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
-
-    return body.TransID || body.TransId
-      ? await handleConfirmation(body)
-      : await handleValidation(body);
-  } catch (e) {
-    console.error('❌ C2B webhook crash:', e);
-    return fail(1, 'Server error');
-  }
-}*/
-
-// Update the main POST handler to include delivery fee handling
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
     const body = await req.json();
-    console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+    console.log('📥 C2B payload received:', JSON.stringify(body, null, 2));
 
-    // Check if it's a delivery fee payment (based on AccountReference starting with DEL)
     const accountNumber = body.BillRefNumber || body.AccountNumber;
-    if (accountNumber?.startsWith('DEL')) {
+    
+    // Route to appropriate handler based on account reference prefix
+    if (accountNumber?.startsWith('SUB-')) {
+      // Handle subscription payments
+      console.log('🔄 Routing to subscription payment handler');
+      return await handleSubscriptionPayment(body);
+    } 
+    else if (accountNumber?.startsWith('DEL')) {
+      // Handle delivery fee payments
+      console.log('🚚 Routing to delivery fee handler');
       return await handleDeliveryFeeConfirmation(body);
     }
-
-    return body.TransID || body.TransId
-      ? await handleConfirmation(body)
-      : await handleValidation(body);
+    else {
+      // Handle regular order payments
+      console.log('📦 Routing to order payment handler');
+      return body.TransID || body.TransId
+        ? await handleConfirmation(body)
+        : await handleValidation(body);
+    }
   } catch (e) {
     console.error('❌ C2B webhook crash:', e);
     return fail(1, 'Server error');

@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
       await SubscriptionPlan.updateMany({}, { popular: false });
     }
 
-    const plan = await SubscriptionPlan.create({
+    /*const plan = await SubscriptionPlan.create({
       name,
       price,
       period: period || 'month',
@@ -95,7 +95,36 @@ export async function POST(req: NextRequest) {
       icon: icon || 'Star',
       order: order || 0,
       isActive: true,
-    });
+    });*/
+
+    const plan = await SubscriptionPlan.create({
+  name,
+  price,
+  period: period || 'month',
+  features,
+  popular: popular || false,
+  badge: badge || '',
+  icon: icon || 'Star',
+  order: order || 0,
+  isActive: true,
+  capabilities: body.capabilities || {  // Add this
+    canFeatureTodayDeals: false,
+    canFeatureBestSellers: false,
+    canFeatureNewArrivals: true,
+    canFeatureClearance: false,
+    canFeatureGiftCards: false,
+    maxTodayDealsPerMonth: 0,
+    maxBestSellersPerMonth: 0,
+    maxNewArrivalsPerMonth: 5,
+    maxClearanceItemsPerMonth: 0,
+    maxGiftCardsPerMonth: 0,
+    maxProducts: 50,
+    prioritySupport: false,
+    advancedAnalytics: false,
+  },
+});
+
+
 
     return NextResponse.json(plan, { status: 201 });
   } catch (error: any) {
@@ -139,6 +168,23 @@ export async function PUT(req: NextRequest) {
       );
     }
 
+    /*const plan = await SubscriptionPlan.findByIdAndUpdate(
+      planId,
+      {
+        name,
+        price,
+        period,
+        features,
+        popular,
+        badge,
+        icon,
+        order,
+        isActive,
+      },
+      { new: true, runValidators: true }
+    );*/
+
+    // In the PUT handler, update capabilities:
     const plan = await SubscriptionPlan.findByIdAndUpdate(
       planId,
       {
@@ -151,6 +197,7 @@ export async function PUT(req: NextRequest) {
         icon,
         order,
         isActive,
+        capabilities: body.capabilities, // Add this
       },
       { new: true, runValidators: true }
     );

@@ -2464,7 +2464,7 @@ export default function EditProductPage() {
 }*/
 
 
-'use client';
+/*'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -2839,7 +2839,7 @@ export default function EditProductPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex-1 space-y-6">
-            {/* Basic Info */}
+            {/* Basic Info *
             <div id="basic" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
               <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
                 <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
@@ -2883,7 +2883,7 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* Category */}
+            {/* Category *
             <div id="category" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
               <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
                 <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
@@ -2910,7 +2910,7 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* Visibility Features */}
+            {/* Visibility Features *
             <div id="subscription" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
               <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
                 <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
@@ -2925,7 +2925,7 @@ export default function EditProductPage() {
                 </p>
               </div>
               <div className="p-6 space-y-6">
-                {/* Today's Deal */}
+                {/* Today's Deal *
                 <FeatureToggle
                   title="Today's Deal"
                   description="Feature your product with a time-limited discount. Creates urgency and drives conversions."
@@ -2954,7 +2954,7 @@ export default function EditProductPage() {
                   )}
                 </FeatureToggle>
 
-                {/* Best Seller */}
+                {/* Best Seller *
                 <FeatureToggle
                   title="Best Seller"
                   description="Showcase your top-performing products. Builds trust and social proof."
@@ -2968,7 +2968,7 @@ export default function EditProductPage() {
                   onToggle={handleSubscriptionCategoryChange}
                 />
 
-                {/* New Arrival */}
+                {/* New Arrival *
                 <FeatureToggle
                   title="New Arrival"
                   description="Highlight new products. Keeps your store fresh and encourages repeat visits."
@@ -2982,7 +2982,7 @@ export default function EditProductPage() {
                   onToggle={handleSubscriptionCategoryChange}
                 />
 
-                {/* Clearance */}
+                {/* Clearance *
                 <FeatureToggle
                   title="Clearance"
                   description="Clear old inventory with deep discounts. Perfect for overstock or seasonal items."
@@ -3009,7 +3009,7 @@ export default function EditProductPage() {
                   )}
                 </FeatureToggle>
 
-                {/* Gift Card */}
+                {/* Gift Card *
                 <FeatureToggle
                   title="Gift Card"
                   description="Sell digital gift cards. Perfect for gifting and increasing revenue."
@@ -3050,7 +3050,7 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* Specifications */}
+            {/* Specifications *
             <div id="specs" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
               <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
                 <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
@@ -3082,7 +3082,7 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* Shipping */}
+            {/* Shipping *
             <div id="shipping" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
               <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
                 <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
@@ -3115,7 +3115,7 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* Tags */}
+            {/* Tags *
             <div id="tags" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
               <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
                 <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
@@ -3128,7 +3128,7 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* Actions */}
+            {/* Actions *
             <div className="flex flex-col sm:flex-row justify-end gap-4 pt-4 pb-8">
               <button type="button" onClick={() => router.push('/vendor-dashboard')} className="px-6 py-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] rounded-xl font-medium">
                 Cancel
@@ -3230,4 +3230,1019 @@ function FeatureToggle({
       {children}
     </div>
   );
+}*/
+
+
+// app/vendor/products/edit/[id]/page.tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
+import {
+  ArrowLeft,
+  Package,
+  Tag,
+  Truck,
+  Hash,
+  Plus,
+  Trash2,
+  Save,
+  AlertCircle,
+  CheckCircle,
+  Sparkles,
+  TrendingUp,
+  Flame,
+  Percent,
+  Crown,
+  Lock,
+  Gift,
+  Loader2,
+  Info,
+  Zap,
+  Shield
+} from 'lucide-react';
+
+type FeatureToggleKey = 'isTodayDeal' | 'isBestSeller' | 'isNewArrival' | 'isClearance' | 'isGiftCard';
+
+interface ProductFormData {
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  category: string;
+  subcategory?: string;
+  images: string[];
+  stock: number;
+  sku: string;
+  brand?: string;
+  specifications: { key: string; value: string }[];
+  shipping: {
+    weight: number;
+    dimensions: { length: number; width: number; height: number };
+  };
+  tags: string[];
+  isActive?: boolean;
+  subscriptionCategories: Record<FeatureToggleKey, boolean>;
+  dealDiscount?: number;
+  dealExpiry?: string;
+  dealStartDate?: string;
+  clearanceReason?: string;
+  isGiftCardProduct?: boolean;
+  giftCardValues?: number[];
 }
+
+interface SubscriptionInfo {
+  tier: string;
+  status: string;
+  remainingDays: number;
+  monthlyUsage: {
+    todayDealsUsed: number;
+    bestSellersUsed: number;
+    newArrivalsUsed: number;
+    clearanceUsed: number;
+    giftCardsCreated: number;
+  };
+  limits: {
+    maxTodayDealsPerMonth: number;
+    maxBestSellersPerMonth: number;
+    maxNewArrivalsPerMonth: number;
+    maxClearanceItemsPerMonth: number;
+    maxGiftCardsPerMonth: number;
+  };
+  features: {
+    canFeatureTodayDeals: boolean;
+    canFeatureBestSellers: boolean;
+    canFeatureNewArrivals: boolean;
+    canFeatureClearance: boolean;
+    canFeatureGiftCards: boolean;
+  };
+}
+
+export default function EditProductPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const params = useParams();
+  const productId = params.id as string;
+
+  const [formData, setFormData] = useState<ProductFormData>({
+    name: '',
+    description: '',
+    price: 0,
+    category: '',
+    images: [],
+    stock: 0,
+    sku: '',
+    specifications: [],
+    shipping: { weight: 0, dimensions: { length: 0, width: 0, height: 0 } },
+    tags: [],
+    subscriptionCategories: {
+      isTodayDeal: false,
+      isBestSeller: false,
+      isNewArrival: false,
+      isClearance: false,
+      isGiftCard: false
+    }
+  });
+
+  const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [activeSection, setActiveSection] = useState('basic');
+
+  useEffect(() => {
+    if (productId && user) {
+      Promise.all([fetchProduct(), fetchSubscriptionStatus()]);
+    }
+  }, [productId, user]);
+
+  const fetchProduct = async () => {
+    try {
+      const response = await fetch(`/api/vendor/products/${productId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setFormData({
+          ...data.product,
+          dealExpiry: data.product.dealExpiry ? new Date(data.product.dealExpiry).toISOString().slice(0, 16) : '',
+          dealStartDate: data.product.dealStartDate ? new Date(data.product.dealStartDate).toISOString().slice(0, 16) : '',
+        });
+      } else {
+        setMessage({ type: 'error', text: 'Failed to load product' });
+      }
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      setMessage({ type: 'error', text: 'Error loading product' });
+    }
+  };
+
+  const fetchSubscriptionStatus = async () => {
+    try {
+      const response = await fetch('/api/vendor/subscription/status');
+      if (response.ok) {
+        const data = await response.json();
+        setSubscriptionInfo({
+          tier: data.subscription.tier,
+          status: data.subscription.status,
+          remainingDays: data.remainingDays,
+          monthlyUsage: data.subscription.monthlyUsage,
+          limits: {
+            maxTodayDealsPerMonth: data.subscription.tier === 'basic' ? 0 : data.subscription.tier === 'growth' ? 10 : data.subscription.tier === 'pro' ? 30 : 100,
+            maxBestSellersPerMonth: data.subscription.tier === 'basic' ? 0 : data.subscription.tier === 'growth' ? 15 : data.subscription.tier === 'pro' ? 50 : 200,
+            maxNewArrivalsPerMonth: data.subscription.tier === 'basic' ? 5 : data.subscription.tier === 'growth' ? 20 : data.subscription.tier === 'pro' ? 100 : 500,
+            maxClearanceItemsPerMonth: data.subscription.tier === 'basic' ? 0 : data.subscription.tier === 'growth' ? 10 : data.subscription.tier === 'pro' ? 30 : 100,
+            maxGiftCardsPerMonth: data.subscription.tier === 'pro' ? 50 : data.subscription.tier === 'elite' ? 200 : 0,
+          },
+          features: {
+            canFeatureTodayDeals: data.subscription.tier !== 'basic',
+            canFeatureBestSellers: data.subscription.tier !== 'basic',
+            canFeatureNewArrivals: true,
+            canFeatureClearance: data.subscription.tier !== 'basic',
+            canFeatureGiftCards: data.subscription.tier === 'pro' || data.subscription.tier === 'elite',
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching subscription:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getRemainingUsage = (feature: FeatureToggleKey): number => {
+    if (!subscriptionInfo) return 0;
+    
+    const usageMap = {
+      isTodayDeal: subscriptionInfo.monthlyUsage.todayDealsUsed,
+      isBestSeller: subscriptionInfo.monthlyUsage.bestSellersUsed,
+      isNewArrival: subscriptionInfo.monthlyUsage.newArrivalsUsed,
+      isClearance: subscriptionInfo.monthlyUsage.clearanceUsed,
+      isGiftCard: subscriptionInfo.monthlyUsage.giftCardsCreated
+    };
+    
+    const limitMap = {
+      isTodayDeal: subscriptionInfo.limits.maxTodayDealsPerMonth,
+      isBestSeller: subscriptionInfo.limits.maxBestSellersPerMonth,
+      isNewArrival: subscriptionInfo.limits.maxNewArrivalsPerMonth,
+      isClearance: subscriptionInfo.limits.maxClearanceItemsPerMonth,
+      isGiftCard: subscriptionInfo.limits.maxGiftCardsPerMonth
+    };
+    
+    const used = usageMap[feature];
+    const max = limitMap[feature];
+    
+    return max - used;
+  };
+
+  const canEnableFeature = (feature: FeatureToggleKey): { allowed: boolean; reason?: string } => {
+    if (!subscriptionInfo || subscriptionInfo.status !== 'active') {
+      return { allowed: false, reason: 'Active subscription required' };
+    }
+
+    const featureMap = {
+      isTodayDeal: subscriptionInfo.features.canFeatureTodayDeals,
+      isBestSeller: subscriptionInfo.features.canFeatureBestSellers,
+      isNewArrival: subscriptionInfo.features.canFeatureNewArrivals,
+      isClearance: subscriptionInfo.features.canFeatureClearance,
+      isGiftCard: subscriptionInfo.features.canFeatureGiftCards
+    };
+
+    if (!featureMap[feature]) {
+      const upgradeMap = {
+        isTodayDeal: 'Growth',
+        isBestSeller: 'Growth',
+        isNewArrival: 'Basic',
+        isClearance: 'Growth',
+        isGiftCard: 'Pro'
+      };
+      return { 
+        allowed: false, 
+        reason: `${subscriptionInfo.tier} tier doesn't include this feature. Upgrade to ${upgradeMap[feature]} or higher.` 
+      };
+    }
+
+    const remaining = getRemainingUsage(feature);
+    if (remaining <= 0 && subscriptionInfo.limits[`max${feature.replace('is', '')}PerMonth` as keyof typeof subscriptionInfo.limits] > 0) {
+      return { allowed: false, reason: 'Monthly limit reached. Upgrade or wait for next month.' };
+    }
+
+    return { allowed: true };
+  };
+
+  const handleSubscriptionCategoryChange = (category: FeatureToggleKey, value: boolean) => {
+    if (value && !formData.subscriptionCategories[category]) {
+      const check = canEnableFeature(category);
+      if (!check.allowed) {
+        setMessage({ type: 'error', text: check.reason || 'Feature not available' });
+        return;
+      }
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      subscriptionCategories: { ...prev.subscriptionCategories, [category]: value }
+    }));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    if (name === 'price' || name === 'originalPrice' || name === 'stock' || name === 'dealDiscount') {
+      setFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
+    } else if (name.includes('shipping.')) {
+      const path = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        shipping: {
+          ...prev.shipping,
+          [path[1]]: path[1] === 'dimensions' 
+            ? { ...prev.shipping.dimensions, [path[2]]: parseFloat(value) || 0 }
+            : parseFloat(value) || 0
+        }
+      }));
+    } else if (name === 'giftCardValues') {
+      const values = value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+      setFormData(prev => ({ ...prev, giftCardValues: values }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setMessage({ type: 'info', text: 'Updating product...' });
+
+    try {
+      const response = await fetch(`/api/vendor/products/${productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Product updated successfully!' });
+        // Refresh subscription info to show updated usage
+        await fetchSubscriptionStatus();
+        setTimeout(() => {
+          router.push('/vendor-dashboard');
+        }, 2000);
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Error updating product' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Error updating product' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-[var(--color-primary)] mx-auto mb-4" />
+          <p className="text-[var(--color-text-muted)]">Loading product...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== 'vendor') {
+    return (
+      <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="inline-flex p-4 bg-red-500/10 rounded-full mb-4">
+            <AlertCircle className="w-12 h-12 text-red-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-[var(--color-text)] mb-2">Access Denied</h1>
+          <p className="text-[var(--color-text-muted)] mb-6">Only vendors can access this page.</p>
+          <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-xl hover:bg-[var(--color-primary-hover)] transition-all duration-300">
+            Go to Home
+            <ArrowLeft className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const tier = subscriptionInfo?.tier || 'basic';
+  const tierColors = {
+    basic: 'text-gray-500',
+    growth: 'text-green-500',
+    pro: 'text-purple-500',
+    elite: 'text-yellow-500'
+  };
+
+  return (
+    <div className="min-h-screen bg-[var(--color-background)]">
+      {/* Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary)]/10 via-[var(--color-primary-soft)]/5 to-transparent py-8 md:py-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--color-primary)]/10 rounded-full mb-4">
+                <Sparkles className="w-4 h-4 text-[var(--color-primary)]" />
+                <span className="text-sm text-[var(--color-primary)] font-medium">Edit Product</span>
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-text)]">
+                Edit {formData.name || 'Product'}
+              </h1>
+              <p className="text-[var(--color-text-muted)] mt-2">
+                Update your product information and visibility settings
+              </p>
+            </div>
+            <div className="bg-[var(--color-surface)] rounded-xl px-4 py-2 border border-[var(--color-border)]">
+              <div className="flex items-center gap-2">
+                <Crown className={`w-4 h-4 ${tierColors[tier as keyof typeof tierColors]}`} />
+                <span className="text-sm font-medium capitalize">{tier} Plan</span>
+                {subscriptionInfo && subscriptionInfo.remainingDays > 0 && (
+                  <span className="text-xs text-[var(--color-text-muted)] ml-2">
+                    ({subscriptionInfo.remainingDays} days left)
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        {/* Messages */}
+        {message && (
+          <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 animate-in slide-in-from-top duration-300 ${
+            message.type === 'success' ? 'bg-green-500/10 border border-green-500/20 text-green-600' :
+            message.type === 'error' ? 'bg-red-500/10 border border-red-500/20 text-red-600' :
+            'bg-blue-500/10 border border-blue-500/20 text-blue-600'
+          }`}>
+            {message.type === 'success' && <CheckCircle className="w-5 h-5 flex-shrink-0" />}
+            {message.type === 'error' && <AlertCircle className="w-5 h-5 flex-shrink-0" />}
+            {message.type === 'info' && <Loader2 className="w-5 h-5 flex-shrink-0 animate-spin" />}
+            <span>{message.text}</span>
+          </div>
+        )}
+
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Sidebar Navigation */}
+          <div className="lg:w-64 flex-shrink-0">
+            <div className="sticky top-24 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-4">
+              <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-4 px-2">
+                Sections
+              </h3>
+              <nav className="space-y-1">
+                {[
+                  { id: 'basic', label: 'Basic Info', icon: <Package className="w-4 h-4" /> },
+                  { id: 'category', label: 'Category', icon: <Tag className="w-4 h-4" /> },
+                  { id: 'subscription', label: 'Visibility Features', icon: <TrendingUp className="w-4 h-4" /> },
+                  { id: 'specs', label: 'Specifications', icon: <Hash className="w-4 h-4" /> },
+                  { id: 'shipping', label: 'Shipping', icon: <Truck className="w-4 h-4" /> },
+                  { id: 'tags', label: 'Tags', icon: <Hash className="w-4 h-4" /> },
+                ].map((section) => (
+                  <button
+                    key={section.id}
+                    onClick={() => {
+                      setActiveSection(section.id);
+                      document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
+                      activeSection === section.id
+                        ? 'bg-gradient-to-r from-[var(--color-primary)]/10 to-[var(--color-primary-alt)]/10 text-[var(--color-primary)] border-l-2 border-[var(--color-primary)]'
+                        : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-background-soft)]'
+                    }`}
+                  >
+                    {section.icon}
+                    <span>{section.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
+          </div>
+
+          {/* Main Form */}
+          <form onSubmit={handleSubmit} className="flex-1 space-y-6">
+            {/* Basic Info Section */}
+            <div id="basic" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+              <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+                <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                  <Package className="w-5 h-5 text-[var(--color-primary)]" />
+                  Basic Information
+                </h2>
+              </div>
+              <div className="p-6 space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Product Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">SKU *</label>
+                    <input
+                      type="text"
+                      name="sku"
+                      value={formData.sku}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Description *</label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    required
+                    rows={5}
+                    className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Price (KES) *</label>
+                    <input
+                      type="number"
+                      name="price"
+                      value={formData.price || ''}
+                      onChange={handleInputChange}
+                      required
+                      min="0"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Original Price (Optional)</label>
+                    <input
+                      type="number"
+                      name="originalPrice"
+                      value={formData.originalPrice || ''}
+                      onChange={handleInputChange}
+                      min="0"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Stock *</label>
+                    <input
+                      type="number"
+                      name="stock"
+                      value={formData.stock || ''}
+                      onChange={handleInputChange}
+                      required
+                      min="0"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Brand</label>
+                  <input
+                    type="text"
+                    name="brand"
+                    value={formData.brand || ''}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Category Section */}
+            <div id="category" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+              <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+                <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                  <Tag className="w-5 h-5 text-[var(--color-primary)]" />
+                  Category
+                </h2>
+              </div>
+              <div className="p-6 space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Category *</label>
+                    <select
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                    >
+                      <option value="">Select Category</option>
+                      {['Electronics', 'Fashion', 'Home & Kitchen', 'Beauty & Personal Care', 'Sports & Outdoors', 'Toys & Games', 'Food & Beverages', 'Health & Wellness', 'Books & Stationery', 'Automotive', 'Other'].map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Subcategory</label>
+                    <input
+                      type="text"
+                      name="subcategory"
+                      value={formData.subcategory || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Visibility Features Section */}
+            <div id="subscription" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+              <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+                <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-[var(--color-primary)]" />
+                  Visibility Features
+                </h2>
+                <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                  Boost your product visibility based on your {tier} plan
+                </p>
+              </div>
+              <div className="p-6 space-y-6">
+                {/* Today's Deal */}
+                <FeatureToggleCard
+                  title="Today's Deal"
+                  description="Feature your product with a time-limited discount. Creates urgency and drives conversions."
+                  icon={<Flame className="w-5 h-5" />}
+                  featureKey="isTodayDeal"
+                  color="orange"
+                  isEnabled={formData.subscriptionCategories.isTodayDeal}
+                  canEnable={subscriptionInfo?.features.canFeatureTodayDeals || false}
+                  remainingUsage={getRemainingUsage('isTodayDeal')}
+                  maxLimit={subscriptionInfo?.limits.maxTodayDealsPerMonth || 0}
+                  tier={tier}
+                  onToggle={(value) => handleSubscriptionCategoryChange('isTodayDeal', value)}
+                >
+                  {formData.subscriptionCategories.isTodayDeal && (
+                    <div className="mt-4 pl-11 space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-[var(--color-text)] mb-1">Discount (%) *</label>
+                          <input
+                            type="number"
+                            name="dealDiscount"
+                            value={formData.dealDiscount || ''}
+                            onChange={handleInputChange}
+                            min="0"
+                            max="100"
+                            required
+                            placeholder="e.g., 20"
+                            className="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-[var(--color-text)] mb-1">Expiry Date *</label>
+                          <input
+                            type="datetime-local"
+                            name="dealExpiry"
+                            value={formData.dealExpiry || ''}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </FeatureToggleCard>
+
+                {/* Best Seller */}
+                <FeatureToggleCard
+                  title="Best Seller"
+                  description="Showcase your top-performing products. Builds trust and social proof."
+                  icon={<TrendingUp className="w-5 h-5" />}
+                  featureKey="isBestSeller"
+                  color="green"
+                  isEnabled={formData.subscriptionCategories.isBestSeller}
+                  canEnable={subscriptionInfo?.features.canFeatureBestSellers || false}
+                  remainingUsage={getRemainingUsage('isBestSeller')}
+                  maxLimit={subscriptionInfo?.limits.maxBestSellersPerMonth || 0}
+                  tier={tier}
+                  onToggle={(value) => handleSubscriptionCategoryChange('isBestSeller', value)}
+                />
+
+                {/* New Arrival */}
+                <FeatureToggleCard
+                  title="New Arrival"
+                  description="Highlight new products. Keeps your store fresh and encourages repeat visits."
+                  icon={<Sparkles className="w-5 h-5" />}
+                  featureKey="isNewArrival"
+                  color="blue"
+                  isEnabled={formData.subscriptionCategories.isNewArrival}
+                  canEnable={subscriptionInfo?.features.canFeatureNewArrivals || false}
+                  remainingUsage={getRemainingUsage('isNewArrival')}
+                  maxLimit={subscriptionInfo?.limits.maxNewArrivalsPerMonth || 0}
+                  tier={tier}
+                  onToggle={(value) => handleSubscriptionCategoryChange('isNewArrival', value)}
+                />
+
+                {/* Clearance */}
+                <FeatureToggleCard
+                  title="Clearance"
+                  description="Clear old inventory with deep discounts. Perfect for overstock or seasonal items."
+                  icon={<Percent className="w-5 h-5" />}
+                  featureKey="isClearance"
+                  color="red"
+                  isEnabled={formData.subscriptionCategories.isClearance}
+                  canEnable={subscriptionInfo?.features.canFeatureClearance || false}
+                  remainingUsage={getRemainingUsage('isClearance')}
+                  maxLimit={subscriptionInfo?.limits.maxClearanceItemsPerMonth || 0}
+                  tier={tier}
+                  onToggle={(value) => handleSubscriptionCategoryChange('isClearance', value)}
+                >
+                  {formData.subscriptionCategories.isClearance && (
+                    <div className="mt-4 pl-11">
+                      <label className="block text-xs font-medium text-[var(--color-text)] mb-1">Clearance Reason</label>
+                      <select
+                        name="clearanceReason"
+                        value={formData.clearanceReason || ''}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                      >
+                        <option value="">Select reason</option>
+                        <option value="overstock">Overstock / Excess Inventory</option>
+                        <option value="old_inventory">Old Inventory / Discontinued</option>
+                        <option value="seasonal">Seasonal Clearance</option>
+                        <option value="discontinued">Discontinued Product</option>
+                      </select>
+                    </div>
+                  )}
+                </FeatureToggleCard>
+
+                {/* Gift Card */}
+                <FeatureToggleCard
+                  title="Gift Card"
+                  description="Sell digital gift cards. Perfect for gifting and increasing revenue."
+                  icon={<Gift className="w-5 h-5" />}
+                  featureKey="isGiftCard"
+                  color="purple"
+                  isEnabled={formData.subscriptionCategories.isGiftCard}
+                  canEnable={subscriptionInfo?.features.canFeatureGiftCards || false}
+                  remainingUsage={getRemainingUsage('isGiftCard')}
+                  maxLimit={subscriptionInfo?.limits.maxGiftCardsPerMonth || 0}
+                  tier={tier}
+                  onToggle={(value) => handleSubscriptionCategoryChange('isGiftCard', value)}
+                >
+                  {formData.subscriptionCategories.isGiftCard && (
+                    <div className="mt-4 pl-11">
+                      <label className="block text-xs font-medium text-[var(--color-text)] mb-1">Gift Card Values (KES) - Comma separated</label>
+                      <input
+                        type="text"
+                        name="giftCardValues"
+                        value={formData.giftCardValues?.join(', ') || ''}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 500, 1000, 2500, 5000"
+                        className="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                      />
+                      <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                        Enter multiple values separated by commas
+                      </p>
+                    </div>
+                  )}
+                </FeatureToggleCard>
+
+                {/* Upgrade Banner for Basic Plan */}
+                {tier === 'basic' && (
+                  <div className="mt-4 p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-xl border border-amber-500/20">
+                    <div className="flex items-start gap-3">
+                      <Crown className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="text-sm font-semibold text-[var(--color-text)] mb-1">Unlock More Features</h4>
+                        <p className="text-xs text-[var(--color-text-muted)] mb-3">
+                          Upgrade to Growth or Pro plan to access Today's Deals, Best Sellers, Clearance, and Gift Cards.
+                        </p>
+                        <Link href="/subscriptions" className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-medium hover:bg-amber-600 transition-colors">
+                          Upgrade Now
+                          <Zap className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Specifications Section */}
+            <div id="specs" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+              <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+                <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                  <Tag className="w-5 h-5 text-[var(--color-primary)]" />
+                  Specifications
+                </h2>
+              </div>
+              <div className="p-6">
+                {formData.specifications.map((spec, idx) => (
+                  <div key={idx} className="flex flex-col sm:flex-row items-center gap-3 mb-3">
+                    <input
+                      type="text"
+                      placeholder="Specification name"
+                      value={spec.key}
+                      onChange={(e) => {
+                        const updated = [...formData.specifications];
+                        updated[idx].key = e.target.value;
+                        setFormData(prev => ({ ...prev, specifications: updated }));
+                      }}
+                      className="flex-1 w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Value"
+                      value={spec.value}
+                      onChange={(e) => {
+                        const updated = [...formData.specifications];
+                        updated[idx].value = e.target.value;
+                        setFormData(prev => ({ ...prev, specifications: updated }));
+                      }}
+                      className="flex-1 w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, specifications: prev.specifications.filter((_, i) => i !== idx) }))}
+                      className="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, specifications: [...prev.specifications, { key: '', value: '' }] }))}
+                  className="mt-3 inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--color-background-soft)] text-[var(--color-primary)] rounded-xl hover:bg-[var(--color-primary)]/10 transition-all"
+                >
+                  <Plus className="w-4 h-4" /> Add Specification
+                </button>
+              </div>
+            </div>
+
+            {/* Shipping Section */}
+            <div id="shipping" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+              <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+                <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                  <Truck className="w-5 h-5 text-[var(--color-primary)]" />
+                  Shipping Information
+                </h2>
+              </div>
+              <div className="p-6 space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Weight (grams) *</label>
+                  <input
+                    type="number"
+                    name="shipping.weight"
+                    value={formData.shipping.weight || ''}
+                    onChange={handleInputChange}
+                    required
+                    min="0"
+                    className="w-full md:w-1/2 px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-3">Dimensions (cm)</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-[var(--color-text-muted)] mb-1">Length</label>
+                      <input
+                        type="number"
+                        name="shipping.dimensions.length"
+                        value={formData.shipping.dimensions.length || ''}
+                        onChange={handleInputChange}
+                        min="0"
+                        className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-[var(--color-text-muted)] mb-1">Width</label>
+                      <input
+                        type="number"
+                        name="shipping.dimensions.width"
+                        value={formData.shipping.dimensions.width || ''}
+                        onChange={handleInputChange}
+                        min="0"
+                        className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-[var(--color-text-muted)] mb-1">Height</label>
+                      <input
+                        type="number"
+                        name="shipping.dimensions.height"
+                        value={formData.shipping.dimensions.height || ''}
+                        onChange={handleInputChange}
+                        min="0"
+                        className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tags Section */}
+            <div id="tags" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+              <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
+                <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                  <Hash className="w-5 h-5 text-[var(--color-primary)]" />
+                  Tags
+                </h2>
+              </div>
+              <div className="p-6">
+                <input
+                  type="text"
+                  placeholder="Enter tags separated by commas"
+                  value={formData.tags.join(', ')}
+                  onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value.split(',').map(t => t.trim()).filter(t => t) }))}
+                  className="w-full px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                />
+                <p className="text-xs text-[var(--color-text-muted)] mt-2">
+                  Tags help customers find your products. Separate multiple tags with commas.
+                </p>
+              </div>
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex flex-col sm:flex-row justify-end gap-4 pt-4 pb-8">
+              <button
+                type="button"
+                onClick={() => router.push('/vendor-dashboard')}
+                className="px-6 py-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] rounded-xl font-medium hover:border-[var(--color-primary)] transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5" />
+                    Update Product
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Feature Toggle Card Component
+interface FeatureToggleCardProps {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  featureKey: string;
+  color: 'orange' | 'green' | 'blue' | 'red' | 'purple';
+  isEnabled: boolean;
+  canEnable: boolean;
+  remainingUsage: number;
+  maxLimit: number;
+  tier: string;
+  onToggle: (value: boolean) => void;
+  children?: React.ReactNode;
+}
+
+function FeatureToggleCard({
+  title,
+  description,
+  icon,
+  color,
+  isEnabled,
+  canEnable,
+  remainingUsage,
+  maxLimit,
+  tier,
+  onToggle,
+  children
+}: FeatureToggleCardProps) {
+  const colorClasses = {
+    orange: { border: 'border-orange-500', bg: 'bg-orange-500/5', iconBg: 'bg-orange-500/20', iconText: 'text-orange-500', toggle: 'bg-orange-500' },
+    green: { border: 'border-green-500', bg: 'bg-green-500/5', iconBg: 'bg-green-500/20', iconText: 'text-green-500', toggle: 'bg-green-500' },
+    blue: { border: 'border-blue-500', bg: 'bg-blue-500/5', iconBg: 'bg-blue-500/20', iconText: 'text-blue-500', toggle: 'bg-blue-500' },
+    red: { border: 'border-red-500', bg: 'bg-red-500/5', iconBg: 'bg-red-500/20', iconText: 'text-red-500', toggle: 'bg-red-500' },
+    purple: { border: 'border-purple-500', bg: 'bg-purple-500/5', iconBg: 'bg-purple-500/20', iconText: 'text-purple-500', toggle: 'bg-purple-500' }
+  };
+  const c = colorClasses[color];
+
+  const isUpgradeRequired = !canEnable && maxLimit === 0;
+  const isLimitReached = canEnable && remainingUsage <= 0 && maxLimit > 0;
+
+  return (
+    <div className={`p-4 rounded-xl border transition-all ${isEnabled ? `${c.border} ${c.bg}` : 'border-[var(--color-border)]'}`}>
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-3 flex-1">
+          <div className={`p-2 rounded-lg ${isEnabled ? c.iconBg : 'bg-[var(--color-background-soft)]'}`}>
+            <div className={isEnabled ? c.iconText : 'text-[var(--color-text-muted)]'}>{icon}</div>
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-semibold text-[var(--color-text)]">{title}</h3>
+              {isUpgradeRequired && (
+                <span className="text-xs bg-gray-500/10 text-gray-500 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Lock className="w-3 h-3" /> Upgrade to {title === 'Gift Card' ? 'Pro' : 'Growth'}
+                </span>
+              )}
+              {isLimitReached && (
+                <span className="text-xs bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> Limit reached
+                </span>
+              )}
+              {canEnable && !isLimitReached && remainingUsage > 0 && (
+                <span className="text-xs bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full">
+                  {remainingUsage} of {maxLimit} remaining
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">{description}</p>
+            {isUpgradeRequired && (
+              <div className="mt-2">
+                <Link
+                  href="/subscriptions"
+                  className="inline-flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
+                >
+                  Upgrade your plan to unlock
+                  <ChevronRight className="w-3 h-3" />
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onToggle(!isEnabled)}
+          disabled={!canEnable || isLimitReached}
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+            isEnabled ? c.toggle : 'bg-[var(--color-border)]'
+          } ${(!canEnable || isLimitReached) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        >
+          <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+            isEnabled ? 'translate-x-6' : 'translate-x-1'
+          }`} />
+        </button>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// Add missing ChevronRight import
+const ChevronRight = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+  </svg>
+);
