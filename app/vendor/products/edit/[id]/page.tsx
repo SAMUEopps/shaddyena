@@ -3638,7 +3638,7 @@ export default function EditProductPage() {
                   { id: 'category', label: 'Category', icon: <Tag className="w-4 h-4" /> },
                   { id: 'subscription', label: 'Visibility Features', icon: <TrendingUp className="w-4 h-4" /> },
                   { id: 'specs', label: 'Specifications', icon: <Hash className="w-4 h-4" /> },
-                  { id: 'shipping', label: 'Shipping', icon: <Truck className="w-4 h-4" /> },
+                 //shipping staff
                   { id: 'tags', label: 'Tags', icon: <Hash className="w-4 h-4" /> },
                 ].map((section) => (
                   <button
@@ -4024,7 +4024,7 @@ export default function EditProductPage() {
             </div>
 
             {/* Shipping Section */}
-            <div id="shipping" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
+            {/*<div id="shipping" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">
               <div className="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)]/5 to-transparent">
                 <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
                   <Truck className="w-5 h-5 text-[var(--color-primary)]" />
@@ -4083,7 +4083,7 @@ export default function EditProductPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div>*/}
 
             {/* Tags Section */}
             <div id="tags" className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] overflow-hidden scroll-mt-24">

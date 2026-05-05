@@ -1153,7 +1153,7 @@ const ProductShowcase = () => {
           </div>
 
           {/* Features Bar - Responsive grid */}
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 xs:gap-3 sm:gap-4 mt-8 sm:mt-10 lg:mt-12">
+          {/*<div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 xs:gap-3 sm:gap-4 mt-8 sm:mt-10 lg:mt-12">
             <div className="bg-[var(--color-surface)] rounded-lg xs:rounded-xl border border-[var(--color-border)] p-2 xs:p-3 sm:p-4 flex items-center gap-2 xs:gap-2.5 sm:gap-3">
               <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 rounded-lg bg-[var(--color-primary-soft)]/20 flex items-center justify-center flex-shrink-0">
                 <Truck className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-[var(--color-primary)]" />
@@ -1183,7 +1183,7 @@ const ProductShowcase = () => {
                 <p className="text-[8px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)] truncate">Price match guarantee</p>
               </div>
             </div>
-          </div>
+          </div>*/}
 
           {/* View All CTA */}
           {/*<div className="relative mt-8 sm:mt-10 lg:mt-12 text-center">
