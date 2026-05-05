@@ -975,6 +975,111 @@ export default function AdminCategoriesPage() {
   };
 
   const renderCategoryTree = (categories: Category[], level: number = 0) => {
+  return categories.map((category) => {
+    const isExpanded = expandedNodes.has(category._id);
+    const hasChildren = category.children && category.children.length > 0;
+    const productCount = category.metadata?.productCount || 0;
+
+    return (
+      <div key={category._id} className="relative">
+        <div
+          className={`flex items-start sm:items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-[var(--color-background-soft)] transition-colors group ${
+            !category.isActive ? 'opacity-60' : ''
+          }`}
+          style={{ marginLeft: `${level * (typeof window !== 'undefined' && window.innerWidth < 640 ? 12 : 24)}px` }}
+        >
+          {/* Expand/Collapse Toggle */}
+          <button
+            onClick={() => hasChildren && toggleExpand(category._id)}
+            className="w-6 h-6 flex-shrink-0 flex items-center justify-center rounded hover:bg-[var(--color-primary-soft)]/20 transition-colors mt-1 sm:mt-0"
+            disabled={!hasChildren}
+          >
+            {hasChildren &&
+              (isExpanded ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              ))}
+          </button>
+
+          {/* Icon */}
+          <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-[var(--color-primary-soft)]/20 to-[var(--color-primary)]/20 flex items-center justify-center">
+            {category.icon ? (
+              <span className="text-lg sm:text-xl">{category.icon}</span>
+            ) : (
+              <Folder className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-primary)]" />
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            {/* Name + Badges */}
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <h3 className="font-medium text-[var(--color-text)] text-sm sm:text-base truncate">
+                {category.name}
+              </h3>
+              {!category.isActive && (
+                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+                  Inactive
+                </span>
+              )}
+              {category.metadata?.featured && (
+                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full flex items-center gap-0.5 sm:gap-1">
+                  <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                  <span className="hidden sm:inline">Featured</span>
+                </span>
+              )}
+              {category.metadata?.popular && (
+                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-0.5 sm:gap-1">
+                  <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                  <span className="hidden sm:inline">Popular</span>
+                </span>
+              )}
+            </div>
+
+            {/* Metadata */}
+            <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-0.5 text-[10px] sm:text-xs text-[var(--color-text-muted)] mt-1">
+              <span className="hidden sm:inline">Slug: {category.slug}</span>
+              <span className="hidden sm:inline">Level: {category.level}</span>
+              <span>Order: {category.order}</span>
+              <span className="flex items-center gap-0.5 sm:gap-1">
+                <Tag className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                {productCount} products
+              </span>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-1 sm:gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={() => handleEdit(category)}
+              className="p-1.5 sm:p-2 rounded-lg hover:bg-[var(--color-primary-soft)]/20 text-[var(--color-primary)] transition-colors"
+              title="Edit"
+            >
+              <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
+            <button
+              onClick={() => handleDelete(category)}
+              className="p-1.5 sm:p-2 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
+              title="Delete"
+            >
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Children */}
+        {isExpanded && hasChildren && (
+          <div className="ml-2 sm:ml-4">
+            {renderCategoryTree(category.children!, level + 1)}
+          </div>
+        )}
+      </div>
+    );
+  });
+};
+
+  /*const renderCategoryTree = (categories: Category[], level: number = 0) => {
     return categories.map((category) => {
       const isExpanded = expandedNodes.has(category._id);
       const hasChildren = category.children && category.children.length > 0;
@@ -1066,7 +1171,7 @@ export default function AdminCategoriesPage() {
         </div>
       );
     });
-  };
+  };*/
 
   const renderListView = () => {
     const filtered = flatCategories.filter(cat =>
