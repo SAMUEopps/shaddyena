@@ -3351,7 +3351,45 @@ export default function EditProductPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
   const [activeSection, setActiveSection] = useState('basic');
+  const [isUploading, setIsUploading] = useState(false);
+const [imageFiles, setImageFiles] = useState<File[]>([]);
 
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const files = Array.from(e.target.files || []);
+  if (files.length === 0) return;
+
+  setIsUploading(true);
+  setMessage({ type: 'info', text: 'Uploading images...' });
+
+  try {
+    // Dynamic import to avoid SSR issues
+    const { uploadMultipleToCloudinary } = await import('@/lib/cloudinary');
+    const uploadedUrls = await uploadMultipleToCloudinary(files);
+    
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, ...uploadedUrls]
+    }));
+    setImageFiles(prev => [...prev, ...files]);
+    setMessage({ type: 'success', text: `${uploadedUrls.length} image(s) uploaded successfully!` });
+    setTimeout(() => setMessage(null), 3000);
+  } catch (error) {
+    setMessage({ type: 'error', text: 'Error uploading images. Please try again.' });
+    console.error('Image upload error:', error);
+  } finally {
+    setIsUploading(false);
+    // Reset input so same files can be selected again
+    e.target.value = '';
+  }
+};
+
+const removeImage = (index: number) => {
+  setFormData(prev => ({
+    ...prev,
+    images: prev.images.filter((_, i) => i !== index)
+  }));
+  setImageFiles(prev => prev.filter((_, i) => i !== index));
+};
   useEffect(() => {
     if (productId && user) {
       Promise.all([fetchProduct(), fetchSubscriptionStatus()]);
@@ -3755,6 +3793,71 @@ export default function EditProductPage() {
                   />
                 </div>
               </div>
+              {/* Images Upload */}
+<div className="space-y-3">
+  <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+    Product Images
+  </label>
+  
+  {/* Image Preview Grid */}
+  {formData.images.length > 0 && (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
+      {formData.images.map((url, index) => (
+        <div key={index} className="relative group aspect-square rounded-xl overflow-hidden border border-[var(--color-border)]">
+          <img 
+            src={url} 
+            alt={`Product ${index + 1}`}
+            className="w-full h-full object-cover"
+          />
+          <button
+            type="button"
+            onClick={() => removeImage(index)}
+            className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+          {index === 0 && (
+            <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-[var(--color-primary)] text-white text-xs rounded-md">
+              Main
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
+  )}
+
+  {/* Upload Input */}
+  <div className="relative">
+    <input
+      type="file"
+      accept="image/*"
+      multiple
+      onChange={handleImageUpload}
+      disabled={isUploading}
+      className="hidden"
+      id="image-upload"
+    />
+    <label
+      htmlFor="image-upload"
+      className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--color-border)] rounded-xl cursor-pointer transition-all ${
+        isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5'
+      }`}
+    >
+      {isUploading ? (
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+          <span className="text-sm text-[var(--color-text-muted)]">Uploading...</span>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-2">
+          <Plus className="w-8 h-8 text-[var(--color-text-muted)]" />
+          <span className="text-sm text-[var(--color-text-muted)]">Click to upload images</span>
+          <span className="text-xs text-[var(--color-text-muted)]">PNG, JPG, GIF up to 5MB</span>
+        </div>
+      )}
+    </label>
+  </div>
+</div>
             </div>
 
             {/* Category Section */}

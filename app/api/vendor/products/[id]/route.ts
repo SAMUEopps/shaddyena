@@ -564,7 +564,6 @@ export async function PUT(
 
     const body = await req.json();
     const { subscriptionCategories, dealDiscount, dealExpiry, dealStartDate, clearanceReason, giftCardValues } = body;
-
     // Get existing product
     const existingProduct = await Product.findOne({ _id: id, vendorId: userId });
     if (!existingProduct) {
@@ -706,7 +705,8 @@ export async function PUT(
     // Update the product
     const updatedProduct = await Product.findByIdAndUpdate(
       id, 
-      updateData, 
+      { $set: updateData },
+      //updateData, 
       { new: true, runValidators: true }
     );
 
