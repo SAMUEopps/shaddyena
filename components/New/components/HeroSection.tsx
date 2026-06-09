@@ -463,6 +463,32 @@ const HeroSection = () => {
         </div>
 
         {/* LEFT COLUMN - Bottom Section */}
+        {/*<div className="lg:col-span-1 lg:row-span-1 group relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 overflow-hidden hover:shadow-xl transition-all duration-500 hover:border-[var(--color-primary)]/30">
+          {/* Decorative badge *
+          <div className="absolute top-4 right-4 bg-[var(--color-primary-alt)] text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse-slow">
+            {heroData.bottomLeft.badge}
+          </div>
+          
+          <div className="relative h-full flex flex-col justify-between">
+            <div className="w-12 h-12 bg-[var(--color-primary-soft)]/30 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Sparkles className="w-6 h-6 text-[var(--color-primary-alt)]" />
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-bold text-[var(--color-text)] mb-1">{heroData.bottomLeft.title}</h3>
+              <p className="text-sm text-[var(--color-text-muted)] mb-3">{heroData.bottomLeft.subtitle}</p>
+              
+              <Link 
+                href={heroData.bottomLeft.link}
+                className="inline-flex items-center text-[var(--color-primary-alt)] hover:text-[var(--color-primary-hover)] font-medium text-sm group/link"
+              >
+                Join Now
+                <ArrowRight className="w-4 h-4 ml-1 group-hover/link:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+          </div>
+        </div>*/}
+
         <div className="lg:col-span-1 lg:row-span-1 group relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 overflow-hidden hover:shadow-xl transition-all duration-500 hover:border-[var(--color-primary)]/30">
           {/* Decorative badge */}
           <div className="absolute top-4 right-4 bg-[var(--color-primary-alt)] text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse-slow">
@@ -479,7 +505,7 @@ const HeroSection = () => {
               <p className="text-sm text-[var(--color-text-muted)] mb-3">{heroData.bottomLeft.subtitle}</p>
               
               <Link 
-                href={heroData.bottomLeft.link}
+                href="/membership"  // Changed from heroData.bottomLeft.link
                 className="inline-flex items-center text-[var(--color-primary-alt)] hover:text-[var(--color-primary-hover)] font-medium text-sm group/link"
               >
                 Join Now
