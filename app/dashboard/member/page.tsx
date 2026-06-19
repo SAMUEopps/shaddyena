@@ -21,6 +21,7 @@ import {
   LogOut,
   User,
   Settings,
+  Phone,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -63,6 +64,7 @@ export default function MemberDashboard() {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState(100);
   const [depositing, setDepositing] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   useEffect(() => {
     fetchDashboardData();
@@ -100,7 +102,7 @@ export default function MemberDashboard() {
     }
   };
 
-  const handleDeposit = async () => {
+  /*const handleDeposit = async () => {
     if (depositAmount < 100) {
       toast.error('Minimum deposit is KES 100');
       return;
@@ -124,6 +126,58 @@ export default function MemberDashboard() {
       setShowDepositModal(false);
       setDepositAmount(100);
       fetchDashboardData();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setDepositing(false);
+    }
+  };*/
+
+  const handleDeposit = async () => {
+    if (depositAmount < 100) {
+      toast.error('Minimum deposit is KES 100');
+      return;
+    }
+
+    // Validate phone number
+    const phoneRegex = /^(?:254|0)[17]\d{8}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      toast.error('Please enter a valid phone number (e.g., 0712345678 or 254712345678)');
+      return;
+    }
+
+    setDepositing(true);
+    try {
+      const response = await fetch('/api/savings/deposit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          amount: depositAmount, 
+          phoneNumber: phoneNumber,
+          paymentMethod: 'mpesa' 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Deposit failed');
+      }
+
+      toast.success(data.message || 'STK Push sent to your phone. Please complete the payment.');
+      setShowDepositModal(false);
+      setDepositAmount(100);
+      setPhoneNumber('');
+      
+      // Don't refresh immediately - wait for callback
+      // Show pending status
+      toast.loading('Waiting for payment confirmation...', { duration: 30000 });
+      
+      // Poll for transaction status or refresh after delay
+      setTimeout(() => {
+        fetchDashboardData();
+      }, 15000);
+
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -328,7 +382,7 @@ export default function MemberDashboard() {
       </main>
 
       {/* Deposit Modal */}
-      {showDepositModal && (
+      {/*{showDepositModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-[var(--color-surface)] rounded-2xl max-w-md w-full p-6">
             <h2 className="text-xl font-bold text-[var(--color-text)] mb-4">Deposit Funds</h2>
@@ -359,6 +413,72 @@ export default function MemberDashboard() {
               >
                 {depositing ? 'Processing...' : 'Deposit'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}*/}
+            {showDepositModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--color-surface)] rounded-2xl max-w-md w-full p-6">
+            <h2 className="text-xl font-bold text-[var(--color-text)] mb-4">Deposit Funds</h2>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                Amount (KES)
+              </label>
+              <input
+                type="number"
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(Math.max(100, parseInt(e.target.value) || 0))}
+                min={100}
+                className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+              <p className="text-sm text-[var(--color-text-muted)] mt-1">Minimum KES 100</p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                M-Pesa Phone Number
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)]" />
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="0712345678"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                />
+              </div>
+              <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                Enter the M-Pesa number you want to pay from
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDepositModal(false);
+                  setPhoneNumber('');
+                }}
+                className="flex-1 px-4 py-2 rounded-xl border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-background-soft)] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeposit}
+                disabled={depositing || !phoneNumber}
+                className="flex-1 bg-[var(--color-primary)] text-white py-2 rounded-xl font-semibold hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {depositing ? 'Processing...' : 'Send STK Push'}
+              </button>
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-500/10 rounded-lg">
+              <p className="text-xs text-[var(--color-text-muted)]">
+                <strong>Note:</strong> You will receive a prompt on your phone to complete the payment. 
+                This may take a few seconds.
+              </p>
             </div>
           </div>
         </div>
