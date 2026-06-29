@@ -7,7 +7,7 @@ export interface IMembershipUser extends Document {
   phone: string;
   nationalId: string;
   password: string;
-  role: 'member';
+  role: 'member' | 'admin';
   membershipNumber: string;
   isActive: boolean;
   isVerified: boolean;
@@ -23,7 +23,7 @@ const membershipUserSchema = new Schema<IMembershipUser>(
     phone: { type: String, required: true, trim: true },
     nationalId: { type: String, required: true, unique: true, trim: true },
     password: { type: String, required: true, select: false },
-    role: { type: String, default: 'member', enum: ['member'] },
+    role: { type: String, enum: ['member', 'admin'], default: 'member' },
     membershipNumber: { type: String, required: true, unique: true },
     isActive: { type: Boolean, default: true },
     isVerified: { type: Boolean, default: false },

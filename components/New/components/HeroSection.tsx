@@ -329,7 +329,8 @@ export default HeroSection;*'*/
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Star, Clock, Shield, TrendingUp, Sparkles } from 'lucide-react';
+import { ArrowRight, Star, Clock, Shield, TrendingUp, Sparkles, Settings } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Dummy data for hero sections
 const heroData = {
@@ -392,6 +393,8 @@ const stats = {
 };
 
 const HeroSection = () => {
+  const { user } = useAuth();
+
   const [mounted, setMounted] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
     hours: 23,
@@ -433,8 +436,8 @@ const HeroSection = () => {
       <div className="relative grid grid-cols-1 lg:grid-cols-4 lg:grid-rows-2 gap-4 min-h-[600px]">
         
         {/* LEFT COLUMN - Top Section */}
-        <div className="lg:col-span-1 lg:row-span-1 group relative bg-[var(--color-primary-alt)] rounded-2xl p-6 overflow-hidden hover:shadow-xl transition-all duration-500 hover:scale-[1.02]">
-          {/* Animated background pattern */}
+        {/*<div className="lg:col-span-1 lg:row-span-1 group relative bg-[var(--color-primary-alt)] rounded-2xl p-6 overflow-hidden hover:shadow-xl transition-all duration-500 hover:scale-[1.02]">
+          {/* Animated background pattern *
           <div className="absolute inset-0 opacity-10">
             <div className="absolute -inset-[100%] bg-[radial-gradient(circle_at_50%_50%,white,transparent_50%)] animate-pulse-slow"></div>
           </div>
@@ -460,7 +463,42 @@ const HeroSection = () => {
               </div>
             </div>
           </div>
+        </div>*/}
+
+              {/* LEFT COLUMN - Bottom Section */}
+      <div className="lg:col-span-1 lg:row-span-1 group relative bg-[var(--color-surface)] border border-[var(--color-border]) rounded-2xl p-6 overflow-hidden hover:shadow-xl transition-all duration-500 hover:border-[var(--color-primary)]/30">
+        {/* Decorative badge */}
+        <div className="absolute top-4 right-4 bg-[var(--color-primary-alt)] text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse-slow">
+          {user?.role === 'admin' ? 'ADMIN' : heroData.bottomLeft.badge}
         </div>
+        
+        <div className="relative h-full flex flex-col justify-between">
+          <div className="w-12 h-12 bg-[var(--color-primary-soft)]/30 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            {user?.role === 'admin' ? (
+              <Settings className="w-6 h-6 text-[var(--color-primary-alt)]" />
+            ) : (
+              <Sparkles className="w-6 h-6 text-[var(--color-primary-alt)]" />
+            )}
+          </div>
+          
+          <div>
+            <h3 className="text-lg font-bold text-[var(--color-text)] mb-1">
+              {user?.role === 'admin' ? 'Admin Panel' : heroData.bottomLeft.title}
+            </h3>
+            <p className="text-sm text-[var(--color-text-muted)] mb-3">
+              {user?.role === 'admin' ? 'Manage members, funds & more' : heroData.bottomLeft.subtitle}
+            </p>
+            
+            <Link 
+              href={user?.role === 'admin' ? '/admin/membership' : '/membership'}
+              className="inline-flex items-center text-[var(--color-primary-alt)] hover:text-[var(--color-primary-hover)] font-medium text-sm group/link"
+            >
+              {user?.role === 'admin' ? 'Go to Admin' : 'Join Now'}
+              <ArrowRight className="w-4 h-4 ml-1 group-hover/link:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </div>
 
         {/* LEFT COLUMN - Bottom Section */}
         {/*<div className="lg:col-span-1 lg:row-span-1 group relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 overflow-hidden hover:shadow-xl transition-all duration-500 hover:border-[var(--color-primary)]/30">
