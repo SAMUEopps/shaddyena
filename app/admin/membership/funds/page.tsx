@@ -171,13 +171,13 @@ export default function AdminFundsPage() {
                 <p className="text-sm text-[var(--color-text-muted)]">Manage investment opportunities</p>
               </div>
             </div>
-            <button
+            {/*<button
               onClick={() => setShowCreateModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-xl text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
             >
               <Plus className="w-4 h-4" />
               Create Fund
-            </button>
+            </button>*/}
           </div>
         </div>
       </header>
