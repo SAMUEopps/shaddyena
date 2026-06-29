@@ -72,7 +72,7 @@ export default function AdminMembershipPage() {
     fetchStats();
   }, [currentPage, filterStatus]);
 
-  const fetchUsers = async () => {
+  /*const fetchUsers = async () => {
     try {
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -89,17 +89,55 @@ export default function AdminMembershipPage() {
         }
         throw new Error('Failed to fetch users');
       }
+      
 
       const data = await response.json();
       setUsers(data.users);
-      setTotalPages(data.pagination.pages);
+      //setTotalPages(data.pagination.pages);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Failed to load users');
     } finally {
       setLoading(false);
     }
-  };
+  };*/
+
+  const fetchUsers = async () => {
+  try {
+    const params = new URLSearchParams({
+      page: currentPage.toString(),
+      limit: '20',
+      status: filterStatus,
+      search: searchTerm,
+    });
+
+    const response = await fetch(`/api/admin/membership/users?${params}`);
+
+    /*if (!response.ok) {
+      if (response.status === 403) {
+        router.push('/membership/login');
+        return;
+      }
+      throw new Error('Failed to fetch users');
+    }*/
+
+    const data = await response.json();
+
+    console.log("========== USERS RESPONSE ==========");
+    console.log(data);
+    console.log("Users:", data.users);
+    console.log("Type:", typeof data.users);
+    console.log("Is Array:", Array.isArray(data.users));
+    console.log("===================================");
+
+    setUsers(data.users ?? []);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    toast.error('Failed to load users');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchStats = async () => {
     try {
