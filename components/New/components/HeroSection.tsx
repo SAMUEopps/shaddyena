@@ -436,8 +436,8 @@ const HeroSection = () => {
       <div className="relative grid grid-cols-1 lg:grid-cols-4 lg:grid-rows-2 gap-4 min-h-[600px]">
         
         {/* LEFT COLUMN - Top Section */}
-        {/*<div className="lg:col-span-1 lg:row-span-1 group relative bg-[var(--color-primary-alt)] rounded-2xl p-6 overflow-hidden hover:shadow-xl transition-all duration-500 hover:scale-[1.02]">
-          {/* Animated background pattern *
+        <div className="lg:col-span-1 lg:row-span-1 group relative bg-[var(--color-primary-alt)] rounded-2xl p-6 overflow-hidden hover:shadow-xl transition-all duration-500 hover:scale-[1.02]">
+          {/* Animated background pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute -inset-[100%] bg-[radial-gradient(circle_at_50%_50%,white,transparent_50%)] animate-pulse-slow"></div>
           </div>
@@ -463,9 +463,9 @@ const HeroSection = () => {
               </div>
             </div>
           </div>
-        </div>*/}
+        </div>
 
-              {/* LEFT COLUMN - Bottom Section */}
+      {/* LEFT COLUMN - Bottom Section */}
       <div className="lg:col-span-1 lg:row-span-1 group relative bg-[var(--color-surface)] border border-[var(--color-border]) rounded-2xl p-6 overflow-hidden hover:shadow-xl transition-all duration-500 hover:border-[var(--color-primary)]/30">
         {/* Decorative badge */}
         <div className="absolute top-4 right-4 bg-[var(--color-primary-alt)] text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse-slow">
@@ -527,8 +527,8 @@ const HeroSection = () => {
           </div>
         </div>*/}
 
-        <div className="lg:col-span-1 lg:row-span-1 group relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 overflow-hidden hover:shadow-xl transition-all duration-500 hover:border-[var(--color-primary)]/30">
-          {/* Decorative badge */}
+        {/*<div className="lg:col-span-1 lg:row-span-1 group relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 overflow-hidden hover:shadow-xl transition-all duration-500 hover:border-[var(--color-primary)]/30">
+          {/* Decorative badge *
           <div className="absolute top-4 right-4 bg-[var(--color-primary-alt)] text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse-slow">
             {heroData.bottomLeft.badge}
           </div>
@@ -551,7 +551,7 @@ const HeroSection = () => {
               </Link>
             </div>
           </div>
-        </div>
+        </div>*/}
 
         {/* MIDDLE COLUMN - Main Feature (spans both rows) */}
         <div className="lg:col-span-2 lg:row-span-2 group relative bg-[var(--color-primary-alt)] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 hover:scale-[1.01] min-h-[300px] lg:min-h-0">
