@@ -49,8 +49,8 @@ export default function Home() {
   const fetchData = async () => {
     try {
       const [productsResponse, shopsResponse] = await Promise.all([
-        fetch('/api/products'),
-        fetch('/api/shops')
+        fetch('/api/shd-api/api/products'),
+        fetch('/api/shd-api/api/shops')
       ]);
 
       const productsData = await productsResponse.json();
