@@ -56,9 +56,10 @@
 
 // C:\Users\USER\Desktop\Projects\my-app\app\api\auth\register\route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import User from '@/models/User';
+
 import bcrypt from 'bcryptjs';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import User from '@/shd-models/models/User';
 
 function generateReferralCode() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

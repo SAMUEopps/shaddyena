@@ -51,7 +51,7 @@
 // app/api/shops/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-import '@/shd-modelsmodels/User';
+import '@/shd-models/models/User';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import Vendor from '@/shd-models/models/Vendor';
 

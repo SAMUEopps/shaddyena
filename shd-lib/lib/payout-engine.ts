@@ -1,9 +1,10 @@
 import { connectToDatabase } from './mongodb';
-import Order from '@/models/Order';
-import Vendor from '@/models/Vendor';
-import Payout from '@/models/Payout';
-import Transaction from '@/models/Transaction';
+
 import { processB2CPayment, processB2BPayment } from './mpesa';
+import Vendor from '@/shd-models/models/Vendor';
+import Transaction from '@/shd-models/models/Transaction';
+import Payout from '@/shd-models/models/Payout';
+import Order from '@/shd-models/models/Order';
 
 export async function processVendorPayout(orderId: string) {
   try {

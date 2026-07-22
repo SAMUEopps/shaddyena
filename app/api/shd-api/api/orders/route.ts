@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import Order from '@/models/Order';
-import '@/models/Vendor';
+import '@/shd-models/models/Vendor';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import { verifyToken } from '@/shd-lib/lib/auth';
+import Order from '@/shd-models/models/Order';
 
 
 
