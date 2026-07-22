@@ -51,6 +51,7 @@ import { WishlistProvider } from "@/contexts/WishlistContext";
 
 import { Toaster } from 'react-hot-toast';
 import Footer from "@/components/New/components/Footer";
+import Navigation from "./SHD-COMPONENTS/components/Navigation";
 
 // Load Inconsolata font
 const inconsolata = Inconsolata({
@@ -78,6 +79,7 @@ export default function RootLayout({
           <CartProvider>
             <WishlistProvider>
             <div className='flex min-h-screen flex-col'>  
+               <Navigation />
                 <main className="flex-1"> 
               {children}
                <Toaster position="top-center" />
