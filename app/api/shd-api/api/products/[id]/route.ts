@@ -311,7 +311,7 @@ import mongoose from 'mongoose';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import { verifyToken } from '@/shd-lib/lib/auth';
 import Vendor from '@/shd-models/models/Vendor';
-import Product from '@/models/product';
+import Product from "@/shd-models/models/Product";
 import { deleteFromCloudinary } from '@/shd-lib/lib/cloudinary';
 
 

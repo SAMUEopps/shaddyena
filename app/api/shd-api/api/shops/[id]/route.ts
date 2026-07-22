@@ -1,74 +1,154 @@
-// // import { NextRequest, NextResponse } from 'next/server';
-// // import { connectToDatabase } from '@/lib/mongodb';
-// // import Vendor from '@/models/Vendor';
-// // import Product from '@/models/Product';
-// // import Order from '@/models/Order';
+// // // import { NextRequest, NextResponse } from 'next/server';
+// // // import { connectToDatabase } from '@/lib/mongodb';
+// // // import Vendor from '@/models/Vendor';
+// // // import Product from '@/models/Product';
+// // // import Order from '@/models/Order';
+
+// // // export async function GET(
+// // //   req: NextRequest,
+// // //   { params }: { params: { id: string } }
+// // // ) {
+// // //   try {
+// // //     await connectToDatabase();
+// // //     const { id } = params;
+
+// // //     // Get vendor details
+// // //     const vendor = await Vendor.findById(id)
+// // //       .populate('userId', 'name email')
+// // //       .lean();
+
+// // //     if (!vendor) {
+// // //       return NextResponse.json(
+// // //         { error: 'Shop not found' },
+// // //         { status: 404 }
+// // //       );
+// // //     }
+
+// // //     // Get products
+// // //     const products = await Product.find({ 
+// // //       vendorId: id, 
+// // //       isActive: true 
+// // //     }).sort({ createdAt: -1 });
+
+// // //     // Get order statistics
+// // //     const orderStats = await Order.aggregate([
+// // //       { $match: { vendorId: vendor._id } },
+// // //       {
+// // //         $group: {
+// // //           _id: null,
+// // //           totalOrders: { $sum: 1 },
+// // //           totalRevenue: { $sum: '$totalAmount' },
+// // //           completedOrders: {
+// // //             $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] }
+// // //           }
+// // //         }
+// // //       }
+// // //     ]);
+
+// // //     const stats = orderStats[0] || { totalOrders: 0, totalRevenue: 0, completedOrders: 0 };
+
+// // //     return NextResponse.json({
+// // //       shop: {
+// // //         ...vendor,
+// // //         products,
+// // //         stats
+// // //       }
+// // //     });
+
+// // //   } catch (error) {
+// // //     console.error('Fetch shop detail error:', error);
+// // //     return NextResponse.json(
+// // //       { error: 'Failed to fetch shop details' },
+// // //       { status: 500 }
+// // //     );
+// // //   }
+// // // }
+
+// // import { NextRequest, NextResponse } from "next/server";
+// // import { connectToDatabase } from "@/lib/mongodb";
+// // import Vendor from "@/models/Vendor";
+// // import Product from "@/models/Product";
+// // import Order from "@/models/Order";
 
 // // export async function GET(
 // //   req: NextRequest,
-// //   { params }: { params: { id: string } }
+// //   { params }: { params: Promise<{ id: string }> }
 // // ) {
 // //   try {
 // //     await connectToDatabase();
-// //     const { id } = params;
 
-// //     // Get vendor details
+// //     const { id } = await params;
+
 // //     const vendor = await Vendor.findById(id)
-// //       .populate('userId', 'name email')
+// //       .populate("userId", "name email")
 // //       .lean();
 
 // //     if (!vendor) {
 // //       return NextResponse.json(
-// //         { error: 'Shop not found' },
+// //         { error: "Shop not found" },
 // //         { status: 404 }
 // //       );
 // //     }
 
-// //     // Get products
-// //     const products = await Product.find({ 
-// //       vendorId: id, 
-// //       isActive: true 
+// //     const products = await Product.find({
+// //       vendorId: id,
+// //       isActive: true,
 // //     }).sort({ createdAt: -1 });
 
-// //     // Get order statistics
 // //     const orderStats = await Order.aggregate([
-// //       { $match: { vendorId: vendor._id } },
+// //       {
+// //         $match: {
+// //           vendorId: vendor._id,
+// //         },
+// //       },
 // //       {
 // //         $group: {
 // //           _id: null,
 // //           totalOrders: { $sum: 1 },
-// //           totalRevenue: { $sum: '$totalAmount' },
+// //           totalRevenue: { $sum: "$totalAmount" },
 // //           completedOrders: {
-// //             $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] }
-// //           }
-// //         }
-// //       }
+// //             $sum: {
+// //               $cond: [
+// //                 { $eq: ["$status", "delivered"] },
+// //                 1,
+// //                 0,
+// //               ],
+// //             },
+// //           },
+// //         },
+// //       },
 // //     ]);
 
-// //     const stats = orderStats[0] || { totalOrders: 0, totalRevenue: 0, completedOrders: 0 };
+// //     const stats = orderStats[0] || {
+// //       totalOrders: 0,
+// //       totalRevenue: 0,
+// //       completedOrders: 0,
+// //     };
 
 // //     return NextResponse.json({
 // //       shop: {
 // //         ...vendor,
 // //         products,
-// //         stats
-// //       }
+// //         stats,
+// //       },
 // //     });
-
 // //   } catch (error) {
-// //     console.error('Fetch shop detail error:', error);
+// //     console.error(error);
+
 // //     return NextResponse.json(
-// //       { error: 'Failed to fetch shop details' },
+// //       { error: "Failed to fetch shop details" },
 // //       { status: 500 }
 // //     );
 // //   }
 // // }
 
+// // app/api/shops/[id]/route.ts
 // import { NextRequest, NextResponse } from "next/server";
-// import { connectToDatabase } from "@/lib/mongodb";
-// import Vendor from "@/models/Vendor";
-// import Product from "@/models/Product";
-// import Order from "@/models/Order";
+
+// import Product from "@/shd-models/models/Product";
+// import Vendor from "@/shd-models/models/Vendor";
+// import { connectToDatabase } from "@/shd-lib/lib/mongodb";
+// import Order from "@/shd-models/models/Order";
 
 // export async function GET(
 //   req: NextRequest,
@@ -81,6 +161,7 @@
 
 //     const vendor = await Vendor.findById(id)
 //       .populate("userId", "name email")
+//       .select('businessName ownerName phoneNumber businessLocation payoutMethod profileImage coverImage totalEarned createdAt')
 //       .lean();
 
 //     if (!vendor) {
@@ -93,12 +174,15 @@
 //     const products = await Product.find({
 //       vendorId: id,
 //       isActive: true,
-//     }).sort({ createdAt: -1 });
+//     })
+//       .select('name price description stock image createdAt')
+//       .sort({ createdAt: -1 })
+//       .lean();
 
 //     const orderStats = await Order.aggregate([
 //       {
 //         $match: {
-//           vendorId: vendor._id,
+//           vendorId: new mongoose.Types.ObjectId(id),
 //         },
 //       },
 //       {
@@ -142,8 +226,8 @@
 //   }
 // }
 
-// app/api/shops/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 
 import Product from "@/shd-models/models/Product";
 import Vendor from "@/shd-models/models/Vendor";
@@ -161,7 +245,9 @@ export async function GET(
 
     const vendor = await Vendor.findById(id)
       .populate("userId", "name email")
-      .select('businessName ownerName phoneNumber businessLocation payoutMethod profileImage coverImage totalEarned createdAt')
+      .select(
+        "businessName ownerName phoneNumber businessLocation payoutMethod profileImage coverImage totalEarned createdAt"
+      )
       .lean();
 
     if (!vendor) {
@@ -175,7 +261,7 @@ export async function GET(
       vendorId: id,
       isActive: true,
     })
-      .select('name price description stock image createdAt')
+      .select("name price description stock image createdAt")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -188,12 +274,18 @@ export async function GET(
       {
         $group: {
           _id: null,
-          totalOrders: { $sum: 1 },
-          totalRevenue: { $sum: "$totalAmount" },
+          totalOrders: {
+            $sum: 1,
+          },
+          totalRevenue: {
+            $sum: "$totalAmount",
+          },
           completedOrders: {
             $sum: {
               $cond: [
-                { $eq: ["$status", "delivered"] },
+                {
+                  $eq: ["$status", "delivered"],
+                },
                 1,
                 0,
               ],
@@ -217,11 +309,15 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("Fetch shop details error:", error);
 
     return NextResponse.json(
-      { error: "Failed to fetch shop details" },
-      { status: 500 }
+      {
+        error: "Failed to fetch shop details",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
