@@ -1,8 +1,9 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\admin\products\toggle-status\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Product from '@/shd-models/models/Product';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Product from '@/models/Product';
-import { verifyToken } from '@/lib/auth';
+
 
 export async function PUT(req: NextRequest) {
   try {

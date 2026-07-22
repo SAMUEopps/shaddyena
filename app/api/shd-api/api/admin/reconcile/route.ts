@@ -1,9 +1,10 @@
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import { getAccountBalance } from '@/shd-lib/lib/mpesa';
+import Payout from '@/shd-models/models/Payout';
+import Transaction from '@/shd-models/models/Transaction';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Transaction from '@/models/Transaction';
-import Payout from '@/models/Payout';
-import { getAccountBalance } from '@/lib/mpesa';
-import { verifyToken } from '@/lib/auth';
+
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();

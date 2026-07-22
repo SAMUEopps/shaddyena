@@ -1,8 +1,8 @@
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import { processB2BPayment, processB2CPayment } from '@/shd-lib/lib/mpesa';
+import Payout from '@/shd-models/models/Payout';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Payout from '@/models/Payout';
-import { processB2CPayment, processB2BPayment } from '@/lib/mpesa';
-import { verifyToken } from '@/lib/auth';
 
 
 export async function POST(req: NextRequest) {

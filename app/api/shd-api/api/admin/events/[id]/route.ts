@@ -1,8 +1,9 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\admin\events\[id]\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Event from '@/shd-models/models/Event';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Event from '@/models/Event';
-import { verifyToken } from '@/lib/auth';
+
 
 export async function GET(
   req: NextRequest,

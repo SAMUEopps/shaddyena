@@ -1,8 +1,8 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\admin\members\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import User from '@/shd-models/models/User';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import User from '@/models/User';
-import { verifyToken } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
