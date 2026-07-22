@@ -1,10 +1,11 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\admin\users\delete\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Rider from '@/shd-models/models/Rider';
+import User from '@/shd-models/models/User';
+import Vendor from '@/shd-models/models/Vendor';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import User from '@/models/User';
-import Vendor from '@/models/Vendor';
-import Rider from '@/models/Rider';
-import { verifyToken } from '@/lib/auth';
+
 
 export async function DELETE(req: NextRequest) {
   try {

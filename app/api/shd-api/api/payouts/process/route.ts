@@ -1,11 +1,11 @@
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import { processB2BPayment, processB2CPayment } from '@/shd-lib/lib/mpesa';
+import Order from '@/shd-models/models/Order';
+import Payout from '@/shd-models/models/Payout';
+import Transaction from '@/shd-models/models/Transaction';
+import Vendor from '@/shd-models/models/Vendor';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Order from '@/models/Order';
-import Vendor from '@/models/Vendor';
-import Payout from '@/models/Payout';
-import Transaction from '@/models/Transaction';
-import { processB2CPayment, processB2BPayment } from '@/lib/mpesa';
-import { verifyToken } from '@/lib/auth';
 
 
 export async function POST(req: NextRequest) {

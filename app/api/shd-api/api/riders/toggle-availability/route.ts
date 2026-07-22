@@ -1,8 +1,9 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\rider\toggle-availability\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Rider from '@/shd-models/models/Rider';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Rider from '@/models/Rider';
-import { verifyToken } from '@/lib/auth';
+
 
 export async function POST(req: NextRequest) {
   try {

@@ -1,9 +1,10 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\vendor\subscriptions\current\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Vendor from '@/shd-models/models/Vendor';
+import VendorSubscription from '@/shd-models/models/VendorSubscription';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import VendorSubscription from '@/models/VendorSubscription';
-import Vendor from '@/models/Vendor';
-import { verifyToken } from '@/lib/auth';
+
 
 export async function GET(req: NextRequest) {
   try {

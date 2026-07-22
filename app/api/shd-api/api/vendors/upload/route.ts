@@ -1,9 +1,9 @@
 // app/api/vendors/upload/route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { deleteFromCloudinary, uploadToCloudinary } from '@/shd-lib/lib/cloudinary';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Vendor from '@/shd-models/models/Vendor';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import { verifyToken } from '@/lib/auth';
-import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary';
-import Vendor from '@/models/Vendor';
 
 export async function POST(req: NextRequest) {
   try {

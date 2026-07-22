@@ -1,9 +1,10 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\profile\change-password\route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import User from '@/models/User';
-import { verifyToken } from '@/lib/auth';
+
 import bcrypt from 'bcryptjs';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import { verifyToken } from '@/shd-lib/lib/auth';
+import User from '@/shd-models/models/User';
 
 export async function POST(req: NextRequest) {
   try {

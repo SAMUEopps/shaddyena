@@ -1,9 +1,10 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\investments\create\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Investment from '@/shd-models/models/Investment';
+import User from '@/shd-models/models/User';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import User from '@/models/User';
-import Investment from '@/models/Investment';
-import { verifyToken } from '@/lib/auth';
+
 
 const INVESTMENT_RATES = {
   TRANSPORT: { returnRate: 0.15, minAmount: 1000, maxAmount: 100000, duration: 6 },

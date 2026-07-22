@@ -1,10 +1,11 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\membership\activate\route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import User from '@/models/User';
-import Savings from '@/models/Savings';
-import { verifyToken } from '@/lib/auth';
+
 import bcrypt from 'bcryptjs';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import { verifyToken } from '@/shd-lib/lib/auth';
+import User from '@/shd-models/models/User';
+import Savings from '@/shd-models/models/Savings';
 
 export async function POST(req: NextRequest) {
   try {

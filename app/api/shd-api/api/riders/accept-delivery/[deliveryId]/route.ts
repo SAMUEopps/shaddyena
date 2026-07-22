@@ -1,10 +1,10 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\rider\accept-delivery\[deliveryId]\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Delivery from '@/shd-models/models/Delivery';
+import Rider from '@/shd-models/models/Rider';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 
-import Rider from '@/models/Rider';
-import { verifyToken } from '@/lib/auth';
-import Delivery from '@/models/Delivery';
 
 export async function POST(
   req: NextRequest,

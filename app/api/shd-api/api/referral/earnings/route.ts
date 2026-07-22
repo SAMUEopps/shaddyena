@@ -1,9 +1,9 @@
 // app/api/referral/earnings/route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import ReferralPayout from '@/shd-models/models/ReferralPayout';
+import User from '@/shd-models/models/User';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import User from '@/models/User';
-import ReferralPayout from '@/models/ReferralPayout';
-import { verifyToken } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     let subscriptionCommissions = 0;
     let pendingPayouts = 0;
 
-    payouts.forEach(p => {
+    payouts.forEach((p: { _id: string; total: number; pending: any; }) => {
       if (p._id === 'order_commission') {
         orderCommissions = p.total || 0;
         pendingPayouts += p.pending || 0;

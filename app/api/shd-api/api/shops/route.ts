@@ -50,9 +50,10 @@
 
 // app/api/shops/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Vendor from '@/models/Vendor';
-import '@/models/User';
+
+import '@/shd-modelsmodels/User';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Vendor from '@/shd-models/models/Vendor';
 
 export async function GET(req: NextRequest) {
   try {
@@ -72,7 +73,7 @@ export async function GET(req: NextRequest) {
       .lean();
 
     // Get product count for each vendor
-    const Product = (await import('@/models/Product')).default;
+    const Product = (await import('@/shd-models/models/Product')).default;
     const vendorWithCounts = await Promise.all(
       vendors.map(async (vendor) => {
         const productCount = await Product.countDocuments({ 

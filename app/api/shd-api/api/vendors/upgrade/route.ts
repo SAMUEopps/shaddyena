@@ -1,10 +1,11 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\vendors\upgrade\route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import Vendor from "@/models/Vendor";
-import User from "@/models/User";
+import { verifyToken } from "@/shd-lib/lib/auth";
+import { connectToDatabase } from "@/shd-lib/lib/mongodb";
+import User from "@/shd-models/models/User";
+import Vendor from "@/shd-models/models/Vendor";
 import bcrypt from "bcryptjs";
-import { verifyToken } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
+
 
 export async function POST(req: NextRequest) {
   try {

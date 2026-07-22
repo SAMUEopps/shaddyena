@@ -1,10 +1,11 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\riders\register\route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import Rider from "@/models/Rider";
-import User from "@/models/User";
+
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { connectToDatabase } from "@/shd-lib/lib/mongodb";
+import User from "@/shd-models/models/User";
+import Rider from "@/shd-models/models/Rider";
 
 function generateReferralCode() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

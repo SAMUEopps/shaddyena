@@ -77,12 +77,12 @@
 //   console.log(`Order ${orderId} delivered, trigger payout`);
 // }
 
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Order from '@/shd-models/models/Order';
+import Vendor from '@/shd-models/models/Vendor';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Order from '@/models/Order';
-import Vendor from '@/models/Vendor';
-import { verifyToken } from '@/lib/auth';
-import { processVendorPayout } from '@/lib/payout-engine';
+
 
 export async function PUT(req: NextRequest) {
   try {
@@ -130,11 +130,11 @@ export async function PUT(req: NextRequest) {
     await order.save();
 
     // If delivered, trigger payout process
-    if (status === 'delivered') {
+   // if (status === 'delivered') {
       // Process payout using the payout engine
-      const payoutResult = await processVendorPayout(order._id);
-      console.log('Payout result:', payoutResult);
-    }
+      //const payoutResult = await processVendorPayout(order._id);
+     // console.log('Payout result:', payoutResult);
+    //}
 
     return NextResponse.json({
       message: 'Order updated successfully',

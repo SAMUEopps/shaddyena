@@ -308,11 +308,12 @@
 // app/api/products/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import { connectToDatabase } from '@/lib/mongodb';
-import Product from '@/models/Product';
-import Vendor from '@/models/Vendor';
-import { verifyToken } from '@/lib/auth';
-import { deleteFromCloudinary } from '@/lib/cloudinary';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import { verifyToken } from '@/shd-lib/lib/auth';
+import Vendor from '@/shd-models/models/Vendor';
+import Product from '@/models/product';
+import { deleteFromCloudinary } from '@/shd-lib/lib/cloudinary';
+
 
 export async function PUT(
   req: NextRequest,

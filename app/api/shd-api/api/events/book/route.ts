@@ -194,13 +194,12 @@
 // }
 
 // C:\Users\Administrator\Desktop\my-app\app\api\events\book\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import { initSTKPush } from '@/shd-lib/lib/mpesa';
+import EventBooking from '@/shd-models/models/EventBooking';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Event from '@/models/Event';
-import EventBooking from '@/models/EventBooking';
-import User from '@/models/User';
-import { verifyToken } from '@/lib/auth';
-import { initSTKPush } from '@/lib/mpesa';
+import Event from '@/shd-models/models/Event';
 
 export async function POST(req: NextRequest) {
   try {

@@ -1,8 +1,9 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\subscriptions\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Subscription from '@/shd-models/models/Subscription';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Subscription from '@/models/Subscription';
-import { verifyToken } from '@/lib/auth';
+
 
 export async function GET(req: NextRequest) {
   try {

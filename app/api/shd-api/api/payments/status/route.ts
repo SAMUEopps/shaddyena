@@ -1,7 +1,7 @@
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import { queryTransactionStatus } from '@/shd-lib/lib/mpesa';
+import Transaction from '@/shd-models/models/Transaction';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Transaction from '@/models/Transaction';
-import { queryTransactionStatus } from '@/lib/mpesa';
 
 export async function GET(req: NextRequest) {
   try {

@@ -467,11 +467,12 @@
 // app/api/vendors/register/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import Vendor from "@/models/Vendor";
-import User from "@/models/User";
+
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import User from "@/shd-models/models/User";
+import { connectToDatabase } from "@/shd-lib/lib/mongodb";
+import Vendor from "@/shd-models/models/Vendor";
 
 function generateReferralCode() {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

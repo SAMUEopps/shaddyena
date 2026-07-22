@@ -1,12 +1,14 @@
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import { initSTKPush } from '@/shd-lib/lib/mpesa';
+import { generateOrderNumber } from '@/shd-lib/lib/utils';
+import Order from '@/shd-models/models/Order';
+import Product from '@/shd-models/models/Product';
+import Transaction from '@/shd-models/models/Transaction';
+import Vendor from '@/shd-models/models/Vendor';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Product from '@/models/Product';
-import Order from '@/models/Order';
-import Transaction from '@/models/Transaction';
-import Vendor from '@/models/Vendor';
-import { initSTKPush } from '@/lib/mpesa';
-import { verifyToken } from '@/lib/auth';
-import { generateOrderNumber } from '@/lib/utils';
+
+
 
 export async function POST(req: NextRequest) {
   try {

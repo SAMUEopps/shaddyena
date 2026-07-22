@@ -1,10 +1,10 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\vendor\subscriptions\upgrade\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Subscription from '@/shd-models/models/Subscription';
+import Vendor from '@/shd-models/models/Vendor';
+import VendorSubscription from '@/shd-models/models/VendorSubscription';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Subscription from '@/models/Subscription';
-import VendorSubscription from '@/models/VendorSubscription';
-import Vendor from '@/models/Vendor';
-import { verifyToken } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {

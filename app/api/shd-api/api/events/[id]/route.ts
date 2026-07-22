@@ -64,8 +64,9 @@
 
 // C:\Users\Administrator\Desktop\my-app\app\api\events\[id]\route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Event from '@/models/Event';
+
+import Event from '@/shd-models/models/Event';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 
 export async function GET(
   req: NextRequest,

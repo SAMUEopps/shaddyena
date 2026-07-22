@@ -1,9 +1,9 @@
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Order from '@/shd-models/models/Order';
+import Product from '@/shd-models/models/Product';
+import Transaction from '@/shd-models/models/Transaction';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Transaction from '@/models/Transaction';
-import Order from '@/models/Order';
-import { queryTransactionStatus } from '@/lib/mpesa';
-import Product from '@/models/Product';
+
 
 export async function POST(req: NextRequest) {
   try {

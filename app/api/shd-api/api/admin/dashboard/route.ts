@@ -1,15 +1,14 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\admin\dashboard\route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import User from '@/models/User';
-import Vendor from '@/models/Vendor';
-import Rider from '@/models/Rider';
-import Product from '@/models/Product';
-import Order from '@/models/Order';
-import Investment from '@/models/Investment';
-import Delivery from '@/models/Delivery';
-import Payout from '@/models/Payout';
-import { verifyToken } from '@/lib/auth';
+
+import User from '@/shd-models/models/User';
+import Product from '@/shd-models/models/Product';
+import Order from '@/shd-models/models/Order';
+import Investment from '@/shd-models/models/Investment';
+import Delivery from '@/shd-models/models/Delivery';
+import Payout from '@/shd-models/models/Payout';
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 
 export async function GET(req: NextRequest) {
   try {

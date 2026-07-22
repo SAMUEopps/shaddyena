@@ -1,9 +1,10 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\savings\deposit\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Savings from '@/shd-models/models/Savings';
+import User from '@/shd-models/models/User';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import User from '@/models/User';
-import Savings from '@/models/Savings';
-import { verifyToken } from '@/lib/auth';
+
 
 export async function POST(req: NextRequest) {
   try {

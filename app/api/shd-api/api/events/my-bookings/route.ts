@@ -1,8 +1,9 @@
 // C:\Users\USER\Desktop\Projects\my-app\app\api\events\my-bookings\route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import EventBooking from '@/shd-models/models/EventBooking';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import EventBooking from '@/models/EventBooking';
-import { verifyToken } from '@/lib/auth';
+
 
 export async function GET(req: NextRequest) {
   try {

@@ -1,8 +1,8 @@
 // app/api/referral/payouts/route.ts
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import ReferralPayout from '@/shd-models/models/ReferralPayout';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import ReferralPayout from '@/models/ReferralPayout';
-import { verifyToken } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {

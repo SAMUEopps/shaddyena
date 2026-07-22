@@ -1,8 +1,9 @@
+import { verifyToken } from '@/shd-lib/lib/auth';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import Product from '@/shd-models/models/Product';
+import Vendor from '@/shd-models/models/Vendor';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Product from '@/models/Product';
-import Vendor from '@/models/Vendor';
-import { verifyToken } from '@/lib/auth';
+
 
 export async function GET(req: NextRequest) {
   try {

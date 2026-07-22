@@ -144,10 +144,11 @@
 
 // app/api/shops/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import Vendor from "@/models/Vendor";
-import Product from "@/models/Product";
-import Order from "@/models/Order";
+
+import Product from "@/shd-models/models/Product";
+import Vendor from "@/shd-models/models/Vendor";
+import { connectToDatabase } from "@/shd-lib/lib/mongodb";
+import Order from "@/shd-models/models/Order";
 
 export async function GET(
   req: NextRequest,
@@ -181,7 +182,7 @@ export async function GET(
     const orderStats = await Order.aggregate([
       {
         $match: {
-          vendorId: vendor._id,
+          vendorId: new mongoose.Types.ObjectId(id),
         },
       },
       {

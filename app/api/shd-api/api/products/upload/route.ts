@@ -1,12 +1,12 @@
 // app/api/products/upload/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import { verifyToken } from '@/lib/auth';
-import { upload } from '@/lib/multer';
-import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary';
-import Product from '@/models/Product';
-import Vendor from '@/models/Vendor';
+
 import mongoose from 'mongoose';
+import { deleteFromCloudinary, uploadToCloudinary } from '@/shd-lib/lib/cloudinary';
+import Product from '@/shd-models/models/Product';
+import Vendor from '@/shd-models/models/Vendor';
+import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+import { verifyToken } from '@/shd-lib/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
