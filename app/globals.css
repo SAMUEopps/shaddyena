@@ -1,4 +1,4 @@
-/*@import "tailwindcss";
+/* /*@import "tailwindcss";
 
 /*@font-face {
   font-family: 'Inconsolata';
@@ -36,70 +36,70 @@ body {
 .pdf-safe * {
   color: #000 !important;
   background-color: #fff !important;
-}*/
+}*
 
 @import "tailwindcss";
 
 /* -----------------------------
    DESIGN TOKENS - LIGHT MODE (default)
------------------------------ */
+----------------------------- *
 
 :root {
-  /* BRAND */
+  /* BRAND *
   --color-primary: #e50986;
   --color-primary-hover: #ac286f;
   --color-primary-soft: #e6a3ca;
   --color-primary-alt: #b45287;
 
-  /* BACKGROUNDS */
+  /* BACKGROUNDS *
   --color-background: #ffffff;
   --color-background-soft: #f8eff9;
   --color-surface: #ffffff;
   --color-card: #ffffff;
 
-  /* TEXT */
+  /* TEXT *
   --color-text: #0f1c47;
   --color-text-muted: #656c85;
 
-  /* BORDERS */
+  /* BORDERS *
   --color-border: #e6e8f0;
   --color-border-muted: #9ea4b7;
 
-  /* UI STATES */
+  /* UI STATES *
   --color-success: #16a34a;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
 
-  /* SHADOW COLOR */
+  /* SHADOW COLOR *
   --color-shadow: rgba(15, 28, 71, 0.08);
 }
 
 /* -----------------------------
    DARK MODE - Triggered by class
------------------------------ */
+----------------------------- *
 
 html.dark {
-  /* BACKGROUNDS */
+  /* BACKGROUNDS *
   --color-background: #0f1c47;
   --color-background-soft: #0b1533;
   --color-surface: #1b2345;
   --color-card: #333a58;
 
-  /* TEXT */
+  /* TEXT *
   --color-text: #f8eff9;
   --color-text-muted: #9ea4b7;
 
-  /* BORDERS */
+  /* BORDERS *
   --color-border: #333a58;
   --color-border-muted: #656c85;
 
-  /* SHADOW */
+  /* SHADOW *
   --color-shadow: rgba(0,0,0,0.4);
 }
 
 /* -----------------------------
    TAILWIND THEME BRIDGE
------------------------------ */
+----------------------------- *
 
 @theme inline {
   --color-background: var(--color-background);
@@ -121,7 +121,7 @@ html.dark {
 
 /* -----------------------------
    GLOBAL BASE STYLES
------------------------------ */
+----------------------------- *
 
 body {
   background: var(--color-background);
@@ -130,7 +130,7 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* PDF export safety */
+/* PDF export safety *
 .pdf-safe * {
   color: #000 !important;
   background-color: #fff !important;
@@ -138,7 +138,7 @@ body {
 
 /* Add to your global.css */
 
-/* Custom animations */
+/* Custom animations *
 @keyframes bounce-subtle {
   0%, 100% {
     transform: translateY(0);
@@ -180,7 +180,7 @@ body {
   animation: slideInFromTop 0.3s ease-out forwards;
 }
 
-/* Smooth transitions for all interactive elements */
+/* Smooth transitions for all interactive elements *
 * {
   transition: background-color 0.2s ease, 
               border-color 0.2s ease, 
@@ -189,7 +189,7 @@ body {
               opacity 0.2s ease;
 }
 
-/* Custom scrollbar for the mega menu */
+/* Custom scrollbar for the mega menu *
 .overflow-y-auto::-webkit-scrollbar {
   width: 6px;
 }
@@ -210,18 +210,18 @@ body {
 
 /* Add to your global.css */
 
-/* Hide scrollbar for Chrome, Safari and Opera */
+/* Hide scrollbar for Chrome, Safari and Opera *
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
+/* Hide scrollbar for IE, Edge and Firefox *
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge *
+  scrollbar-width: none;  /* Firefox *
 }
 
-/* Shine animation */
+/* Shine animation *
 @keyframes shine {
   0% {
     left: -100%;
@@ -239,7 +239,7 @@ body {
 
 /* Add to your global.css */
 
-/* Pulse animation for unread indicators */
+/* Pulse animation for unread indicators *
 @keyframes pulse-ring {
   0% {
     transform: scale(0.8);
@@ -255,7 +255,7 @@ body {
   animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Shimmer effect for unread rows */
+/* Shimmer effect for unread rows *
 @keyframes shimmer {
   0% {
     background-position: -1000px 0;
@@ -276,7 +276,7 @@ body {
   animation: shimmer 2s infinite;
 }
 
-/* Glow effect for new badge */
+/* Glow effect for new badge *
 @keyframes glow {
   0%, 100% {
     box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
@@ -288,4 +288,58 @@ body {
 
 .glow-new {
   animation: glow 2s ease-in-out infinite;
+} */
+
+@import "tailwindcss";
+
+:root {
+  --primary: #e50986;
+  --background: #f6f3fa;
+  --secondary: #101c47;
+  --accent: #db91ba;
+  --accent-dark: #ab2b70;
+  --text: #4a526d;
+  --surface: #f9c9e7;
+  --muted: #898fa5;
+  --primary-light: #b7558b;
+}
+
+@theme {
+  --color-primary: var(--primary);
+  --color-background: var(--background);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-text: var(--text);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-primary-light: var(--primary-light);
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+  font-family: sans-serif;
+}
+
+.container {
+  max-width: 80rem;
+  margin: auto;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-dark);
 }
