@@ -46,7 +46,7 @@ export default function Home() {
     }
   }, []);
 
-  const fetchData = async () => {
+  /*const fetchData = async () => {
     try {
       const [productsResponse, shopsResponse] = await Promise.all([
         fetch('/api/shd-api/api/products'),
@@ -63,7 +63,42 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  };*/
+
+  const fetchData = async () => {
+  try {
+    const [productsResponse, shopsResponse] = await Promise.all([
+      fetch('/api/shd-api/api/products'),
+      fetch('/api/shd-api/api/shops')
+    ]);
+
+    const productsData = await productsResponse.json();
+    const shopsData = await shopsResponse.json();
+
+
+    console.log("🛒 Products API Response:", productsData);
+    console.log("🏪 Shops API Response:", shopsData);
+
+    console.log(
+      "First Product:",
+      productsData.products?.[0]
+    );
+
+    console.log(
+      "First Product Vendor:",
+      productsData.products?.[0]?.vendorId
+    );
+
+
+    setProducts(productsData.products || []);
+    setShops(shopsData.shops || []);
+
+  } catch (error) {
+    console.error("Fetch data error:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const addToCart = (product: Product) => {
     setAddingToCart(product._id);
