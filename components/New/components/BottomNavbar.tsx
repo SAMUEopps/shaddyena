@@ -2512,10 +2512,22 @@ const BottomNavbar = ({ isScrolled }: BottomNavbarProps) => {
                       <Phone className="w-5 h-5 text-[var(--color-primary)]" />
                       <span className="text-sm">Need help? Call us: +254 700 000 000</span>
                     </div>
-                    <div className="flex items-center space-x-4">
+                    {/*<div className="flex items-center space-x-4">
                       <Mail className="w-5 h-5 text-[var(--color-primary)]" />
                       <span className="text-sm">support@shaddyna.com</span>
-                    </div>
+                    </div>*/}
+                    <Link
+  href="/support"
+  className="flex items-center space-x-4 hover:opacity-80 transition-opacity"
+>
+  <Mail className="w-5 h-5 text-[var(--color-primary)]" />
+
+  <div className="flex flex-col">
+    <span className="text-sm">
+      Need assistance?
+    </span>
+  </div>
+</Link>
                     {user && (
                       <button
                         onClick={() => {
