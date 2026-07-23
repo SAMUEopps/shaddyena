@@ -1072,7 +1072,7 @@ export default function ProfilePage() {
           <div className="text-6xl mb-4">🔒</div>
           <p className="text-muted text-lg mb-6">Please login to view your profile</p>
           <Link 
-            href="/login" 
+            href="/shd-pages/login" 
             className="inline-block bg-primary text-white px-8 py-3 rounded-xl hover:bg-accent-dark transition-all duration-200 shadow-sm hover:shadow-md font-medium"
           >
             Login
@@ -1159,26 +1159,26 @@ export default function ProfilePage() {
                   <h3 className="text-sm font-medium text-muted mb-3">Quick Actions</h3>
                   <div className="flex flex-wrap gap-3">
                     <Link 
-                      href="/profile/referrals" 
+                      href="/shd/pages/profile/referrals" 
                       className="bg-purple-50 text-purple-700 px-4 py-2.5 rounded-xl hover:bg-purple-100 transition-all duration-200 border border-purple-200 font-medium text-sm"
                     >
                       📤 Referrals
                     </Link>
                     <button 
-                      onClick={() => router.push('/orders')}
+                      onClick={() => router.push('/shd-pages/orders')}
                       className="bg-blue-50 text-primary px-4 py-2.5 rounded-xl hover:bg-blue-100 transition-all duration-200 border border-blue-200 font-medium text-sm"
                     >
                       📦 Orders
                     </button>
                     <button 
-                      onClick={() => router.push('/payments')}
+                      onClick={() => router.push('/shd-pages/payments')}
                       className="bg-green-50 text-green-700 px-4 py-2.5 rounded-xl hover:bg-green-100 transition-all duration-200 border border-green-200 font-medium text-sm"
                     >
                       💳 Payments
                     </button>
                     {user.role === 'customer' && (
                       <button 
-                        onClick={() => router.push('/vendor/upgrade')}
+                        onClick={() => router.push('/shd-pages/vendor/upgrade')}
                         className="bg-yellow-50 text-yellow-700 px-4 py-2.5 rounded-xl hover:bg-yellow-100 transition-all duration-200 border border-yellow-200 font-medium text-sm"
                       >
                         🏪 Upgrade to Vendor
