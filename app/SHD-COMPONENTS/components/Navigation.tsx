@@ -659,13 +659,13 @@ export default function Navigation() {
             ) : (
               <div className="flex items-center gap-2">
                 <Link 
-                  href="/login" 
+                  href="/shd-pages/login" 
                   className="px-4 py-2 rounded-lg text-secondary hover:text-primary hover:bg-surface transition-all duration-200"
                 >
                   Login
                 </Link>
                 <Link 
-                  href="/register" 
+                  href="/shd-pages/register" 
                   className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-accent-dark transition-all duration-200 shadow-sm hover:shadow-md"
                 >
                   Register
