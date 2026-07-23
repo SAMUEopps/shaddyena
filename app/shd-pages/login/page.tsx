@@ -248,11 +248,11 @@ export default function Login() {
         
         // Redirect based on role
         if (data.user.role === 'admin') {
-          router.push('/admin/dashboard');
+          router.push('/shd-pages/admin/dashboard');
         } else if (data.user.role === 'vendor') {
-          router.push('/vendor/dashboard');
+          router.push('/shd-pages/vendor/dashboard');
         } else if (data.user.role === 'rider') {
-          router.push('/rider/dashboard');
+          router.push('/shd-pages/rider/dashboard');
         } else {
           router.push('/');
         }
@@ -319,7 +319,7 @@ export default function Login() {
 
             <div className="flex items-center justify-end">
               <Link 
-                href="/forgot-password" 
+                href="/shd-pages/forgot-password" 
                 className="text-sm text-primary hover:text-accent-dark transition-colors duration-200 font-medium"
               >
                 Forgot password?
@@ -349,7 +349,7 @@ export default function Login() {
           <div className="mt-8 space-y-4">
             <div className="text-center">
               <Link 
-                href="/register" 
+                href="/shd-pages/register" 
                 className="text-primary hover:text-accent-dark transition-colors duration-200 font-medium"
               >
                 Don't have an account? Register →
@@ -361,7 +361,7 @@ export default function Login() {
                 Are you a business owner?
               </p>
               <Link
-                href="/vendor/register"
+                href="/shd-pages/vendor/register"
                 className="w-full flex items-center justify-center gap-2 bg-green-50 text-green-700 hover:bg-green-100 px-5 py-3 rounded-xl font-medium transition-all duration-200 border border-green-200"
               >
                 🏪 Register Your Shop
@@ -373,7 +373,7 @@ export default function Login() {
                 Are you a delivery rider?
               </p>
               <Link
-                href="/rider/register"
+                href="/shd-pages/rider/register"
                 className="w-full flex items-center justify-center gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100 px-5 py-3 rounded-xl font-medium transition-all duration-200 border border-purple-200"
               >
                 🏍️ Register as Rider

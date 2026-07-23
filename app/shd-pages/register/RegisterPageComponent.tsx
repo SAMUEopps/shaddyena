@@ -58,7 +58,7 @@ export default function  RegisterForm() {
 
       if (response.ok) {
         alert('Registration successful! Please login.');
-        router.push('/login');
+        router.push('/shd-pages/login');
       } else {
         setError(data.error || 'Registration failed');
       }
@@ -216,7 +216,7 @@ export default function  RegisterForm() {
           <div className="mt-8 space-y-4">
             <div className="text-center">
               <Link 
-                href="/login" 
+                href="/shd-pages/login" 
                 className="text-primary hover:text-accent-dark transition-colors duration-200 font-medium"
               >
                 Already have an account? Login →
@@ -228,7 +228,7 @@ export default function  RegisterForm() {
                 Are you a business owner?
               </p>
               <Link
-                href="/vendor/register"
+                href="/shd-pages/vendor/register"
                 className="w-full flex items-center justify-center gap-2 bg-green-50 text-green-700 hover:bg-green-100 px-5 py-3 rounded-xl font-medium transition-all duration-200 border border-green-200"
               >
                 🏪 Register Your Shop
@@ -240,7 +240,7 @@ export default function  RegisterForm() {
                 Are you a delivery rider?
               </p>
               <Link
-                href="/rider/register"
+                href="/shd-pages/rider/register"
                 className="w-full flex items-center justify-center gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100 px-5 py-3 rounded-xl font-medium transition-all duration-200 border border-purple-200"
               >
                 🏍️ Register as Rider
