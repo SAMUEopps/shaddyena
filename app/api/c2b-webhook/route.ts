@@ -1460,7 +1460,7 @@ export async function POST(req: NextRequest) {
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import OrderDraft from '@/models/OrderDraft';
-import Order, { DeliveryDetails } from '@/models/Order';
+import Order from '@/models/Order';
 import Ledger from '@/models/Ledger';
 import Product from '@/models/product';
 import User from '@/models/user';
@@ -1769,9 +1769,9 @@ async function handleDeliveryFeeConfirmation(body: any) {
   const confirmationCode = generateConfirmationCode();
 
   // Update suborder with payment and confirmation code
-  if (!suborder.deliveryDetails) {
-    suborder.deliveryDetails = {} as DeliveryDetails;
-  }
+  //if (!suborder.deliveryDetails) {
+  //  suborder.deliveryDetails = {} as DeliveryDetails;
+  //}
   
   suborder.deliveryDetails.deliveryFeePaid = true;
   suborder.deliveryDetails.deliveryFeePaidAt = new Date();
