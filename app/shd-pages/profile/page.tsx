@@ -1159,7 +1159,7 @@ export default function ProfilePage() {
                   <h3 className="text-sm font-medium text-muted mb-3">Quick Actions</h3>
                   <div className="flex flex-wrap gap-3">
                     <Link 
-                      href="/shd/pages/profile/referrals" 
+                      href="/shd-pages/profile/referrals" 
                       className="bg-purple-50 text-purple-700 px-4 py-2.5 rounded-xl hover:bg-purple-100 transition-all duration-200 border border-purple-200 font-medium text-sm"
                     >
                       📤 Referrals
