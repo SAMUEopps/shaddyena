@@ -89,6 +89,21 @@ export default function Home() {
       productsData.products?.[0]?.vendorId
     );
 
+    console.log(
+  "Products:",
+  JSON.stringify(productsData.products, null, 2)
+);
+
+console.log(
+  "First Product:",
+  JSON.stringify(productsData.products?.[0], null, 2)
+);
+
+console.log(
+  "First Product Vendor:",
+  JSON.stringify(productsData.products?.[0]?.vendorId, null, 2)
+);
+
 
     setProducts(productsData.products || []);
     setShops(shopsData.shops || []);
