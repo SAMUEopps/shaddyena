@@ -41,7 +41,7 @@ export default function  RegisterForm() {
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch('/api/shd-api/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
