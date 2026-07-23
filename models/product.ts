@@ -343,7 +343,7 @@ productSchema.index({ sku: 1 }, { unique: true });
 
 export default mongoose.models.Product || mongoose.model<IProduct>('Product', productSchema);*/
 
-import mongoose, { Document, Schema } from 'mongoose';
+/*import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IProduct extends Document {
   name: string;
@@ -619,4 +619,6 @@ productSchema.index({ 'subscriptionCategories.isClearance': 1 });
 productSchema.index({ 'subscriptionCategories.isGiftCard': 1 });
 
 export default mongoose.models.Product ||
-  mongoose.model<IProduct>('Product', productSchema);
+  mongoose.model<IProduct>('Product', productSchema);*/
+
+  
