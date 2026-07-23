@@ -620,5 +620,3 @@ productSchema.index({ 'subscriptionCategories.isGiftCard': 1 });
 
 export default mongoose.models.Product ||
   mongoose.model<IProduct>('Product', productSchema);*/
-
-  
