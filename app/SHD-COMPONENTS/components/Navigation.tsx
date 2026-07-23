@@ -571,11 +571,11 @@ export default function Navigation() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1 lg:gap-2">
             <NavLink href="/">Home</NavLink>
-            <NavLink href="/shops">Shops</NavLink>
+            <NavLink href="/shd-pages/shops">Shops</NavLink>
             
             {/* Cart with badge */}
             <Link 
-              href="/cart" 
+              href="/shd-pages/cart" 
               className="relative px-3 py-2 rounded-lg hover:text-primary hover:bg-surface transition-all duration-200 text-secondary"
             >
               <span>Cart</span>
@@ -602,20 +602,20 @@ export default function Navigation() {
               {showServices && (
                 <div className="absolute left-0 top-full w-56 rounded-lg bg-white shadow-xl border border-surface py-2 animate-in fade-in slide-in-from-top-2 duration-200">
                   <Link
-                    href="/membership/activate"
+                    href="/shd-pages/membership/activate"
                     className="block px-4 py-2.5 hover:text-primary hover:bg-surface transition-all duration-200 text-secondary"
                   >
                      Membership
                   </Link>
                   <Link
-                    href="/events"
+                    href="/shd-pages/events"
                     className="block px-4 py-2.5 hover:text-primary hover:bg-surface transition-all duration-200 text-secondary"
                   >
                      Events
                   </Link>
                   {userRole === "vendor" && (
                     <Link
-                      href="/vendor/subscriptions"
+                      href="/shd-pages/vendor/subscriptions"
                       className="block px-4 py-2.5 hover:text-primary hover:bg-surface transition-all duration-200 text-secondary"
                     >
                       💎 Vendor Subscriptions
@@ -628,25 +628,25 @@ export default function Navigation() {
             {/* Auth Links */}
             {isLoggedIn ? (
               <div className="flex items-center gap-1 lg:gap-2">
-                <NavLink href="/profile">Profile</NavLink>
+                <NavLink href="/shd-pages/profile">Profile</NavLink>
                 {userRole === 'admin' && (
-                  <NavLink href="/admin/dashboard" className="text-primary font-semibold">
+                  <NavLink href="/shd-pages/admin/dashboard" className="text-primary font-semibold">
                     Admin
                   </NavLink>
                 )}
                 {userRole === 'vendor' && (
                   <>
-                    <NavLink href="/vendor/dashboard">Dashboard</NavLink>
-                    <NavLink href="/vendor/products">Products</NavLink>
+                    <NavLink href="/shd-pages/vendor/dashboard">Dashboard</NavLink>
+                    <NavLink href="/shd-pages/vendor/products">Products</NavLink>
                   </>
                 )}
                 {userRole === 'rider' && (
-                  <NavLink href="/rider/dashboard">🏍️ Rider</NavLink>
+                  <NavLink href="/shd-pages/rider/dashboard">🏍️ Rider</NavLink>
                 )}
                 {userRole === 'customer' && (
                   <>
-                    <NavLink href="/orders">Orders</NavLink>
-                    <NavLink href="/membership/dashboard">🌟 Member</NavLink>
+                    <NavLink href="/shd-pages/orders">Orders</NavLink>
+                    <NavLink href="/shd-pages/membership/dashboard">🌟 Member</NavLink>
                   </>
                 )}
                 <button
@@ -689,11 +689,11 @@ export default function Navigation() {
           <div className="md:hidden py-4 border-t border-surface animate-in slide-in-from-top-2 duration-200">
             <div className="flex flex-col space-y-1">
               <MobileNavLink href="/">Home</MobileNavLink>
-              <MobileNavLink href="/shops">Shops</MobileNavLink>
+              <MobileNavLink href="/shd-pages/shops">Shops</MobileNavLink>
               
               {/* Mobile Cart */}
               <Link 
-                href="/cart" 
+                href="/shd-pages/cart" 
                 className="flex items-center justify-between px-4 py-3 rounded-lg hover:text-primary hover:bg-surface transition-all duration-200 text-secondary"
               >
                 <span>Cart</span>
@@ -716,20 +716,20 @@ export default function Navigation() {
                 {showServices && (
                   <div className="mt-2 ml-4 space-y-1 animate-in slide-in-from-top-2 duration-200">
                     <Link
-                      href="/membership/activate"
+                      href="/shd-pages/membership/activate"
                       className="block px-4 py-2.5 rounded-lg hover:text-primary hover:bg-surface transition-all duration-200 text-secondary"
                     >
                        Membership
                     </Link>
                     <Link
-                      href="/events"
+                      href="/shd-pages/events"
                       className="block px-4 py-2.5 rounded-lg hover:text-primary hover:bg-surface transition-all duration-200 text-secondary"
                     >
                        Events
                     </Link>
                     {userRole === "vendor" && (
                       <Link
-                        href="/vendor/subscriptions"
+                        href="/shd-pages/vendor/subscriptions"
                         className="block px-4 py-2.5 rounded-lg hover:text-primary hover:bg-surface transition-all duration-200 text-secondary"
                       >
                         💎 Vendor Subscriptions
@@ -742,23 +742,23 @@ export default function Navigation() {
               {/* Mobile Auth Links */}
               {isLoggedIn ? (
                 <>
-                  <MobileNavLink href="/profile">Profile</MobileNavLink>
+                  <MobileNavLink href="/shd-pages/profile">Profile</MobileNavLink>
                   {userRole === 'admin' && (
-                    <MobileNavLink href="/admin/dashboard">Admin</MobileNavLink>
+                    <MobileNavLink href="/shd-pages/admin/dashboard">Admin</MobileNavLink>
                   )}
                   {userRole === 'vendor' && (
                     <>
-                      <MobileNavLink href="/vendor/dashboard">Dashboard</MobileNavLink>
-                      <MobileNavLink href="/vendor/products">Products</MobileNavLink>
+                      <MobileNavLink href="/shd-pages/vendor/dashboard">Dashboard</MobileNavLink>
+                      <MobileNavLink href="/shd-pages/vendor/products">Products</MobileNavLink>
                     </>
                   )}
                   {userRole === 'rider' && (
-                    <MobileNavLink href="/rider/dashboard">🏍️ Rider</MobileNavLink>
+                    <MobileNavLink href="/shd-pages/rider/dashboard">🏍️ Rider</MobileNavLink>
                   )}
                   {userRole === 'customer' && (
                     <>
-                      <MobileNavLink href="/orders">Orders</MobileNavLink>
-                      <MobileNavLink href="/membership/dashboard">🌟 Member</MobileNavLink>
+                      <MobileNavLink href="/shd-pages/orders">Orders</MobileNavLink>
+                      <MobileNavLink href="/shd-pages/membership/dashboard">🌟 Member</MobileNavLink>
                     </>
                   )}
                   <button
