@@ -133,6 +133,8 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+    console.log("Model file:", Product.modelName);
+    console.log("Schema paths:", Object.keys(Product.schema.paths));
     const { searchParams } = new URL(req.url);
     const vendorId = searchParams.get('vendorId');
 
