@@ -444,7 +444,7 @@ export default function MembershipDashboard() {
         return;
       }
 
-      const response = await fetch('/api/membership/dashboard', {
+      const response = await fetch('/api/shd-api/api/membership/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -466,7 +466,7 @@ export default function MembershipDashboard() {
   const handleDeposit = async (amount: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/savings/deposit', {
+      const response = await fetch('/api/shd-api/api/savings/deposit', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -491,7 +491,7 @@ export default function MembershipDashboard() {
   const handleInvest = async (type: string, amount: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/investments/create', {
+      const response = await fetch('/api/shd-api/api/investments/create', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

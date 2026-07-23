@@ -496,7 +496,7 @@ export default function RiderRegister() {
     };
 
     try {
-      const response = await fetch('/api/riders/register', {
+      const response = await fetch('/api/shd-api/api/riders/register', {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"

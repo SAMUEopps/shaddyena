@@ -465,7 +465,7 @@ export default function VendorDashboard() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/vendors/orders', {
+      const response = await fetch('/api/shd-api/api/vendors/orders', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -479,7 +479,7 @@ export default function VendorDashboard() {
 
   const fetchVendorProfile = async () => {
     try {
-      const response = await fetch('/api/vendors/profile', {
+      const response = await fetch('/api/shd-api/api/vendors/profile', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -511,7 +511,7 @@ export default function VendorDashboard() {
 
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
-      const response = await fetch('/api/orders/status', {
+      const response = await fetch('/api/shd-api/api/orders/status', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -538,7 +538,7 @@ export default function VendorDashboard() {
       formData.append('image', file);
       formData.append('type', type);
 
-      const response = await fetch('/api/vendors/upload', {
+      const response = await fetch('/api/shd-api/api/vendors/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -568,7 +568,7 @@ export default function VendorDashboard() {
     if (!confirm(`Remove ${type} image?`)) return;
 
     try {
-      const response = await fetch(`/api/vendors/upload?type=${type}`, {
+      const response = await fetch(`/api/shd-api/api/vendors/upload?type=${type}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -592,7 +592,7 @@ export default function VendorDashboard() {
     setEditing(true);
 
     try {
-      const response = await fetch('/api/vendors/profile', {
+      const response = await fetch('/api/shd-api/api/vendors/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

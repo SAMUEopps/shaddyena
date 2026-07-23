@@ -915,7 +915,7 @@ export default function ProfilePage() {
         return;
       }
 
-      const response = await fetch('/api/profile', {
+      const response = await fetch('/api/shd-api/api/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -952,7 +952,7 @@ export default function ProfilePage() {
         return;
       }
 
-      const response = await fetch('/api/profile', {
+      const response = await fetch('/api/shd-api/api/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -1009,7 +1009,7 @@ export default function ProfilePage() {
         return;
       }
 
-      const response = await fetch('/api/profile/change-password', {
+      const response = await fetch('/api/shd-api/api/profile/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

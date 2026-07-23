@@ -1850,7 +1850,7 @@ export default function EventDetail({ params }: { params: Promise<{ id: string }
 
   const fetchEvent = async () => {
     try {
-      const response = await fetch(`/api/events/${eventId}`);
+      const response = await fetch(`/api/shd-api/api/events/${eventId}`);
       const data = await response.json();
       setEvent(data.event);
       // Auto-select first ticket type
@@ -1952,7 +1952,7 @@ const handleBooking = async (e: React.FormEvent) => {
   }
 
   try {
-    const response = await fetch('/api/events/book', {
+    const response = await fetch('/api/shd-api/api/events/book', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -2005,7 +2005,7 @@ const handleBooking = async (e: React.FormEvent) => {
       
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`/api/payments/status?checkoutRequestId=${checkoutRequestId}`, {
+        const response = await fetch(`/api/shd-api/api/payments/status?checkoutRequestId=${checkoutRequestId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

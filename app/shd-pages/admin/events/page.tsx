@@ -298,7 +298,7 @@ export default function AdminEvents() {
   const fetchEvents = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/events', {
+      const response = await fetch('/api/shd-api/api/admin/events', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -317,7 +317,7 @@ export default function AdminEvents() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/events/${eventId}`, {
+      const response = await fetch(`/api/shd-api/api/admin/events/${eventId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -345,7 +345,7 @@ export default function AdminEvents() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/events/${eventId}`, {
+      const response = await fetch(`/api/shd-api/api/admin/events/${eventId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

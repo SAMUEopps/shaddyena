@@ -446,11 +446,11 @@ export default function UpgradeToVendor() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        router.push('/login');
+        router.push('/shd-pages/login');
         return;
       }
 
-      const response = await fetch('/api/profile', {
+      const response = await fetch('/api/shd-api/api/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -466,7 +466,7 @@ export default function UpgradeToVendor() {
       if (data.user.role === 'vendor') {
         setError('You are already a vendor!');
         setTimeout(() => {
-          router.push('/vendor/dashboard');
+          router.push('/shd-pages/vendor/dashboard');
         }, 2000);
       }
 
@@ -514,7 +514,7 @@ export default function UpgradeToVendor() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        router.push('/login');
+        router.push('/shd-pages/login');
         return;
       }
 
@@ -535,7 +535,7 @@ export default function UpgradeToVendor() {
         }
       };
 
-      const response = await fetch('/api/vendors/upgrade', {
+      const response = await fetch('/api/shd-api/api/vendors/upgrade', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -559,7 +559,7 @@ export default function UpgradeToVendor() {
         }
 
         setTimeout(() => {
-          router.push('/vendor/dashboard');
+          router.push('/shd/pages/vendor/dashboard');
         }, 2000);
       } else {
         setError(data.error || 'Upgrade failed');
@@ -607,7 +607,7 @@ export default function UpgradeToVendor() {
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
               <Link 
-                href="/profile" 
+                href="/shd-pages/profile" 
                 className="text-primary hover:text-accent-dark transition-colors duration-200 font-medium inline-flex items-center gap-2 mb-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -27,7 +27,7 @@ export default function Orders() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/orders', {
+      const response = await fetch('/api/shd-api/api/orders', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -43,7 +43,7 @@ export default function Orders() {
 
   const confirmDelivery = async (orderId: string) => {
     try {
-      const response = await fetch('/api/orders/confirm', {
+      const response = await fetch('/api/shd-api/api/orders/confirm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

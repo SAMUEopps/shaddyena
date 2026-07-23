@@ -176,7 +176,7 @@ export default function AdminProducts() {
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/products', {
+      const response = await fetch('/api/shd-api/api/admin/products', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -196,7 +196,7 @@ export default function AdminProducts() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/products/toggle-status', {
+      const response = await fetch('/api/shd-api/api/admin/products/toggle-status', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

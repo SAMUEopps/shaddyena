@@ -332,7 +332,7 @@ export default function Invest() {
         return;
       }
 
-      const response = await fetch('/api/membership/dashboard', {
+      const response = await fetch('/api/shd-api/api/membership/dashboard', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -386,7 +386,7 @@ export default function Invest() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/investments/create', {
+      const response = await fetch('/api/shd-api/api/investments/create', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -1248,7 +1248,7 @@ export default function VendorRegister() {
     };
 
     try {
-      const response = await fetch('/api/vendors/register', {
+      const response = await fetch('/api/shd-api/api/vendors/register', {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"

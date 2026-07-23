@@ -262,7 +262,7 @@ export default function AdminSubscriptions() {
   const fetchSubscriptions = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/subscriptions', {
+      const response = await fetch('/api/shd-api/api/admin/subscriptions', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -281,7 +281,7 @@ export default function AdminSubscriptions() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/subscriptions/${subscriptionId}`, {
+      const response = await fetch(`/api/shd-api/api/admin/subscriptions/${subscriptionId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -311,7 +311,7 @@ export default function AdminSubscriptions() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/subscriptions/${subscriptionId}`, {
+      const response = await fetch(`/api/shd-api/api/admin/subscriptions/${subscriptionId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

@@ -941,7 +941,7 @@ export default function VendorProducts() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/vendors/products', {
+      const response = await fetch('/api/shd-api/api/vendors/products', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -1004,7 +1004,7 @@ export default function VendorProducts() {
         formDataObj.append('productId', productId);
       }
 
-      const response = await fetch('/api/products/upload', {
+      const response = await fetch('/api/shd-api/api/products/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

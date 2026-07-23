@@ -54,7 +54,7 @@ export default function RiderDashboard() {
         }
 
         // Fetch rider stats
-        const statsResponse = await fetch('/api/rider/stats', {
+        const statsResponse = await fetch('/api/shd-api/api/rider/stats', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -67,7 +67,7 @@ export default function RiderDashboard() {
         }
 
         // Fetch deliveries
-        const deliveriesResponse = await fetch('/api/rider/deliveries', {
+        const deliveriesResponse = await fetch('/api/shd-api/api/rider/deliveries', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -91,7 +91,7 @@ export default function RiderDashboard() {
   const toggleAvailability = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/rider/toggle-availability', {
+      const response = await fetch('/api/shd-api/api/rider/toggle-availability', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -112,7 +112,7 @@ export default function RiderDashboard() {
   const acceptDelivery = async (deliveryId: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/rider/accept-delivery/${deliveryId}`, {
+      const response = await fetch(`/api/shd-api/api/rider/accept-delivery/${deliveryId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -139,7 +139,7 @@ export default function RiderDashboard() {
   const updateDeliveryStatus = async (deliveryId: string, status: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/rider/update-delivery/${deliveryId}`, {
+      const response = await fetch(`/api/shd-api/api/rider/update-delivery/${deliveryId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -159,7 +159,7 @@ export default function RiderDashboard() {
         
         if (status === 'delivered') {
           // Refresh stats
-          const statsResponse = await fetch('/api/rider/stats', {
+          const statsResponse = await fetch('/api/shd-api/api/rider/stats', {
             headers: {
               'Authorization': `Bearer ${token}`
             }

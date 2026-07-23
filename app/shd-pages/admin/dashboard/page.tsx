@@ -282,7 +282,7 @@ export default function AdminDashboard() {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/dashboard', {
+      const response = await fetch('/api/shd-api/api/admin/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -351,7 +351,7 @@ export default function ReferralsPage() {
         return;
       }
 
-      const response = await fetch('/api/referral/stats', {
+      const response = await fetch('/api/shd-api/api/referral/stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -382,7 +382,7 @@ export default function ReferralsPage() {
         return;
       }
 
-      const response = await fetch('/api/referral/generate', {
+      const response = await fetch('/api/shd-api/api/referral/generate', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

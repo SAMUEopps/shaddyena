@@ -33,7 +33,7 @@ export default function AdminUsers() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/users', {
+      const response = await fetch('/api/shd-api/api/admin/users', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -50,7 +50,7 @@ export default function AdminUsers() {
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/users/update-role', {
+      const response = await fetch('/api/shd-api/api/admin/users/update-role', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -76,7 +76,7 @@ export default function AdminUsers() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/users/delete', {
+      const response = await fetch('/api/shd-api/api/admin/users/delete', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

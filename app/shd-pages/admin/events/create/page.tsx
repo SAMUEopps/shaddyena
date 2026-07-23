@@ -1014,7 +1014,7 @@ export default function CreateEvent() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/events', {
+      const response = await fetch('/api/shd-api/api/admin/events', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

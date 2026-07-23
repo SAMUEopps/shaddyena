@@ -304,7 +304,7 @@ export default function ShopsPage() {
 
   const fetchShops = async () => {
     try {
-      const response = await fetch('/api/shops');
+      const response = await fetch('/api/shd-api/api/shops');
       const data = await response.json();
       setShops(data.shops || []);
     } catch (error) {

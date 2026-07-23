@@ -331,7 +331,7 @@ export default function Cart() {
         quantity: item.quantity
       }));
 
-      const response = await fetch('/api/checkout', {
+      const response = await fetch('/api/shd-api/api/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

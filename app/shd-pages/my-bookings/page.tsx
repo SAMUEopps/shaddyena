@@ -35,7 +35,7 @@ export default function MyBookings() {
         return;
       }
 
-      const response = await fetch('/api/events/my-bookings', {
+      const response = await fetch('/api/shd-api/api/events/my-bookings', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

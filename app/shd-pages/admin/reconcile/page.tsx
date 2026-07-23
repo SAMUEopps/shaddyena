@@ -168,7 +168,7 @@ export default function AdminReconcile() {
   const fetchReconciliation = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/reconcile', {
+      const response = await fetch('/api/shd-api/api/admin/reconcile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

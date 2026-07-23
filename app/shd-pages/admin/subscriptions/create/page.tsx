@@ -413,7 +413,7 @@ export default function CreateSubscription() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/subscriptions', {
+      const response = await fetch('/api/shd-api/api/admin/subscriptions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

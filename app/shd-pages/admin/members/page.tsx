@@ -152,7 +152,7 @@ export default function AdminMembers() {
   const fetchMembers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/members', {
+      const response = await fetch('/api/shd-api/api/admin/members', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

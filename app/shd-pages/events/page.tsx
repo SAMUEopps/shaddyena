@@ -457,7 +457,7 @@ export default function EventsPage() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch('/api/events');
+      const response = await fetch('/api/shd-api/api/events');
       const data = await response.json();
       setEvents(data.events || []);
     } catch (error) {

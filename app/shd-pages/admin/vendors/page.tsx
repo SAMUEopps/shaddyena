@@ -190,7 +190,7 @@ export default function AdminVendors() {
   const fetchVendors = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/vendors', {
+      const response = await fetch('/api/shd-api/api/admin/vendors', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -210,7 +210,7 @@ export default function AdminVendors() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/vendors/toggle-status', {
+      const response = await fetch('/api/shd-api/api/admin/vendors/toggle-status', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

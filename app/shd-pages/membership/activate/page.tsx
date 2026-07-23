@@ -191,7 +191,7 @@ export default function ActivateMembership() {
         return;
       }
 
-      const response = await fetch('/api/membership/activate', {
+      const response = await fetch('/api/shd-api/api/membership/activate', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

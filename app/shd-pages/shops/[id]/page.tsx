@@ -559,7 +559,7 @@ export default function ShopDetail() {
   const fetchShopDetail = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/shops/${params.id}`);
+      const response = await fetch(`/api/shd-api/api/shops/${params.id}`);
       const data = await response.json();
       
       if (!response.ok) {

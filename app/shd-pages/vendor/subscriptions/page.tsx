@@ -322,7 +322,7 @@ export default function VendorSubscriptions() {
     try {
       const token = localStorage.getItem('token');
       
-      const subsResponse = await fetch('/api/subscriptions', {
+      const subsResponse = await fetch('/api/shd-api/api/subscriptions', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -330,7 +330,7 @@ export default function VendorSubscriptions() {
       const subsData = await subsResponse.json();
       setSubscriptions(subsData.subscriptions || []);
 
-      const currentResponse = await fetch('/api/vendor/subscriptions/current', {
+      const currentResponse = await fetch('/api/shd-api/api/vendor/subscriptions/current', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -352,7 +352,7 @@ export default function VendorSubscriptions() {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/vendor/subscriptions/upgrade', {
+      const response = await fetch('/api/shd-api/api/vendor/subscriptions/upgrade', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -382,7 +382,7 @@ export default function VendorSubscriptions() {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/vendor/subscriptions/cancel-auto-renew', {
+      const response = await fetch('/api/shd-api/api/vendor/subscriptions/cancel-auto-renew', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
