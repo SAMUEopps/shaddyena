@@ -104,14 +104,14 @@ export default function ShopSection({ shops }: ShopSectionProps) {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-secondary flex items-center gap-2 sm:gap-3">
-            <span className="text-2xl sm:text-3xl">🏪</span> Featured Shops
+            Featured Shops
           </h2>
           <p className="text-muted text-xs sm:text-sm mt-0.5 sm:mt-1">
             {shops.length} shops available
           </p>
         </div>
         <Link
-          href="/shops"
+          href="/shd-pages/shops"
           className="text-primary hover:text-accent-dark transition-colors duration-200 font-medium text-sm sm:text-base flex items-center gap-1 sm:gap-2"
         >
           View all 
@@ -134,7 +134,7 @@ export default function ShopSection({ shops }: ShopSectionProps) {
           {shops.length > 6 && (
             <div className="text-center mt-6 sm:mt-8">
               <Link
-                href="/shops"
+                href="/shd-pages/shops"
                 className="inline-block bg-primary hover:bg-accent-dark text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] font-medium text-sm sm:text-base"
               >
                 View All {shops.length} Shops →

@@ -115,7 +115,7 @@ interface ShopCardProps {
 export default function ShopCard({ shop }: ShopCardProps) {
   return (
     <Link
-      href={`/shops/${shop._id}`}
+      href={`/shd-pages/shops/${shop._id}`}
       className="bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-surface hover:border-primary/20 group h-full flex flex-col"
     >
       {/* Shop Cover Image */}

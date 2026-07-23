@@ -113,14 +113,14 @@ export default function ProductSection({ products, addingToCart, onAddToCart }: 
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-secondary flex items-center gap-2 sm:gap-3">
-            <span className="text-2xl sm:text-3xl">📦</span> Featured Products
+          Featured Products
           </h2>
           <p className="text-muted text-xs sm:text-sm mt-0.5 sm:mt-1">
             {products.length} products available
           </p>
         </div>
         <Link
-          href="/products"
+          href="/shd-pages/products"
           className="text-primary hover:text-accent-dark transition-colors duration-200 font-medium text-sm sm:text-base flex items-center gap-1 sm:gap-2"
         >
           View all 
