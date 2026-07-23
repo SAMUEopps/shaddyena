@@ -1,296 +1,345 @@
-/*import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcryptjs';
+// /*import mongoose, { Document, Schema } from 'mongoose';
+// import bcrypt from 'bcryptjs';
 
-export interface IUser extends Document {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role: 'customer' | 'vendor' | 'admin';
-  phone: string;
-  avatar?: string;
-  businessName?: string; 
-  businessType?: string; 
-  businessDocuments?: string[];
-  mpesaNumber?: string; 
-  isVerified: boolean;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  comparePassword(candidatePassword: string): Promise<boolean>;
-}
+// export interface IUser extends Document {
+//   firstName: string;
+//   lastName: string;
+//   email: string;
+//   password: string;
+//   role: 'customer' | 'vendor' | 'admin';
+//   phone: string;
+//   avatar?: string;
+//   businessName?: string; 
+//   businessType?: string; 
+//   businessDocuments?: string[];
+//   mpesaNumber?: string; 
+//   isVerified: boolean;
+//   isActive: boolean;
+//   createdAt: Date;
+//   updatedAt: Date;
+//   comparePassword(candidatePassword: string): Promise<boolean>;
+// }
 
-const userSchema = new Schema<IUser>(
-  {
-    firstName: { type: String, required: true, trim: true },
-    lastName: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true, select: false },
-    role: { 
-      type: String, 
-      required: true, 
-      enum: ['customer', 'vendor', 'admin', 'delivery'],
-      default: 'customer'
-    },
-    phone: { type: String, required: true, trim: true },
-    avatar: { type: String },
-    businessName: { type: String, trim: true }, // For vendors
-    businessType: { type: String, trim: true }, // For vendors
-    businessDocuments: [{ type: String }], // For vendors - store file paths
-    mpesaNumber: { type: String, trim: true }, // For M-Pesa payments
-    isVerified: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true }
-  },
-  { timestamps: true }
-);
+// const userSchema = new Schema<IUser>(
+//   {
+//     firstName: { type: String, required: true, trim: true },
+//     lastName: { type: String, required: true, trim: true },
+//     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+//     password: { type: String, required: true, select: false },
+//     role: { 
+//       type: String, 
+//       required: true, 
+//       enum: ['customer', 'vendor', 'admin', 'delivery'],
+//       default: 'customer'
+//     },
+//     phone: { type: String, required: true, trim: true },
+//     avatar: { type: String },
+//     businessName: { type: String, trim: true }, // For vendors
+//     businessType: { type: String, trim: true }, // For vendors
+//     businessDocuments: [{ type: String }], // For vendors - store file paths
+//     mpesaNumber: { type: String, trim: true }, // For M-Pesa payments
+//     isVerified: { type: Boolean, default: false },
+//     isActive: { type: Boolean, default: true }
+//   },
+//   { timestamps: true }
+// );
 
-// Index for better query performance
-userSchema.index({ email: 1 });
-userSchema.index({ role: 1 });
-userSchema.index({ isActive: 1 });
+// // Index for better query performance
+// userSchema.index({ email: 1 });
+// userSchema.index({ role: 1 });
+// userSchema.index({ isActive: 1 });
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
+// userSchema.pre('save', async function (next) {
+//   if (!this.isModified('password')) return next();
+//   this.password = await bcrypt.hash(this.password, 12);
+//   next();
+// });
 
-userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
-};
+// userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+//   return bcrypt.compare(candidatePassword, this.password);
+// };
 
-// Virtual for full name
-userSchema.virtual('fullName').get(function () {
-  return `${this.firstName} ${this.lastName}`;
-});
+// // Virtual for full name
+// userSchema.virtual('fullName').get(function () {
+//   return `${this.firstName} ${this.lastName}`;
+// });
 
-export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);*/
-
-
+// export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);*/
 
 
 
 
-// lib/models/User.ts
-/*import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
 
-export interface IUser extends Document {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role: 'customer' | 'vendor' | 'admin' | 'delivery';
-  phone: string;
-  avatar?: string;
-  businessName?: string;
-  businessType?: string;
-  businessDocuments?: string[];
-  mpesaNumber?: string;
-  isVerified: boolean;
-  isActive: boolean;
 
-  referralCode: string;
-  referredBy?: string;
-  referralCount: {
-    type: Number,
-    default: 0,
-  },
+// // lib/models/User.ts
+// /*import mongoose, { Document, Schema } from 'mongoose';
+// import bcrypt from 'bcryptjs';
+// import { v4 as uuidv4 } from 'uuid';
 
-  createdAt: Date;
-  updatedAt: Date;
-  comparePassword(candidatePassword: string): Promise<boolean>;
-}
+// export interface IUser extends Document {
+//   firstName: string;
+//   lastName: string;
+//   email: string;
+//   password: string;
+//   role: 'customer' | 'vendor' | 'admin' | 'delivery';
+//   phone: string;
+//   avatar?: string;
+//   businessName?: string;
+//   businessType?: string;
+//   businessDocuments?: string[];
+//   mpesaNumber?: string;
+//   isVerified: boolean;
+//   isActive: boolean;
 
-const userSchema = new Schema<IUser>(
-  {
-    firstName: { type: String, required: true, trim: true },
-    lastName: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true, select: false },
-    role: { 
-      type: String, 
-      required: true, 
-      enum: ['customer', 'vendor', 'admin', 'delivery'],
-      default: 'customer'
-    },
-    phone: { type: String, required: true, trim: true },
-    avatar: { type: String },
-    businessName: { type: String, trim: true },
-    businessType: { type: String, trim: true },
-    businessDocuments: [{ type: String }],
-    mpesaNumber: { type: String, trim: true },
-    isVerified: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true },
+//   referralCode: string;
+//   referredBy?: string;
+//   referralCount: {
+//     type: Number,
+//     default: 0,
+//   },
+
+//   createdAt: Date;
+//   updatedAt: Date;
+//   comparePassword(candidatePassword: string): Promise<boolean>;
+// }
+
+// const userSchema = new Schema<IUser>(
+//   {
+//     firstName: { type: String, required: true, trim: true },
+//     lastName: { type: String, required: true, trim: true },
+//     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+//     password: { type: String, required: true, select: false },
+//     role: { 
+//       type: String, 
+//       required: true, 
+//       enum: ['customer', 'vendor', 'admin', 'delivery'],
+//       default: 'customer'
+//     },
+//     phone: { type: String, required: true, trim: true },
+//     avatar: { type: String },
+//     businessName: { type: String, trim: true },
+//     businessType: { type: String, trim: true },
+//     businessDocuments: [{ type: String }],
+//     mpesaNumber: { type: String, trim: true },
+//     isVerified: { type: Boolean, default: false },
+//     isActive: { type: Boolean, default: true },
     
-    // Referral schema
-    referralCode: {
-      type: String,
-      required: true,
-      unique: true,
-      default: () => uuidv4().substring(0, 8).toUpperCase()
-    },
-    referredBy: {
-      type: String,
-      required: false
-    },
-    referralCount: {
-      type: Number,
-      default: 0
-    }
-  },
-  { timestamps: true }
-);
+//     // Referral schema
+//     referralCode: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//       default: () => uuidv4().substring(0, 8).toUpperCase()
+//     },
+//     referredBy: {
+//       type: String,
+//       required: false
+//     },
+//     referralCount: {
+//       type: Number,
+//       default: 0
+//     }
+//   },
+//   { timestamps: true }
+// );
 
-// Indexes
-userSchema.index({ email: 1 });
-userSchema.index({ role: 1 });
-userSchema.index({ isActive: 1 });
-userSchema.index({ referralCode: 1 }); // For referral lookups
+// // Indexes
+// userSchema.index({ email: 1 });
+// userSchema.index({ role: 1 });
+// userSchema.index({ isActive: 1 });
+// userSchema.index({ referralCode: 1 }); // For referral lookups
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
+// userSchema.pre('save', async function (next) {
+//   if (!this.isModified('password')) return next();
+//   this.password = await bcrypt.hash(this.password, 12);
+//   next();
+// });
 
-userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
-};
+// userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+//   return bcrypt.compare(candidatePassword, this.password);
+// };
 
-// Virtual for full name
-userSchema.virtual('fullName').get(function () {
-  return `${this.firstName} ${this.lastName}`;
-});
+// // Virtual for full name
+// userSchema.virtual('fullName').get(function () {
+//   return `${this.firstName} ${this.lastName}`;
+// });
 
-export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);*/
+// export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);*/
 
-// lib/models/User.ts
-import mongoose, { Document, Schema, Types } from 'mongoose';
-import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
+// // lib/models/User.ts
+// import mongoose, { Document, Schema, Types } from 'mongoose';
+// import bcrypt from 'bcryptjs';
+// import { v4 as uuidv4 } from 'uuid';
+
+// export interface IUser extends Document {
+//   firstName: string;
+//   lastName: string;
+//   email: string;
+//   password: string;
+//   role: 'customer' | 'vendor' | 'admin' | 'delivery';
+//   phone: string;
+//   avatar?: string;
+//   businessName?: string;
+//   businessType?: string;
+//   businessDocuments?: string[];
+//   mpesaNumber?: string;
+//   isVerified: boolean;
+//   isActive: boolean;
+
+//   // Referral fields - FIXED
+//   referralCode: string;
+//   referredBy?: Types.ObjectId; // Changed from string to ObjectId
+//   referralCount: number;
+//   referrals: Types.ObjectId[]; // ADD THIS FIELD
+//   riderProfile?: {
+//     isApproved: boolean;
+//     vehicleType?: string;
+//     vehicleModel?: string;
+//     vehiclePlate?: string;
+//     licenseNumber?: string;
+//     rating?: number;
+//     totalDeliveries?: number;
+//     joinedAt?: Date;
+//   };
+//   // In the User schema, add:
+//   hasPendingVendorRequest: {
+//     type: Boolean,
+//     default: false
+//   };
+//   createdAt: Date;
+//   updatedAt: Date;
+//   comparePassword(candidatePassword: string): Promise<boolean>;
+// }
+
+// const userSchema = new Schema<IUser>(
+//   {
+//     firstName: { type: String, required: true, trim: true },
+//     lastName: { type: String, required: true, trim: true },
+//     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+//     password: { type: String, required: true, select: false },
+//     role: { 
+//       type: String, 
+//       required: true, 
+//       enum: ['customer', 'vendor', 'admin', 'delivery'],
+//       default: 'customer'
+//     },
+//     phone: { type: String, required: true, trim: true },
+//     avatar: { type: String },
+//     businessName: { type: String, trim: true },
+//     businessType: { type: String, trim: true },
+//     businessDocuments: [{ type: String }],
+//     mpesaNumber: { type: String, trim: true },
+//     isVerified: { type: Boolean, default: false },
+//     isActive: { type: Boolean, default: true },
+//     riderProfile: {
+//       isApproved: { type: Boolean, default: false },
+//       vehicleType: { type: String },
+//       vehicleModel: { type: String },
+//       vehiclePlate: { type: String },
+//       licenseNumber: { type: String },
+//       rating: { type: Number, default: 0 },
+//       totalDeliveries: { type: Number, default: 0 },
+//       joinedAt: { type: Date },
+//     },
+//     // Referral schema - FIXED
+//     referralCode: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//       default: () => uuidv4().substring(0, 8).toUpperCase()
+//     },
+//     // Add this field in the User schema
+// hasPendingVendorRequest: {
+//   type: Boolean,
+//   default: false
+// },
+// // lib/models/User.ts - Update the referredBy field
+// referredBy: {
+//   type: String, // Explicitly set as String
+//   required: false
+// },
+//     referralCount: {
+//       type: Number,
+//       default: 0
+//     },
+//     referrals: [{ // ADD THIS FIELD - array of user references
+//       type: Schema.Types.ObjectId,
+//       ref: 'User',
+//       default: []
+//     }]
+//   },
+//   { timestamps: true }
+// );
+
+// // Indexes
+// userSchema.index({ email: 1 });
+// userSchema.index({ role: 1 });
+// userSchema.index({ isActive: 1 });
+// userSchema.index({ referralCode: 1 });
+// userSchema.index({ referredBy: 1 }); // For referral lookups
+
+// userSchema.pre('save', async function (next) {
+//   if (!this.isModified('password')) return next();
+//   this.password = await bcrypt.hash(this.password, 12);
+//   next();
+// });
+
+// userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+//   return bcrypt.compare(candidatePassword, this.password);
+// };
+
+// // Virtual for full name
+// userSchema.virtual('fullName').get(function () {
+//   return `${this.firstName} ${this.lastName}`;
+// }); 
+
+// export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+
+// models/User.ts
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IUser extends Document {
-  firstName: string;
-  lastName: string;
+  name: string;
+  phoneNumber: string;
   email: string;
   password: string;
-  role: 'customer' | 'vendor' | 'admin' | 'delivery';
-  phone: string;
-  avatar?: string;
-  businessName?: string;
-  businessType?: string;
-  businessDocuments?: string[];
-  mpesaNumber?: string;
   isVerified: boolean;
-  isActive: boolean;
-
-  // Referral fields - FIXED
+  role: 'customer' | 'vendor' | 'admin' | 'rider';
   referralCode: string;
-  referredBy?: Types.ObjectId; // Changed from string to ObjectId
-  referralCount: number;
-  referrals: Types.ObjectId[]; // ADD THIS FIELD
-  riderProfile?: {
-    isApproved: boolean;
-    vehicleType?: string;
-    vehicleModel?: string;
-    vehiclePlate?: string;
-    licenseNumber?: string;
-    rating?: number;
-    totalDeliveries?: number;
-    joinedAt?: Date;
-  };
-  // In the User schema, add:
-  hasPendingVendorRequest: {
-    type: Boolean,
-    default: false
-  };
+  referredBy: string | null;
+  referrals: string[];
+  referralEarnings: number;
+  referralCommissionEarnings: number; // New: earnings from order commissions
+  referralSubscriptionEarnings: number; // New: earnings from subscription commissions
+  // Membership fields
+  isMember: boolean;
+  memberSince?: Date;
+  totalSavings: number;
+  totalInvestments: number;
+  availableBalance: number;
   createdAt: Date;
-  updatedAt: Date;
-  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const userSchema = new Schema<IUser>(
-  {
-    firstName: { type: String, required: true, trim: true },
-    lastName: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true, select: false },
-    role: { 
-      type: String, 
-      required: true, 
-      enum: ['customer', 'vendor', 'admin', 'delivery'],
-      default: 'customer'
-    },
-    phone: { type: String, required: true, trim: true },
-    avatar: { type: String },
-    businessName: { type: String, trim: true },
-    businessType: { type: String, trim: true },
-    businessDocuments: [{ type: String }],
-    mpesaNumber: { type: String, trim: true },
-    isVerified: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true },
-    riderProfile: {
-      isApproved: { type: Boolean, default: false },
-      vehicleType: { type: String },
-      vehicleModel: { type: String },
-      vehiclePlate: { type: String },
-      licenseNumber: { type: String },
-      rating: { type: Number, default: 0 },
-      totalDeliveries: { type: Number, default: 0 },
-      joinedAt: { type: Date },
-    },
-    // Referral schema - FIXED
-    referralCode: {
-      type: String,
-      required: true,
-      unique: true,
-      default: () => uuidv4().substring(0, 8).toUpperCase()
-    },
-    // Add this field in the User schema
-hasPendingVendorRequest: {
-  type: Boolean,
-  default: false
-},
-// lib/models/User.ts - Update the referredBy field
-referredBy: {
-  type: String, // Explicitly set as String
-  required: false
-},
-    referralCount: {
-      type: Number,
-      default: 0
-    },
-    referrals: [{ // ADD THIS FIELD - array of user references
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      default: []
-    }]
-  },
-  { timestamps: true }
-);
-
-// Indexes
-userSchema.index({ email: 1 });
-userSchema.index({ role: 1 });
-userSchema.index({ isActive: 1 });
-userSchema.index({ referralCode: 1 });
-userSchema.index({ referredBy: 1 }); // For referral lookups
-
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
+const UserSchema = new Schema<IUser>({
+  name: { type: String, required: true },
+  phoneNumber: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  isVerified: { type: Boolean, default: false },
+  role: { type: String, enum: ['customer', 'vendor', 'admin', 'rider'], default: 'customer' },
+  referralCode: { type: String, unique: true },
+  referredBy: { type: String, default: null },
+  referrals: [{ type: String }],
+  referralEarnings: { type: Number, default: 0 },
+  referralCommissionEarnings: { type: Number, default: 0 },
+  referralSubscriptionEarnings: { type: Number, default: 0 },
+  // Membership fields
+  isMember: { type: Boolean, default: false },
+  memberSince: { type: Date },
+  totalSavings: { type: Number, default: 0 },
+  totalInvestments: { type: Number, default: 0 },
+  availableBalance: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now }
 });
 
-userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
-};
-
-// Virtual for full name
-userSchema.virtual('fullName').get(function () {
-  return `${this.firstName} ${this.lastName}`;
-}); 
-
-export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
