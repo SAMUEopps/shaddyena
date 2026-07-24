@@ -351,7 +351,7 @@ export default function Cart() {
       if (response.ok) {
         alert('Payment initiated! Check your phone for M-Pesa prompt.');
         localStorage.removeItem('cart');
-        router.push('/orders');
+        router.push('/shd-pages/orders');
       } else {
         alert(data.error || 'Checkout failed');
       }

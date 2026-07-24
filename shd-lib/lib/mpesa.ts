@@ -37,7 +37,7 @@ export async function getAccessToken() {
   }
 }
 
-export async function initSTKPush(phoneNumber: string, amount: number, accountReference: string) {
+/*export async function initSTKPush(phoneNumber: string, amount: number, accountReference: string) {
   try {
     const token = await getAccessToken();
     const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
@@ -68,6 +68,71 @@ export async function initSTKPush(phoneNumber: string, amount: number, accountRe
     return response.data;
   } catch (error) {
     console.error('STK Push failed:', error);
+    throw error;
+  }
+}*/
+
+export async function initSTKPush(
+  phoneNumber: string,
+  amount: number,
+  accountReference: string
+) {
+  try {
+    const phone = phoneNumber
+      .replace(/\s+/g, '')
+      .replace('+', '')
+      .replace(/^0/, '254');
+
+    const token = await getAccessToken();
+
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[^0-9]/g, '')
+      .slice(0, 14);
+
+    const password = Buffer.from(
+      `${SHORTCODE}${PASSKEY}${timestamp}`
+    ).toString('base64');
+
+    console.log({
+      phone,
+      amount,
+      shortcode: SHORTCODE,
+      timestamp,
+      callback: `${process.env.NEXT_PUBLIC_BASE_URL}/api/callback`
+    });
+
+    const response = await axios.post(
+      `${BASE_URL}/mpesa/stkpush/v1/processrequest`,
+      {
+        BusinessShortCode: SHORTCODE,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: 'CustomerPayBillOnline',
+        Amount: Math.round(amount),
+        PartyA: phone,
+        PartyB: SHORTCODE,
+        PhoneNumber: phone,
+        CallBackURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api/callback`,
+        AccountReference: accountReference,
+        TransactionDesc: 'Shaddyna Payment',
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    return response.data;
+
+  } catch (error: any) {
+    console.error(
+      "STK Error:",
+      error.response?.data || error.message
+    );
+
     throw error;
   }
 }

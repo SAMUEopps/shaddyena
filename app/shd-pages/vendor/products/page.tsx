@@ -1062,8 +1062,8 @@ export default function VendorProducts() {
       };
 
       const url = editingProduct 
-        ? `/api/products/${editingProduct._id}`
-        : '/api/products';
+        ? `/api/shd-api/api/products/${editingProduct._id}`
+        : '/api/shd-api/api/products';
       
       const response = await fetch(url, {
         method: editingProduct ? 'PUT' : 'POST',
@@ -1102,7 +1102,7 @@ export default function VendorProducts() {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const response = await fetch(`/api/products/${productId}`, {
+      const response = await fetch(`/api/shd-api/api/products/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1126,7 +1126,7 @@ export default function VendorProducts() {
     if (!confirm('Remove product image?')) return;
 
     try {
-      const response = await fetch(`/api/products/${productId}`, {
+      const response = await fetch(`/api/shd-api/api/products/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -1151,7 +1151,7 @@ export default function VendorProducts() {
 
   const toggleProductStatus = async (productId: string, currentStatus: boolean) => {
     try {
-      const response = await fetch(`/api/products/${productId}`, {
+      const response = await fetch(`/api/shd-api/api/products/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

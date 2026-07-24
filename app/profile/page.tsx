@@ -1268,12 +1268,13 @@ export default function ProfilePage() {
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ChevronLeft, User, Lock, Shield, LogOut, Camera, CheckCircle, AlertCircle } from 'lucide-react';
 import ReferralDashboard from '@/components/dashboards/RefferalDasboard';
 import SubscriptionPayment from '@/components/dashboards/SubscriptionPayment';
+import { useAuth } from '@/shd-contexts/AuthContext';
 
 interface ProfileFormData {
   firstName: string;
@@ -1314,11 +1315,11 @@ export default function ProfilePage() {
   // Check authentication and redirect if not logged in
   useEffect(() => {
     if (!authLoading && !user) {
-      router.replace('/login');
+      router.replace('/shd-pages/login');
     }
   }, [user, authLoading, router]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (user) {
       setFormData({
         firstName: user.firstName || '',
@@ -1334,7 +1335,7 @@ export default function ProfilePage() {
         confirmPassword: ''
       });
     }
-  }, [user]);
+  }, [user]);*/
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -1495,7 +1496,7 @@ export default function ProfilePage() {
           <div className="w-full lg:w-1/3 xl:w-1/4">
             <div className="bg-[var(--color-surface)] rounded-lg xs:rounded-xl sm:rounded-2xl border border-[var(--color-border)] p-3 xs:p-4 sm:p-5 lg:p-6">
               {/* Profile Avatar */}
-              <div className="text-center">
+              {/*<div className="text-center">
                 <div className="relative inline-block">
                   <div className="relative w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-alt)] flex items-center justify-center text-white text-base xs:text-xl sm:text-2xl font-bold mx-auto mb-2 xs:mb-3 sm:mb-4 shadow-lg">
                     {formData.avatar ? (
@@ -1535,7 +1536,7 @@ export default function ProfilePage() {
                     </span>
                   )}
                 </div>
-              </div>
+              </div>*/}
 
               {/* Navigation Tabs */}
               <nav className="mt-4 xs:mt-5 sm:mt-6 lg:mt-8 space-y-1">

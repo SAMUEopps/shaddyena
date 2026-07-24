@@ -559,7 +559,7 @@ export default function UpgradeToVendor() {
         }
 
         setTimeout(() => {
-          router.push('/shd/pages/vendor/dashboard');
+          router.push('/shd-pages/vendor/dashboard');
         }, 2000);
       } else {
         setError(data.error || 'Upgrade failed');

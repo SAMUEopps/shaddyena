@@ -1027,7 +1027,7 @@ export default function ReferralsTab() {
 'use client';
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -1057,6 +1057,7 @@ import {
   Info,
   Heart
 } from 'lucide-react';
+import { useAuth } from "@/shd-contexts/AuthContext";
 
 // -------------------------------
 // TYPES
@@ -1107,7 +1108,7 @@ interface ReferralEarningsSummary {
 // MAIN COMPONENT
 // -------------------------------
 export default function ReferralsTab() {
-  const { user, refreshUser } = useAuth();
+  const { user,  } = useAuth();
   const router = useRouter();
   
   const [loading, setLoading] = useState(true);
@@ -1212,11 +1213,11 @@ export default function ReferralsTab() {
   // -------------------------------
   // HANDLERS
   // -------------------------------
-  const handleRefresh = async () => {
+  /*const handleRefresh = async () => {
     await refreshUser();
     await fetchAllData();
     toast.success('Data updated!');
-  };
+  };*/
 
   // -------------------------------
   // USE EFFECT
@@ -1303,9 +1304,9 @@ export default function ReferralsTab() {
               </div>
               <span className="text-[9px] xs:text-[10px] sm:text-xs text-[var(--color-text-muted)]">Total</span>
             </div>
-            <p className="text-xl xs:text-2xl sm:text-3xl font-bold text-[var(--color-text)] mb-0.5 xs:mb-1">
+            {/*<p className="text-xl xs:text-2xl sm:text-3xl font-bold text-[var(--color-text)] mb-0.5 xs:mb-1">
               {user?.referralCount || 0}
-            </p>
+            </p>*/}
             <p className="text-[8px] xs:text-[9px] sm:text-xs text-[var(--color-text-muted)]">People joined using your code</p>
           </div>
 
@@ -1431,7 +1432,7 @@ export default function ReferralsTab() {
           </div>
 
           {/* Refresh Button */}
-          <div className="mt-4 xs:mt-5 sm:mt-6 text-center">
+          {/*<div className="mt-4 xs:mt-5 sm:mt-6 text-center">
             <button
               onClick={handleRefresh}
               className="inline-flex items-center gap-1.5 xs:gap-2 px-3 xs:px-4 py-1.5 xs:py-2 text-[10px] xs:text-xs sm:text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
@@ -1439,7 +1440,7 @@ export default function ReferralsTab() {
               <RefreshCw className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />
               <span>Refresh Data</span>
             </button>
-          </div>
+          </div>*/}
         </div>
 
         {/* Referred Users List */}

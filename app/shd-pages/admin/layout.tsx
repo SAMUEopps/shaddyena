@@ -187,22 +187,22 @@ export default function AdminLayout({
   };
 
   const navItems = [
-    { href: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
-    { href: '/admin/users', label: 'Users', icon: '👥' },
-    { href: '/admin/vendors', label: 'Vendors', icon: '🏪' },
-    { href: '/admin/riders', label: 'Riders', icon: '🏍️' },
-    { href: '/admin/products', label: 'Products', icon: '📦' },
-    { href: '/admin/orders', label: 'Orders', icon: '📋' },
-    { href: '/admin/deliveries', label: 'Deliveries', icon: '🚚' },
-    { href: '/admin/transactions', label: 'Transactions', icon: '💰' },
-    { href: '/admin/payouts', label: 'Payouts', icon: '💳' },
-    { href: '/admin/members', label: 'Members', icon: '🌟' },
-    { href: '/admin/investments', label: 'Investments', icon: '📈' },
-    { href: '/admin/referrals', label: 'Referrals', icon: '🔗' },
-    { href: '/admin/reconcile', label: 'Reconciliation', icon: '📊' },
-    { href: '/admin/settings', label: 'Settings', icon: '⚙️' },
-    { href: '/admin/events', label: 'Events', icon: '📅' },
-    { href: '/admin/subscriptions', label: 'Subscriptions', icon: '📋' },
+    { href: '/shd-pages/admin/dashboard', label: 'Dashboard', icon: '📊' },
+    { href: '/shd-pages/admin/users', label: 'Users', icon: '👥' },
+    { href: '/shd-pages/admin/vendors', label: 'Vendors', icon: '🏪' },
+    { href: '/shd-pages/admin/riders', label: 'Riders', icon: '🏍️' },
+    { href: '/shd-pages/admin/products', label: 'Products', icon: '📦' },
+    { href: '/shd-pages/admin/orders', label: 'Orders', icon: '📋' },
+    { href: '/shd-pages/admin/deliveries', label: 'Deliveries', icon: '🚚' },
+    { href: '/shd-pages/admin/transactions', label: 'Transactions', icon: '💰' },
+    { href: '/shd-pages/admin/payouts', label: 'Payouts', icon: '💳' },
+    { href: '/shd-pages/admin/members', label: 'Members', icon: '🌟' },
+    { href: '/shd-pages/admin/investments', label: 'Investments', icon: '📈' },
+    { href: '/shd-pages/admin/referrals', label: 'Referrals', icon: '🔗' },
+    { href: '/shd-pages/admin/reconcile', label: 'Reconciliation', icon: '📊' },
+    { href: '/shd-pages/admin/settings', label: 'Settings', icon: '⚙️' },
+    { href: '/shd-pages/admin/events', label: 'Events', icon: '📅' },
+    { href: '/shd-pages/admin/subscriptions', label: 'Subscriptions', icon: '📋' },
   ];
 
   // Close sidebar on mobile when route changes
