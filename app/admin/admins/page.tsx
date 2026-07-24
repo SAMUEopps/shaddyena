@@ -268,7 +268,7 @@ export default function AdminsTab() {
   };
 
   const handleDeleteClick = (admin: Admin) => {
-    if (admin._id === currentUser?._id) {
+    if (admin._id === currentUser?.id) {
       alert('You cannot delete your own account!');
       return;
     }
@@ -632,7 +632,7 @@ export default function AdminsTab() {
                 const statusBadge = getStatusBadge(admin.isActive);
                 const verificationBadge = getVerificationBadge(admin.isVerified);
                 const roleLevelBadge = getRoleLevelBadge(admin.adminStats?.roleLevel);
-                const isCurrentUser = admin._id === currentUser?._id;
+                const isCurrentUser = admin._id === currentUser?.id;
                 
                 return (
                   <div
