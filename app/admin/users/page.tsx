@@ -712,7 +712,7 @@ export default function UsersTab() {
                               >
                                 {user.isVerified ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                               </button>
-                              <button
+                              {/*<button
                                 onClick={() => handleDeleteClick(user)}
                                 disabled={user._id === currentUser?._id}
                                 className={`p-2 transition-colors rounded-lg ${
@@ -723,7 +723,7 @@ export default function UsersTab() {
                                 title={user._id === currentUser?._id ? 'Cannot delete yourself' : 'Delete User'}
                               >
                                 <Trash2 className="w-4 h-4" />
-                              </button>
+                              </button>*/}
                             </div>
                           </td>
                         </tr>
