@@ -1,2138 +1,2453 @@
-// /*import { NextRequest, NextResponse } from "next/server";
+// // /*import { NextRequest, NextResponse } from "next/server";
 
-// export async function POST(req: NextRequest) {
-//   try {
-//     const body = await req.json();
-//     console.log("[INFO] C2B request received:", body);
+// // export async function POST(req: NextRequest) {
+// //   try {
+// //     const body = await req.json();
+// //     console.log("[INFO] C2B request received:", body);
 
-//     const { TransID, TransAmount, MSISDN, BillRefNumber } = body;
+// //     const { TransID, TransAmount, MSISDN, BillRefNumber } = body;
 
-//     // ---- Backend validation example ----
-//     const isValidAccount = true; // Check BillRefNumber in your DB
-//     const expectedAmount = 500;   // Optional: check amount
+// //     // ---- Backend validation example ----
+// //     const isValidAccount = true; // Check BillRefNumber in your DB
+// //     const expectedAmount = 500;   // Optional: check amount
 
-//     if (!isValidAccount || TransAmount <= 0 || TransAmount !== expectedAmount) {
-//       console.warn("[WARN] Payment rejected:", body);
-//       return NextResponse.json({ ResultCode: 1, ResultDesc: "Rejected" });
-//     }
+// //     if (!isValidAccount || TransAmount <= 0 || TransAmount !== expectedAmount) {
+// //       console.warn("[WARN] Payment rejected:", body);
+// //       return NextResponse.json({ ResultCode: 1, ResultDesc: "Rejected" });
+// //     }
 
-//     // ---- Save payment to DB here ----
-//     console.log("[SUCCESS] Payment accepted:", body);
+// //     // ---- Save payment to DB here ----
+// //     console.log("[SUCCESS] Payment accepted:", body);
 
-//     return NextResponse.json({ ResultCode: 0, ResultDesc: "Accepted" });
-//   } catch (error: any) {
-//     console.error("[ERROR] C2B webhook failed:", error.message);
-//     return NextResponse.json({ ResultCode: 1, ResultDesc: "Internal Server Error" }, { status: 500 });
-//   }
-// }
-// */
+// //     return NextResponse.json({ ResultCode: 0, ResultDesc: "Accepted" });
+// //   } catch (error: any) {
+// //     console.error("[ERROR] C2B webhook failed:", error.message);
+// //     return NextResponse.json({ ResultCode: 1, ResultDesc: "Internal Server Error" }, { status: 500 });
+// //   }
+// // }
+// // */
 
-// /*import { NextRequest, NextResponse } from 'next/server';
-// import dbConnect from '@/lib/dbConnect';
-// import OrderDraft from '@/models/OrderDraft';
-// import Order from '@/models/Order';
-// import Ledger from '@/models/Ledger';
-// import Product from '@/models/product';
-// import { decodeRef, generateOrderId } from '@/lib/orderUtils';
+// // /*import { NextRequest, NextResponse } from 'next/server';
+// // import dbConnect from '@/lib/dbConnect';
+// // import OrderDraft from '@/models/OrderDraft';
+// // import Order from '@/models/Order';
+// // import Ledger from '@/models/Ledger';
+// // import Product from '@/models/product';
+// // import { decodeRef, generateOrderId } from '@/lib/orderUtils';
 
-// export async function POST(req: NextRequest) {
-//   try {
-//     await dbConnect();
+// // export async function POST(req: NextRequest) {
+// //   try {
+// //     await dbConnect();
 
-//     // Log the full callback URL
-//     console.log('M-Pesa callback URL:', req.url);
+// //     // Log the full callback URL
+// //     console.log('M-Pesa callback URL:', req.url);
 
-//     const body = await req.json();
-//     console.log('M-Pesa callback received:', JSON.stringify(body, null, 2));
+// //     const body = await req.json();
+// //     console.log('M-Pesa callback received:', JSON.stringify(body, null, 2));
 
-//     // Handle different callback types
-//     if (body.StkCallback) {
-//       // STK Push callback
-//       const callbackMetadata = body.StkCallback.CallbackMetadata;
-//       if (!callbackMetadata || !Array.isArray(callbackMetadata.Item)) {
-//         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Invalid callback format' });
-//       }
+// //     // Handle different callback types
+// //     if (body.StkCallback) {
+// //       // STK Push callback
+// //       const callbackMetadata = body.StkCallback.CallbackMetadata;
+// //       if (!callbackMetadata || !Array.isArray(callbackMetadata.Item)) {
+// //         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Invalid callback format' });
+// //       }
 
-//       // Extract payment details from callback
-//       let amount, mpesaReceiptNumber, transactionDate, phoneNumber;
+// //       // Extract payment details from callback
+// //       let amount, mpesaReceiptNumber, transactionDate, phoneNumber;
       
-//       for (const item of callbackMetadata.Item) {
-//         switch (item.Name) {
-//           case 'Amount':
-//             amount = item.Value;
-//             break;
-//           case 'MpesaReceiptNumber':
-//             mpesaReceiptNumber = item.Value;
-//             break;
-//           case 'TransactionDate':
-//             transactionDate = item.Value;
-//             break;
-//           case 'PhoneNumber':
-//             phoneNumber = item.Value;
-//             break;
-//         }
-//       }
+// //       for (const item of callbackMetadata.Item) {
+// //         switch (item.Name) {
+// //           case 'Amount':
+// //             amount = item.Value;
+// //             break;
+// //           case 'MpesaReceiptNumber':
+// //             mpesaReceiptNumber = item.Value;
+// //             break;
+// //           case 'TransactionDate':
+// //             transactionDate = item.Value;
+// //             break;
+// //           case 'PhoneNumber':
+// //             phoneNumber = item.Value;
+// //             break;
+// //         }
+// //       }
 
-//       if (body.StkCallback.ResultCode !== 0) {
-//         console.error('Payment failed:', body.StkCallback.ResultDesc);
-//         return NextResponse.json({ ResultCode: 0, ResultDesc: 'Callback processed' });
-//       }
+// //       if (body.StkCallback.ResultCode !== 0) {
+// //         console.error('Payment failed:', body.StkCallback.ResultDesc);
+// //         return NextResponse.json({ ResultCode: 0, ResultDesc: 'Callback processed' });
+// //       }
 
-//       // Find the account reference in the metadata
-//       const accountReferenceItem = callbackMetadata.Item.find((item: { Name: string }) => item.Name === 'AccountReference');
-//       if (!accountReferenceItem) {
-//         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Missing account reference' });
-//       }
+// //       // Find the account reference in the metadata
+// //       const accountReferenceItem = callbackMetadata.Item.find((item: { Name: string }) => item.Name === 'AccountReference');
+// //       if (!accountReferenceItem) {
+// //         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Missing account reference' });
+// //       }
 
-//       const accountReference = accountReferenceItem.Value;
+// //       const accountReference = accountReferenceItem.Value;
       
-//       // Decode and validate reference
-//       const decoded = decodeRef(accountReference);
-//       if (!decoded.ok) {
-//         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Invalid reference' });
-//       }
+// //       // Decode and validate reference
+// //       const decoded = decodeRef(accountReference);
+// //       if (!decoded.ok) {
+// //         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Invalid reference' });
+// //       }
 
-//       // Find order draft
-//       const draft = await OrderDraft.findOne({ token: decoded.token });
-//       if (!draft) {
-//         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Reference not found' });
-//       }
+// //       // Find order draft
+// //       const draft = await OrderDraft.findOne({ token: decoded.token });
+// //       if (!draft) {
+// //         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Reference not found' });
+// //       }
 
-//       // Check if already processed (idempotency)
-//       if (draft.status === 'CONFIRMED') {
-//         return NextResponse.json({ ResultCode: 0, ResultDesc: 'Already processed' });
-//       }
+// //       // Check if already processed (idempotency)
+// //       if (draft.status === 'CONFIRMED') {
+// //         return NextResponse.json({ ResultCode: 0, ResultDesc: 'Already processed' });
+// //       }
 
-//       // Validate amount
-//       if (amount !== draft.totalAmount) {
-//         draft.status = 'FAILED';
-//         await draft.save();
-//         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Amount mismatch' });
-//       }
+// //       // Validate amount
+// //       if (amount !== draft.totalAmount) {
+// //         draft.status = 'FAILED';
+// //         await draft.save();
+// //         return NextResponse.json({ ResultCode: 1, ResultDesc: 'Amount mismatch' });
+// //       }
+
+// //       // Update product stock
+// //       for (const item of draft.items) {
+// //         await Product.findByIdAndUpdate(
+// //           item.productId,
+// //           { $inc: { stock: -item.quantity } }
+// //         );
+// //       }
+
+// //       // Create main order
+// //       const orderId = generateOrderId();
+// //       const order = new Order({
+// //         orderId,
+// //         draftToken: draft.token,
+// //         buyerId: draft.buyerId,
+// //         items: draft.items,
+// //         suborders: draft.vendorSplits.map((vendor: { vendorId: any; shopId: any; amount: any; commission: any; netAmount: any }) => ({
+// //           vendorId: vendor.vendorId,
+// //           shopId: vendor.shopId,
+// //           items: draft.items.filter((item: { vendorId: any }) => item.vendorId === vendor.vendorId),
+// //           amount: vendor.amount,
+// //           commission: vendor.commission,
+// //           netAmount: vendor.netAmount,
+// //           status: 'PENDING'
+// //         })),
+// //         totalAmount: draft.totalAmount,
+// //         platformFee: draft.vendorSplits.reduce((sum: any, vendor: { commission: any }) => sum + vendor.commission, 0),
+// //         currency: draft.currency,
+// //         paymentMethod: 'M-PESA',
+// //         paymentStatus: 'PAID',
+// //         shipping: draft.shipping,
+// //         status: 'PENDING',
+// //         mpesaTransactionId: mpesaReceiptNumber
+// //       });
+
+// //       await order.save();
+
+// //       // Create ledger entries for vendor payouts
+// //       const ledgerEntries = draft.vendorSplits.map((vendor: { vendorId: any; shopId: any; amount: any; commission: any; netAmount: any }) => ({
+// //         vendorId: vendor.vendorId,
+// //         shopId: vendor.shopId,
+// //         orderId: orderId,
+// //         draftToken: draft.token,
+// //         amount: vendor.amount,
+// //         commission: vendor.commission,
+// //         netAmount: vendor.netAmount,
+// //         status: 'PENDING',
+// //         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // Schedule for 24 hours later
+// //       }));
+
+// //       await Ledger.insertMany(ledgerEntries);
+
+// //       // Update draft status
+// //       draft.status = 'CONFIRMED';
+// //       draft.mpesaTransactionId = mpesaReceiptNumber;
+// //       await draft.save();
+
+// //       // TODO: Send notifications to buyer and vendors
+// //       console.log(`Order ${orderId} confirmed successfully`);
+
+// //       return NextResponse.json({ ResultCode: 0, ResultDesc: 'Success' });
+// //     }
+
+// //     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Unsupported callback type' });
+
+// //   } catch (error) {
+// //     console.error('Callback processing error:', error);
+// //     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Server error' });
+// //   }
+// // }
+// // */
+
+// // /*import { NextRequest, NextResponse } from 'next/server';
+// // import dbConnect from '@/lib/dbConnect';
+// // import OrderDraft from '@/models/OrderDraft';
+// // import Order from '@/models/Order';
+// // import Ledger from '@/models/Ledger';
+// // import Product from '@/models/product';
+// // import { decodeRef, generateOrderId } from '@/lib/orderUtils';
+
+// // export async function POST(req: NextRequest) {
+// //   try {
+// //     await dbConnect();
+
+// //     console.log('M-Pesa callback URL!!!:', req.url);
+
+// //     const body = await req.json();
+// //     console.log('M-Pesa C2B callback received:', JSON.stringify(body, null, 2));
+
+// //     // Check if it’s a valid C2B Paybill payload
+// //     if (!body.TransID || !body.BillRefNumber) {
+// //       return NextResponse.json({ ResultCode: 1, ResultDesc: 'Invalid C2B payload' });
+// //     }
+
+// //     // Extract payment details
+// //     const amount = parseFloat(body.TransAmount);
+// //     const mpesaReceiptNumber = body.TransID;
+// //     const transactionDate = body.TransTime;
+// //     const phoneNumber = body.MSISDN;
+// //     const accountReference = body.BillRefNumber;
+
+// //     // Decode and validate reference
+// //     const decoded = decodeRef(accountReference);
+// //     if (!decoded.ok) {
+// //       console.error('Invalid account reference:', accountReference);
+// //       return NextResponse.json({ ResultCode: 1, ResultDesc: 'Invalid reference' });
+// //     }
+
+// //     // Find order draft
+// //     const draft = await OrderDraft.findOne({ token: decoded.token });
+// //     if (!draft) {
+// //       console.error('Draft not found for reference:', accountReference);
+// //       return NextResponse.json({ ResultCode: 1, ResultDesc: 'Reference not found' });
+// //     }
+
+// //     // Check if already processed
+// //     if (draft.status === 'CONFIRMED') {
+// //       console.log('Draft already confirmed:', draft.token);
+// //       return NextResponse.json({ ResultCode: 0, ResultDesc: 'Already processed' });
+// //     }
+
+// //     // Validate amount
+// //     if (amount !== draft.totalAmount) {
+// //       draft.status = 'FAILED';
+// //       await draft.save();
+// //       console.error(`Amount mismatch: expected ${draft.totalAmount}, got ${amount}`);
+// //       return NextResponse.json({ ResultCode: 1, ResultDesc: 'Amount mismatch' });
+// //     }
+
+// //     // Update product stock
+// //     for (const item of draft.items) {
+// //       await Product.findByIdAndUpdate(
+// //         item.productId,
+// //         { $inc: { stock: -item.quantity } }
+// //       );
+// //     }
+
+// //     // Create order
+// //     const orderId = generateOrderId();
+// //     const order = new Order({
+// //       orderId,
+// //       draftToken: draft.token,
+// //       buyerId: draft.buyerId,
+// //       items: draft.items,
+// //       suborders: draft.vendorSplits.map((vendor: any) => ({
+// //         vendorId: vendor.vendorId,
+// //         shopId: vendor.shopId,
+// //         items: draft.items.filter((item: any) => item.vendorId === vendor.vendorId),
+// //         amount: vendor.amount,
+// //         commission: vendor.commission,
+// //         netAmount: vendor.netAmount,
+// //         status: 'PENDING'
+// //       })),
+// //       totalAmount: draft.totalAmount,
+// //       platformFee: draft.vendorSplits.reduce((sum: number, v: any) => sum + v.commission, 0),
+// //       currency: draft.currency,
+// //       paymentMethod: 'M-PESA',
+// //       paymentStatus: 'PAID',
+// //       shipping: draft.shipping,
+// //       status: 'PENDING',
+// //       mpesaTransactionId: mpesaReceiptNumber
+// //     });
+
+// //     await order.save();
+
+// //     // Create ledger entries
+// //     const ledgerEntries = draft.vendorSplits.map((vendor: any) => ({
+// //       vendorId: vendor.vendorId,
+// //       shopId: vendor.shopId,
+// //       orderId: orderId,
+// //       draftToken: draft.token,
+// //       amount: vendor.amount,
+// //       commission: vendor.commission,
+// //       netAmount: vendor.netAmount,
+// //       status: 'PENDING',
+// //       scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // payout scheduled for 24h later
+// //     }));
+
+// //     await Ledger.insertMany(ledgerEntries);
+
+// //     // Update draft
+// //     draft.status = 'CONFIRMED';
+// //     draft.mpesaTransactionId = mpesaReceiptNumber;
+// //     await draft.save();
+
+// //     console.log(`✅ Order ${orderId} confirmed successfully from C2B`);
+
+// //     return NextResponse.json({ ResultCode: 0, ResultDesc: 'Success' });
+
+// //   } catch (error) {
+// //     console.error('❌ Callback processing error:', error);
+// //     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Server error' });
+// //   }
+// // }
+// // */
+
+
+
+
+// // // app/api/c2b-webhook/route.ts
+// // /*import { NextRequest, NextResponse } from 'next/server';
+// // import dbConnect from '@/lib/dbConnect';
+// // import OrderDraft from '@/models/OrderDraft';
+// // import Order from '@/models/Order';
+// // import Ledger from '@/models/Ledger';
+// // import Product from '@/models/product';
+// // import { decodeRef, generateOrderId } from '@/lib/orderUtils';
+// // import { sendSMS } from '@/lib/sms';
+
+
+// // /* =================================================================
+// //    Helpers reused by both flows
+// // ================================================================= *
+// // function fail(code: number, desc: string) {
+// //   return NextResponse.json({ ResultCode: code, ResultDesc: desc });
+// // }
+// // function ok(desc = 'Accepted') {
+// //   return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
+// // }
+
+// // /* =================================================================
+// //    VALIDATION  (M-Pesa Validation phase)
+// // ================================================================= *
+// // async function handleValidation(body: any) {
+// //   const accountNumber = body.AccountNumber || body.BillRefNumber;
+// //   const amount = parseInt(body.Amount || body.TransAmount, 10);
+
+// //   if (!accountNumber) return fail(1, 'Missing account number');
+
+// //   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+// //   if (!draft) return fail(1, 'Unknown reference');
+
+// //   const decoded = decodeRef(draft.fullRef);
+// //   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
+
+// //   if (amount !== draft.totalAmount) {
+// //     console.error(`❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`);
+// //     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+// //   }
+
+// //   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+
+// //   if (draft.status === 'VALIDATED') return ok('Already validated');
+// //   if (draft.status !== 'PENDING') return fail(1, 'Already processed');
+
+// //   draft.status = 'VALIDATED';
+// //   await draft.save();
+// //   console.log('✅ Validation OK for shortRef:', accountNumber);
+// //   return ok();
+// // }
+
+// // /* =================================================================
+// //    CONFIRMATION  (M-Pesa Confirmation phase)
+// // ================================================================= *
+// // async function handleConfirmation(body: any) {
+// //   const accountNumber = body.BillRefNumber || body.AccountNumber;
+// //   const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+// //   if (!accountNumber) return fail(1, 'Missing account number');
+
+// //   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+// //   if (!draft) return fail(1, 'Unknown reference');
+
+// //   const decoded = decodeRef(draft.fullRef);
+// //   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
+
+// //   if (amount !== draft.totalAmount) {
+// //     draft.status = 'FAILED';
+// //     await draft.save();
+// //     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+// //   }
+
+// //   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+
+// //   if (draft.status === 'CONFIRMED') return ok('Already processed');
+
+// //   /* ---------- stock ---------- *
+// //   for (const it of draft.items) {
+// //     await Product.findByIdAndUpdate(it.productId, { $inc: { stock: -it.quantity } });
+// //   }
+
+// //   /* ---------- order ---------- *
+// //   const orderId = generateOrderId();
+// //   const order = new Order({
+// //     orderId,
+// //     draftToken: draft.token,
+// //     buyerId: draft.buyerId,
+// //     items: draft.items,
+// //     suborders: draft.vendorSplits.map((v: any) => ({
+// //       vendorId: v.vendorId,
+// //       shopId: v.shopId,
+// //       items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
+// //       amount: v.amount,
+// //       commission: v.commission,
+// //       netAmount: v.netAmount,
+// //       status: 'PENDING',
+// //     })),
+// //     totalAmount: draft.totalAmount,
+// //     platformFee: draft.vendorSplits.reduce((s: number, v: any) => s + v.commission, 0),
+// //     currency: draft.currency || 'KES',
+// //     paymentMethod: 'M-PESA',
+// //     paymentStatus: 'PAID',
+// //     shipping: draft.shipping,
+// //     status: 'PENDING',
+// //     mpesaTransactionId: body.TransID || body.TransId,
+// //   });
+// //   await order.save();
+
+// //   /* ---------- ledger ---------- *
+// //   const ledgerEntries = draft.vendorSplits.map((v: any) => ({
+// //     vendorId: v.vendorId,
+// //     shopId: v.shopId,
+// //     orderId,
+// //     draftToken: draft.token,
+// //     amount: v.amount,
+// //     commission: v.commission,
+// //     netAmount: v.netAmount,
+// //     status: 'PENDING',
+// //     scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+// //   }));
+// //   await Ledger.insertMany(ledgerEntries);
+
+// //   /* ---------- finalize draft ---------- *
+// //   draft.status = 'CONFIRMED';
+// //   draft.mpesaTransactionId = body.TransID || body.TransId;
+// //   await draft.save();
+
+
+// //   /* ---------- SEND SMS ---------- *
+
+// //   // Customer phone number (from shipping)
+// //   const customerPhone = draft.shipping.phone;
+
+// //   // Format phone (ensure +2547…)
+// //   const normalizePhone = (phone: string) => {
+// //     if (phone.startsWith("+")) return phone;
+// //     if (phone.startsWith("0")) return "+254" + phone.substring(1);
+// //     if (phone.startsWith("7")) return "+254" + phone;
+// //     return phone;
+// //   };
+
+// //   const formattedPhone = normalizePhone(customerPhone);
+
+// //   // 🆕 Log phone for debugging
+// //   console.log("📞 Raw phone from DB:", customerPhone);
+// //   console.log("📞 Formatted phone:", formattedPhone);
+
+// //   // Build customer SMS message
+// //   const customerMessage = `
+// //   Thank you for your order!
+
+// //   Order ID: ${orderId}
+// //   Amount: KES ${draft.totalAmount}
+// //   Transaction: ${draft.mpesaTransactionId}
+
+// //   We will process and keep you updated.
+// //   -Shaddyna
+// //   `.trim();
+
+// //   // Admin phone (replace with yours)
+// //   const adminPhone = "+254711118817";
+// //   const adminMessage = `
+// //   New Order Received!
+
+// //   Order ID: ${orderId}
+// //   Customer Phone: ${formattedPhone}
+// //   Amount: KES ${draft.totalAmount}
+// //   Transaction: ${draft.mpesaTransactionId}
+// //   `.trim();
+
+// //   // Send SMS to customer
+// //   await sendSMS(formattedPhone, customerMessage);
+
+// //   // Send SMS to admin
+// //   await sendSMS(adminPhone, adminMessage);
+
+// //   console.log("📨 SMS notifications sent.");
+
+// //   /* ---------- return response ---------- *
+// //   console.log('✅ Confirmation complete for shortRef:', accountNumber);
+// //   return ok('Success');
+
+// //   }
+
+// //   /* =================================================================
+// //     MAIN ENTRY
+// //   ================================================================= *
+// //   export async function POST(req: NextRequest) {
+// //     try {
+// //       await dbConnect();
+// //       const body = await req.json();
+// //       console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+
+// //       // M-Pesa sends TransID only in the confirmation phase
+// //       return body.TransID || body.TransId
+// //         ? await handleConfirmation(body)
+// //         : await handleValidation(body);
+// //     } catch (e) {
+// //       console.error('❌ C2B webhook crash:', e);
+// //       return fail(1, 'Server error');
+// //     }
+// // }*/
+
+
+
+
+
+
+
+
+// // //////////////////////////////////////////////////////////////////////////
+
+
+// // /////////////////////////////////////////////////////////////////////////////
+// // // app/api/c2b-webhook/route.ts
+// // /*import { NextRequest, NextResponse } from 'next/server';
+// // import dbConnect from '@/lib/dbConnect';
+// // import OrderDraft from '@/models/OrderDraft';
+// // import Order from '@/models/Order';
+// // import Ledger from '@/models/Ledger';
+// // import Product from '@/models/product';
+// // import User from '@/models/user';
+// // import { decodeRef, generateOrderId } from '@/lib/orderUtils';
+// // import { sendSMS } from '@/lib/sms';
+
+// // /* =================================================================
+// //    Helpers reused by both flows
+// // ================================================================= *
+// // function fail(code: number, desc: string) {
+// //   return NextResponse.json({ ResultCode: code, ResultDesc: desc });
+// // }
+
+// // function ok(desc = 'Accepted') {
+// //   return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
+// // }
+
+// // /* =================================================================
+// //    VALIDATION  (M-Pesa Validation phase)
+// // ================================================================= *
+// // async function handleValidation(body: any) {
+// //   const accountNumber = body.AccountNumber || body.BillRefNumber;
+// //   const amount = parseInt(body.Amount || body.TransAmount, 10);
+
+// //   if (!accountNumber) return fail(1, 'Missing account number');
+
+// //   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+// //   if (!draft) return fail(1, 'Unknown reference');
+
+// //   const decoded = decodeRef(draft.fullRef);
+// //   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
+
+// //   if (amount !== draft.totalAmount) {
+// //     console.error(`❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`);
+// //     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+// //   }
+
+// //   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+
+// //   if (draft.status === 'VALIDATED') return ok('Already validated');
+// //   if (draft.status !== 'PENDING') return fail(1, 'Already processed');
+
+// //   draft.status = 'VALIDATED';
+// //   await draft.save();
+// //   console.log('✅ Validation OK for shortRef:', accountNumber);
+// //   return ok();
+// // }
+
+// // async function handleConfirmation(body: any) {
+// //   const accountNumber = body.BillRefNumber || body.AccountNumber;
+// //   const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+// //   if (!accountNumber) return fail(1, 'Missing account number');
+
+// //   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+// //   if (!draft) return fail(1, 'Unknown reference');
+
+// //   if (amount !== draft.totalAmount) {
+// //     draft.status = 'FAILED';
+// //     await draft.save();
+// //     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+// //   }
+
+// //   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+// //   if (draft.status === 'CONFIRMED') return ok('Already processed');
+
+// //   /* ---------- stock ---------- *
+// //   for (const it of draft.items) {
+// //     await Product.findByIdAndUpdate(it.productId, {
+// //       $inc: { stock: -it.quantity },
+// //     });
+// //   }
+
+// //   /* ---------- order ---------- *
+// //   const orderId = generateOrderId();
+
+// //   const order = new Order({
+// //     orderId,
+// //     draftToken: draft.token,
+// //     buyerId: draft.buyerId,
+// //     items: draft.items,
+// //     suborders: draft.vendorSplits.map((v: any) => ({
+// //       vendorId: v.vendorId,
+// //       shopId: v.shopId,
+// //       items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
+// //       amount: v.amount,
+// //       commission: v.commission, // FULL 3%
+// //       netAmount: v.netAmount,   // already after 3%
+// //       status: 'PENDING',
+// //     })),
+// //     totalAmount: draft.totalAmount,
+// //     platformFee: draft.vendorSplits.reduce(
+// //       (sum: number, v: any) => sum + v.commission,
+// //       0
+// //     ),
+// //     currency: draft.currency || 'KES',
+// //     paymentMethod: 'M_PESA',
+// //     paymentStatus: 'PAID',
+// //     shipping: draft.shipping,
+// //     status: 'PENDING',
+// //     mpesaTransactionId: body.TransID || body.TransId,
+// //   });
+
+// //   await order.save();
+
+// //   /* ---------- ledger ---------- *
+
+// //   const ledgerEntries: any[] = [];
+
+// //   for (const v of draft.vendorSplits) {
+// //     const totalCommission = v.commission;        // 3%
+// //     const referralAmount = v.amount * 0.005;     // 0.5%
+// //     const platformAmount = totalCommission - referralAmount; // 2.5%
+
+// //     // Vendor payout (net already correct)
+// //     ledgerEntries.push({
+// //       type: 'VENDOR_PAYOUT',
+// //       vendorId: v.vendorId,
+// //       shopId: v.shopId,
+// //       orderId,
+// //       draftToken: draft.token,
+// //       amount: v.netAmount,
+// //       status: 'PENDING',
+// //       scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+// //     });
+
+// //     // Platform income (2.5%)
+// //     ledgerEntries.push({
+// //       type: 'PLATFORM_COMMISSION',
+// //       orderId,
+// //       draftToken: draft.token,
+// //       amount: platformAmount,
+// //       status: 'PAID',
+// //     });
+
+// //     // Referral commission (0.5%) — SAME 3% bucket
+// //     const vendorUser = await User.findById(v.vendorId);
+// //     if (vendorUser?.referredBy) {
+// //       ledgerEntries.push({
+// //         type: 'REFERRAL_COMMISSION',
+// //         referrerId: vendorUser.referredBy,
+// //         referredVendorId: vendorUser._id,
+// //         orderId,
+// //         draftToken: draft.token,
+// //         amount: referralAmount,
+// //         status: 'PENDING',
+// //         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+// //       });
+// //     }
+// //   }
+
+// //   await Ledger.insertMany(ledgerEntries);
+
+// //   /* ---------- finalize draft ---------- *
+// //   draft.status = 'CONFIRMED';
+// //   draft.mpesaTransactionId = body.TransID || body.TransId;
+// //   await draft.save();
+
+// //   return ok('Success');
+// // }
+
+// // /* =================================================================
+// //    CONFIRMATION  (M-Pesa Confirmation phase)
+// // ================================================================= */
+// // /*async function handleConfirmation(body: any) {
+// //   const accountNumber = body.BillRefNumber || body.AccountNumber;
+// //   const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+// //   if (!accountNumber) return fail(1, 'Missing account number');
+
+// //   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+// //   if (!draft) return fail(1, 'Unknown reference');
+
+// //   const decoded = decodeRef(draft.fullRef);
+// //   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
+
+// //   if (amount !== draft.totalAmount) {
+// //     draft.status = 'FAILED';
+// //     await draft.save();
+// //     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+// //   }
+
+// //   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+
+// //   if (draft.status === 'CONFIRMED') return ok('Already processed');
+
+// //   /* ---------- stock ---------- *
+// //   for (const it of draft.items) {
+// //     await Product.findByIdAndUpdate(it.productId, { $inc: { stock: -it.quantity } });
+// //   }
+
+// //   /* ---------- order ---------- *
+// //   const orderId = generateOrderId();
+// //   const order = new Order({
+// //     orderId,
+// //     draftToken: draft.token,
+// //     buyerId: draft.buyerId,
+// //     items: draft.items,
+// //     suborders: draft.vendorSplits.map((v: any) => ({
+// //       vendorId: v.vendorId,
+// //       shopId: v.shopId,
+// //       items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
+// //       amount: v.amount,
+// //       commission: v.commission,
+// //       netAmount: v.netAmount,
+// //       status: 'PENDING',
+// //     })),
+// //     totalAmount: draft.totalAmount,
+// //     platformFee: draft.vendorSplits.reduce((s: number, v: any) => s + v.commission, 0),
+// //     currency: draft.currency || 'KES',
+// //     paymentMethod: 'M-PESA',
+// //     paymentStatus: 'PAID',
+// //     shipping: draft.shipping,
+// //     status: 'PENDING',
+// //     mpesaTransactionId: body.TransID || body.TransId,
+// //   });
+// //   await order.save();
+
+// //   /* ---------- ledger ---------- *
+// //   // Vendor payouts
+// //   const vendorLedgerEntries = draft.vendorSplits.map((v: any) => ({
+// //     type: 'VENDOR_PAYOUT',
+// //     vendorId: v.vendorId,
+// //     shopId: v.shopId,
+// //     orderId,
+// //     draftToken: draft.token,
+// //     amount: v.amount,
+// //     commission: v.commission,
+// //     netAmount: v.netAmount,
+// //     status: 'PENDING',
+// //     scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+// //   }));
+
+// //   // Referral commissions
+// //   const referralLedgerEntries = await Promise.all(
+// //     draft.vendorSplits.map(async (v: any) => {
+// //       const vendorUser = await User.findById(v.vendorId);
+// //       if (!vendorUser?.referredBy) return null;
+
+// //       return {
+// //         type: 'REFERRAL_COMMISSION',
+// //         referrerId: vendorUser.referredBy,
+// //         referredVendorId: vendorUser._id,
+// //         orderId,
+// //         draftToken: draft.token,
+// //         amount: v.amount * 0.005, // 0.5%
+// //         status: 'PENDING',
+// //         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+// //       };
+// //     })
+// //   );
+
+// //   const validReferralLedgerEntries = referralLedgerEntries.filter(Boolean);
+
+// //   // Insert all ledger entries
+// //   await Ledger.insertMany([...vendorLedgerEntries, ...validReferralLedgerEntries]);
+
+// //   /* ---------- finalize draft ---------- *
+// //   draft.status = 'CONFIRMED';
+// //   draft.mpesaTransactionId = body.TransID || body.TransId;
+// //   await draft.save();
+
+// //   /* ---------- SEND SMS ---------- *
+// //   const customerPhone = draft.shipping.phone;
+// //   const normalizePhone = (phone: string) => {
+// //     if (phone.startsWith("+")) return phone;
+// //     if (phone.startsWith("0")) return "+254" + phone.substring(1);
+// //     if (phone.startsWith("7")) return "+254" + phone;
+// //     return phone;
+// //   };
+// //   const formattedPhone = normalizePhone(customerPhone);
+
+// //   const customerMessage = `
+// //   Thank you for your order!
+// //   Order ID: ${orderId}
+// //   Amount: KES ${draft.totalAmount}
+// //   Transaction: ${draft.mpesaTransactionId}
+// //   We will process and keep you updated.
+// //   -Shaddyna
+// //   `.trim();
+
+// //   const adminPhone = "+254711118817";
+// //   const adminMessage = `
+// //   New Order Received!
+// //   Order ID: ${orderId}
+// //   Customer Phone: ${formattedPhone}
+// //   Amount: KES ${draft.totalAmount}
+// //   Transaction: ${draft.mpesaTransactionId}
+// //   `.trim();
+
+// //   await sendSMS(formattedPhone, customerMessage);
+// //   await sendSMS(adminPhone, adminMessage);
+
+// //   console.log("📨 SMS notifications sent.");
+// //   console.log('✅ Confirmation complete for shortRef:', accountNumber);
+// //   return ok('Success');
+// // }*/
+
+// // /* =================================================================
+// //     MAIN ENTRY
+// // ================================================================= *
+// // export async function POST(req: NextRequest) {
+// //   try {
+// //     await dbConnect();
+// //     const body = await req.json();
+// //     console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+
+// //     // M-Pesa sends TransID only in the confirmation phase
+// //     return body.TransID || body.TransId
+// //       ? await handleConfirmation(body)
+// //       : await handleValidation(body);
+// //   } catch (e) {
+// //     console.error('❌ C2B webhook crash:', e);
+// //     return fail(1, 'Server error');
+// //   }
+// // }*/
+
+// // ///////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // //////////////////////////////////////////////////////////////
+
+
+// // // app/api/c2b-webhook/route.ts
+// // /*import { NextRequest, NextResponse } from 'next/server';
+// // import dbConnect from '@/lib/dbConnect';
+// // import OrderDraft from '@/models/OrderDraft';
+// // import Order, { DeliveryDetails } from '@/models/Order';
+// // import Ledger from '@/models/Ledger';
+// // import Product from '@/models/product';
+// // import User from '@/models/user';
+// // import { decodeRef, generateOrderId } from '@/lib/orderUtils';
+// // import { sendSMS } from '@/lib/sms';
+
+
+// // // app/api/c2b-webhook/route.ts - Add delivery fee confirmation handler
+
+// // // Add this function to generate confirmation code
+// // function generateConfirmationCode(): string {
+// //   return Math.random().toString(36).substring(2, 10).toUpperCase();
+// // }
+
+// // // Add this handler for delivery fee confirmations
+// // /*async function handleDeliveryFeeConfirmation(body: any) {
+// //   const accountNumber = body.BillRefNumber || body.AccountNumber; // This will be the paymentRef (e.g., DELABC123)
+// //   const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+// //   if (!accountNumber || !accountNumber.startsWith('DEL')) {
+// //     return fail(1, 'Not a delivery fee payment');
+// //   }
+
+// //   const paymentRef = accountNumber;
+
+// //   // Find order with this delivery fee payment reference
+// //   const order = await Order.findOne({
+// //     'suborders.deliveryDetails.deliveryFeePaymentRef': paymentRef
+// //   });
+
+// //   if (!order) {
+// //     return fail(1, 'Unknown delivery fee reference');
+// //   }
+
+// //   // Find the specific suborder
+// //   const suborder = order.suborders.find(
+// //     (so: any) => so.deliveryDetails?.deliveryFeePaymentRef === paymentRef
+// //   );
+
+// //   if (!suborder) {
+// //     return fail(1, 'Suborder not found');
+// //   }
+
+// //   // Verify amount matches
+// //   if (amount !== suborder.deliveryFee) {
+// //     console.error(`❌ Delivery fee amount mismatch: got ${amount}, expected ${suborder.deliveryFee}`);
+// //     return fail(1, `Amount mismatch. Expected ${suborder.deliveryFee}`);
+// //   }
+
+// //   // Check if already processed
+// //   if (suborder.deliveryDetails?.deliveryFeePaid) {
+// //     return ok('Already processed');
+// //   }
+
+// //   // Generate confirmation code
+// //   const confirmationCode = generateConfirmationCode();
+
+// //   // Update suborder with payment and confirmation code
+// //   suborder.deliveryDetails.deliveryFeePaid = true;
+// //   suborder.deliveryDetails.deliveryFeePaidAt = new Date();
+// //   suborder.deliveryDetails.deliveryFeeReceipt = body.TransID || body.TransId;
+// //   suborder.deliveryDetails.confirmationCode = confirmationCode;
+// //   suborder.deliveryDetails.confirmedAt = new Date();
+  
+// //   // Update suborder status
+// //   suborder.status = 'CONFIRMED';
+
+// //   await order.save();
+
+// //   console.log(`✅ Delivery fee paid and confirmation code generated: ${confirmationCode}`);
+
+// //   return ok('Delivery fee confirmed');
+// // }*/
+
+// // // app/api/c2b-webhook/route.ts - Update handleDeliveryFeeConfirmation with better logging
+
+// // /*async function handleDeliveryFeeConfirmation(body: any) {
+// //   const accountNumber = body.BillRefNumber || body.AccountNumber;
+// //   const amount = parseInt(body.TransAmount || body.Amount, 10);
+// //   const transactionId = body.TransID || body.TransId;
+
+// //   console.log(`📥 Processing delivery fee payment:`);
+// //   console.log(`   - Account Ref: ${accountNumber}`);
+// //   console.log(`   - Amount: ${amount}`);
+// //   console.log(`   - Transaction ID: ${transactionId}`);
+
+// //   if (!accountNumber || !accountNumber.startsWith('DEL')) {
+// //     console.log(`❌ Not a delivery fee payment: ${accountNumber}`);
+// //     return fail(1, 'Not a delivery fee payment');
+// //   }
+
+// //   const paymentRef = accountNumber;
+// //   console.log(`🔍 Looking for order with paymentRef: ${paymentRef}`);
+
+// //   // Find order with this delivery fee payment reference
+// //   const order = await Order.findOne({
+// //     'suborders.deliveryDetails.deliveryFeePaymentRef': paymentRef
+// //   });
+
+// //   if (!order) {
+// //     console.log(`❌ No order found with deliveryFeePaymentRef: ${paymentRef}`);
+    
+// //     // Try to find any orders with suborders that might have this reference
+// //     const allOrders = await Order.find({}).limit(5);
+// //     console.log(`📊 Checking recent orders for reference:`);
+// //     for (const o of allOrders) {
+// //       for (const so of o.suborders) {
+// //         if (so.deliveryDetails?.deliveryFeePaymentRef) {
+// //           console.log(`   - Order ${o._id}, Suborder ${so._id}: ${so.deliveryDetails.deliveryFeePaymentRef}`);
+// //         }
+// //       }
+// //     }
+// //     return fail(1, 'Unknown delivery fee reference');
+// //   }
+
+// //   console.log(`✅ Found order: ${order._id}`);
+// //   console.log(`   - Order Status: ${order.status}`);
+// //   console.log(`   - Buyer ID: ${order.buyerId}`);
+
+// //   // Find the specific suborder
+// //   const suborder = order.suborders.find(
+// //     (so: any) => so.deliveryDetails?.deliveryFeePaymentRef === paymentRef
+// //   );
+
+// //   if (!suborder) {
+// //     console.log(`❌ No suborder found with deliveryFeePaymentRef: ${paymentRef}`);
+    
+// //     // Log all suborder payment refs
+// //     order.suborders.forEach((so: any, index: number) => {
+// //       console.log(`   - Suborder ${index}: ${so._id}, Ref: ${so.deliveryDetails?.deliveryFeePaymentRef}`);
+// //     });
+    
+// //     return fail(1, 'Suborder not found');
+// //   }
+
+// //   console.log(`✅ Found suborder: ${suborder._id}`);
+// //   console.log(`   - Suborder Status: ${suborder.status}`);
+// //   console.log(`   - Delivery Fee: ${suborder.deliveryFee}`);
+// //   console.log(`   - Current deliveryDetails:`, JSON.stringify(suborder.deliveryDetails, null, 2));
+
+// //   // Verify amount matches
+// //   if (amount !== suborder.deliveryFee) {
+// //     console.error(`❌ Delivery fee amount mismatch: got ${amount}, expected ${suborder.deliveryFee}`);
+// //     return fail(1, `Amount mismatch. Expected ${suborder.deliveryFee}`);
+// //   }
+
+// //   // Check if already processed
+// //   if (suborder.deliveryDetails?.deliveryFeePaid) {
+// //     console.log(`⚠️ Delivery fee already paid for suborder: ${suborder._id}`);
+// //     console.log(`   - Paid At: ${suborder.deliveryDetails.deliveryFeePaidAt}`);
+// //     console.log(`   - Receipt: ${suborder.deliveryDetails.deliveryFeeReceipt}`);
+// //     return ok('Already processed');
+// //   }
+
+// //   // Generate confirmation code
+// //   const confirmationCode = generateConfirmationCode();
+// //   console.log(`🔑 Generated confirmation code: ${confirmationCode}`);
+
+// //   // Update suborder with payment and confirmation code
+// //   if (!suborder.deliveryDetails) {
+// //     suborder.deliveryDetails = {};
+// //   }
+  
+// //   suborder.deliveryDetails.deliveryFeePaid = true;
+// //   suborder.deliveryDetails.deliveryFeePaidAt = new Date();
+// //   suborder.deliveryDetails.deliveryFeeReceipt = transactionId;
+// //   suborder.deliveryDetails.confirmationCode = confirmationCode;
+// //   suborder.deliveryDetails.confirmedAt = new Date();
+  
+// //   // Update suborder status
+// //   suborder.status = 'CONFIRMED';
+
+// //   await order.save();
+
+// //   console.log(`✅ Successfully updated suborder:`);
+// //   console.log(`   - deliveryFeePaid: ${suborder.deliveryDetails.deliveryFeePaid}`);
+// //   console.log(`   - confirmationCode: ${suborder.deliveryDetails.confirmationCode}`);
+// //   console.log(`   - suborder.status: ${suborder.status}`);
+
+// //   return ok('Delivery fee confirmed');
+// // }*/
+
+// // // app/api/c2b-webhook/route.ts - Update the logging section
+// // // In the handleDeliveryFeeConfirmation function, update the logging:
+
+// // /*async function handleDeliveryFeeConfirmation(body: any) {
+// //   const accountNumber = body.BillRefNumber || body.AccountNumber;
+// //   const amount = parseInt(body.TransAmount || body.Amount, 10);
+// //   const transactionId = body.TransID || body.TransId;
+
+// //   console.log(`📥 Processing delivery fee payment:`);
+// //   console.log(`   - Account Ref: ${accountNumber}`);
+// //   console.log(`   - Amount: ${amount}`);
+// //   console.log(`   - Transaction ID: ${transactionId}`);
+
+// //   if (!accountNumber || !accountNumber.startsWith('DEL')) {
+// //     console.log(`❌ Not a delivery fee payment: ${accountNumber}`);
+// //     return fail(1, 'Not a delivery fee payment');
+// //   }
+
+// //   const paymentRef = accountNumber;
+// //   console.log(`🔍 Looking for order with paymentRef: ${paymentRef}`);
+
+// //   // Find order with this delivery fee payment reference
+// //   const order = await Order.findOne({
+// //     'suborders.deliveryDetails.deliveryFeePaymentRef': paymentRef
+// //   });
+
+// //   if (!order) {
+// //     console.log(`❌ No order found with deliveryFeePaymentRef: ${paymentRef}`);
+    
+// //     // Try to find any orders with suborders that might have this reference
+// //     const allOrders = await Order.find({}).limit(5);
+// //     console.log(`📊 Checking recent orders for reference:`);
+// //     for (const o of allOrders) {
+// //       // Use for...of with index to safely access suborders
+// //       for (let i = 0; i < o.suborders.length; i++) {
+// //         const so = o.suborders[i];
+// //         if (so.deliveryDetails?.deliveryFeePaymentRef) {
+// //           // Use the index or the suborder's _id if available
+// //           const suborderId = so._id ? so._id.toString() : `index-${i}`;
+// //           console.log(`   - Order ${o._id}, Suborder ${suborderId}: ${so.deliveryDetails.deliveryFeePaymentRef}`);
+// //         }
+// //       }
+// //     }
+// //     return fail(1, 'Unknown delivery fee reference');
+// //   }
+
+// //   console.log(`✅ Found order: ${order._id}`);
+// //   console.log(`   - Order Status: ${order.status}`);
+// //   console.log(`   - Buyer ID: ${order.buyerId}`);
+
+// //   // Find the specific suborder
+// //   const suborder = order.suborders.find(
+// //     (so: any) => so.deliveryDetails?.deliveryFeePaymentRef === paymentRef
+// //   );
+
+// //   if (!suborder) {
+// //     console.log(`❌ No suborder found with deliveryFeePaymentRef: ${paymentRef}`);
+    
+// //     // Log all suborder payment refs safely
+// //     order.suborders.forEach((so: any, index: number) => {
+// //       const suborderId = so._id ? so._id.toString() : `index-${index}`;
+// //       console.log(`   - Suborder ${suborderId}, Ref: ${so.deliveryDetails?.deliveryFeePaymentRef}`);
+// //     });
+    
+// //     return fail(1, 'Suborder not found');
+// //   }
+
+// //   // Use type assertion or optional chaining for _id
+// //   const suborderId = suborder._id ? suborder._id.toString() : 'unknown';
+  
+// //   console.log(`✅ Found suborder: ${suborderId}`);
+// //   console.log(`   - Suborder Status: ${suborder.status}`);
+// //   console.log(`   - Delivery Fee: ${suborder.deliveryFee}`);
+// //   console.log(`   - Current deliveryDetails:`, JSON.stringify(suborder.deliveryDetails, null, 2));
+
+// //   // Verify amount matches
+// //   if (amount !== suborder.deliveryFee) {
+// //     console.error(`❌ Delivery fee amount mismatch: got ${amount}, expected ${suborder.deliveryFee}`);
+// //     return fail(1, `Amount mismatch. Expected ${suborder.deliveryFee}`);
+// //   }
+
+// //   // Check if already processed
+// //   if (suborder.deliveryDetails?.deliveryFeePaid) {
+// //     console.log(`⚠️ Delivery fee already paid for suborder: ${suborderId}`);
+// //     console.log(`   - Paid At: ${suborder.deliveryDetails.deliveryFeePaidAt}`);
+// //     console.log(`   - Receipt: ${suborder.deliveryDetails.deliveryFeeReceipt}`);
+// //     return ok('Already processed');
+// //   }
+
+// //   // Generate confirmation code
+// //   const confirmationCode = generateConfirmationCode();
+// //   console.log(`🔑 Generated confirmation code: ${confirmationCode}`);
+
+// //   // Update suborder with payment and confirmation code
+// //   if (!suborder.deliveryDetails) {
+// //     suborder.deliveryDetails = {} as DeliveryDetails;
+// //   }
+  
+// //   suborder.deliveryDetails.deliveryFeePaid = true;
+// //   suborder.deliveryDetails.deliveryFeePaidAt = new Date();
+// //   suborder.deliveryDetails.deliveryFeeReceipt = transactionId;
+// //   suborder.deliveryDetails.confirmationCode = confirmationCode;
+// //   suborder.deliveryDetails.confirmedAt = new Date();
+  
+// //   // Update suborder status
+// //   suborder.status = 'CONFIRMED';
+
+// //   await order.save();
+
+// //   console.log(`✅ Successfully updated suborder:`);
+// //   console.log(`   - deliveryFeePaid: ${suborder.deliveryDetails.deliveryFeePaid}`);
+// //   console.log(`   - confirmationCode: ${suborder.deliveryDetails.confirmationCode}`);
+// //   console.log(`   - suborder.status: ${suborder.status}`);
+
+// //   return ok('Delivery fee confirmed');
+// // }
+// // /* =================================================================
+// //    Helpers
+// // ================================================================= *
+// // function fail(code: number, desc: string) {
+// //   return NextResponse.json({ ResultCode: code, ResultDesc: desc });
+// // }
+
+// // function ok(desc = 'Accepted') {
+// //   return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
+// // }
+
+// // /* =================================================================
+// //    VALIDATION
+// // ================================================================= *
+// // async function handleValidation(body: any) {
+// //   const accountNumber = body.AccountNumber || body.BillRefNumber;
+// //   const amount = parseInt(body.Amount || body.TransAmount, 10);
+
+// //   if (!accountNumber) return fail(1, 'Missing account number');
+
+// //   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+// //   if (!draft) return fail(1, 'Unknown reference');
+
+// //   const decoded = decodeRef(draft.fullRef);
+// //   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
+
+// //   if (amount !== draft.totalAmount) {
+// //     console.error(`❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`);
+// //     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+// //   }
+
+// //   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+
+// //   if (draft.status === 'VALIDATED') return ok('Already validated');
+// //   if (draft.status !== 'PENDING') return fail(1, 'Already processed');
+
+// //   draft.status = 'VALIDATED';
+// //   await draft.save();
+// //   console.log('✅ Validation OK for shortRef:', accountNumber);
+// //   return ok();
+// // }
+
+
+
+// // async function handleConfirmation(body: any) {
+// //   const accountNumber = body.BillRefNumber || body.AccountNumber;
+// //   const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+// //   if (!accountNumber) return fail(1, 'Missing account number');
+
+// //   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+// //   if (!draft) return fail(1, 'Unknown reference');
+
+// //   if (amount !== draft.totalAmount) {
+// //     draft.status = 'FAILED';
+// //     await draft.save();
+// //     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+// //   }
+
+// //   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+// //   if (draft.status === 'CONFIRMED') return ok('Already processed');
+
+// //   /* ---------- stock ---------- *
+// //   for (const it of draft.items) {
+// //     await Product.findByIdAndUpdate(it.productId, {
+// //       $inc: { stock: -it.quantity },
+// //     });
+// //   }
+
+// //   /* ---------- order ID ---------- *
+// //   const orderId = generateOrderId();
+
+// //   /* ---------- ledger ---------- *
+// //   const ledgerEntries: any[] = [];
+
+// //   for (const v of draft.vendorSplits) {
+// //     const totalAmount = v.amount;
+// //     const vendorUser = await User.findById(v.vendorId);
+
+// //     let platformShare = 0;
+// //     let referralShare = 0;
+
+// //     if (vendorUser?.referredBy) {
+// //       // 3% split: 2.5% platform, 0.5% referral
+// //       referralShare = totalAmount * 0.005;
+// //       platformShare = totalAmount * 0.025;
+
+// //       // Referral commission entry (locked for 24 hours)
+// //       ledgerEntries.push({
+// //         type: 'REFERRAL_COMMISSION',
+// //         referrerId: vendorUser.referredBy,
+// //         referredVendorId: vendorUser._id,
+// //         orderId,
+// //         draftToken: draft.token,
+// //         amount: referralShare,
+// //         netAmount: referralShare,
+// //         withdrawalStatus: 'LOCKED',
+// //         status: 'PENDING',
+// //         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+// //         metadata: {
+// //           percentage: 0.5,
+// //           description: 'Referral commission from vendor sale'
+// //         }
+// //       });
+// //     } else {
+// //       // No referral: platform gets full 3%
+// //       platformShare = totalAmount * 0.03;
+// //     }
+
+// //     // Platform commission entry
+// //     ledgerEntries.push({
+// //       type: 'PLATFORM_COMMISSION',
+// //       orderId,
+// //       draftToken: draft.token,
+// //       amount: platformShare,
+// //       netAmount: platformShare,
+// //       withdrawalStatus: 'PAID', // Platform commission is paid immediately to platform
+// //       status: 'PAID',
+// //       scheduledAt: new Date(),
+// //       paidAt: new Date(),
+// //       metadata: {
+// //         percentage: vendorUser?.referredBy ? 2.5 : 3,
+// //         description: 'Platform commission'
+// //       }
+// //     });
+
+// //     // Calculate 80% immediate release (after commission)
+// //     const commissionTotal = platformShare + referralShare;
+// //     const vendorEarnings = totalAmount - commissionTotal;
+// //     const immediateRelease = vendorEarnings * 0.8;
+// //     const remaining20Percent = vendorEarnings * 0.2;
+
+// //     // Immediate vendor payout (80%)
+// //     ledgerEntries.push({
+// //       type: 'VENDOR_PAYOUT',
+// //       vendorId: v.vendorId,
+// //       shopId: v.shopId,
+// //       orderId,
+// //       draftToken: draft.token,
+// //       amount: immediateRelease,
+// //       netAmount: immediateRelease,
+// //       withdrawalStatus: 'AVAILABLE', // Available for immediate withdrawal
+// //       status: 'PENDING',
+// //       scheduledAt: new Date(), // Available immediately
+// //       metadata: {
+// //         isImmediateRelease: true,
+// //         percentage: 80,
+// //         platformShare,
+// //         referralShare,
+// //         totalEarnings: vendorEarnings,
+// //         breakdown: {
+// //           totalAmount,
+// //           commission: commissionTotal,
+// //           vendorEarnings,
+// //           immediateRelease,
+// //           remaining20Percent
+// //         }
+// //       }
+// //     });
+
+// //     // Remaining 20% (locked for 24 hours)
+// //     ledgerEntries.push({
+// //       type: 'VENDOR_PAYOUT',
+// //       vendorId: v.vendorId,
+// //       shopId: v.shopId,
+// //       orderId,
+// //       draftToken: draft.token,
+// //       amount: remaining20Percent,
+// //       netAmount: remaining20Percent,
+// //       withdrawalStatus: 'LOCKED', // Locked for 24 hours
+// //       status: 'PENDING',
+// //       scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours hold
+// //       metadata: {
+// //         isImmediateRelease: false,
+// //         percentage: 20,
+// //         holdUntil: new Date(Date.now() + 24 * 60 * 60 * 1000),
+// //         platformShare,
+// //         referralShare,
+// //         totalEarnings: vendorEarnings
+// //       }
+// //     });
+// //   }
+
+// //   await Ledger.insertMany(ledgerEntries);
+
+// //   /* ---------- order ---------- *
+// //   const order = new Order({
+// //     orderId,
+// //     draftToken: draft.token,
+// //     buyerId: draft.buyerId,
+// //     items: draft.items,
+// //     suborders: await Promise.all(
+// //       draft.vendorSplits.map(async (v: any) => {
+// //         const totalAmount = v.amount;
+// //         const vendorUser = await User.findById(v.vendorId);
+
+// //         const platformShare = vendorUser?.referredBy ? totalAmount * 0.025 : totalAmount * 0.03;
+// //         const referralShare = vendorUser?.referredBy ? totalAmount * 0.005 : 0;
+// //         const vendorNet = totalAmount - platformShare - referralShare;
+
+// //         return {
+// //           vendorId: v.vendorId,
+// //           shopId: v.shopId,
+// //           items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
+// //           amount: totalAmount,
+// //           commission: platformShare + referralShare,
+// //           netAmount: vendorNet,
+// //           status: 'PROCESSING',
+// //         };
+// //       })
+// //     ),
+// //     totalAmount: draft.totalAmount,
+// //     platformFee: draft.vendorSplits.reduce((sum: number, v: any) => {
+// //       const vendorUser = draft.items.find((it: any) => it.vendorId === v.vendorId);
+// //       return sum + (vendorUser?.referredBy ? v.amount * 0.025 : v.amount * 0.03);
+// //     }, 0),
+// //     currency: draft.currency || 'KES',
+// //     paymentMethod: 'M-PESA',
+// //     paymentStatus: 'PAID',
+// //     shipping: draft.shipping,
+// //     status: 'PENDING',
+// //     mpesaTransactionId: body.TransID || body.TransId,
+// //   });
+
+// //   await order.save();
+
+// //   /* ---------- finalize draft ---------- *
+// //   draft.status = 'CONFIRMED';
+// //   draft.mpesaTransactionId = body.TransID || body.TransId;
+// //   await draft.save();
+
+// //   return ok('Success');
+// // }
+
+
+// // /* =================================================================
+// //     MAIN ENTRY
+// // ================================================================= */
+// // /*export async function POST(req: NextRequest) {
+// //   try {
+// //     await dbConnect();
+// //     const body = await req.json();
+// //     console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+
+// //     return body.TransID || body.TransId
+// //       ? await handleConfirmation(body)
+// //       : await handleValidation(body);
+// //   } catch (e) {
+// //     console.error('❌ C2B webhook crash:', e);
+// //     return fail(1, 'Server error');
+// //   }
+// // }*
+
+// // // Update the main POST handler to include delivery fee handling
+// // export async function POST(req: NextRequest) {
+// //   try {
+// //     await dbConnect();
+// //     const body = await req.json();
+// //     console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
+
+// //     // Check if it's a delivery fee payment (based on AccountReference starting with DEL)
+// //     const accountNumber = body.BillRefNumber || body.AccountNumber;
+// //     if (accountNumber?.startsWith('DEL')) {
+// //       return await handleDeliveryFeeConfirmation(body);
+// //     }
+
+// //     return body.TransID || body.TransId
+// //       ? await handleConfirmation(body)
+// //       : await handleValidation(body);
+// //   } catch (e) {
+// //     console.error('❌ C2B webhook crash:', e);
+// //     return fail(1, 'Server error');
+// //   }
+// // }*/
+
+
+
+// // // app/api/c2b-webhook/route.ts
+// // import { NextRequest, NextResponse } from 'next/server';
+// // import dbConnect from '@/lib/dbConnect';
+// // import OrderDraft from '@/models/OrderDraft';
+// // import Order from '@/models/Order';
+// // import Ledger from '@/models/Ledger';
+// // import Product from '@/models/product';
+// // import User from '@/models/user';
+// // import Payment from '@/models/Payment';
+// // import VendorSubscription from '@/models/VendorSubscription';
+// // import SubscriptionPlan from '@/models/SubscriptionPlan';
+// // import { decodeRef, generateOrderId } from '@/lib/orderUtils';
+// // import { sendSMS } from '@/lib/sms';
+
+// // function generateConfirmationCode(): string {
+// //   return Math.random().toString(36).substring(2, 10).toUpperCase();
+// // }
+
+// // /* =================================================================
+// //    SUBSCRIPTION PAYMENT HANDLER
+// // ================================================================= */
+// // async function handleSubscriptionPayment(body: any) {
+// //   const accountNumber = body.BillRefNumber || body.AccountNumber;
+// //   const amount = parseInt(body.TransAmount || body.Amount, 10);
+// //   const transactionId = body.TransID || body.TransId;
+// //   const phoneNumber = body.MSISDN || body.PhoneNumber;
+
+// //   console.log(`📥 Processing subscription payment:`);
+// //   console.log(`   - Account Ref: ${accountNumber}`);
+// //   console.log(`   - Amount: ${amount}`);
+// //   console.log(`   - Transaction ID: ${transactionId}`);
+// //   console.log(`   - Phone: ${phoneNumber}`);
+
+// //   // Format: SUB-{planId}-{userId}
+// //   if (!accountNumber || !accountNumber.startsWith('SUB-')) {
+// //     console.log(`❌ Not a subscription payment: ${accountNumber}`);
+// //     return fail(1, 'Not a subscription payment');
+// //   }
+
+// //   const parts = accountNumber.split('-');
+// //   if (parts.length !== 3) {
+// //     console.log(`❌ Invalid subscription reference format: ${accountNumber}`);
+// //     return fail(1, 'Invalid subscription reference');
+// //   }
+
+// //   const [, planId, userId] = parts;
+// //   console.log(`🔍 Looking for payment with planId: ${planId}, userId: ${userId}`);
+
+// //   // Find the pending payment record
+// //   const payment = await Payment.findOne({
+// //     _id: planId, // The planId in the reference is actually the payment _id
+// //     userId,
+// //     status: 'PENDING'
+// //   });
+
+// //   if (!payment) {
+// //     console.log(`❌ No pending payment found for reference: ${accountNumber}`);
+// //     return fail(1, 'Payment reference not found');
+// //   }
+
+// //   // Verify amount matches
+// //   if (amount !== payment.amount) {
+// //     console.error(`❌ Amount mismatch: got ${amount}, expected ${payment.amount}`);
+// //     payment.status = 'FAILED';
+// //     await payment.save();
+// //     return fail(1, `Amount mismatch. Expected ${payment.amount}`);
+// //   }
+
+// //   // Update payment status
+// //   payment.status = 'PAID';
+// //   payment.mpesaReceipt = transactionId;
+// //   payment.stkCallback = body;
+// //   await payment.save();
+
+// //   console.log(`✅ Payment recorded successfully: ${payment._id}`);
+
+// //   // Now activate the subscription
+// //   await activateSubscription(payment, transactionId);
+
+// //   // Send confirmation SMS
+// //   const user = await User.findById(userId);
+// //   if (user && user.phone) {
+// //     const plan = await SubscriptionPlan.findById(payment.planId);
+// //     const message = `✅ Payment of KES ${amount} for ${plan?.name || 'subscription'} plan received successfully! Your subscription is now active. Thank you for choosing our platform.`;
+// //     await sendSMS(user.phone, message).catch(console.error);
+// //   }
+
+// //   return ok('Subscription payment confirmed');
+// // }
+
+// // async function activateSubscription(payment: any, transactionId: string) {
+// //   const userId = payment.userId;
+// //   const planId = payment.planId;
+// //   const amount = payment.amount;
+
+// //   // Get the subscription plan details
+// //   const subscriptionPlan = await SubscriptionPlan.findById(planId);
+// //   if (!subscriptionPlan) {
+// //     console.error('❌ Subscription plan not found:', planId);
+// //     throw new Error('Plan not found');
+// //   }
+
+// //   // Calculate new subscription dates
+// //   const today = new Date();
+// //   const periodInDays = subscriptionPlan.period === 'month' ? 30 : 
+// //                       subscriptionPlan.period === 'quarter' ? 90 : 365;
+// //   const endDate = new Date(today);
+// //   endDate.setDate(endDate.getDate() + periodInDays);
+
+// //   const planTier = subscriptionPlan.name.toLowerCase().includes('basic') ? 'basic' :
+// //                   subscriptionPlan.name.toLowerCase().includes('growth') ? 'growth' :
+// //                   subscriptionPlan.name.toLowerCase().includes('pro') ? 'pro' : 'elite';
+
+// //   // Find or create vendor subscription
+// //   let vendorSubscription = await VendorSubscription.findOne({ vendorId: userId });
+
+// //   if (vendorSubscription) {
+// //     // Log the current state before update
+// //     console.log(`📊 Current subscription state for vendor ${userId}:`);
+// //     console.log(`   - Tier: ${vendorSubscription.tier}`);
+// //     console.log(`   - Status: ${vendorSubscription.status}`);
+// //     console.log(`   - End Date: ${vendorSubscription.endDate}`);
+// //     console.log(`   - Payment History Count: ${vendorSubscription.paymentHistory.length}`);
+
+// //     const oldTier = vendorSubscription.tier;
+// //     const oldEndDate = vendorSubscription.endDate;
+// //     const isActive = new Date(oldEndDate) > today;
+
+// //     if (isActive && vendorSubscription.status === 'active') {
+// //       // Active subscription - extend the end date
+// //       const newEndDate = new Date(oldEndDate);
+// //       newEndDate.setDate(newEndDate.getDate() + periodInDays);
+// //       vendorSubscription.endDate = newEndDate;
+// //       console.log(`📅 Extending subscription: ${oldEndDate} → ${newEndDate}`);
+// //     } else {
+// //       // Expired or cancelled subscription - start new
+// //       vendorSubscription.startDate = today;
+// //       vendorSubscription.endDate = endDate;
+// //       vendorSubscription.status = 'active';
+// //       console.log(`🔄 Reactivating subscription from ${today} to ${endDate}`);
+// //     }
+
+// //     // Update tier if changed
+// //     vendorSubscription.tier = planTier;
+// //     vendorSubscription.paymentId = payment._id;
+    
+// //     // Add to payment history
+// //     vendorSubscription.paymentHistory.push({
+// //       paymentId: payment._id,
+// //       planId: planId,
+// //       amount: amount,
+// //       paidAt: today,
+// //       validUntil: vendorSubscription.endDate,
+// //     });
+
+// //     // Reset monthly usage if tier changed or subscription was inactive
+// //     if (oldTier !== planTier || !isActive) {
+// //       vendorSubscription.monthlyUsage = {
+// //         todayDealsUsed: 0,
+// //         bestSellersUsed: 0,
+// //         newArrivalsUsed: 0,
+// //         clearanceUsed: 0,
+// //         giftCardsCreated: 0,
+// //         month: today,
+// //         lastResetAt: today,
+// //       };
+// //       console.log(`🔄 Reset monthly usage for tier change or reactivation`);
+// //     }
+
+// //     // Clear any grace period
+// //     vendorSubscription.gracePeriodEndsAt = undefined;
+    
+// //     await vendorSubscription.save();
+
+// //     console.log(`✅ Subscription updated for vendor ${userId}:`);
+// //     console.log(`   - New Tier: ${vendorSubscription.tier}`);
+// //     console.log(`   - New End Date: ${vendorSubscription.endDate}`);
+// //     console.log(`   - Status: ${vendorSubscription.status}`);
+// //   } else {
+// //     // Create new subscription
+// //     vendorSubscription = await VendorSubscription.create({
+// //       vendorId: userId,
+// //       tier: planTier,
+// //       status: 'active',
+// //       startDate: today,
+// //       endDate: endDate,
+// //       autoRenew: false,
+// //       paymentId: payment._id,
+// //       paymentHistory: [{
+// //         paymentId: payment._id,
+// //         planId: planId,
+// //         amount: amount,
+// //         paidAt: today,
+// //         validUntil: endDate,
+// //       }],
+// //       monthlyUsage: {
+// //         todayDealsUsed: 0,
+// //         bestSellersUsed: 0,
+// //         newArrivalsUsed: 0,
+// //         clearanceUsed: 0,
+// //         giftCardsCreated: 0,
+// //         month: today,
+// //         lastResetAt: today,
+// //       },
+// //       featuredProducts: [],
+// //     });
+
+// //     console.log(`✨ New subscription created for vendor ${userId}:`);
+// //     console.log(`   - Tier: ${vendorSubscription.tier}`);
+// //     console.log(`   - End Date: ${vendorSubscription.endDate}`);
+// //   }
+
+// //   // Process referral bonus if applicable
+// //   if (payment.referrerId && !payment.referralBonusPaid) {
+// //     const referralBonus = amount * 0.1; // 10% referral bonus
+// //     payment.referralBonus = referralBonus;
+// //     payment.referralBonusPaid = true;
+// //     await payment.save();
+
+// //     // Add to referrer's ledger
+// //     await Ledger.create({
+// //       type: 'REFERRAL_BONUS',
+// //       userId: payment.referrerId,
+// //       amount: referralBonus,
+// //       netAmount: referralBonus,
+// //       withdrawalStatus: 'AVAILABLE',
+// //       status: 'PAID',
+// //       paidAt: new Date(),
+// //       metadata: {
+// //         referredUserId: userId,
+// //         paymentId: payment._id,
+// //         subscriptionPlan: planTier,
+// //         description: `Referral bonus for ${subscriptionPlan.name} subscription`
+// //       }
+// //     });
+
+// //     console.log(`💰 Referral bonus of KES ${referralBonus} credited to ${payment.referrerId}`);
+
+// //     // Notify referrer
+// //     const referrer = await User.findById(payment.referrerId);
+// //     if (referrer && referrer.phone) {
+// //       const message = `🎉 Congratulations! You've earned KES ${referralBonus} referral bonus from ${vendorSubscription.tier} subscription purchase.`;
+// //       await sendSMS(referrer.phone, message).catch(console.error);
+// //     }
+// //   }
+
+// //   return vendorSubscription;
+// // }
+
+// // /* =================================================================
+// //    DELIVERY FEE HANDLER
+// // ================================================================= */
+// // async function handleDeliveryFeeConfirmation(body: any) {
+// //   const accountNumber = body.BillRefNumber || body.AccountNumber;
+// //   const amount = parseInt(body.TransAmount || body.Amount, 10);
+// //   const transactionId = body.TransID || body.TransId;
+
+// //   console.log(`📥 Processing delivery fee payment:`);
+// //   console.log(`   - Account Ref: ${accountNumber}`);
+// //   console.log(`   - Amount: ${amount}`);
+// //   console.log(`   - Transaction ID: ${transactionId}`);
+
+// //   if (!accountNumber || !accountNumber.startsWith('DEL')) {
+// //     console.log(`❌ Not a delivery fee payment: ${accountNumber}`);
+// //     return fail(1, 'Not a delivery fee payment');
+// //   }
+
+// //   const paymentRef = accountNumber;
+// //   console.log(`🔍 Looking for order with paymentRef: ${paymentRef}`);
+
+// //   // Find order with this delivery fee payment reference
+// //   const order = await Order.findOne({
+// //     'suborders.deliveryDetails.deliveryFeePaymentRef': paymentRef
+// //   });
+
+// //   if (!order) {
+// //     console.log(`❌ No order found with deliveryFeePaymentRef: ${paymentRef}`);
+// //     return fail(1, 'Unknown delivery fee reference');
+// //   }
+
+// //   console.log(`✅ Found order: ${order._id}`);
+
+// //   // Find the specific suborder
+// //   const suborder = order.suborders.find(
+// //     (so: any) => so.deliveryDetails?.deliveryFeePaymentRef === paymentRef
+// //   );
+
+// //   if (!suborder) {
+// //     console.log(`❌ No suborder found with deliveryFeePaymentRef: ${paymentRef}`);
+// //     return fail(1, 'Suborder not found');
+// //   }
+
+// //   const suborderId = suborder._id ? suborder._id.toString() : 'unknown';
+  
+// //   console.log(`✅ Found suborder: ${suborderId}`);
+// //   console.log(`   - Delivery Fee: ${suborder.deliveryFee}`);
+
+// //   // Verify amount matches
+// //   if (amount !== suborder.deliveryFee) {
+// //     console.error(`❌ Delivery fee amount mismatch: got ${amount}, expected ${suborder.deliveryFee}`);
+// //     return fail(1, `Amount mismatch. Expected ${suborder.deliveryFee}`);
+// //   }
+
+// //   // Check if already processed
+// //   if (suborder.deliveryDetails?.deliveryFeePaid) {
+// //     console.log(`⚠️ Delivery fee already paid for suborder: ${suborderId}`);
+// //     return ok('Already processed');
+// //   }
+
+// //   // Generate confirmation code
+// //   const confirmationCode = generateConfirmationCode();
+
+// //   // Update suborder with payment and confirmation code
+// //   //if (!suborder.deliveryDetails) {
+// //   //  suborder.deliveryDetails = {} as DeliveryDetails;
+// //   //}
+  
+// //   suborder.deliveryDetails.deliveryFeePaid = true;
+// //   suborder.deliveryDetails.deliveryFeePaidAt = new Date();
+// //   suborder.deliveryDetails.deliveryFeeReceipt = transactionId;
+// //   suborder.deliveryDetails.confirmationCode = confirmationCode;
+// //   suborder.deliveryDetails.confirmedAt = new Date();
+  
+// //   // Update suborder status
+// //   suborder.status = 'CONFIRMED';
+
+// //   await order.save();
+
+// //   console.log(`✅ Successfully updated suborder with confirmation code: ${confirmationCode}`);
+
+// //   return ok('Delivery fee confirmed');
+// // }
+
+// // /* =================================================================
+// //    ORDER PAYMENT HANDLERS
+// // ================================================================= */
+// // async function handleValidation(body: any) {
+// //   const accountNumber = body.AccountNumber || body.BillRefNumber;
+// //   const amount = parseInt(body.Amount || body.TransAmount, 10);
+
+// //   if (!accountNumber) return fail(1, 'Missing account number');
+
+// //   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+// //   if (!draft) return fail(1, 'Unknown reference');
+
+// //   const decoded = decodeRef(draft.fullRef);
+// //   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
+
+// //   if (amount !== draft.totalAmount) {
+// //     console.error(`❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`);
+// //     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+// //   }
+
+// //   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+
+// //   if (draft.status === 'VALIDATED') return ok('Already validated');
+// //   if (draft.status !== 'PENDING') return fail(1, 'Already processed');
+
+// //   draft.status = 'VALIDATED';
+// //   await draft.save();
+// //   console.log('✅ Validation OK for shortRef:', accountNumber);
+// //   return ok();
+// // }
+
+// // async function handleConfirmation(body: any) {
+// //   const accountNumber = body.BillRefNumber || body.AccountNumber;
+// //   const amount = parseInt(body.TransAmount || body.Amount, 10);
+
+// //   if (!accountNumber) return fail(1, 'Missing account number');
+
+// //   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
+// //   if (!draft) return fail(1, 'Unknown reference');
+
+// //   if (amount !== draft.totalAmount) {
+// //     draft.status = 'FAILED';
+// //     await draft.save();
+// //     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
+// //   }
+
+// //   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
+// //   if (draft.status === 'CONFIRMED') return ok('Already processed');
+
+// //   /* ---------- stock ---------- */
+// //   for (const it of draft.items) {
+// //     await Product.findByIdAndUpdate(it.productId, {
+// //       $inc: { stock: -it.quantity },
+// //     });
+// //   }
+
+// //   /* ---------- order ID ---------- */
+// //   const orderId = generateOrderId();
+
+// //   /* ---------- ledger ---------- */
+// //   const ledgerEntries: any[] = [];
+
+// //   for (const v of draft.vendorSplits) {
+// //     const totalAmount = v.amount;
+// //     const vendorUser = await User.findById(v.vendorId);
+
+// //     let platformShare = 0;
+// //     let referralShare = 0;
+
+// //     if (vendorUser?.referredBy) {
+// //       // 3% split: 2.5% platform, 0.5% referral
+// //       referralShare = totalAmount * 0.005;
+// //       platformShare = totalAmount * 0.025;
+
+// //       // Referral commission entry (locked for 24 hours)
+// //       ledgerEntries.push({
+// //         type: 'REFERRAL_COMMISSION',
+// //         referrerId: vendorUser.referredBy,
+// //         referredVendorId: vendorUser._id,
+// //         orderId,
+// //         draftToken: draft.token,
+// //         amount: referralShare,
+// //         netAmount: referralShare,
+// //         withdrawalStatus: 'LOCKED',
+// //         status: 'PENDING',
+// //         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+// //         metadata: {
+// //           percentage: 0.5,
+// //           description: 'Referral commission from vendor sale'
+// //         }
+// //       });
+// //     } else {
+// //       // No referral: platform gets full 3%
+// //       platformShare = totalAmount * 0.03;
+// //     }
+
+// //     // Platform commission entry
+// //     ledgerEntries.push({
+// //       type: 'PLATFORM_COMMISSION',
+// //       orderId,
+// //       draftToken: draft.token,
+// //       amount: platformShare,
+// //       netAmount: platformShare,
+// //       withdrawalStatus: 'PAID',
+// //       status: 'PAID',
+// //       scheduledAt: new Date(),
+// //       paidAt: new Date(),
+// //       metadata: {
+// //         percentage: vendorUser?.referredBy ? 2.5 : 3,
+// //         description: 'Platform commission'
+// //       }
+// //     });
+
+// //     // Calculate 80% immediate release (after commission)
+// //     const commissionTotal = platformShare + referralShare;
+// //     const vendorEarnings = totalAmount - commissionTotal;
+// //     const immediateRelease = vendorEarnings * 0.8;
+// //     const remaining20Percent = vendorEarnings * 0.2;
+
+// //     // Immediate vendor payout (80%)
+// //     ledgerEntries.push({
+// //       type: 'VENDOR_PAYOUT',
+// //       vendorId: v.vendorId,
+// //       shopId: v.shopId,
+// //       orderId,
+// //       draftToken: draft.token,
+// //       amount: immediateRelease,
+// //       netAmount: immediateRelease,
+// //       withdrawalStatus: 'AVAILABLE',
+// //       status: 'PENDING',
+// //       scheduledAt: new Date(),
+// //       metadata: {
+// //         isImmediateRelease: true,
+// //         percentage: 80,
+// //         platformShare,
+// //         referralShare,
+// //         totalEarnings: vendorEarnings,
+// //         breakdown: {
+// //           totalAmount,
+// //           commission: commissionTotal,
+// //           vendorEarnings,
+// //           immediateRelease,
+// //           remaining20Percent
+// //         }
+// //       }
+// //     });
+
+// //     // Remaining 20% (locked for 24 hours)
+// //     ledgerEntries.push({
+// //       type: 'VENDOR_PAYOUT',
+// //       vendorId: v.vendorId,
+// //       shopId: v.shopId,
+// //       orderId,
+// //       draftToken: draft.token,
+// //       amount: remaining20Percent,
+// //       netAmount: remaining20Percent,
+// //       withdrawalStatus: 'LOCKED',
+// //       status: 'PENDING',
+// //       scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+// //       metadata: {
+// //         isImmediateRelease: false,
+// //         percentage: 20,
+// //         holdUntil: new Date(Date.now() + 24 * 60 * 60 * 1000),
+// //         platformShare,
+// //         referralShare,
+// //         totalEarnings: vendorEarnings
+// //       }
+// //     });
+// //   }
+
+// //   await Ledger.insertMany(ledgerEntries);
+
+// //   /* ---------- order ---------- */
+// //   const order = new Order({
+// //     orderId,
+// //     draftToken: draft.token,
+// //     buyerId: draft.buyerId,
+// //     items: draft.items,
+// //     suborders: await Promise.all(
+// //       draft.vendorSplits.map(async (v: any) => {
+// //         const totalAmount = v.amount;
+// //         const vendorUser = await User.findById(v.vendorId);
+
+// //         const platformShare = vendorUser?.referredBy ? totalAmount * 0.025 : totalAmount * 0.03;
+// //         const referralShare = vendorUser?.referredBy ? totalAmount * 0.005 : 0;
+// //         const vendorNet = totalAmount - platformShare - referralShare;
+
+// //         return {
+// //           vendorId: v.vendorId,
+// //           shopId: v.shopId,
+// //           items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
+// //           amount: totalAmount,
+// //           commission: platformShare + referralShare,
+// //           netAmount: vendorNet,
+// //           status: 'PROCESSING',
+// //         };
+// //       })
+// //     ),
+// //     totalAmount: draft.totalAmount,
+// //     platformFee: draft.vendorSplits.reduce((sum: number, v: any) => {
+// //       const vendorUser = draft.items.find((it: any) => it.vendorId === v.vendorId);
+// //       return sum + (vendorUser?.referredBy ? v.amount * 0.025 : v.amount * 0.03);
+// //     }, 0),
+// //     currency: draft.currency || 'KES',
+// //     paymentMethod: 'M-PESA',
+// //     paymentStatus: 'PAID',
+// //     shipping: draft.shipping,
+// //     status: 'PENDING',
+// //     mpesaTransactionId: body.TransID || body.TransId,
+// //   });
+
+// //   await order.save();
+
+// //   /* ---------- finalize draft ---------- */
+// //   draft.status = 'CONFIRMED';
+// //   draft.mpesaTransactionId = body.TransID || body.TransId;
+// //   await draft.save();
+
+// //   return ok('Success');
+// // }
+
+// // /* =================================================================
+// //    HELPERS
+// // ================================================================= */
+// // function fail(code: number, desc: string) {
+// //   return NextResponse.json({ ResultCode: code, ResultDesc: desc });
+// // }
+
+// // function ok(desc = 'Accepted') {
+// //   return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
+// // }
+
+// // /* =================================================================
+// //    MAIN C2B WEBHOOK HANDLER
+// // ================================================================= */
+// // export async function POST(req: NextRequest) {
+// //   try {
+// //     await dbConnect();
+// //     const body = await req.json();
+// //     console.log('📥 C2B payload received:', JSON.stringify(body, null, 2));
+
+// //     const accountNumber = body.BillRefNumber || body.AccountNumber;
+    
+// //     // Route to appropriate handler based on account reference prefix
+// //     if (accountNumber?.startsWith('SUB-')) {
+// //       // Handle subscription payments
+// //       console.log('🔄 Routing to subscription payment handler');
+// //       return await handleSubscriptionPayment(body);
+// //     } 
+// //     else if (accountNumber?.startsWith('DEL')) {
+// //       // Handle delivery fee payments
+// //       console.log('🚚 Routing to delivery fee handler');
+// //       return await handleDeliveryFeeConfirmation(body);
+// //     }
+// //     else {
+// //       // Handle regular order payments
+// //       console.log('📦 Routing to order payment handler');
+// //       return body.TransID || body.TransId
+// //         ? await handleConfirmation(body)
+// //         : await handleValidation(body);
+// //     }
+// //   } catch (e) {
+// //     console.error('❌ C2B webhook crash:', e);
+// //     return fail(1, 'Server error');
+// //   }
+// // }
+
+
+
+// // app/api/shd-api/api/callback/route.ts
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import Transaction from '@/shd-models/models/Transaction';
+// import Order from '@/shd-models/models/Order';
+// import Product from '@/shd-models/models/Product';
+// import Vendor from '@/shd-models/models/Vendor';
+
+// // Helper function to process successful payment
+// async function processSuccessfulPayment(transaction: any, responseData: any) {
+//   try {
+//     // Update transaction
+//     transaction.status = 'success';
+//     transaction.receiptNumber = responseData.MpesaReceiptNumber;
+//     transaction.metadata = {
+//       ...transaction.metadata,
+//       mpesaResponse: responseData
+//     };
+//     await transaction.save();
+
+//     // Get all order IDs from metadata
+//     const orderIds = transaction.metadata?.orders || [];
+    
+//     // Update each order
+//     for (const orderId of orderIds) {
+//       const order = await Order.findById(orderId);
+//       if (!order) continue;
+
+//       // Mark as paid
+//       order.isPaid = true;
+//       order.transactionId = transaction.transactionId;
+//       order.status = 'processing'; // Move from pending to processing
+//       await order.save();
 
 //       // Update product stock
-//       for (const item of draft.items) {
+//       for (const item of order.products) {
 //         await Product.findByIdAndUpdate(
 //           item.productId,
 //           { $inc: { stock: -item.quantity } }
 //         );
 //       }
 
-//       // Create main order
-//       const orderId = generateOrderId();
-//       const order = new Order({
-//         orderId,
-//         draftToken: draft.token,
-//         buyerId: draft.buyerId,
-//         items: draft.items,
-//         suborders: draft.vendorSplits.map((vendor: { vendorId: any; shopId: any; amount: any; commission: any; netAmount: any }) => ({
-//           vendorId: vendor.vendorId,
-//           shopId: vendor.shopId,
-//           items: draft.items.filter((item: { vendorId: any }) => item.vendorId === vendor.vendorId),
-//           amount: vendor.amount,
-//           commission: vendor.commission,
-//           netAmount: vendor.netAmount,
-//           status: 'PENDING'
-//         })),
-//         totalAmount: draft.totalAmount,
-//         platformFee: draft.vendorSplits.reduce((sum: any, vendor: { commission: any }) => sum + vendor.commission, 0),
-//         currency: draft.currency,
-//         paymentMethod: 'M-PESA',
-//         paymentStatus: 'PAID',
-//         shipping: draft.shipping,
-//         status: 'PENDING',
-//         mpesaTransactionId: mpesaReceiptNumber
-//       });
-
-//       await order.save();
-
-//       // Create ledger entries for vendor payouts
-//       const ledgerEntries = draft.vendorSplits.map((vendor: { vendorId: any; shopId: any; amount: any; commission: any; netAmount: any }) => ({
-//         vendorId: vendor.vendorId,
-//         shopId: vendor.shopId,
-//         orderId: orderId,
-//         draftToken: draft.token,
-//         amount: vendor.amount,
-//         commission: vendor.commission,
-//         netAmount: vendor.netAmount,
-//         status: 'PENDING',
-//         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // Schedule for 24 hours later
-//       }));
-
-//       await Ledger.insertMany(ledgerEntries);
-
-//       // Update draft status
-//       draft.status = 'CONFIRMED';
-//       draft.mpesaTransactionId = mpesaReceiptNumber;
-//       await draft.save();
-
-//       // TODO: Send notifications to buyer and vendors
-//       console.log(`Order ${orderId} confirmed successfully`);
-
-//       return NextResponse.json({ ResultCode: 0, ResultDesc: 'Success' });
-//     }
-
-//     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Unsupported callback type' });
-
-//   } catch (error) {
-//     console.error('Callback processing error:', error);
-//     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Server error' });
-//   }
-// }
-// */
-
-// /*import { NextRequest, NextResponse } from 'next/server';
-// import dbConnect from '@/lib/dbConnect';
-// import OrderDraft from '@/models/OrderDraft';
-// import Order from '@/models/Order';
-// import Ledger from '@/models/Ledger';
-// import Product from '@/models/product';
-// import { decodeRef, generateOrderId } from '@/lib/orderUtils';
-
-// export async function POST(req: NextRequest) {
-//   try {
-//     await dbConnect();
-
-//     console.log('M-Pesa callback URL!!!:', req.url);
-
-//     const body = await req.json();
-//     console.log('M-Pesa C2B callback received:', JSON.stringify(body, null, 2));
-
-//     // Check if it’s a valid C2B Paybill payload
-//     if (!body.TransID || !body.BillRefNumber) {
-//       return NextResponse.json({ ResultCode: 1, ResultDesc: 'Invalid C2B payload' });
-//     }
-
-//     // Extract payment details
-//     const amount = parseFloat(body.TransAmount);
-//     const mpesaReceiptNumber = body.TransID;
-//     const transactionDate = body.TransTime;
-//     const phoneNumber = body.MSISDN;
-//     const accountReference = body.BillRefNumber;
-
-//     // Decode and validate reference
-//     const decoded = decodeRef(accountReference);
-//     if (!decoded.ok) {
-//       console.error('Invalid account reference:', accountReference);
-//       return NextResponse.json({ ResultCode: 1, ResultDesc: 'Invalid reference' });
-//     }
-
-//     // Find order draft
-//     const draft = await OrderDraft.findOne({ token: decoded.token });
-//     if (!draft) {
-//       console.error('Draft not found for reference:', accountReference);
-//       return NextResponse.json({ ResultCode: 1, ResultDesc: 'Reference not found' });
-//     }
-
-//     // Check if already processed
-//     if (draft.status === 'CONFIRMED') {
-//       console.log('Draft already confirmed:', draft.token);
-//       return NextResponse.json({ ResultCode: 0, ResultDesc: 'Already processed' });
-//     }
-
-//     // Validate amount
-//     if (amount !== draft.totalAmount) {
-//       draft.status = 'FAILED';
-//       await draft.save();
-//       console.error(`Amount mismatch: expected ${draft.totalAmount}, got ${amount}`);
-//       return NextResponse.json({ ResultCode: 1, ResultDesc: 'Amount mismatch' });
-//     }
-
-//     // Update product stock
-//     for (const item of draft.items) {
-//       await Product.findByIdAndUpdate(
-//         item.productId,
-//         { $inc: { stock: -item.quantity } }
+//       // Update vendor's pending payout
+//       await Vendor.findByIdAndUpdate(
+//         order.vendorId,
+//         { $inc: { pendingPayout: order.vendorAmount } }
 //       );
 //     }
 
-//     // Create order
-//     const orderId = generateOrderId();
-//     const order = new Order({
-//       orderId,
-//       draftToken: draft.token,
-//       buyerId: draft.buyerId,
-//       items: draft.items,
-//       suborders: draft.vendorSplits.map((vendor: any) => ({
-//         vendorId: vendor.vendorId,
-//         shopId: vendor.shopId,
-//         items: draft.items.filter((item: any) => item.vendorId === vendor.vendorId),
-//         amount: vendor.amount,
-//         commission: vendor.commission,
-//         netAmount: vendor.netAmount,
-//         status: 'PENDING'
-//       })),
-//       totalAmount: draft.totalAmount,
-//       platformFee: draft.vendorSplits.reduce((sum: number, v: any) => sum + v.commission, 0),
-//       currency: draft.currency,
-//       paymentMethod: 'M-PESA',
-//       paymentStatus: 'PAID',
-//       shipping: draft.shipping,
-//       status: 'PENDING',
-//       mpesaTransactionId: mpesaReceiptNumber
-//     });
+//     return true;
+//   } catch (error) {
+//     console.error('Error processing successful payment:', error);
+//     return false;
+//   }
+// }
 
-//     await order.save();
+// // Helper function to process failed payment
+// async function processFailedPayment(transaction: any) {
+//   try {
+//     transaction.status = 'failed';
+//     await transaction.save();
 
-//     // Create ledger entries
-//     const ledgerEntries = draft.vendorSplits.map((vendor: any) => ({
-//       vendorId: vendor.vendorId,
-//       shopId: vendor.shopId,
-//       orderId: orderId,
-//       draftToken: draft.token,
-//       amount: vendor.amount,
-//       commission: vendor.commission,
-//       netAmount: vendor.netAmount,
-//       status: 'PENDING',
-//       scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // payout scheduled for 24h later
-//     }));
+//     // Optionally cancel the orders
+//     const orderIds = transaction.metadata?.orders || [];
+//     for (const orderId of orderIds) {
+//       await Order.findByIdAndUpdate(orderId, { 
+//         status: 'cancelled',
+//         isPaid: false
+//       });
+//     }
 
-//     await Ledger.insertMany(ledgerEntries);
+//     return true;
+//   } catch (error) {
+//     console.error('Error processing failed payment:', error);
+//     return false;
+//   }
+// }
 
-//     // Update draft
-//     draft.status = 'CONFIRMED';
-//     draft.mpesaTransactionId = mpesaReceiptNumber;
-//     await draft.save();
+// export async function POST(req: NextRequest) {
+//   try {
+//     await connectToDatabase();
 
-//     console.log(`✅ Order ${orderId} confirmed successfully from C2B`);
+//     // Parse the callback data
+//     const callbackData = await req.json();
+//     console.log('Received callback:', JSON.stringify(callbackData, null, 2));
 
-//     return NextResponse.json({ ResultCode: 0, ResultDesc: 'Success' });
+//     // Extract the relevant data from M-Pesa response
+//     const response = callbackData.Body?.stkCallback;
+    
+//     if (!response) {
+//       console.error('Invalid callback structure:', callbackData);
+//       return NextResponse.json(
+//         { error: 'Invalid callback data' },
+//         { status: 400 }
+//       );
+//     }
+
+//     const { 
+//       MerchantRequestID,
+//       CheckoutRequestID,
+//       ResultCode,
+//       ResultDesc,
+//       CallbackMetadata
+//     } = response;
+
+//     // Find the transaction
+//     const transaction = await Transaction.findOne({ transactionId: CheckoutRequestID });
+    
+//     if (!transaction) {
+//       console.error('Transaction not found:', CheckoutRequestID);
+//       return NextResponse.json(
+//         { error: 'Transaction not found' },
+//         { status: 404 }
+//       );
+//     }
+
+//     console.log('Found transaction:', transaction);
+
+//     // Process based on ResultCode
+//     if (ResultCode === 0) {
+//       // Payment successful
+//       console.log('Payment successful for transaction:', CheckoutRequestID);
+      
+//       // Extract metadata
+//       const metadataMap: { [key: string]: string } = {};
+//       if (CallbackMetadata?.Item) {
+//         CallbackMetadata.Item.forEach((item: any) => {
+//           metadataMap[item.Name] = item.Value;
+//         });
+//       }
+
+//       const responseData = {
+//         MpesaReceiptNumber: metadataMap.MpesaReceiptNumber,
+//         TransactionDate: metadataMap.TransactionDate,
+//         PhoneNumber: metadataMap.PhoneNumber,
+//         Amount: metadataMap.Amount
+//       };
+
+//       const success = await processSuccessfulPayment(transaction, responseData);
+      
+//       if (success) {
+//         console.log('Successfully processed payment for orders:', transaction.metadata?.orders);
+//       }
+
+//     } else {
+//       // Payment failed
+//       console.log(`Payment failed for transaction ${CheckoutRequestID}: ${ResultDesc}`);
+//       await processFailedPayment(transaction);
+//     }
+
+//     // Always respond with success to M-Pesa (they expect a 200 OK)
+//     return NextResponse.json(
+//       { 
+//         ResultCode: 0, 
+//         ResultDesc: "Success" 
+//       },
+//       { status: 200 }
+//     );
 
 //   } catch (error) {
-//     console.error('❌ Callback processing error:', error);
-//     return NextResponse.json({ ResultCode: 1, ResultDesc: 'Server error' });
-//   }
-// }
-// */
-
-
-
-
-// // app/api/c2b-webhook/route.ts
-// /*import { NextRequest, NextResponse } from 'next/server';
-// import dbConnect from '@/lib/dbConnect';
-// import OrderDraft from '@/models/OrderDraft';
-// import Order from '@/models/Order';
-// import Ledger from '@/models/Ledger';
-// import Product from '@/models/product';
-// import { decodeRef, generateOrderId } from '@/lib/orderUtils';
-// import { sendSMS } from '@/lib/sms';
-
-
-// /* =================================================================
-//    Helpers reused by both flows
-// ================================================================= *
-// function fail(code: number, desc: string) {
-//   return NextResponse.json({ ResultCode: code, ResultDesc: desc });
-// }
-// function ok(desc = 'Accepted') {
-//   return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
-// }
-
-// /* =================================================================
-//    VALIDATION  (M-Pesa Validation phase)
-// ================================================================= *
-// async function handleValidation(body: any) {
-//   const accountNumber = body.AccountNumber || body.BillRefNumber;
-//   const amount = parseInt(body.Amount || body.TransAmount, 10);
-
-//   if (!accountNumber) return fail(1, 'Missing account number');
-
-//   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
-//   if (!draft) return fail(1, 'Unknown reference');
-
-//   const decoded = decodeRef(draft.fullRef);
-//   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
-
-//   if (amount !== draft.totalAmount) {
-//     console.error(`❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`);
-//     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
-//   }
-
-//   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
-
-//   if (draft.status === 'VALIDATED') return ok('Already validated');
-//   if (draft.status !== 'PENDING') return fail(1, 'Already processed');
-
-//   draft.status = 'VALIDATED';
-//   await draft.save();
-//   console.log('✅ Validation OK for shortRef:', accountNumber);
-//   return ok();
-// }
-
-// /* =================================================================
-//    CONFIRMATION  (M-Pesa Confirmation phase)
-// ================================================================= *
-// async function handleConfirmation(body: any) {
-//   const accountNumber = body.BillRefNumber || body.AccountNumber;
-//   const amount = parseInt(body.TransAmount || body.Amount, 10);
-
-//   if (!accountNumber) return fail(1, 'Missing account number');
-
-//   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
-//   if (!draft) return fail(1, 'Unknown reference');
-
-//   const decoded = decodeRef(draft.fullRef);
-//   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
-
-//   if (amount !== draft.totalAmount) {
-//     draft.status = 'FAILED';
-//     await draft.save();
-//     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
-//   }
-
-//   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
-
-//   if (draft.status === 'CONFIRMED') return ok('Already processed');
-
-//   /* ---------- stock ---------- *
-//   for (const it of draft.items) {
-//     await Product.findByIdAndUpdate(it.productId, { $inc: { stock: -it.quantity } });
-//   }
-
-//   /* ---------- order ---------- *
-//   const orderId = generateOrderId();
-//   const order = new Order({
-//     orderId,
-//     draftToken: draft.token,
-//     buyerId: draft.buyerId,
-//     items: draft.items,
-//     suborders: draft.vendorSplits.map((v: any) => ({
-//       vendorId: v.vendorId,
-//       shopId: v.shopId,
-//       items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
-//       amount: v.amount,
-//       commission: v.commission,
-//       netAmount: v.netAmount,
-//       status: 'PENDING',
-//     })),
-//     totalAmount: draft.totalAmount,
-//     platformFee: draft.vendorSplits.reduce((s: number, v: any) => s + v.commission, 0),
-//     currency: draft.currency || 'KES',
-//     paymentMethod: 'M-PESA',
-//     paymentStatus: 'PAID',
-//     shipping: draft.shipping,
-//     status: 'PENDING',
-//     mpesaTransactionId: body.TransID || body.TransId,
-//   });
-//   await order.save();
-
-//   /* ---------- ledger ---------- *
-//   const ledgerEntries = draft.vendorSplits.map((v: any) => ({
-//     vendorId: v.vendorId,
-//     shopId: v.shopId,
-//     orderId,
-//     draftToken: draft.token,
-//     amount: v.amount,
-//     commission: v.commission,
-//     netAmount: v.netAmount,
-//     status: 'PENDING',
-//     scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-//   }));
-//   await Ledger.insertMany(ledgerEntries);
-
-//   /* ---------- finalize draft ---------- *
-//   draft.status = 'CONFIRMED';
-//   draft.mpesaTransactionId = body.TransID || body.TransId;
-//   await draft.save();
-
-
-//   /* ---------- SEND SMS ---------- *
-
-//   // Customer phone number (from shipping)
-//   const customerPhone = draft.shipping.phone;
-
-//   // Format phone (ensure +2547…)
-//   const normalizePhone = (phone: string) => {
-//     if (phone.startsWith("+")) return phone;
-//     if (phone.startsWith("0")) return "+254" + phone.substring(1);
-//     if (phone.startsWith("7")) return "+254" + phone;
-//     return phone;
-//   };
-
-//   const formattedPhone = normalizePhone(customerPhone);
-
-//   // 🆕 Log phone for debugging
-//   console.log("📞 Raw phone from DB:", customerPhone);
-//   console.log("📞 Formatted phone:", formattedPhone);
-
-//   // Build customer SMS message
-//   const customerMessage = `
-//   Thank you for your order!
-
-//   Order ID: ${orderId}
-//   Amount: KES ${draft.totalAmount}
-//   Transaction: ${draft.mpesaTransactionId}
-
-//   We will process and keep you updated.
-//   -Shaddyna
-//   `.trim();
-
-//   // Admin phone (replace with yours)
-//   const adminPhone = "+254711118817";
-//   const adminMessage = `
-//   New Order Received!
-
-//   Order ID: ${orderId}
-//   Customer Phone: ${formattedPhone}
-//   Amount: KES ${draft.totalAmount}
-//   Transaction: ${draft.mpesaTransactionId}
-//   `.trim();
-
-//   // Send SMS to customer
-//   await sendSMS(formattedPhone, customerMessage);
-
-//   // Send SMS to admin
-//   await sendSMS(adminPhone, adminMessage);
-
-//   console.log("📨 SMS notifications sent.");
-
-//   /* ---------- return response ---------- *
-//   console.log('✅ Confirmation complete for shortRef:', accountNumber);
-//   return ok('Success');
-
-//   }
-
-//   /* =================================================================
-//     MAIN ENTRY
-//   ================================================================= *
-//   export async function POST(req: NextRequest) {
-//     try {
-//       await dbConnect();
-//       const body = await req.json();
-//       console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
-
-//       // M-Pesa sends TransID only in the confirmation phase
-//       return body.TransID || body.TransId
-//         ? await handleConfirmation(body)
-//         : await handleValidation(body);
-//     } catch (e) {
-//       console.error('❌ C2B webhook crash:', e);
-//       return fail(1, 'Server error');
-//     }
-// }*/
-
-
-
-
-
-
-
-
-// //////////////////////////////////////////////////////////////////////////
-
-
-// /////////////////////////////////////////////////////////////////////////////
-// // app/api/c2b-webhook/route.ts
-// /*import { NextRequest, NextResponse } from 'next/server';
-// import dbConnect from '@/lib/dbConnect';
-// import OrderDraft from '@/models/OrderDraft';
-// import Order from '@/models/Order';
-// import Ledger from '@/models/Ledger';
-// import Product from '@/models/product';
-// import User from '@/models/user';
-// import { decodeRef, generateOrderId } from '@/lib/orderUtils';
-// import { sendSMS } from '@/lib/sms';
-
-// /* =================================================================
-//    Helpers reused by both flows
-// ================================================================= *
-// function fail(code: number, desc: string) {
-//   return NextResponse.json({ ResultCode: code, ResultDesc: desc });
-// }
-
-// function ok(desc = 'Accepted') {
-//   return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
-// }
-
-// /* =================================================================
-//    VALIDATION  (M-Pesa Validation phase)
-// ================================================================= *
-// async function handleValidation(body: any) {
-//   const accountNumber = body.AccountNumber || body.BillRefNumber;
-//   const amount = parseInt(body.Amount || body.TransAmount, 10);
-
-//   if (!accountNumber) return fail(1, 'Missing account number');
-
-//   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
-//   if (!draft) return fail(1, 'Unknown reference');
-
-//   const decoded = decodeRef(draft.fullRef);
-//   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
-
-//   if (amount !== draft.totalAmount) {
-//     console.error(`❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`);
-//     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
-//   }
-
-//   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
-
-//   if (draft.status === 'VALIDATED') return ok('Already validated');
-//   if (draft.status !== 'PENDING') return fail(1, 'Already processed');
-
-//   draft.status = 'VALIDATED';
-//   await draft.save();
-//   console.log('✅ Validation OK for shortRef:', accountNumber);
-//   return ok();
-// }
-
-// async function handleConfirmation(body: any) {
-//   const accountNumber = body.BillRefNumber || body.AccountNumber;
-//   const amount = parseInt(body.TransAmount || body.Amount, 10);
-
-//   if (!accountNumber) return fail(1, 'Missing account number');
-
-//   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
-//   if (!draft) return fail(1, 'Unknown reference');
-
-//   if (amount !== draft.totalAmount) {
-//     draft.status = 'FAILED';
-//     await draft.save();
-//     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
-//   }
-
-//   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
-//   if (draft.status === 'CONFIRMED') return ok('Already processed');
-
-//   /* ---------- stock ---------- *
-//   for (const it of draft.items) {
-//     await Product.findByIdAndUpdate(it.productId, {
-//       $inc: { stock: -it.quantity },
-//     });
-//   }
-
-//   /* ---------- order ---------- *
-//   const orderId = generateOrderId();
-
-//   const order = new Order({
-//     orderId,
-//     draftToken: draft.token,
-//     buyerId: draft.buyerId,
-//     items: draft.items,
-//     suborders: draft.vendorSplits.map((v: any) => ({
-//       vendorId: v.vendorId,
-//       shopId: v.shopId,
-//       items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
-//       amount: v.amount,
-//       commission: v.commission, // FULL 3%
-//       netAmount: v.netAmount,   // already after 3%
-//       status: 'PENDING',
-//     })),
-//     totalAmount: draft.totalAmount,
-//     platformFee: draft.vendorSplits.reduce(
-//       (sum: number, v: any) => sum + v.commission,
-//       0
-//     ),
-//     currency: draft.currency || 'KES',
-//     paymentMethod: 'M_PESA',
-//     paymentStatus: 'PAID',
-//     shipping: draft.shipping,
-//     status: 'PENDING',
-//     mpesaTransactionId: body.TransID || body.TransId,
-//   });
-
-//   await order.save();
-
-//   /* ---------- ledger ---------- *
-
-//   const ledgerEntries: any[] = [];
-
-//   for (const v of draft.vendorSplits) {
-//     const totalCommission = v.commission;        // 3%
-//     const referralAmount = v.amount * 0.005;     // 0.5%
-//     const platformAmount = totalCommission - referralAmount; // 2.5%
-
-//     // Vendor payout (net already correct)
-//     ledgerEntries.push({
-//       type: 'VENDOR_PAYOUT',
-//       vendorId: v.vendorId,
-//       shopId: v.shopId,
-//       orderId,
-//       draftToken: draft.token,
-//       amount: v.netAmount,
-//       status: 'PENDING',
-//       scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-//     });
-
-//     // Platform income (2.5%)
-//     ledgerEntries.push({
-//       type: 'PLATFORM_COMMISSION',
-//       orderId,
-//       draftToken: draft.token,
-//       amount: platformAmount,
-//       status: 'PAID',
-//     });
-
-//     // Referral commission (0.5%) — SAME 3% bucket
-//     const vendorUser = await User.findById(v.vendorId);
-//     if (vendorUser?.referredBy) {
-//       ledgerEntries.push({
-//         type: 'REFERRAL_COMMISSION',
-//         referrerId: vendorUser.referredBy,
-//         referredVendorId: vendorUser._id,
-//         orderId,
-//         draftToken: draft.token,
-//         amount: referralAmount,
-//         status: 'PENDING',
-//         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-//       });
-//     }
-//   }
-
-//   await Ledger.insertMany(ledgerEntries);
-
-//   /* ---------- finalize draft ---------- *
-//   draft.status = 'CONFIRMED';
-//   draft.mpesaTransactionId = body.TransID || body.TransId;
-//   await draft.save();
-
-//   return ok('Success');
-// }
-
-// /* =================================================================
-//    CONFIRMATION  (M-Pesa Confirmation phase)
-// ================================================================= */
-// /*async function handleConfirmation(body: any) {
-//   const accountNumber = body.BillRefNumber || body.AccountNumber;
-//   const amount = parseInt(body.TransAmount || body.Amount, 10);
-
-//   if (!accountNumber) return fail(1, 'Missing account number');
-
-//   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
-//   if (!draft) return fail(1, 'Unknown reference');
-
-//   const decoded = decodeRef(draft.fullRef);
-//   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
-
-//   if (amount !== draft.totalAmount) {
-//     draft.status = 'FAILED';
-//     await draft.save();
-//     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
-//   }
-
-//   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
-
-//   if (draft.status === 'CONFIRMED') return ok('Already processed');
-
-//   /* ---------- stock ---------- *
-//   for (const it of draft.items) {
-//     await Product.findByIdAndUpdate(it.productId, { $inc: { stock: -it.quantity } });
-//   }
-
-//   /* ---------- order ---------- *
-//   const orderId = generateOrderId();
-//   const order = new Order({
-//     orderId,
-//     draftToken: draft.token,
-//     buyerId: draft.buyerId,
-//     items: draft.items,
-//     suborders: draft.vendorSplits.map((v: any) => ({
-//       vendorId: v.vendorId,
-//       shopId: v.shopId,
-//       items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
-//       amount: v.amount,
-//       commission: v.commission,
-//       netAmount: v.netAmount,
-//       status: 'PENDING',
-//     })),
-//     totalAmount: draft.totalAmount,
-//     platformFee: draft.vendorSplits.reduce((s: number, v: any) => s + v.commission, 0),
-//     currency: draft.currency || 'KES',
-//     paymentMethod: 'M-PESA',
-//     paymentStatus: 'PAID',
-//     shipping: draft.shipping,
-//     status: 'PENDING',
-//     mpesaTransactionId: body.TransID || body.TransId,
-//   });
-//   await order.save();
-
-//   /* ---------- ledger ---------- *
-//   // Vendor payouts
-//   const vendorLedgerEntries = draft.vendorSplits.map((v: any) => ({
-//     type: 'VENDOR_PAYOUT',
-//     vendorId: v.vendorId,
-//     shopId: v.shopId,
-//     orderId,
-//     draftToken: draft.token,
-//     amount: v.amount,
-//     commission: v.commission,
-//     netAmount: v.netAmount,
-//     status: 'PENDING',
-//     scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-//   }));
-
-//   // Referral commissions
-//   const referralLedgerEntries = await Promise.all(
-//     draft.vendorSplits.map(async (v: any) => {
-//       const vendorUser = await User.findById(v.vendorId);
-//       if (!vendorUser?.referredBy) return null;
-
-//       return {
-//         type: 'REFERRAL_COMMISSION',
-//         referrerId: vendorUser.referredBy,
-//         referredVendorId: vendorUser._id,
-//         orderId,
-//         draftToken: draft.token,
-//         amount: v.amount * 0.005, // 0.5%
-//         status: 'PENDING',
-//         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-//       };
-//     })
-//   );
-
-//   const validReferralLedgerEntries = referralLedgerEntries.filter(Boolean);
-
-//   // Insert all ledger entries
-//   await Ledger.insertMany([...vendorLedgerEntries, ...validReferralLedgerEntries]);
-
-//   /* ---------- finalize draft ---------- *
-//   draft.status = 'CONFIRMED';
-//   draft.mpesaTransactionId = body.TransID || body.TransId;
-//   await draft.save();
-
-//   /* ---------- SEND SMS ---------- *
-//   const customerPhone = draft.shipping.phone;
-//   const normalizePhone = (phone: string) => {
-//     if (phone.startsWith("+")) return phone;
-//     if (phone.startsWith("0")) return "+254" + phone.substring(1);
-//     if (phone.startsWith("7")) return "+254" + phone;
-//     return phone;
-//   };
-//   const formattedPhone = normalizePhone(customerPhone);
-
-//   const customerMessage = `
-//   Thank you for your order!
-//   Order ID: ${orderId}
-//   Amount: KES ${draft.totalAmount}
-//   Transaction: ${draft.mpesaTransactionId}
-//   We will process and keep you updated.
-//   -Shaddyna
-//   `.trim();
-
-//   const adminPhone = "+254711118817";
-//   const adminMessage = `
-//   New Order Received!
-//   Order ID: ${orderId}
-//   Customer Phone: ${formattedPhone}
-//   Amount: KES ${draft.totalAmount}
-//   Transaction: ${draft.mpesaTransactionId}
-//   `.trim();
-
-//   await sendSMS(formattedPhone, customerMessage);
-//   await sendSMS(adminPhone, adminMessage);
-
-//   console.log("📨 SMS notifications sent.");
-//   console.log('✅ Confirmation complete for shortRef:', accountNumber);
-//   return ok('Success');
-// }*/
-
-// /* =================================================================
-//     MAIN ENTRY
-// ================================================================= *
-// export async function POST(req: NextRequest) {
-//   try {
-//     await dbConnect();
-//     const body = await req.json();
-//     console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
-
-//     // M-Pesa sends TransID only in the confirmation phase
-//     return body.TransID || body.TransId
-//       ? await handleConfirmation(body)
-//       : await handleValidation(body);
-//   } catch (e) {
-//     console.error('❌ C2B webhook crash:', e);
-//     return fail(1, 'Server error');
-//   }
-// }*/
-
-// ///////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// //////////////////////////////////////////////////////////////
-
-
-// // app/api/c2b-webhook/route.ts
-// /*import { NextRequest, NextResponse } from 'next/server';
-// import dbConnect from '@/lib/dbConnect';
-// import OrderDraft from '@/models/OrderDraft';
-// import Order, { DeliveryDetails } from '@/models/Order';
-// import Ledger from '@/models/Ledger';
-// import Product from '@/models/product';
-// import User from '@/models/user';
-// import { decodeRef, generateOrderId } from '@/lib/orderUtils';
-// import { sendSMS } from '@/lib/sms';
-
-
-// // app/api/c2b-webhook/route.ts - Add delivery fee confirmation handler
-
-// // Add this function to generate confirmation code
-// function generateConfirmationCode(): string {
-//   return Math.random().toString(36).substring(2, 10).toUpperCase();
-// }
-
-// // Add this handler for delivery fee confirmations
-// /*async function handleDeliveryFeeConfirmation(body: any) {
-//   const accountNumber = body.BillRefNumber || body.AccountNumber; // This will be the paymentRef (e.g., DELABC123)
-//   const amount = parseInt(body.TransAmount || body.Amount, 10);
-
-//   if (!accountNumber || !accountNumber.startsWith('DEL')) {
-//     return fail(1, 'Not a delivery fee payment');
-//   }
-
-//   const paymentRef = accountNumber;
-
-//   // Find order with this delivery fee payment reference
-//   const order = await Order.findOne({
-//     'suborders.deliveryDetails.deliveryFeePaymentRef': paymentRef
-//   });
-
-//   if (!order) {
-//     return fail(1, 'Unknown delivery fee reference');
-//   }
-
-//   // Find the specific suborder
-//   const suborder = order.suborders.find(
-//     (so: any) => so.deliveryDetails?.deliveryFeePaymentRef === paymentRef
-//   );
-
-//   if (!suborder) {
-//     return fail(1, 'Suborder not found');
-//   }
-
-//   // Verify amount matches
-//   if (amount !== suborder.deliveryFee) {
-//     console.error(`❌ Delivery fee amount mismatch: got ${amount}, expected ${suborder.deliveryFee}`);
-//     return fail(1, `Amount mismatch. Expected ${suborder.deliveryFee}`);
-//   }
-
-//   // Check if already processed
-//   if (suborder.deliveryDetails?.deliveryFeePaid) {
-//     return ok('Already processed');
-//   }
-
-//   // Generate confirmation code
-//   const confirmationCode = generateConfirmationCode();
-
-//   // Update suborder with payment and confirmation code
-//   suborder.deliveryDetails.deliveryFeePaid = true;
-//   suborder.deliveryDetails.deliveryFeePaidAt = new Date();
-//   suborder.deliveryDetails.deliveryFeeReceipt = body.TransID || body.TransId;
-//   suborder.deliveryDetails.confirmationCode = confirmationCode;
-//   suborder.deliveryDetails.confirmedAt = new Date();
-  
-//   // Update suborder status
-//   suborder.status = 'CONFIRMED';
-
-//   await order.save();
-
-//   console.log(`✅ Delivery fee paid and confirmation code generated: ${confirmationCode}`);
-
-//   return ok('Delivery fee confirmed');
-// }*/
-
-// // app/api/c2b-webhook/route.ts - Update handleDeliveryFeeConfirmation with better logging
-
-// /*async function handleDeliveryFeeConfirmation(body: any) {
-//   const accountNumber = body.BillRefNumber || body.AccountNumber;
-//   const amount = parseInt(body.TransAmount || body.Amount, 10);
-//   const transactionId = body.TransID || body.TransId;
-
-//   console.log(`📥 Processing delivery fee payment:`);
-//   console.log(`   - Account Ref: ${accountNumber}`);
-//   console.log(`   - Amount: ${amount}`);
-//   console.log(`   - Transaction ID: ${transactionId}`);
-
-//   if (!accountNumber || !accountNumber.startsWith('DEL')) {
-//     console.log(`❌ Not a delivery fee payment: ${accountNumber}`);
-//     return fail(1, 'Not a delivery fee payment');
-//   }
-
-//   const paymentRef = accountNumber;
-//   console.log(`🔍 Looking for order with paymentRef: ${paymentRef}`);
-
-//   // Find order with this delivery fee payment reference
-//   const order = await Order.findOne({
-//     'suborders.deliveryDetails.deliveryFeePaymentRef': paymentRef
-//   });
-
-//   if (!order) {
-//     console.log(`❌ No order found with deliveryFeePaymentRef: ${paymentRef}`);
-    
-//     // Try to find any orders with suborders that might have this reference
-//     const allOrders = await Order.find({}).limit(5);
-//     console.log(`📊 Checking recent orders for reference:`);
-//     for (const o of allOrders) {
-//       for (const so of o.suborders) {
-//         if (so.deliveryDetails?.deliveryFeePaymentRef) {
-//           console.log(`   - Order ${o._id}, Suborder ${so._id}: ${so.deliveryDetails.deliveryFeePaymentRef}`);
-//         }
-//       }
-//     }
-//     return fail(1, 'Unknown delivery fee reference');
-//   }
-
-//   console.log(`✅ Found order: ${order._id}`);
-//   console.log(`   - Order Status: ${order.status}`);
-//   console.log(`   - Buyer ID: ${order.buyerId}`);
-
-//   // Find the specific suborder
-//   const suborder = order.suborders.find(
-//     (so: any) => so.deliveryDetails?.deliveryFeePaymentRef === paymentRef
-//   );
-
-//   if (!suborder) {
-//     console.log(`❌ No suborder found with deliveryFeePaymentRef: ${paymentRef}`);
-    
-//     // Log all suborder payment refs
-//     order.suborders.forEach((so: any, index: number) => {
-//       console.log(`   - Suborder ${index}: ${so._id}, Ref: ${so.deliveryDetails?.deliveryFeePaymentRef}`);
-//     });
-    
-//     return fail(1, 'Suborder not found');
-//   }
-
-//   console.log(`✅ Found suborder: ${suborder._id}`);
-//   console.log(`   - Suborder Status: ${suborder.status}`);
-//   console.log(`   - Delivery Fee: ${suborder.deliveryFee}`);
-//   console.log(`   - Current deliveryDetails:`, JSON.stringify(suborder.deliveryDetails, null, 2));
-
-//   // Verify amount matches
-//   if (amount !== suborder.deliveryFee) {
-//     console.error(`❌ Delivery fee amount mismatch: got ${amount}, expected ${suborder.deliveryFee}`);
-//     return fail(1, `Amount mismatch. Expected ${suborder.deliveryFee}`);
-//   }
-
-//   // Check if already processed
-//   if (suborder.deliveryDetails?.deliveryFeePaid) {
-//     console.log(`⚠️ Delivery fee already paid for suborder: ${suborder._id}`);
-//     console.log(`   - Paid At: ${suborder.deliveryDetails.deliveryFeePaidAt}`);
-//     console.log(`   - Receipt: ${suborder.deliveryDetails.deliveryFeeReceipt}`);
-//     return ok('Already processed');
-//   }
-
-//   // Generate confirmation code
-//   const confirmationCode = generateConfirmationCode();
-//   console.log(`🔑 Generated confirmation code: ${confirmationCode}`);
-
-//   // Update suborder with payment and confirmation code
-//   if (!suborder.deliveryDetails) {
-//     suborder.deliveryDetails = {};
-//   }
-  
-//   suborder.deliveryDetails.deliveryFeePaid = true;
-//   suborder.deliveryDetails.deliveryFeePaidAt = new Date();
-//   suborder.deliveryDetails.deliveryFeeReceipt = transactionId;
-//   suborder.deliveryDetails.confirmationCode = confirmationCode;
-//   suborder.deliveryDetails.confirmedAt = new Date();
-  
-//   // Update suborder status
-//   suborder.status = 'CONFIRMED';
-
-//   await order.save();
-
-//   console.log(`✅ Successfully updated suborder:`);
-//   console.log(`   - deliveryFeePaid: ${suborder.deliveryDetails.deliveryFeePaid}`);
-//   console.log(`   - confirmationCode: ${suborder.deliveryDetails.confirmationCode}`);
-//   console.log(`   - suborder.status: ${suborder.status}`);
-
-//   return ok('Delivery fee confirmed');
-// }*/
-
-// // app/api/c2b-webhook/route.ts - Update the logging section
-// // In the handleDeliveryFeeConfirmation function, update the logging:
-
-// /*async function handleDeliveryFeeConfirmation(body: any) {
-//   const accountNumber = body.BillRefNumber || body.AccountNumber;
-//   const amount = parseInt(body.TransAmount || body.Amount, 10);
-//   const transactionId = body.TransID || body.TransId;
-
-//   console.log(`📥 Processing delivery fee payment:`);
-//   console.log(`   - Account Ref: ${accountNumber}`);
-//   console.log(`   - Amount: ${amount}`);
-//   console.log(`   - Transaction ID: ${transactionId}`);
-
-//   if (!accountNumber || !accountNumber.startsWith('DEL')) {
-//     console.log(`❌ Not a delivery fee payment: ${accountNumber}`);
-//     return fail(1, 'Not a delivery fee payment');
-//   }
-
-//   const paymentRef = accountNumber;
-//   console.log(`🔍 Looking for order with paymentRef: ${paymentRef}`);
-
-//   // Find order with this delivery fee payment reference
-//   const order = await Order.findOne({
-//     'suborders.deliveryDetails.deliveryFeePaymentRef': paymentRef
-//   });
-
-//   if (!order) {
-//     console.log(`❌ No order found with deliveryFeePaymentRef: ${paymentRef}`);
-    
-//     // Try to find any orders with suborders that might have this reference
-//     const allOrders = await Order.find({}).limit(5);
-//     console.log(`📊 Checking recent orders for reference:`);
-//     for (const o of allOrders) {
-//       // Use for...of with index to safely access suborders
-//       for (let i = 0; i < o.suborders.length; i++) {
-//         const so = o.suborders[i];
-//         if (so.deliveryDetails?.deliveryFeePaymentRef) {
-//           // Use the index or the suborder's _id if available
-//           const suborderId = so._id ? so._id.toString() : `index-${i}`;
-//           console.log(`   - Order ${o._id}, Suborder ${suborderId}: ${so.deliveryDetails.deliveryFeePaymentRef}`);
-//         }
-//       }
-//     }
-//     return fail(1, 'Unknown delivery fee reference');
-//   }
-
-//   console.log(`✅ Found order: ${order._id}`);
-//   console.log(`   - Order Status: ${order.status}`);
-//   console.log(`   - Buyer ID: ${order.buyerId}`);
-
-//   // Find the specific suborder
-//   const suborder = order.suborders.find(
-//     (so: any) => so.deliveryDetails?.deliveryFeePaymentRef === paymentRef
-//   );
-
-//   if (!suborder) {
-//     console.log(`❌ No suborder found with deliveryFeePaymentRef: ${paymentRef}`);
-    
-//     // Log all suborder payment refs safely
-//     order.suborders.forEach((so: any, index: number) => {
-//       const suborderId = so._id ? so._id.toString() : `index-${index}`;
-//       console.log(`   - Suborder ${suborderId}, Ref: ${so.deliveryDetails?.deliveryFeePaymentRef}`);
-//     });
-    
-//     return fail(1, 'Suborder not found');
-//   }
-
-//   // Use type assertion or optional chaining for _id
-//   const suborderId = suborder._id ? suborder._id.toString() : 'unknown';
-  
-//   console.log(`✅ Found suborder: ${suborderId}`);
-//   console.log(`   - Suborder Status: ${suborder.status}`);
-//   console.log(`   - Delivery Fee: ${suborder.deliveryFee}`);
-//   console.log(`   - Current deliveryDetails:`, JSON.stringify(suborder.deliveryDetails, null, 2));
-
-//   // Verify amount matches
-//   if (amount !== suborder.deliveryFee) {
-//     console.error(`❌ Delivery fee amount mismatch: got ${amount}, expected ${suborder.deliveryFee}`);
-//     return fail(1, `Amount mismatch. Expected ${suborder.deliveryFee}`);
-//   }
-
-//   // Check if already processed
-//   if (suborder.deliveryDetails?.deliveryFeePaid) {
-//     console.log(`⚠️ Delivery fee already paid for suborder: ${suborderId}`);
-//     console.log(`   - Paid At: ${suborder.deliveryDetails.deliveryFeePaidAt}`);
-//     console.log(`   - Receipt: ${suborder.deliveryDetails.deliveryFeeReceipt}`);
-//     return ok('Already processed');
-//   }
-
-//   // Generate confirmation code
-//   const confirmationCode = generateConfirmationCode();
-//   console.log(`🔑 Generated confirmation code: ${confirmationCode}`);
-
-//   // Update suborder with payment and confirmation code
-//   if (!suborder.deliveryDetails) {
-//     suborder.deliveryDetails = {} as DeliveryDetails;
-//   }
-  
-//   suborder.deliveryDetails.deliveryFeePaid = true;
-//   suborder.deliveryDetails.deliveryFeePaidAt = new Date();
-//   suborder.deliveryDetails.deliveryFeeReceipt = transactionId;
-//   suborder.deliveryDetails.confirmationCode = confirmationCode;
-//   suborder.deliveryDetails.confirmedAt = new Date();
-  
-//   // Update suborder status
-//   suborder.status = 'CONFIRMED';
-
-//   await order.save();
-
-//   console.log(`✅ Successfully updated suborder:`);
-//   console.log(`   - deliveryFeePaid: ${suborder.deliveryDetails.deliveryFeePaid}`);
-//   console.log(`   - confirmationCode: ${suborder.deliveryDetails.confirmationCode}`);
-//   console.log(`   - suborder.status: ${suborder.status}`);
-
-//   return ok('Delivery fee confirmed');
-// }
-// /* =================================================================
-//    Helpers
-// ================================================================= *
-// function fail(code: number, desc: string) {
-//   return NextResponse.json({ ResultCode: code, ResultDesc: desc });
-// }
-
-// function ok(desc = 'Accepted') {
-//   return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
-// }
-
-// /* =================================================================
-//    VALIDATION
-// ================================================================= *
-// async function handleValidation(body: any) {
-//   const accountNumber = body.AccountNumber || body.BillRefNumber;
-//   const amount = parseInt(body.Amount || body.TransAmount, 10);
-
-//   if (!accountNumber) return fail(1, 'Missing account number');
-
-//   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
-//   if (!draft) return fail(1, 'Unknown reference');
-
-//   const decoded = decodeRef(draft.fullRef);
-//   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
-
-//   if (amount !== draft.totalAmount) {
-//     console.error(`❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`);
-//     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
-//   }
-
-//   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
-
-//   if (draft.status === 'VALIDATED') return ok('Already validated');
-//   if (draft.status !== 'PENDING') return fail(1, 'Already processed');
-
-//   draft.status = 'VALIDATED';
-//   await draft.save();
-//   console.log('✅ Validation OK for shortRef:', accountNumber);
-//   return ok();
-// }
-
-
-
-// async function handleConfirmation(body: any) {
-//   const accountNumber = body.BillRefNumber || body.AccountNumber;
-//   const amount = parseInt(body.TransAmount || body.Amount, 10);
-
-//   if (!accountNumber) return fail(1, 'Missing account number');
-
-//   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
-//   if (!draft) return fail(1, 'Unknown reference');
-
-//   if (amount !== draft.totalAmount) {
-//     draft.status = 'FAILED';
-//     await draft.save();
-//     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
-//   }
-
-//   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
-//   if (draft.status === 'CONFIRMED') return ok('Already processed');
-
-//   /* ---------- stock ---------- *
-//   for (const it of draft.items) {
-//     await Product.findByIdAndUpdate(it.productId, {
-//       $inc: { stock: -it.quantity },
-//     });
-//   }
-
-//   /* ---------- order ID ---------- *
-//   const orderId = generateOrderId();
-
-//   /* ---------- ledger ---------- *
-//   const ledgerEntries: any[] = [];
-
-//   for (const v of draft.vendorSplits) {
-//     const totalAmount = v.amount;
-//     const vendorUser = await User.findById(v.vendorId);
-
-//     let platformShare = 0;
-//     let referralShare = 0;
-
-//     if (vendorUser?.referredBy) {
-//       // 3% split: 2.5% platform, 0.5% referral
-//       referralShare = totalAmount * 0.005;
-//       platformShare = totalAmount * 0.025;
-
-//       // Referral commission entry (locked for 24 hours)
-//       ledgerEntries.push({
-//         type: 'REFERRAL_COMMISSION',
-//         referrerId: vendorUser.referredBy,
-//         referredVendorId: vendorUser._id,
-//         orderId,
-//         draftToken: draft.token,
-//         amount: referralShare,
-//         netAmount: referralShare,
-//         withdrawalStatus: 'LOCKED',
-//         status: 'PENDING',
-//         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-//         metadata: {
-//           percentage: 0.5,
-//           description: 'Referral commission from vendor sale'
-//         }
-//       });
-//     } else {
-//       // No referral: platform gets full 3%
-//       platformShare = totalAmount * 0.03;
-//     }
-
-//     // Platform commission entry
-//     ledgerEntries.push({
-//       type: 'PLATFORM_COMMISSION',
-//       orderId,
-//       draftToken: draft.token,
-//       amount: platformShare,
-//       netAmount: platformShare,
-//       withdrawalStatus: 'PAID', // Platform commission is paid immediately to platform
-//       status: 'PAID',
-//       scheduledAt: new Date(),
-//       paidAt: new Date(),
-//       metadata: {
-//         percentage: vendorUser?.referredBy ? 2.5 : 3,
-//         description: 'Platform commission'
-//       }
-//     });
-
-//     // Calculate 80% immediate release (after commission)
-//     const commissionTotal = platformShare + referralShare;
-//     const vendorEarnings = totalAmount - commissionTotal;
-//     const immediateRelease = vendorEarnings * 0.8;
-//     const remaining20Percent = vendorEarnings * 0.2;
-
-//     // Immediate vendor payout (80%)
-//     ledgerEntries.push({
-//       type: 'VENDOR_PAYOUT',
-//       vendorId: v.vendorId,
-//       shopId: v.shopId,
-//       orderId,
-//       draftToken: draft.token,
-//       amount: immediateRelease,
-//       netAmount: immediateRelease,
-//       withdrawalStatus: 'AVAILABLE', // Available for immediate withdrawal
-//       status: 'PENDING',
-//       scheduledAt: new Date(), // Available immediately
-//       metadata: {
-//         isImmediateRelease: true,
-//         percentage: 80,
-//         platformShare,
-//         referralShare,
-//         totalEarnings: vendorEarnings,
-//         breakdown: {
-//           totalAmount,
-//           commission: commissionTotal,
-//           vendorEarnings,
-//           immediateRelease,
-//           remaining20Percent
-//         }
-//       }
-//     });
-
-//     // Remaining 20% (locked for 24 hours)
-//     ledgerEntries.push({
-//       type: 'VENDOR_PAYOUT',
-//       vendorId: v.vendorId,
-//       shopId: v.shopId,
-//       orderId,
-//       draftToken: draft.token,
-//       amount: remaining20Percent,
-//       netAmount: remaining20Percent,
-//       withdrawalStatus: 'LOCKED', // Locked for 24 hours
-//       status: 'PENDING',
-//       scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours hold
-//       metadata: {
-//         isImmediateRelease: false,
-//         percentage: 20,
-//         holdUntil: new Date(Date.now() + 24 * 60 * 60 * 1000),
-//         platformShare,
-//         referralShare,
-//         totalEarnings: vendorEarnings
-//       }
-//     });
-//   }
-
-//   await Ledger.insertMany(ledgerEntries);
-
-//   /* ---------- order ---------- *
-//   const order = new Order({
-//     orderId,
-//     draftToken: draft.token,
-//     buyerId: draft.buyerId,
-//     items: draft.items,
-//     suborders: await Promise.all(
-//       draft.vendorSplits.map(async (v: any) => {
-//         const totalAmount = v.amount;
-//         const vendorUser = await User.findById(v.vendorId);
-
-//         const platformShare = vendorUser?.referredBy ? totalAmount * 0.025 : totalAmount * 0.03;
-//         const referralShare = vendorUser?.referredBy ? totalAmount * 0.005 : 0;
-//         const vendorNet = totalAmount - platformShare - referralShare;
-
-//         return {
-//           vendorId: v.vendorId,
-//           shopId: v.shopId,
-//           items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
-//           amount: totalAmount,
-//           commission: platformShare + referralShare,
-//           netAmount: vendorNet,
-//           status: 'PROCESSING',
-//         };
-//       })
-//     ),
-//     totalAmount: draft.totalAmount,
-//     platformFee: draft.vendorSplits.reduce((sum: number, v: any) => {
-//       const vendorUser = draft.items.find((it: any) => it.vendorId === v.vendorId);
-//       return sum + (vendorUser?.referredBy ? v.amount * 0.025 : v.amount * 0.03);
-//     }, 0),
-//     currency: draft.currency || 'KES',
-//     paymentMethod: 'M-PESA',
-//     paymentStatus: 'PAID',
-//     shipping: draft.shipping,
-//     status: 'PENDING',
-//     mpesaTransactionId: body.TransID || body.TransId,
-//   });
-
-//   await order.save();
-
-//   /* ---------- finalize draft ---------- *
-//   draft.status = 'CONFIRMED';
-//   draft.mpesaTransactionId = body.TransID || body.TransId;
-//   await draft.save();
-
-//   return ok('Success');
-// }
-
-
-// /* =================================================================
-//     MAIN ENTRY
-// ================================================================= */
-// /*export async function POST(req: NextRequest) {
-//   try {
-//     await dbConnect();
-//     const body = await req.json();
-//     console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
-
-//     return body.TransID || body.TransId
-//       ? await handleConfirmation(body)
-//       : await handleValidation(body);
-//   } catch (e) {
-//     console.error('❌ C2B webhook crash:', e);
-//     return fail(1, 'Server error');
-//   }
-// }*
-
-// // Update the main POST handler to include delivery fee handling
-// export async function POST(req: NextRequest) {
-//   try {
-//     await dbConnect();
-//     const body = await req.json();
-//     console.log('📥 C2B payload:', JSON.stringify(body, null, 2));
-
-//     // Check if it's a delivery fee payment (based on AccountReference starting with DEL)
-//     const accountNumber = body.BillRefNumber || body.AccountNumber;
-//     if (accountNumber?.startsWith('DEL')) {
-//       return await handleDeliveryFeeConfirmation(body);
-//     }
-
-//     return body.TransID || body.TransId
-//       ? await handleConfirmation(body)
-//       : await handleValidation(body);
-//   } catch (e) {
-//     console.error('❌ C2B webhook crash:', e);
-//     return fail(1, 'Server error');
-//   }
-// }*/
-
-
-
-// // app/api/c2b-webhook/route.ts
-// import { NextRequest, NextResponse } from 'next/server';
-// import dbConnect from '@/lib/dbConnect';
-// import OrderDraft from '@/models/OrderDraft';
-// import Order from '@/models/Order';
-// import Ledger from '@/models/Ledger';
-// import Product from '@/models/product';
-// import User from '@/models/user';
-// import Payment from '@/models/Payment';
-// import VendorSubscription from '@/models/VendorSubscription';
-// import SubscriptionPlan from '@/models/SubscriptionPlan';
-// import { decodeRef, generateOrderId } from '@/lib/orderUtils';
-// import { sendSMS } from '@/lib/sms';
-
-// function generateConfirmationCode(): string {
-//   return Math.random().toString(36).substring(2, 10).toUpperCase();
-// }
-
-// /* =================================================================
-//    SUBSCRIPTION PAYMENT HANDLER
-// ================================================================= */
-// async function handleSubscriptionPayment(body: any) {
-//   const accountNumber = body.BillRefNumber || body.AccountNumber;
-//   const amount = parseInt(body.TransAmount || body.Amount, 10);
-//   const transactionId = body.TransID || body.TransId;
-//   const phoneNumber = body.MSISDN || body.PhoneNumber;
-
-//   console.log(`📥 Processing subscription payment:`);
-//   console.log(`   - Account Ref: ${accountNumber}`);
-//   console.log(`   - Amount: ${amount}`);
-//   console.log(`   - Transaction ID: ${transactionId}`);
-//   console.log(`   - Phone: ${phoneNumber}`);
-
-//   // Format: SUB-{planId}-{userId}
-//   if (!accountNumber || !accountNumber.startsWith('SUB-')) {
-//     console.log(`❌ Not a subscription payment: ${accountNumber}`);
-//     return fail(1, 'Not a subscription payment');
-//   }
-
-//   const parts = accountNumber.split('-');
-//   if (parts.length !== 3) {
-//     console.log(`❌ Invalid subscription reference format: ${accountNumber}`);
-//     return fail(1, 'Invalid subscription reference');
-//   }
-
-//   const [, planId, userId] = parts;
-//   console.log(`🔍 Looking for payment with planId: ${planId}, userId: ${userId}`);
-
-//   // Find the pending payment record
-//   const payment = await Payment.findOne({
-//     _id: planId, // The planId in the reference is actually the payment _id
-//     userId,
-//     status: 'PENDING'
-//   });
-
-//   if (!payment) {
-//     console.log(`❌ No pending payment found for reference: ${accountNumber}`);
-//     return fail(1, 'Payment reference not found');
-//   }
-
-//   // Verify amount matches
-//   if (amount !== payment.amount) {
-//     console.error(`❌ Amount mismatch: got ${amount}, expected ${payment.amount}`);
-//     payment.status = 'FAILED';
-//     await payment.save();
-//     return fail(1, `Amount mismatch. Expected ${payment.amount}`);
-//   }
-
-//   // Update payment status
-//   payment.status = 'PAID';
-//   payment.mpesaReceipt = transactionId;
-//   payment.stkCallback = body;
-//   await payment.save();
-
-//   console.log(`✅ Payment recorded successfully: ${payment._id}`);
-
-//   // Now activate the subscription
-//   await activateSubscription(payment, transactionId);
-
-//   // Send confirmation SMS
-//   const user = await User.findById(userId);
-//   if (user && user.phone) {
-//     const plan = await SubscriptionPlan.findById(payment.planId);
-//     const message = `✅ Payment of KES ${amount} for ${plan?.name || 'subscription'} plan received successfully! Your subscription is now active. Thank you for choosing our platform.`;
-//     await sendSMS(user.phone, message).catch(console.error);
-//   }
-
-//   return ok('Subscription payment confirmed');
-// }
-
-// async function activateSubscription(payment: any, transactionId: string) {
-//   const userId = payment.userId;
-//   const planId = payment.planId;
-//   const amount = payment.amount;
-
-//   // Get the subscription plan details
-//   const subscriptionPlan = await SubscriptionPlan.findById(planId);
-//   if (!subscriptionPlan) {
-//     console.error('❌ Subscription plan not found:', planId);
-//     throw new Error('Plan not found');
-//   }
-
-//   // Calculate new subscription dates
-//   const today = new Date();
-//   const periodInDays = subscriptionPlan.period === 'month' ? 30 : 
-//                       subscriptionPlan.period === 'quarter' ? 90 : 365;
-//   const endDate = new Date(today);
-//   endDate.setDate(endDate.getDate() + periodInDays);
-
-//   const planTier = subscriptionPlan.name.toLowerCase().includes('basic') ? 'basic' :
-//                   subscriptionPlan.name.toLowerCase().includes('growth') ? 'growth' :
-//                   subscriptionPlan.name.toLowerCase().includes('pro') ? 'pro' : 'elite';
-
-//   // Find or create vendor subscription
-//   let vendorSubscription = await VendorSubscription.findOne({ vendorId: userId });
-
-//   if (vendorSubscription) {
-//     // Log the current state before update
-//     console.log(`📊 Current subscription state for vendor ${userId}:`);
-//     console.log(`   - Tier: ${vendorSubscription.tier}`);
-//     console.log(`   - Status: ${vendorSubscription.status}`);
-//     console.log(`   - End Date: ${vendorSubscription.endDate}`);
-//     console.log(`   - Payment History Count: ${vendorSubscription.paymentHistory.length}`);
-
-//     const oldTier = vendorSubscription.tier;
-//     const oldEndDate = vendorSubscription.endDate;
-//     const isActive = new Date(oldEndDate) > today;
-
-//     if (isActive && vendorSubscription.status === 'active') {
-//       // Active subscription - extend the end date
-//       const newEndDate = new Date(oldEndDate);
-//       newEndDate.setDate(newEndDate.getDate() + periodInDays);
-//       vendorSubscription.endDate = newEndDate;
-//       console.log(`📅 Extending subscription: ${oldEndDate} → ${newEndDate}`);
-//     } else {
-//       // Expired or cancelled subscription - start new
-//       vendorSubscription.startDate = today;
-//       vendorSubscription.endDate = endDate;
-//       vendorSubscription.status = 'active';
-//       console.log(`🔄 Reactivating subscription from ${today} to ${endDate}`);
-//     }
-
-//     // Update tier if changed
-//     vendorSubscription.tier = planTier;
-//     vendorSubscription.paymentId = payment._id;
-    
-//     // Add to payment history
-//     vendorSubscription.paymentHistory.push({
-//       paymentId: payment._id,
-//       planId: planId,
-//       amount: amount,
-//       paidAt: today,
-//       validUntil: vendorSubscription.endDate,
-//     });
-
-//     // Reset monthly usage if tier changed or subscription was inactive
-//     if (oldTier !== planTier || !isActive) {
-//       vendorSubscription.monthlyUsage = {
-//         todayDealsUsed: 0,
-//         bestSellersUsed: 0,
-//         newArrivalsUsed: 0,
-//         clearanceUsed: 0,
-//         giftCardsCreated: 0,
-//         month: today,
-//         lastResetAt: today,
-//       };
-//       console.log(`🔄 Reset monthly usage for tier change or reactivation`);
-//     }
-
-//     // Clear any grace period
-//     vendorSubscription.gracePeriodEndsAt = undefined;
-    
-//     await vendorSubscription.save();
-
-//     console.log(`✅ Subscription updated for vendor ${userId}:`);
-//     console.log(`   - New Tier: ${vendorSubscription.tier}`);
-//     console.log(`   - New End Date: ${vendorSubscription.endDate}`);
-//     console.log(`   - Status: ${vendorSubscription.status}`);
-//   } else {
-//     // Create new subscription
-//     vendorSubscription = await VendorSubscription.create({
-//       vendorId: userId,
-//       tier: planTier,
-//       status: 'active',
-//       startDate: today,
-//       endDate: endDate,
-//       autoRenew: false,
-//       paymentId: payment._id,
-//       paymentHistory: [{
-//         paymentId: payment._id,
-//         planId: planId,
-//         amount: amount,
-//         paidAt: today,
-//         validUntil: endDate,
-//       }],
-//       monthlyUsage: {
-//         todayDealsUsed: 0,
-//         bestSellersUsed: 0,
-//         newArrivalsUsed: 0,
-//         clearanceUsed: 0,
-//         giftCardsCreated: 0,
-//         month: today,
-//         lastResetAt: today,
+//     console.error('Callback error:', error);
+//     // Always return success to M-Pesa even on error
+//     return NextResponse.json(
+//       { 
+//         ResultCode: 0, 
+//         ResultDesc: "Success" 
 //       },
-//       featuredProducts: [],
-//     });
-
-//     console.log(`✨ New subscription created for vendor ${userId}:`);
-//     console.log(`   - Tier: ${vendorSubscription.tier}`);
-//     console.log(`   - End Date: ${vendorSubscription.endDate}`);
-//   }
-
-//   // Process referral bonus if applicable
-//   if (payment.referrerId && !payment.referralBonusPaid) {
-//     const referralBonus = amount * 0.1; // 10% referral bonus
-//     payment.referralBonus = referralBonus;
-//     payment.referralBonusPaid = true;
-//     await payment.save();
-
-//     // Add to referrer's ledger
-//     await Ledger.create({
-//       type: 'REFERRAL_BONUS',
-//       userId: payment.referrerId,
-//       amount: referralBonus,
-//       netAmount: referralBonus,
-//       withdrawalStatus: 'AVAILABLE',
-//       status: 'PAID',
-//       paidAt: new Date(),
-//       metadata: {
-//         referredUserId: userId,
-//         paymentId: payment._id,
-//         subscriptionPlan: planTier,
-//         description: `Referral bonus for ${subscriptionPlan.name} subscription`
-//       }
-//     });
-
-//     console.log(`💰 Referral bonus of KES ${referralBonus} credited to ${payment.referrerId}`);
-
-//     // Notify referrer
-//     const referrer = await User.findById(payment.referrerId);
-//     if (referrer && referrer.phone) {
-//       const message = `🎉 Congratulations! You've earned KES ${referralBonus} referral bonus from ${vendorSubscription.tier} subscription purchase.`;
-//       await sendSMS(referrer.phone, message).catch(console.error);
-//     }
-//   }
-
-//   return vendorSubscription;
-// }
-
-// /* =================================================================
-//    DELIVERY FEE HANDLER
-// ================================================================= */
-// async function handleDeliveryFeeConfirmation(body: any) {
-//   const accountNumber = body.BillRefNumber || body.AccountNumber;
-//   const amount = parseInt(body.TransAmount || body.Amount, 10);
-//   const transactionId = body.TransID || body.TransId;
-
-//   console.log(`📥 Processing delivery fee payment:`);
-//   console.log(`   - Account Ref: ${accountNumber}`);
-//   console.log(`   - Amount: ${amount}`);
-//   console.log(`   - Transaction ID: ${transactionId}`);
-
-//   if (!accountNumber || !accountNumber.startsWith('DEL')) {
-//     console.log(`❌ Not a delivery fee payment: ${accountNumber}`);
-//     return fail(1, 'Not a delivery fee payment');
-//   }
-
-//   const paymentRef = accountNumber;
-//   console.log(`🔍 Looking for order with paymentRef: ${paymentRef}`);
-
-//   // Find order with this delivery fee payment reference
-//   const order = await Order.findOne({
-//     'suborders.deliveryDetails.deliveryFeePaymentRef': paymentRef
-//   });
-
-//   if (!order) {
-//     console.log(`❌ No order found with deliveryFeePaymentRef: ${paymentRef}`);
-//     return fail(1, 'Unknown delivery fee reference');
-//   }
-
-//   console.log(`✅ Found order: ${order._id}`);
-
-//   // Find the specific suborder
-//   const suborder = order.suborders.find(
-//     (so: any) => so.deliveryDetails?.deliveryFeePaymentRef === paymentRef
-//   );
-
-//   if (!suborder) {
-//     console.log(`❌ No suborder found with deliveryFeePaymentRef: ${paymentRef}`);
-//     return fail(1, 'Suborder not found');
-//   }
-
-//   const suborderId = suborder._id ? suborder._id.toString() : 'unknown';
-  
-//   console.log(`✅ Found suborder: ${suborderId}`);
-//   console.log(`   - Delivery Fee: ${suborder.deliveryFee}`);
-
-//   // Verify amount matches
-//   if (amount !== suborder.deliveryFee) {
-//     console.error(`❌ Delivery fee amount mismatch: got ${amount}, expected ${suborder.deliveryFee}`);
-//     return fail(1, `Amount mismatch. Expected ${suborder.deliveryFee}`);
-//   }
-
-//   // Check if already processed
-//   if (suborder.deliveryDetails?.deliveryFeePaid) {
-//     console.log(`⚠️ Delivery fee already paid for suborder: ${suborderId}`);
-//     return ok('Already processed');
-//   }
-
-//   // Generate confirmation code
-//   const confirmationCode = generateConfirmationCode();
-
-//   // Update suborder with payment and confirmation code
-//   //if (!suborder.deliveryDetails) {
-//   //  suborder.deliveryDetails = {} as DeliveryDetails;
-//   //}
-  
-//   suborder.deliveryDetails.deliveryFeePaid = true;
-//   suborder.deliveryDetails.deliveryFeePaidAt = new Date();
-//   suborder.deliveryDetails.deliveryFeeReceipt = transactionId;
-//   suborder.deliveryDetails.confirmationCode = confirmationCode;
-//   suborder.deliveryDetails.confirmedAt = new Date();
-  
-//   // Update suborder status
-//   suborder.status = 'CONFIRMED';
-
-//   await order.save();
-
-//   console.log(`✅ Successfully updated suborder with confirmation code: ${confirmationCode}`);
-
-//   return ok('Delivery fee confirmed');
-// }
-
-// /* =================================================================
-//    ORDER PAYMENT HANDLERS
-// ================================================================= */
-// async function handleValidation(body: any) {
-//   const accountNumber = body.AccountNumber || body.BillRefNumber;
-//   const amount = parseInt(body.Amount || body.TransAmount, 10);
-
-//   if (!accountNumber) return fail(1, 'Missing account number');
-
-//   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
-//   if (!draft) return fail(1, 'Unknown reference');
-
-//   const decoded = decodeRef(draft.fullRef);
-//   if (!decoded.ok || !decoded.token) return fail(1, 'Invalid reference');
-
-//   if (amount !== draft.totalAmount) {
-//     console.error(`❌ Amount mismatch: got ${amount}, expected ${draft.totalAmount}`);
-//     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
-//   }
-
-//   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
-
-//   if (draft.status === 'VALIDATED') return ok('Already validated');
-//   if (draft.status !== 'PENDING') return fail(1, 'Already processed');
-
-//   draft.status = 'VALIDATED';
-//   await draft.save();
-//   console.log('✅ Validation OK for shortRef:', accountNumber);
-//   return ok();
-// }
-
-// async function handleConfirmation(body: any) {
-//   const accountNumber = body.BillRefNumber || body.AccountNumber;
-//   const amount = parseInt(body.TransAmount || body.Amount, 10);
-
-//   if (!accountNumber) return fail(1, 'Missing account number');
-
-//   const draft = await OrderDraft.findOne({ shortRef: accountNumber });
-//   if (!draft) return fail(1, 'Unknown reference');
-
-//   if (amount !== draft.totalAmount) {
-//     draft.status = 'FAILED';
-//     await draft.save();
-//     return fail(1, `Amount mismatch. Expected ${draft.totalAmount}`);
-//   }
-
-//   if (draft.expiresAt < new Date()) return fail(1, 'Reference expired');
-//   if (draft.status === 'CONFIRMED') return ok('Already processed');
-
-//   /* ---------- stock ---------- */
-//   for (const it of draft.items) {
-//     await Product.findByIdAndUpdate(it.productId, {
-//       $inc: { stock: -it.quantity },
-//     });
-//   }
-
-//   /* ---------- order ID ---------- */
-//   const orderId = generateOrderId();
-
-//   /* ---------- ledger ---------- */
-//   const ledgerEntries: any[] = [];
-
-//   for (const v of draft.vendorSplits) {
-//     const totalAmount = v.amount;
-//     const vendorUser = await User.findById(v.vendorId);
-
-//     let platformShare = 0;
-//     let referralShare = 0;
-
-//     if (vendorUser?.referredBy) {
-//       // 3% split: 2.5% platform, 0.5% referral
-//       referralShare = totalAmount * 0.005;
-//       platformShare = totalAmount * 0.025;
-
-//       // Referral commission entry (locked for 24 hours)
-//       ledgerEntries.push({
-//         type: 'REFERRAL_COMMISSION',
-//         referrerId: vendorUser.referredBy,
-//         referredVendorId: vendorUser._id,
-//         orderId,
-//         draftToken: draft.token,
-//         amount: referralShare,
-//         netAmount: referralShare,
-//         withdrawalStatus: 'LOCKED',
-//         status: 'PENDING',
-//         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-//         metadata: {
-//           percentage: 0.5,
-//           description: 'Referral commission from vendor sale'
-//         }
-//       });
-//     } else {
-//       // No referral: platform gets full 3%
-//       platformShare = totalAmount * 0.03;
-//     }
-
-//     // Platform commission entry
-//     ledgerEntries.push({
-//       type: 'PLATFORM_COMMISSION',
-//       orderId,
-//       draftToken: draft.token,
-//       amount: platformShare,
-//       netAmount: platformShare,
-//       withdrawalStatus: 'PAID',
-//       status: 'PAID',
-//       scheduledAt: new Date(),
-//       paidAt: new Date(),
-//       metadata: {
-//         percentage: vendorUser?.referredBy ? 2.5 : 3,
-//         description: 'Platform commission'
-//       }
-//     });
-
-//     // Calculate 80% immediate release (after commission)
-//     const commissionTotal = platformShare + referralShare;
-//     const vendorEarnings = totalAmount - commissionTotal;
-//     const immediateRelease = vendorEarnings * 0.8;
-//     const remaining20Percent = vendorEarnings * 0.2;
-
-//     // Immediate vendor payout (80%)
-//     ledgerEntries.push({
-//       type: 'VENDOR_PAYOUT',
-//       vendorId: v.vendorId,
-//       shopId: v.shopId,
-//       orderId,
-//       draftToken: draft.token,
-//       amount: immediateRelease,
-//       netAmount: immediateRelease,
-//       withdrawalStatus: 'AVAILABLE',
-//       status: 'PENDING',
-//       scheduledAt: new Date(),
-//       metadata: {
-//         isImmediateRelease: true,
-//         percentage: 80,
-//         platformShare,
-//         referralShare,
-//         totalEarnings: vendorEarnings,
-//         breakdown: {
-//           totalAmount,
-//           commission: commissionTotal,
-//           vendorEarnings,
-//           immediateRelease,
-//           remaining20Percent
-//         }
-//       }
-//     });
-
-//     // Remaining 20% (locked for 24 hours)
-//     ledgerEntries.push({
-//       type: 'VENDOR_PAYOUT',
-//       vendorId: v.vendorId,
-//       shopId: v.shopId,
-//       orderId,
-//       draftToken: draft.token,
-//       amount: remaining20Percent,
-//       netAmount: remaining20Percent,
-//       withdrawalStatus: 'LOCKED',
-//       status: 'PENDING',
-//       scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-//       metadata: {
-//         isImmediateRelease: false,
-//         percentage: 20,
-//         holdUntil: new Date(Date.now() + 24 * 60 * 60 * 1000),
-//         platformShare,
-//         referralShare,
-//         totalEarnings: vendorEarnings
-//       }
-//     });
-//   }
-
-//   await Ledger.insertMany(ledgerEntries);
-
-//   /* ---------- order ---------- */
-//   const order = new Order({
-//     orderId,
-//     draftToken: draft.token,
-//     buyerId: draft.buyerId,
-//     items: draft.items,
-//     suborders: await Promise.all(
-//       draft.vendorSplits.map(async (v: any) => {
-//         const totalAmount = v.amount;
-//         const vendorUser = await User.findById(v.vendorId);
-
-//         const platformShare = vendorUser?.referredBy ? totalAmount * 0.025 : totalAmount * 0.03;
-//         const referralShare = vendorUser?.referredBy ? totalAmount * 0.005 : 0;
-//         const vendorNet = totalAmount - platformShare - referralShare;
-
-//         return {
-//           vendorId: v.vendorId,
-//           shopId: v.shopId,
-//           items: draft.items.filter((it: any) => it.vendorId === v.vendorId),
-//           amount: totalAmount,
-//           commission: platformShare + referralShare,
-//           netAmount: vendorNet,
-//           status: 'PROCESSING',
-//         };
-//       })
-//     ),
-//     totalAmount: draft.totalAmount,
-//     platformFee: draft.vendorSplits.reduce((sum: number, v: any) => {
-//       const vendorUser = draft.items.find((it: any) => it.vendorId === v.vendorId);
-//       return sum + (vendorUser?.referredBy ? v.amount * 0.025 : v.amount * 0.03);
-//     }, 0),
-//     currency: draft.currency || 'KES',
-//     paymentMethod: 'M-PESA',
-//     paymentStatus: 'PAID',
-//     shipping: draft.shipping,
-//     status: 'PENDING',
-//     mpesaTransactionId: body.TransID || body.TransId,
-//   });
-
-//   await order.save();
-
-//   /* ---------- finalize draft ---------- */
-//   draft.status = 'CONFIRMED';
-//   draft.mpesaTransactionId = body.TransID || body.TransId;
-//   await draft.save();
-
-//   return ok('Success');
-// }
-
-// /* =================================================================
-//    HELPERS
-// ================================================================= */
-// function fail(code: number, desc: string) {
-//   return NextResponse.json({ ResultCode: code, ResultDesc: desc });
-// }
-
-// function ok(desc = 'Accepted') {
-//   return NextResponse.json({ ResultCode: 0, ResultDesc: desc });
-// }
-
-// /* =================================================================
-//    MAIN C2B WEBHOOK HANDLER
-// ================================================================= */
-// export async function POST(req: NextRequest) {
-//   try {
-//     await dbConnect();
-//     const body = await req.json();
-//     console.log('📥 C2B payload received:', JSON.stringify(body, null, 2));
-
-//     const accountNumber = body.BillRefNumber || body.AccountNumber;
-    
-//     // Route to appropriate handler based on account reference prefix
-//     if (accountNumber?.startsWith('SUB-')) {
-//       // Handle subscription payments
-//       console.log('🔄 Routing to subscription payment handler');
-//       return await handleSubscriptionPayment(body);
-//     } 
-//     else if (accountNumber?.startsWith('DEL')) {
-//       // Handle delivery fee payments
-//       console.log('🚚 Routing to delivery fee handler');
-//       return await handleDeliveryFeeConfirmation(body);
-//     }
-//     else {
-//       // Handle regular order payments
-//       console.log('📦 Routing to order payment handler');
-//       return body.TransID || body.TransId
-//         ? await handleConfirmation(body)
-//         : await handleValidation(body);
-//     }
-//   } catch (e) {
-//     console.error('❌ C2B webhook crash:', e);
-//     return fail(1, 'Server error');
+//       { status: 200 }
+//     );
 //   }
 // }
 
-
-
-// app/api/shd-api/api/callback/route.ts
-
+// api/c2b-webhook/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import Transaction from '@/shd-models/models/Transaction';
 import Order from '@/shd-models/models/Order';
 import Product from '@/shd-models/models/Product';
 import Vendor from '@/shd-models/models/Vendor';
+import User from '@/shd-models/models/User';
+import mongoose from 'mongoose';
 
-// Helper function to process successful payment
-async function processSuccessfulPayment(transaction: any, responseData: any) {
+// Process successful payment
+async function processSuccessfulPayment(transaction: any, receiptNumber: string, amount: string, phoneNumber: string) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     // Update transaction
     transaction.status = 'success';
-    transaction.receiptNumber = responseData.MpesaReceiptNumber;
+    transaction.receiptNumber = receiptNumber;
     transaction.metadata = {
       ...transaction.metadata,
-      mpesaResponse: responseData
+      mpesaReceipt: receiptNumber,
+      amount: amount,
+      phoneNumber: phoneNumber
     };
-    await transaction.save();
+    await transaction.save({ session });
 
     // Get all order IDs from metadata
     const orderIds = transaction.metadata?.orders || [];
+    const customerId = transaction.metadata?.customerId;
+    const referredBy = transaction.metadata?.referredBy;
     
     // Update each order
     for (const orderId of orderIds) {
-      const order = await Order.findById(orderId);
+      const order = await Order.findById(orderId).session(session);
       if (!order) continue;
 
-      // Mark as paid
+      // ✅ Mark as paid - THIS IS WHERE ORDER GETS UPDATED
       order.isPaid = true;
       order.transactionId = transaction.transactionId;
       order.status = 'processing'; // Move from pending to processing
-      await order.save();
+      await order.save({ session });
 
       // Update product stock
       for (const item of order.products) {
         await Product.findByIdAndUpdate(
           item.productId,
-          { $inc: { stock: -item.quantity } }
+          { $inc: { stock: -item.quantity } },
+          { session }
         );
       }
 
       // Update vendor's pending payout
       await Vendor.findByIdAndUpdate(
         order.vendorId,
-        { $inc: { pendingPayout: order.vendorAmount } }
+        { $inc: { pendingPayout: order.vendorAmount } },
+        { session }
       );
     }
 
+    // Handle referral commission if applicable
+    if (referredBy && customerId) {
+      const commissionAmount = transaction.amount * 0.005; // 0.5%
+      
+      // ✅ Update user's referral commission earnings
+      await User.findByIdAndUpdate(
+        referredBy,
+        { 
+          $inc: { 
+            referralCommissionEarnings: commissionAmount,
+            referralEarnings: commissionAmount,
+            availableBalance: commissionAmount // If you want to add to available balance
+          } 
+        },
+        { session }
+      );
+      
+      console.log(`Added ${commissionAmount} referral commission to user ${referredBy}`);
+    }
+
+    await session.commitTransaction();
+    console.log(`✅ Successfully processed payment. Orders ${orderIds} marked as paid.`);
     return true;
+
   } catch (error) {
+    await session.abortTransaction();
     console.error('Error processing successful payment:', error);
     return false;
+  } finally {
+    session.endSession();
   }
 }
 
-// Helper function to process failed payment
+// Process failed payment
 async function processFailedPayment(transaction: any) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     transaction.status = 'failed';
-    await transaction.save();
+    await transaction.save({ session });
 
-    // Optionally cancel the orders
+    // Cancel the orders
     const orderIds = transaction.metadata?.orders || [];
     for (const orderId of orderIds) {
-      await Order.findByIdAndUpdate(orderId, { 
-        status: 'cancelled',
-        isPaid: false
+      await Order.findByIdAndUpdate(
+        orderId, 
+        { 
+          status: 'cancelled',
+          isPaid: false
+        },
+        { session }
+      );
+    }
+
+    await session.commitTransaction();
+    console.log(`❌ Payment failed. Orders ${orderIds} cancelled.`);
+    return true;
+  } catch (error) {
+    await session.abortTransaction();
+    console.error('Error processing failed payment:', error);
+    return false;
+  } finally {
+    session.endSession();
+  }
+}
+
+// Handle STK Push Callback
+async function handleSTKCallback(data: any) {
+  const response = data.Body?.stkCallback;
+  
+  if (!response) {
+    console.error('Invalid STK callback structure:', data);
+    return false;
+  }
+
+  const { 
+    CheckoutRequestID,
+    ResultCode,
+    ResultDesc,
+    CallbackMetadata
+  } = response;
+
+  const transaction = await Transaction.findOne({ transactionId: CheckoutRequestID });
+  
+  if (!transaction) {
+    console.error('Transaction not found:', CheckoutRequestID);
+    return false;
+  }
+
+  if (ResultCode === 0) {
+    const metadataMap: { [key: string]: string } = {};
+    if (CallbackMetadata?.Item) {
+      CallbackMetadata.Item.forEach((item: any) => {
+        metadataMap[item.Name] = item.Value;
       });
     }
 
+    await processSuccessfulPayment(
+      transaction,
+      metadataMap.MpesaReceiptNumber,
+      metadataMap.Amount,
+      metadataMap.PhoneNumber
+    );
+    console.log('✅ STK Payment successful:', CheckoutRequestID);
+  } else {
+    await processFailedPayment(transaction);
+    console.log(`❌ STK Payment failed: ${ResultDesc}`);
+  }
+
+  return true;
+}
+
+// Handle C2B Callback
+async function handleC2BCallback(data: any) {
+  try {
+    console.log('Processing C2B callback:', data);
+
+    const {
+      TransID,
+      TransAmount,
+      BillRefNumber,
+      MSISDN
+    } = data;
+
+    // Find the transaction by accountReference in metadata
+    const transaction = await Transaction.findOne({ 
+      'metadata.accountReference': BillRefNumber 
+    });
+    
+    if (!transaction) {
+      console.error('Transaction not found for BillRefNumber:', BillRefNumber);
+      return false;
+    }
+
+    // Check if payment amount matches
+    const expectedAmount = transaction.amount;
+    const receivedAmount = parseFloat(TransAmount);
+    
+    if (receivedAmount >= expectedAmount) {
+      // ✅ This will mark orders as paid
+      await processSuccessfulPayment(
+        transaction,
+        TransID,
+        TransAmount,
+        MSISDN
+      );
+      console.log('✅ C2B Payment processed successfully:', TransID);
+    } else {
+      console.error(`❌ Amount mismatch: Expected ${expectedAmount}, got ${receivedAmount}`);
+      await processFailedPayment(transaction);
+    }
+
     return true;
+
   } catch (error) {
-    console.error('Error processing failed payment:', error);
+    console.error('Error processing C2B callback:', error);
     return false;
   }
 }
@@ -2141,91 +2456,33 @@ export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
 
-    // Parse the callback data
     const callbackData = await req.json();
-    console.log('Received callback:', JSON.stringify(callbackData, null, 2));
+    console.log('📥 Received callback:', JSON.stringify(callbackData, null, 2));
 
-    // Extract the relevant data from M-Pesa response
-    const response = callbackData.Body?.stkCallback;
+    let handled = false;
     
-    if (!response) {
-      console.error('Invalid callback structure:', callbackData);
-      return NextResponse.json(
-        { error: 'Invalid callback data' },
-        { status: 400 }
-      );
+    // Check for STK Push callback (has Body.stkCallback)
+    if (callbackData.Body?.stkCallback) {
+      handled = await handleSTKCallback(callbackData);
+    }
+    // Check for C2B callback (has TransactionType and TransID)
+    else if (callbackData.TransactionType) {
+      handled = await handleC2BCallback(callbackData);
+    }
+    else {
+      console.error('❌ Unknown callback format:', callbackData);
     }
 
-    const { 
-      MerchantRequestID,
-      CheckoutRequestID,
-      ResultCode,
-      ResultDesc,
-      CallbackMetadata
-    } = response;
-
-    // Find the transaction
-    const transaction = await Transaction.findOne({ transactionId: CheckoutRequestID });
-    
-    if (!transaction) {
-      console.error('Transaction not found:', CheckoutRequestID);
-      return NextResponse.json(
-        { error: 'Transaction not found' },
-        { status: 404 }
-      );
-    }
-
-    console.log('Found transaction:', transaction);
-
-    // Process based on ResultCode
-    if (ResultCode === 0) {
-      // Payment successful
-      console.log('Payment successful for transaction:', CheckoutRequestID);
-      
-      // Extract metadata
-      const metadataMap: { [key: string]: string } = {};
-      if (CallbackMetadata?.Item) {
-        CallbackMetadata.Item.forEach((item: any) => {
-          metadataMap[item.Name] = item.Value;
-        });
-      }
-
-      const responseData = {
-        MpesaReceiptNumber: metadataMap.MpesaReceiptNumber,
-        TransactionDate: metadataMap.TransactionDate,
-        PhoneNumber: metadataMap.PhoneNumber,
-        Amount: metadataMap.Amount
-      };
-
-      const success = await processSuccessfulPayment(transaction, responseData);
-      
-      if (success) {
-        console.log('Successfully processed payment for orders:', transaction.metadata?.orders);
-      }
-
-    } else {
-      // Payment failed
-      console.log(`Payment failed for transaction ${CheckoutRequestID}: ${ResultDesc}`);
-      await processFailedPayment(transaction);
-    }
-
-    // Always respond with success to M-Pesa (they expect a 200 OK)
+    // Always return success to M-Pesa
     return NextResponse.json(
-      { 
-        ResultCode: 0, 
-        ResultDesc: "Success" 
-      },
+      { ResultCode: 0, ResultDesc: "Success" },
       { status: 200 }
     );
 
   } catch (error) {
-    console.error('Callback error:', error);
-    // Always return success to M-Pesa even on error
+    console.error('❌ Callback error:', error);
     return NextResponse.json(
-      { 
-        ResultCode: 0, 
-        ResultDesc: "Success" 
-      },
+      { ResultCode: 0, ResultDesc: "Success" },
       { status: 200 }
     );
   }
