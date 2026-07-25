@@ -2242,7 +2242,7 @@ import User from '@/shd-models/models/User';
 import mongoose from 'mongoose';
 
 // Process successful payment
-async function processSuccessfulPayment(transaction: any, receiptNumber: string, amount: string, phoneNumber: string) {
+/*async function processSuccessfulPayment(transaction: any, receiptNumber: string, amount: string, phoneNumber: string) {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -2318,6 +2318,97 @@ async function processSuccessfulPayment(transaction: any, receiptNumber: string,
   } catch (error) {
     await session.abortTransaction();
     console.error('Error processing successful payment:', error);
+    return false;
+  } finally {
+    session.endSession();
+  }
+}*/
+
+// api/c2b-webhook/route.ts (updated processSuccessfulPayment)
+async function processSuccessfulPayment(transaction: any, receiptNumber: string, amount: string, phoneNumber: string) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // Update transaction
+    transaction.status = 'success';
+    transaction.receiptNumber = receiptNumber;
+    transaction.metadata = {
+      ...transaction.metadata,
+      mpesaReceipt: receiptNumber,
+      amount: amount,
+      phoneNumber: phoneNumber
+    };
+    await transaction.save({ session });
+
+    // ✅ Get ALL order IDs from metadata
+    const orderIds = transaction.metadata?.orders || [];
+    const customerId = transaction.metadata?.customerId;
+    const referredBy = transaction.metadata?.referredBy;
+    
+    console.log(`📦 Processing ${orderIds.length} orders for payment ${receiptNumber}`);
+
+    // ✅ Update ALL orders
+    const updatedOrders = [];
+    for (const orderId of orderIds) {
+      const order = await Order.findById(orderId).session(session);
+      if (!order) {
+        console.warn(`⚠️ Order ${orderId} not found, skipping...`);
+        continue;
+      }
+
+      // Mark as paid
+      order.isPaid = true;
+      order.transactionId = transaction.transactionId;
+      order.status = 'processing';
+      await order.save({ session });
+      updatedOrders.push(order.orderNumber);
+
+      // Update product stock
+      for (const item of order.products) {
+        await Product.findByIdAndUpdate(
+          item.productId,
+          { $inc: { stock: -item.quantity } },
+          { session }
+        );
+      }
+
+      // Update vendor's pending payout
+      await Vendor.findByIdAndUpdate(
+        order.vendorId,
+        { $inc: { pendingPayout: order.vendorAmount } },
+        { session }
+      );
+
+      console.log(`✅ Order ${order.orderNumber} (${order.vendorId}) marked as paid`);
+    }
+
+    // Handle referral commission (once for the entire transaction)
+    if (referredBy && customerId) {
+      const commissionAmount = transaction.amount * 0.005; // 0.5% of total
+      
+      await User.findByIdAndUpdate(
+        referredBy,
+        { 
+          $inc: { 
+            referralCommissionEarnings: commissionAmount,
+            referralEarnings: commissionAmount,
+            availableBalance: commissionAmount
+          } 
+        },
+        { session }
+      );
+      
+      console.log(`💰 Added ${commissionAmount} referral commission to user ${referredBy}`);
+    }
+
+    await session.commitTransaction();
+    console.log(`✅ Successfully processed ${updatedOrders.length} orders: ${updatedOrders.join(', ')}`);
+    return true;
+
+  } catch (error) {
+    await session.abortTransaction();
+    console.error('❌ Error processing successful payment:', error);
     return false;
   } finally {
     session.endSession();
