@@ -99,7 +99,7 @@ export async function initSTKPush(
       amount,
       shortcode: SHORTCODE,
       timestamp,
-      callback: `${process.env.NEXT_PUBLIC_BASE_URL}/api/callback`
+      callback: `${process.env.NEXT_PUBLIC_BASE_URL}/api/c2b-webhook`
     });
 
     const response = await axios.post(
