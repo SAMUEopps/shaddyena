@@ -1141,6 +1141,7 @@
 //   );
 // }
 
+// app/shd-pages/vendor/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -1152,8 +1153,18 @@ import VendorHeader from './components/VendorHeader';
 import MessageBanner from './components/MessageBanner';
 import LoadingSpinner from './components/LoadingSpinner';
 
+interface Rider {
+  id: string;
+  name: string;
+  phone: string;
+  vehicleType: string;
+  rating: number;
+  totalDeliveries: number;
+}
+
 export default function VendorDashboard() {
   const { orders, vendor, loading, refreshData, updateVendor, setOrders } = useVendorData();
+  const [availableRiders, setAvailableRiders] = useState<Rider[]>([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -1173,6 +1184,25 @@ export default function VendorDashboard() {
     },
   });
 
+  // Fetch available riders
+  const fetchAvailableRiders = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/shd-api/api/vendors/riders', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableRiders(data.riders || []);
+      }
+    } catch (error) {
+      console.error('Error fetching riders:', error);
+    }
+  };
+
   useEffect(() => {
     if (vendor) {
       setEditForm({
@@ -1190,6 +1220,7 @@ export default function VendorDashboard() {
         },
       });
     }
+    fetchAvailableRiders();
   }, [vendor]);
 
   const handleImageUpload = async (file: File, type: 'profile' | 'cover') => {
@@ -1295,6 +1326,41 @@ export default function VendorDashboard() {
     }
   };
 
+  const assignRiderToOrder = async (orderId: string, riderId: string) => {
+    try {
+      const response = await fetch('/api/orders/assign-rider', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ orderId, riderId })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Update local orders with assigned rider
+        const updatedOrders = orders.map(order => 
+          order._id === orderId ? { 
+            ...order, 
+            rider: data.order.rider,
+            deliveryStatus: 'assigned',
+            riderAssignedAt: new Date()
+          } : order
+        );
+        setOrders(updatedOrders);
+        showMessage('success', 'Rider assigned successfully!');
+        // Refresh riders list
+        fetchAvailableRiders();
+      } else {
+        const data = await response.json();
+        showMessage('error', data.error || 'Failed to assign rider');
+      }
+    } catch (error) {
+      showMessage('error', 'Failed to assign rider');
+    }
+  };
+
   const showMessage = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 3000);
@@ -1332,7 +1398,12 @@ export default function VendorDashboard() {
         />
 
         {/* Orders List */}
-        <OrdersList orders={orders} onStatusChange={updateOrderStatus} />
+        <OrdersList 
+          orders={orders} 
+          onStatusChange={updateOrderStatus}
+          onAssignRider={assignRiderToOrder}
+          availableRiders={availableRiders}
+        />
 
         {/* Edit Profile Modal */}
         <EditProfileModal

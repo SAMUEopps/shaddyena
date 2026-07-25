@@ -2240,6 +2240,7 @@ import Product from '@/shd-models/models/Product';
 import Vendor from '@/shd-models/models/Vendor';
 import User from '@/shd-models/models/User';
 import mongoose from 'mongoose';
+import Delivery from '@/shd-models/models/Delivery';
 
 // Process successful payment
 /*async function processSuccessfulPayment(transaction: any, receiptNumber: string, amount: string, phoneNumber: string) {
@@ -2323,6 +2324,13 @@ import mongoose from 'mongoose';
     session.endSession();
   }
 }*/
+function calculateDeliveryFee(totalAmount: number): number {
+  if (totalAmount < 500) return 100;
+  if (totalAmount < 1000) return 150;
+  if (totalAmount < 2000) return 200;
+  if (totalAmount < 5000) return 300;
+  return 400;
+}
 
 // api/c2b-webhook/route.ts (updated processSuccessfulPayment)
 async function processSuccessfulPayment(transaction: any, receiptNumber: string, amount: string, phoneNumber: string) {
@@ -2355,6 +2363,31 @@ async function processSuccessfulPayment(transaction: any, receiptNumber: string,
       if (!order) {
         console.warn(`⚠️ Order ${orderId} not found, skipping...`);
         continue;
+      }
+
+      // Create delivery record for this order
+      const customer = await User.findById(order.customerId).session(session);
+      const vendor = await Vendor.findById(order.vendorId).session(session);
+
+      // Only create delivery if not already created
+      if (!order.deliveryId) {
+        const delivery = await Delivery.create([{
+          orderId: order._id,
+          customerName: customer?.name || 'Customer',
+          customerPhone: order.deliveryPhone || customer?.phoneNumber || 'N/A',
+          pickupLocation: vendor?.businessLocation || 'Vendor Location',
+          dropoffLocation: order.deliveryAddress,
+          status: 'pending',
+          distance: 0, // Will be calculated when rider assigned
+          earnings: calculateDeliveryFee(order.totalAmount),
+          estimatedTime: '30 min',
+          createdAt: new Date()
+        }], { session });
+
+        // Update order with delivery ID
+        order.deliveryId = delivery[0]._id;
+        order.deliveryStatus = 'pending';
+        await order.save({ session });
       }
 
       // Mark as paid
@@ -2578,3 +2611,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

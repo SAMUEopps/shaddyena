@@ -1,8 +1,9 @@
 'use client';
 
+import { Order } from '@/types/vendor';
 import { useState, useEffect } from 'react';
 
-interface Order {
+/*interface Order {
   _id: string;
   orderNumber: string;
   totalAmount: number;
@@ -12,7 +13,7 @@ interface Order {
   };
   products: any[];
   createdAt: string;
-}
+}*/
 
 interface VendorProfile {
   _id: string;

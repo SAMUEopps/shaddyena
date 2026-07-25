@@ -49,7 +49,7 @@ export default function RiderDashboard() {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          router.push('/login');
+          router.push('/shd-pages/login');
           return;
         }
 

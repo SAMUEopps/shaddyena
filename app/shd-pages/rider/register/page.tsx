@@ -509,7 +509,7 @@ export default function RiderRegister() {
       if (response.ok) {
         localStorage.setItem("token", data.token);
         alert("Rider registration successful!");
-        router.push("/rider/dashboard");
+        router.push("/shd-pages/rider/dashboard");
       } else {
         setError(data.error || "Rider registration failed");
       }
