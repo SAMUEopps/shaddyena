@@ -187,7 +187,7 @@ export default function ActivateMembership() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        router.push('/login');
+        router.push('/shd-pages/login');
         return;
       }
 
@@ -207,7 +207,7 @@ export default function ActivateMembership() {
 
       if (response.ok) {
         alert('🎉 Membership activated successfully!');
-        router.push('/membership/dashboard');
+        router.push('/shd-pages/membership/dashboard');
       } else {
         setError(data.error || 'Failed to activate membership');
       }
