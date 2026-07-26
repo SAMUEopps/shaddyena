@@ -896,7 +896,7 @@ export default function Navigation() {
             href="/" 
             className="text-2xl sm:text-3xl font-bold text-primary hover:text-accent-dark transition-colors duration-200"
           >
-            Shaddyna
+            shaddyna
           </Link>
 
           {/* Desktop Navigation */}
