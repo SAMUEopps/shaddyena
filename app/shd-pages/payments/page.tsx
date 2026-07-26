@@ -113,7 +113,7 @@ export default function PaymentsPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div>
             <Link 
-              href="/profile" 
+              href="/shd-pages/profile" 
               className="text-primary hover:text-accent-dark transition-colors duration-200 font-medium inline-flex items-center gap-2 mb-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
