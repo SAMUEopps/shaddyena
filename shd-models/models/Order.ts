@@ -152,7 +152,8 @@ export interface IOrder extends Document {
   deliveryId?: mongoose.Types.ObjectId;
   riderId?: mongoose.Types.ObjectId;
   assignedRiderId?: mongoose.Types.ObjectId;
-  deliveryStatus?: 'pending' | 'assigned' | 'picked_up' | 'in_transit' | 'delivered';
+  //deliveryStatus?: 'pending' | 'assigned' | 'picked_up' | 'in_transit' | 'delivered';
+   deliveryStatus?: 'pending' | 'assigned' | 'picked_up' | 'in_transit' | 'delivered' | 'awaiting_confirmation' | 'completed';
   riderAssignedAt?: Date;
   pickedUpAt?: Date;
   deliveredAt?: Date;
@@ -192,9 +193,14 @@ const OrderSchema = new Schema<IOrder>({
   deliveryId: { type: Schema.Types.ObjectId, ref: 'Delivery' },
   riderId: { type: Schema.Types.ObjectId, ref: 'Rider' },
   assignedRiderId: { type: Schema.Types.ObjectId, ref: 'Rider' },
+  //deliveryStatus: {
+  //  type: String,
+  //  enum: ['pending', 'assigned', 'picked_up', 'in_transit', 'delivered'],
+  //  default: 'pending'
+  //},
   deliveryStatus: {
     type: String,
-    enum: ['pending', 'assigned', 'picked_up', 'in_transit', 'delivered'],
+    enum: ['pending', 'assigned', 'picked_up', 'in_transit', 'delivered', 'awaiting_confirmation', 'completed'],
     default: 'pending'
   },
   riderAssignedAt: Date,

@@ -1328,7 +1328,7 @@ export default function VendorDashboard() {
 
   const assignRiderToOrder = async (orderId: string, riderId: string) => {
     try {
-      const response = await fetch('/api/orders/assign-rider', {
+      const response = await fetch('/api/shd-api/api/orders/assign-rider', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
