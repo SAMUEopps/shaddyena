@@ -393,7 +393,7 @@ export default function ShopsPage() {
             {filteredShops.map((shop) => (
               <Link
                 key={shop._id}
-                href={`/shops/${shop._id}`}
+                href={`/shd-pages/shops/${shop._id}`}
                 className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-surface hover:border-primary/20"
               >
                 {/* Shop Cover Image */}
