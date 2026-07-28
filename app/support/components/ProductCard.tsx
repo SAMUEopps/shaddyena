@@ -199,7 +199,7 @@ export default function ProductCard({ product, onAddToCart, isAdding }: ProductC
         </div>
 
         <Link
-          href={`/shops/${product.vendorId._id}`}
+          href={`/shd-pages/shops/${product.vendorId._id}`}
           className="text-primary hover:text-accent-dark text-[10px] sm:text-xs md:text-sm flex items-center gap-0.5 sm:gap-1 mt-1 sm:mt-1.5 md:mt-2 transition-colors duration-200 group/link truncate"
         >
           🏪 {product.vendorId.businessName}
