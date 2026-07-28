@@ -155,5 +155,10 @@ const ProductSchema = new Schema<IProduct>(
   }
 );
 
-export default mongoose.models.Product ||
+// export default mongoose.models.Product ||
+//   mongoose.model<IProduct>('Product', ProductSchema);
+const Product =
+  mongoose.models.Product as mongoose.Model<IProduct> ||
   mongoose.model<IProduct>('Product', ProductSchema);
+
+export default Product;

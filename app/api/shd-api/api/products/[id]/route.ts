@@ -567,14 +567,28 @@ export async function GET(
     }
 
     // Get related products from same vendor (excluding current product)
-    const relatedProducts = await Product.find({
-      vendorId: product.vendorId._id,
-      _id: { $ne: productId },
-      isActive: true
-    })
-    .limit(4)
-    .select('name price image stock')
-    .lean();
+    // const relatedProducts = await Product.find({
+    //   vendorId: product.vendorId._id,
+    //   _id: { $ne: productId },
+    //   isActive: true
+    // })
+    // .limit(4)
+    // .select('name price image stock')
+    // .lean();
+
+    const vendorId =
+  typeof product.vendorId === 'object'
+    ? product.vendorId._id
+    : product.vendorId;
+
+const relatedProducts = await Product.find({
+  vendorId,
+  _id: { $ne: productId },
+  isActive: true,
+})
+.limit(4)
+.select('name price image stock')
+.lean();
 
     return NextResponse.json({
       success: true,
@@ -695,7 +709,7 @@ export async function PUT(
     if (stock !== undefined) product.stock = stock;
     if (description !== undefined) product.description = description;
     if (isActive !== undefined) product.isActive = isActive;
-    if (category !== undefined) product.category = category;
+    //if (category !== undefined) product.category = category;
 
     await product.save();
 
