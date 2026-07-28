@@ -1,5 +1,130 @@
-// // // app/api/products/[id]/route.ts
+// // // // app/api/products/[id]/route.ts
+// // // import { NextRequest, NextResponse } from 'next/server';
+// // // import { connectToDatabase } from '@/lib/mongodb';
+// // // import Product from '@/models/Product';
+// // // import Vendor from '@/models/Vendor';
+// // // import { verifyToken } from '@/lib/auth';
+
+// // // export async function PUT(
+// // //   req: NextRequest,
+// // //   { params }: { params: { id: string } }
+// // // ) {
+// // //   try {
+// // //     await connectToDatabase();
+// // //     const token = req.headers.get('authorization')?.split(' ')[1];
+// // //     const decoded = verifyToken(token);
+    
+// // //     if (!decoded) {
+// // //       return NextResponse.json(
+// // //         { error: 'Unauthorized' },
+// // //         { status: 401 }
+// // //       );
+// // //     }
+
+// // //     // Get vendor profile
+// // //     const vendor = await Vendor.findOne({ userId: decoded.userId });
+// // //     if (!vendor) {
+// // //       return NextResponse.json(
+// // //         { error: 'Vendor profile not found' },
+// // //         { status: 404 }
+// // //       );
+// // //     }
+
+// // //     const productId = params.id;
+// // //     const body = await req.json();
+// // //     const { name, price, stock, description, isActive } = body;
+
+// // //     // Find the product and verify ownership
+// // //     const product = await Product.findOne({ 
+// // //       _id: productId, 
+// // //       vendorId: vendor._id 
+// // //     });
+
+// // //     if (!product) {
+// // //       return NextResponse.json(
+// // //         { error: 'Product not found or you do not have permission to edit it' },
+// // //         { status: 404 }
+// // //       );
+// // //     }
+
+// // //     // Update product fields
+// // //     if (name !== undefined) product.name = name;
+// // //     if (price !== undefined) product.price = price;
+// // //     if (stock !== undefined) product.stock = stock;
+// // //     if (description !== undefined) product.description = description;
+// // //     if (isActive !== undefined) product.isActive = isActive;
+
+// // //     await product.save();
+
+// // //     return NextResponse.json({
+// // //       message: 'Product updated successfully',
+// // //       product
+// // //     });
+
+// // //   } catch (error) {
+// // //     console.error('Product update error:', error);
+// // //     return NextResponse.json(
+// // //       { error: 'Failed to update product' },
+// // //       { status: 500 }
+// // //     );
+// // //   }
+// // // }
+
+// // // export async function DELETE(
+// // //   req: NextRequest,
+// // //   { params }: { params: { id: string } }
+// // // ) {
+// // //   try {
+// // //     await connectToDatabase();
+// // //     const token = req.headers.get('authorization')?.split(' ')[1];
+// // //     const decoded = verifyToken(token);
+    
+// // //     if (!decoded) {
+// // //       return NextResponse.json(
+// // //         { error: 'Unauthorized' },
+// // //         { status: 401 }
+// // //       );
+// // //     }
+
+// // //     // Get vendor profile
+// // //     const vendor = await Vendor.findOne({ userId: decoded.userId });
+// // //     if (!vendor) {
+// // //       return NextResponse.json(
+// // //         { error: 'Vendor profile not found' },
+// // //         { status: 404 }
+// // //       );
+// // //     }
+
+// // //     const productId = params.id;
+
+// // //     // Find and delete the product (verify ownership)
+// // //     const product = await Product.findOneAndDelete({ 
+// // //       _id: productId, 
+// // //       vendorId: vendor._id 
+// // //     });
+
+// // //     if (!product) {
+// // //       return NextResponse.json(
+// // //         { error: 'Product not found or you do not have permission to delete it' },
+// // //         { status: 404 }
+// // //       );
+// // //     }
+
+// // //     return NextResponse.json({
+// // //       message: 'Product deleted successfully'
+// // //     });
+
+// // //   } catch (error) {
+// // //     console.error('Product deletion error:', error);
+// // //     return NextResponse.json(
+// // //       { error: 'Failed to delete product' },
+// // //       { status: 500 }
+// // //     );
+// // //   }
+// // // }
+
 // // import { NextRequest, NextResponse } from 'next/server';
+// // import mongoose from 'mongoose';
 // // import { connectToDatabase } from '@/lib/mongodb';
 // // import Product from '@/models/Product';
 // // import Vendor from '@/models/Vendor';
@@ -7,13 +132,22 @@
 
 // // export async function PUT(
 // //   req: NextRequest,
-// //   { params }: { params: { id: string } }
+// //   { params }: { params: Promise<{ id: string }> }
 // // ) {
 // //   try {
 // //     await connectToDatabase();
+
 // //     const token = req.headers.get('authorization')?.split(' ')[1];
+
+// //     if (!token) {
+// //       return NextResponse.json(
+// //         { error: 'Unauthorized' },
+// //         { status: 401 }
+// //       );
+// //     }
+
 // //     const decoded = verifyToken(token);
-    
+
 // //     if (!decoded) {
 // //       return NextResponse.json(
 // //         { error: 'Unauthorized' },
@@ -21,8 +155,17 @@
 // //       );
 // //     }
 
-// //     // Get vendor profile
+// //     const { id: productId } = await params;
+
+// //     if (!mongoose.Types.ObjectId.isValid(productId)) {
+// //       return NextResponse.json(
+// //         { error: 'Invalid product ID' },
+// //         { status: 400 }
+// //       );
+// //     }
+
 // //     const vendor = await Vendor.findOne({ userId: decoded.userId });
+
 // //     if (!vendor) {
 // //       return NextResponse.json(
 // //         { error: 'Vendor profile not found' },
@@ -30,41 +173,56 @@
 // //       );
 // //     }
 
-// //     const productId = params.id;
 // //     const body = await req.json();
-// //     const { name, price, stock, description, isActive } = body;
 
-// //     // Find the product and verify ownership
-// //     const product = await Product.findOne({ 
-// //       _id: productId, 
-// //       vendorId: vendor._id 
+// //     const {
+// //       name,
+// //       price,
+// //       stock,
+// //       description,
+// //       isActive,
+// //       image,
+// //       category,
+// //     } = body;
+
+// //     const product = await Product.findOne({
+// //       _id: productId,
+// //       vendorId: vendor._id,
 // //     });
 
 // //     if (!product) {
 // //       return NextResponse.json(
-// //         { error: 'Product not found or you do not have permission to edit it' },
+// //         {
+// //           error:
+// //             'Product not found or you do not have permission to edit it',
+// //         },
 // //         { status: 404 }
 // //       );
 // //     }
 
-// //     // Update product fields
 // //     if (name !== undefined) product.name = name;
 // //     if (price !== undefined) product.price = price;
 // //     if (stock !== undefined) product.stock = stock;
 // //     if (description !== undefined) product.description = description;
 // //     if (isActive !== undefined) product.isActive = isActive;
+// //     if (image !== undefined) product.image = image;
+// //     if (category !== undefined) product.category = category;
 
 // //     await product.save();
 
 // //     return NextResponse.json({
+// //       success: true,
 // //       message: 'Product updated successfully',
-// //       product
+// //       product,
 // //     });
-
 // //   } catch (error) {
 // //     console.error('Product update error:', error);
+
 // //     return NextResponse.json(
-// //       { error: 'Failed to update product' },
+// //       {
+// //         success: false,
+// //         error: 'Failed to update product',
+// //       },
 // //       { status: 500 }
 // //     );
 // //   }
@@ -72,13 +230,22 @@
 
 // // export async function DELETE(
 // //   req: NextRequest,
-// //   { params }: { params: { id: string } }
+// //   { params }: { params: Promise<{ id: string }> }
 // // ) {
 // //   try {
 // //     await connectToDatabase();
+
 // //     const token = req.headers.get('authorization')?.split(' ')[1];
+
+// //     if (!token) {
+// //       return NextResponse.json(
+// //         { error: 'Unauthorized' },
+// //         { status: 401 }
+// //       );
+// //     }
+
 // //     const decoded = verifyToken(token);
-    
+
 // //     if (!decoded) {
 // //       return NextResponse.json(
 // //         { error: 'Unauthorized' },
@@ -86,8 +253,19 @@
 // //       );
 // //     }
 
-// //     // Get vendor profile
-// //     const vendor = await Vendor.findOne({ userId: decoded.userId });
+// //     const { id: productId } = await params;
+
+// //     if (!mongoose.Types.ObjectId.isValid(productId)) {
+// //       return NextResponse.json(
+// //         { error: 'Invalid product ID' },
+// //         { status: 400 }
+// //       );
+// //     }
+
+// //     const vendor = await Vendor.findOne({
+// //       userId: decoded.userId,
+// //     });
+
 // //     if (!vendor) {
 // //       return NextResponse.json(
 // //         { error: 'Vendor profile not found' },
@@ -95,40 +273,48 @@
 // //       );
 // //     }
 
-// //     const productId = params.id;
-
-// //     // Find and delete the product (verify ownership)
-// //     const product = await Product.findOneAndDelete({ 
-// //       _id: productId, 
-// //       vendorId: vendor._id 
+// //     const product = await Product.findOneAndDelete({
+// //       _id: productId,
+// //       vendorId: vendor._id,
 // //     });
 
 // //     if (!product) {
 // //       return NextResponse.json(
-// //         { error: 'Product not found or you do not have permission to delete it' },
+// //         {
+// //           error:
+// //             'Product not found or you do not have permission to delete it',
+// //         },
 // //         { status: 404 }
 // //       );
 // //     }
 
 // //     return NextResponse.json({
-// //       message: 'Product deleted successfully'
+// //       success: true,
+// //       message: 'Product deleted successfully',
 // //     });
-
 // //   } catch (error) {
 // //     console.error('Product deletion error:', error);
+
 // //     return NextResponse.json(
-// //       { error: 'Failed to delete product' },
+// //       {
+// //         success: false,
+// //         error: 'Failed to delete product',
+// //       },
 // //       { status: 500 }
 // //     );
 // //   }
 // // }
 
+// // app/api/products/[id]/route.ts
 // import { NextRequest, NextResponse } from 'next/server';
 // import mongoose from 'mongoose';
-// import { connectToDatabase } from '@/lib/mongodb';
-// import Product from '@/models/Product';
-// import Vendor from '@/models/Vendor';
-// import { verifyToken } from '@/lib/auth';
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import { verifyToken } from '@/shd-lib/lib/auth';
+// import '@/models/shop';
+// import Vendor from '@/shd-models/models/Vendor';
+// import Product from "@/shd-models/models/Product";
+// import { deleteFromCloudinary } from '@/shd-lib/lib/cloudinary';
+
 
 // export async function PUT(
 //   req: NextRequest,
@@ -182,7 +368,9 @@
 //       description,
 //       isActive,
 //       image,
+//       imagePublicId,
 //       category,
+//       removeImage,
 //     } = body;
 
 //     const product = await Product.findOne({
@@ -200,12 +388,35 @@
 //       );
 //     }
 
+//     // Handle image removal
+//     if (removeImage) {
+//       if (product.imagePublicId) {
+//         try {
+//           await deleteFromCloudinary(product.imagePublicId);
+//         } catch (error) {
+//           console.error('Error deleting image from Cloudinary:', error);
+//         }
+//       }
+//       product.image = undefined;
+//       product.imagePublicId = undefined;
+//     } else if (image !== undefined) {
+//       // If updating image, delete old one from Cloudinary
+//       if (product.imagePublicId && image !== product.image) {
+//         try {
+//           await deleteFromCloudinary(product.imagePublicId);
+//         } catch (error) {
+//           console.error('Error deleting old image from Cloudinary:', error);
+//         }
+//       }
+//       product.image = image;
+//       product.imagePublicId = imagePublicId;
+//     }
+
 //     if (name !== undefined) product.name = name;
 //     if (price !== undefined) product.price = price;
 //     if (stock !== undefined) product.stock = stock;
 //     if (description !== undefined) product.description = description;
 //     if (isActive !== undefined) product.isActive = isActive;
-//     if (image !== undefined) product.image = image;
 //     if (category !== undefined) product.category = category;
 
 //     await product.save();
@@ -273,7 +484,7 @@
 //       );
 //     }
 
-//     const product = await Product.findOneAndDelete({
+//     const product = await Product.findOne({
 //       _id: productId,
 //       vendorId: vendor._id,
 //     });
@@ -287,6 +498,17 @@
 //         { status: 404 }
 //       );
 //     }
+
+//     // Delete image from Cloudinary if exists
+//     if (product.imagePublicId) {
+//       try {
+//         await deleteFromCloudinary(product.imagePublicId);
+//       } catch (error) {
+//         console.error('Error deleting image from Cloudinary:', error);
+//       }
+//     }
+
+//     await product.deleteOne();
 
 //     return NextResponse.json({
 //       success: true,
@@ -310,11 +532,68 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import { verifyToken } from '@/shd-lib/lib/auth';
+import '@/models/shop';
 import Vendor from '@/shd-models/models/Vendor';
 import Product from "@/shd-models/models/Product";
 import { deleteFromCloudinary } from '@/shd-lib/lib/cloudinary';
 
+// GET - Fetch a single product (public)
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await connectToDatabase();
 
+    const { id: productId } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return NextResponse.json(
+        { error: 'Invalid product ID' },
+        { status: 400 }
+      );
+    }
+
+    // Fetch product with vendor details populated
+    const product = await Product.findById(productId)
+      .populate('vendorId', 'businessName ownerName phoneNumber businessLocation profileImage')
+      .lean();
+
+    if (!product) {
+      return NextResponse.json(
+        { error: 'Product not found' },
+        { status: 404 }
+      );
+    }
+
+    // Get related products from same vendor (excluding current product)
+    const relatedProducts = await Product.find({
+      vendorId: product.vendorId._id,
+      _id: { $ne: productId },
+      isActive: true
+    })
+    .limit(4)
+    .select('name price image stock')
+    .lean();
+
+    return NextResponse.json({
+      success: true,
+      product,
+      relatedProducts
+    });
+  } catch (error) {
+    console.error('Product fetch error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to fetch product',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT - Update a product (vendor only)
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -438,6 +717,7 @@ export async function PUT(
   }
 }
 
+// DELETE - Delete a product (vendor only)
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
