@@ -430,7 +430,7 @@ export async function POST(req: NextRequest) {
     const { password, initialDeposit, phoneNumber } = body;
 
     // Validate initial deposit (minimum 100)
-    if (!initialDeposit || initialDeposit < 100) {
+    if (!initialDeposit || initialDeposit < 1) {
       return NextResponse.json(
         { error: 'Minimum initial deposit is KSh 100' },
         { status: 400 }
