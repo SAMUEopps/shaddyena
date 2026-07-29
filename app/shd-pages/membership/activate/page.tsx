@@ -814,13 +814,16 @@
 // app/shd-pages/membership/activate/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PaymentProcessor from '@/app/SHD-COMPONENTS/components/PaymentProcessor';
+import { useAuth } from '@/shd-contexts/AuthContext';
+
 
 export default function ActivateMembership() {
   const router = useRouter();
+  const { user, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     password: '',
     initialDeposit: '1',
@@ -834,6 +837,27 @@ export default function ActivateMembership() {
     phoneNumber: string;
   } | null>(null);
   const [showPhoneInput, setShowPhoneInput] = useState(false);
+
+  useEffect(() => {
+
+  if (!isLoading && user?.isMember) {
+    router.replace('/shd-pages/membership/dashboard');
+  }
+
+}, [user, isLoading, router]);
+
+if (isLoading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Checking membership status...
+    </div>
+  );
+}
+
+
+if (user?.isMember) {
+  return null;
+}
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
