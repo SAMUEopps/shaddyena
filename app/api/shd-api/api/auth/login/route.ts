@@ -33,16 +33,38 @@ export async function POST(req: NextRequest) {
       { expiresIn: '7d' }
     );
 
+    // return NextResponse.json({
+    //   token,
+    //   user: {
+    //     id: user._id,
+    //     name: user.name,
+    //     phoneNumber: user.phoneNumber,
+    //     email: user.email,
+    //     role: user.role
+    //   }
+    // });
+
     return NextResponse.json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        phoneNumber: user.phoneNumber,
-        email: user.email,
-        role: user.role
-      }
-    });
+  token,
+  user: {
+    id: user._id,
+    name: user.name,
+    phoneNumber: user.phoneNumber,
+    email: user.email,
+    role: user.role,
+    isVerified: user.isVerified,
+
+    // Membership
+    isMember: user.isMember,
+    memberSince: user.memberSince,
+    totalSavings: user.totalSavings,
+    totalInvestments: user.totalInvestments,
+    availableBalance: user.availableBalance,
+
+    // Referral
+    referralCode: user.referralCode
+  }
+});
 
   } catch (error) {
     console.error('Login error:', error);

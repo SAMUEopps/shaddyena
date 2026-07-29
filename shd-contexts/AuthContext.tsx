@@ -3,16 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
-// interface User {
-//   id: string;
-//   name: string;
-//   email: string;
-//   phoneNumber: string;
-//   role: 'customer' | 'vendor' | 'admin' | 'rider';
-//   isVerified: boolean;
-//   createdAt?: string;
-//   referralCode?: string;
-// }
+
 
 interface User {
   id: string;

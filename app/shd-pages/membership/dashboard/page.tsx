@@ -586,7 +586,7 @@ export default function MembershipDashboard() {
                 💰 Deposit
               </button>
               <Link
-                href="/membership/invest"
+                href="/shd-pages/membership/invest"
                 className="bg-primary hover:bg-accent-dark text-white px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] font-medium"
               >
                 💼 Invest
@@ -697,7 +697,7 @@ export default function MembershipDashboard() {
                     <div className="text-4xl mb-2">📈</div>
                     <p className="text-muted">No investments yet</p>
                     <Link
-                      href="/membership/invest"
+                      href="/shd-pages/membership/invest"
                       className="text-primary hover:text-accent-dark font-medium transition-colors duration-200 mt-2 inline-block"
                     >
                       Start Investing →
@@ -802,7 +802,7 @@ export default function MembershipDashboard() {
           </Link>
 
           <Link
-            href="/membership/invest"
+            href="/shd-pages/membership/invest"
             className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-surface hover:border-primary/20 group"
           >
             <div className="flex items-center justify-between">
@@ -815,7 +815,7 @@ export default function MembershipDashboard() {
           </Link>
 
           <Link
-            href="/membership/withdraw"
+            href="/shd-pages/membership/withdraw"
             className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-surface hover:border-primary/20 group"
           >
             <div className="flex items-center justify-between">
@@ -828,7 +828,7 @@ export default function MembershipDashboard() {
           </Link>
 
           <Link
-            href="/membership/refer"
+            href="/shd-pages/membership/refer"
             className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-surface hover:border-primary/20 group"
           >
             <div className="flex items-center justify-between">
