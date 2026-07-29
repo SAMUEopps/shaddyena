@@ -339,87 +339,166 @@ export class MpesaPaymentService {
   }
 
     // New method - accepts custom phone number
-  async initiatePaymentWithPhone(
-    amount: number,
-    purpose: 'membership' | 'savings' | 'investment',
-    phoneNumber: string,
-    metadata: any = {}
-  ): Promise<{ checkoutRequestId: string; transactionId: string }> {
-    const user = await this.getUser();
-    if (!user) throw new Error('User not found');
+//   async initiatePaymentWithPhone(
+//     amount: number,
+//     purpose: 'membership' | 'savings' | 'investment',
+//     phoneNumber: string,
+//     metadata: any = {}
+//   ): Promise<{ checkoutRequestId: string; transactionId: string }> {
+//     const user = await this.getUser();
+//     if (!user) throw new Error('User not found');
 
-    // Clean and validate phone number
-    let cleanPhone = phoneNumber.replace(/[+\s]/g, '');
-    if (cleanPhone.startsWith('0')) {
-      cleanPhone = '254' + cleanPhone.substring(1);
-    }
-    if (!cleanPhone.startsWith('254')) {
-      cleanPhone = '254' + cleanPhone;
-    }
+//     // Clean and validate phone number
+//     let cleanPhone = phoneNumber.replace(/[+\s]/g, '');
+//     if (cleanPhone.startsWith('0')) {
+//       cleanPhone = '254' + cleanPhone.substring(1);
+//     }
+//     if (!cleanPhone.startsWith('254')) {
+//       cleanPhone = '254' + cleanPhone;
+//     }
 
-    if (!/^254[0-9]{9}$/.test(cleanPhone)) {
-      throw new Error('Invalid phone number format');
-    }
+//     if (!/^254[0-9]{9}$/.test(cleanPhone)) {
+//       throw new Error('Invalid phone number format');
+//     }
 
-    // Generate reference based on purpose
-    const referencePrefix = purpose === 'membership' ? 'MEM' : 
-                           purpose === 'savings' ? 'SAV' : 'INV';
-    const accountReference = this.generateReference(referencePrefix);
-    const transactionId = `STK-${Date.now()}`;
+//     // Generate reference based on purpose
+//     const referencePrefix = purpose === 'membership' ? 'MEM' : 
+//                            purpose === 'savings' ? 'SAV' : 'INV';
+//     const accountReference = this.generateReference(referencePrefix);
+//     const transactionId = `STK-${Date.now()}`;
 
-    // Create transaction record
-    const transaction = await Transaction.create({
-      transactionId: transactionId,
-      phoneNumber: cleanPhone, // Use the provided phone number
-      amount: amount,
-      status: 'pending',
-      type: purpose,
-      purpose: purpose,
-      userId: user._id,
-      accountReference: accountReference,
-      metadata: {
-        ...metadata,
-        userPhoneNumber: user.phoneNumber, // Store original number
-        providedPhone: cleanPhone, // Store provided number
-        userEmail: user.email,
-        purpose: purpose,
-        amount: amount,
-        userName: user.name
-      }
-    });
+//     // Create transaction record
+//     const transaction = await Transaction.create({
+//       transactionId: transactionId,
+//       phoneNumber: cleanPhone, // Use the provided phone number
+//       amount: amount,
+//       status: 'pending',
+//       type: purpose,
+//       purpose: purpose,
+//       userId: user._id,
+//       accountReference: accountReference,
+//       metadata: {
+//         ...metadata,
+//         userPhoneNumber: user.phoneNumber, // Store original number
+//         providedPhone: cleanPhone, // Store provided number
+//         userEmail: user.email,
+//         purpose: purpose,
+//         amount: amount,
+//         userName: user.name
+//       }
+//     });
 
-    try {
-      // Initiate STK Push with the provided phone number
-      const response = await initSTKPush(
-        cleanPhone, // Use provided phone number
-        amount,
-        accountReference
-      );
+//     try {
+//       // Initiate STK Push with the provided phone number
+//       const response = await initSTKPush(
+//         cleanPhone, // Use provided phone number
+//         amount,
+//         accountReference
+//       );
 
-      // Update transaction with checkout request ID
-      transaction.checkoutRequestId = response.CheckoutRequestID;
-      transaction.transactionId = response.CheckoutRequestID;
-      transaction.metadata = {
-        ...transaction.metadata,
-        checkoutRequestId: response.CheckoutRequestID,
-        merchantRequestId: response.MerchantRequestID
-      };
-      await transaction.save();
+//       // Update transaction with checkout request ID
+//       transaction.checkoutRequestId = response.CheckoutRequestID;
+//       transaction.transactionId = response.CheckoutRequestID;
+//       transaction.metadata = {
+//         ...transaction.metadata,
+//         checkoutRequestId: response.CheckoutRequestID,
+//         merchantRequestId: response.MerchantRequestID
+//       };
+//       await transaction.save();
 
-      return {
-        checkoutRequestId: response.CheckoutRequestID,
-        transactionId: transaction._id.toString()
-      };
+//       return {
+//         checkoutRequestId: response.CheckoutRequestID,
+//         transactionId: transaction._id.toString()
+//       };
 
-    } catch (error: any) {
-      // Update transaction as failed
-      transaction.status = 'failed';
-      transaction.errorMessage = error.message || 'Failed to initiate payment';
-      await transaction.save();
-      throw error;
-    }
+//     } catch (error: any) {
+//       // Update transaction as failed
+//       transaction.status = 'failed';
+//       transaction.errorMessage = error.message || 'Failed to initiate payment';
+//       await transaction.save();
+//       throw error;
+//     }
+//   }
+// shd-lib/services/mpesaPaymentService.ts - Add accountReference to transaction
+async initiatePaymentWithPhone(
+  amount: number,
+  purpose: 'membership' | 'savings' | 'investment',
+  phoneNumber: string,
+  metadata: any = {}
+): Promise<{ checkoutRequestId: string; transactionId: string }> {
+  const user = await this.getUser();
+  if (!user) throw new Error('User not found');
+
+  let cleanPhone = phoneNumber.replace(/[+\s]/g, '');
+  if (cleanPhone.startsWith('0')) {
+    cleanPhone = '254' + cleanPhone.substring(1);
+  }
+  if (!cleanPhone.startsWith('254')) {
+    cleanPhone = '254' + cleanPhone;
   }
 
+  if (!/^254[0-9]{9}$/.test(cleanPhone)) {
+    throw new Error('Invalid phone number format');
+  }
+
+  // Generate reference based on purpose
+  const referencePrefix = purpose === 'membership' ? 'MEM' : 
+                         purpose === 'savings' ? 'SAV' : 'INV';
+  const accountReference = this.generateReference(referencePrefix);
+  const transactionId = `STK-${Date.now()}`;
+
+  // Create transaction record with BOTH checkoutRequestId and accountReference
+  const transaction = await Transaction.create({
+    transactionId: transactionId,
+    phoneNumber: cleanPhone,
+    amount: amount,
+    status: 'pending',
+    type: purpose,
+    purpose: purpose,
+    userId: user._id,
+    accountReference: accountReference, // IMPORTANT: Store for C2B callback matching
+    metadata: {
+      ...metadata,
+      userPhoneNumber: user.phoneNumber,
+      providedPhone: cleanPhone,
+      userEmail: user.email,
+      purpose: purpose,
+      amount: amount,
+      userName: user.name,
+      accountReference: accountReference // Also store in metadata
+    }
+  });
+
+  try {
+    // Initiate STK Push
+    const response = await initSTKPush(
+      cleanPhone,
+      amount,
+      accountReference
+    );
+
+    // Update transaction with checkout request ID
+    transaction.checkoutRequestId = response.CheckoutRequestID;
+    transaction.transactionId = response.CheckoutRequestID;
+    transaction.metadata = {
+      ...transaction.metadata,
+      checkoutRequestId: response.CheckoutRequestID,
+      merchantRequestId: response.MerchantRequestID
+    };
+    await transaction.save();
+
+    return {
+      checkoutRequestId: response.CheckoutRequestID,
+      transactionId: transaction._id.toString()
+    };
+
+  } catch (error: any) {
+    transaction.status = 'failed';
+    transaction.errorMessage = error.message || 'Failed to initiate payment';
+    await transaction.save();
+    throw error;
+  }
+}
 //   async queryPaymentStatus(checkoutRequestId: string): Promise<any> {
 //     try {
 //       const result = await queryTransactionStatus(checkoutRequestId);
