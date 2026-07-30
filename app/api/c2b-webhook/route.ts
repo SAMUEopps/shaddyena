@@ -1112,6 +1112,7 @@ import Delivery from '@/shd-models/models/Delivery';
 import Investment from '@/shd-models/models/Investment';
 import Savings from '@/shd-models/models/Savings';
 import mongoose from 'mongoose';
+import Advertisement from '@/shd-models/models/Advertisement';
 
 // Helper function to calculate delivery fee
 function calculateDeliveryFee(totalAmount: number): number {
@@ -1482,6 +1483,48 @@ async function processSavingsPayment(transaction: any, receiptNumber: string) {
   }
 }
 
+async function processAdvertisementPayment(transaction: any, receiptNumber: string) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // Update transaction
+    transaction.status = 'success';
+    transaction.receiptNumber = receiptNumber;
+    await transaction.save({ session });
+
+    const adId = transaction.metadata?.adId;
+    const vendorId = transaction.metadata?.vendorId;
+
+    if (!adId) {
+      throw new Error('Advertisement ID not found');
+    }
+
+    // Update advertisement payment status
+    const advertisement = await Advertisement.findById(adId).session(session);
+    if (!advertisement) {
+      throw new Error('Advertisement not found');
+    }
+
+    advertisement.paymentStatus = 'paid';
+    advertisement.isActive = true;
+    await advertisement.save({ session });
+
+    console.log(`✅ Advertisement ${adId} payment confirmed`);
+
+    await session.commitTransaction();
+    return true;
+
+  } catch (error) {
+    await session.abortTransaction();
+    console.error('❌ Error processing advertisement payment:', error);
+    return false;
+  } finally {
+    session.endSession();
+  }
+}
+
+
 // Process investment payment
 async function processInvestmentPayment(transaction: any, receiptNumber: string) {
   const session = await mongoose.startSession();
@@ -1756,6 +1799,10 @@ export async function POST(req: NextRequest) {
 
    break;
 
+
+     case 'advertisement': // NEW
+    processed = await processAdvertisementPayment(transaction, receiptNumber);
+    break;
 
 
    default:

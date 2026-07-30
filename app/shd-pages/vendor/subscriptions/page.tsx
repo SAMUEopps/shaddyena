@@ -443,7 +443,7 @@ export default function VendorSubscriptions() {
             </p>
           </div>
           <Link
-            href="/vendor/dashboard"
+            href="/shd-pages/vendor/dashboard"
             className="bg-surface hover:bg-surface/70 text-secondary px-5 py-2.5 rounded-xl transition-all duration-200 font-medium"
           >
             ← Dashboard
