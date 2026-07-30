@@ -312,7 +312,16 @@ interface Advertisement {
   };
 }
 
-const defaultSlides = [
+interface DefaultSlide {
+  icon: string;
+  title: string;
+  highlight: string;
+  description: string;
+}
+
+const defaultSlides: DefaultSlide[] = [
+
+//const defaultSlides = [
   {
     icon: '🎨',
     title: 'Showcase Your Products Beautifully',
@@ -373,7 +382,9 @@ export default function HeroSection() {
   const hasAdvertisements = advertisements.length > 0;
   const displayItems = hasAdvertisements ? advertisements : defaultSlides;
 
-  const currentItem = displayItems[current % displayItems.length];
+  //const currentItem = displayItems[current % displayItems.length];
+  const currentAd = advertisements[current % advertisements.length];
+  const currentDefaultSlide = defaultSlides[current % defaultSlides.length];
 
   // Render advertisement slide
   const renderAdSlide = (ad: Advertisement) => (
@@ -424,8 +435,10 @@ export default function HeroSection() {
     </div>
   );
 
+  const renderDefaultSlide = (slide: DefaultSlide) => (
+
   // Render default slide
-  const renderDefaultSlide = (slide: typeof defaultSlides[0]) => (
+  //const renderDefaultSlide = (slide: typeof defaultSlides[0]) => (
     <div className="text-center py-8 sm:py-12 lg:py-16">
       <div className="flex justify-center items-center gap-3 mb-5">
         <span className="text-3xl sm:text-4xl">{slide.icon}</span>
@@ -459,7 +472,7 @@ export default function HeroSection() {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 lg:py-28 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          {loading ? (
+          {/*{loading ? (
             <div className="h-64 flex items-center justify-center">
               <div className="animate-pulse text-white/50">Loading...</div>
             </div>
@@ -472,6 +485,20 @@ export default function HeroSection() {
             // Show default slides if no advertisements
             <div key={current} className="animate-[fadeIn_0.7s_ease-in-out]">
               {renderDefaultSlide(currentItem)}
+            </div>
+          )}*/}
+
+          {loading ? (
+            <div className="h-64 flex items-center justify-center">
+              <div className="animate-pulse text-white/50">Loading...</div>
+            </div>
+          ) : hasAdvertisements ? (
+            <div key={current} className="animate-[fadeIn_0.7s_ease-in-out]">
+              {renderAdSlide(currentAd)}
+            </div>
+          ) : (
+            <div key={current} className="animate-[fadeIn_0.7s_ease-in-out]">
+              {renderDefaultSlide(currentDefaultSlide)}
             </div>
           )}
 
