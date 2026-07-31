@@ -665,7 +665,7 @@ export default function ShopDetail() {
             Back
           </Link>
           <Link 
-            href="/cart" 
+            href="/shd-pages/cart" 
             className="relative bg-white/90 backdrop-blur-sm hover:bg-white text-secondary px-5 py-2.5 rounded-xl transition-all duration-200 font-medium shadow-sm"
           >
             🛒 Cart

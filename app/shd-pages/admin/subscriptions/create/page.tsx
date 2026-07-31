@@ -436,7 +436,7 @@ export default function CreateSubscription() {
       if (response.ok) {
         setMessage({ type: 'success', text: 'Subscription plan created successfully!' });
         setTimeout(() => {
-          router.push('/admin/subscriptions');
+          router.push('/shd-pages/admin/subscriptions');
         }, 1500);
       } else {
         setMessage({ type: 'error', text: data.error || 'Failed to create subscription' });
@@ -461,7 +461,7 @@ export default function CreateSubscription() {
           </p>
         </div>
         <Link 
-          href="/admin/subscriptions" 
+          href="/shd-pages/admin/subscriptions" 
           className="text-primary hover:text-accent-dark transition-colors duration-200 font-medium inline-flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -797,7 +797,7 @@ export default function CreateSubscription() {
               )}
             </button>
             <Link
-              href="/admin/subscriptions"
+              href="/shd-pages/admin/subscriptions"
               className="bg-surface hover:bg-surface/70 text-secondary px-8 py-3 rounded-xl transition-all duration-200 font-medium"
             >
               Cancel

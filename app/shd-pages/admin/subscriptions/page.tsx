@@ -368,7 +368,7 @@ export default function AdminSubscriptions() {
           </p>
         </div>
         <Link
-          href="/admin/subscriptions/create"
+          href="/shd-pages/admin/subscriptions/create"
           className="bg-primary hover:bg-accent-dark text-white px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] font-medium"
         >
           + Create Subscription
@@ -422,7 +422,7 @@ export default function AdminSubscriptions() {
             </button>
           ) : (
             <Link
-              href="/admin/subscriptions/create"
+              href="/shd-pages/admin/subscriptions/create"
               className="inline-block bg-primary hover:bg-accent-dark text-white px-6 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md font-medium"
             >
               Create Subscription
@@ -485,14 +485,14 @@ export default function AdminSubscriptions() {
                 {/* Actions */}
                 <div className="mt-4 pt-4 border-t border-surface flex flex-wrap items-center gap-2">
                   <Link
-                    href={`/admin/subscriptions/${sub._id}`}
+                    href={`/shd-pages/admin/subscriptions/${sub._id}`}
                     className="text-primary hover:text-accent-dark text-sm font-medium transition-colors duration-200"
                   >
                     View Details
                   </Link>
                   <span className="text-muted">|</span>
                   <Link
-                    href={`/admin/subscriptions/edit/${sub._id}`}
+                    href={`/shd-pages/admin/subscriptions/edit/${sub._id}`}
                     className="text-accent-dark hover:text-accent-dark/80 text-sm font-medium transition-colors duration-200"
                   >
                     Edit
