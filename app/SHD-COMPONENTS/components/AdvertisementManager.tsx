@@ -482,6 +482,15 @@ export default function AdvertisementManager({ vendorId, vendorName, onShowMessa
     fetchAdvertisements();
   }, [vendorId]);
 
+  useEffect(() => {
+  if (vendorId) {
+    setFormData(prev => ({
+      ...prev,
+      link: `${process.env.NEXT_PUBLIC_APP_URL}/shd-pages/shops/${vendorId}`,
+    }));
+  }
+}, [vendorId]);
+
   const fetchAdvertisements = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -671,11 +680,19 @@ export default function AdvertisementManager({ vendorId, vendorName, onShowMessa
     setShowForm(false);
     setSelectedFile(null);
     setPreviewUrl(null);
+    // setFormData({
+    //   title: '',
+    //   description: '',
+    //   durationWeeks: 1,
+    //   link: '',
+    // });
     setFormData({
       title: '',
       description: '',
       durationWeeks: 1,
-      link: '',
+      link: vendorId
+        ? `${process.env.NEXT_PUBLIC_APP_URL}/shd-pages/shops/${vendorId}`
+        : '',
     });
   };
 

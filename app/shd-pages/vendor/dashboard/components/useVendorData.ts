@@ -3,18 +3,6 @@
 import { Order } from '@/types/vendor';
 import { useState, useEffect } from 'react';
 
-/*interface Order {
-  _id: string;
-  orderNumber: string;
-  totalAmount: number;
-  status: string;
-  customerId: {
-    name: string;
-  };
-  products: any[];
-  createdAt: string;
-}*/
-
 interface VendorProfile {
   _id: string;
   businessName: string;
