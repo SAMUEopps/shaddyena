@@ -57,7 +57,7 @@ export default function ImageUploadControls({
 
   return (
     <div className={`flex gap-2 ${className}`}>
-      <label className="cursor-pointer bg-white/90 backdrop-blur-sm hover:bg-white text-secondary px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all duration-200 text-xs sm:text-sm font-medium shadow-sm">
+      {/*<label className="cursor-pointer bg-white/90 backdrop-blur-sm hover:bg-white text-secondary px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all duration-200 text-xs sm:text-sm font-medium shadow-sm">
         {uploading ? '⏳ Uploading...' : `📸 ${type === 'cover' ? 'Change Cover' : 'Update Photo'}`}
         <input
           type="file"
@@ -67,7 +67,19 @@ export default function ImageUploadControls({
           onChange={handleFileChange}
           disabled={uploading}
         />
-      </label>
+      </label>*/}
+<label className="relative inline-flex items-center justify-center cursor-pointer bg-white/90 backdrop-blur-sm hover:bg-white text-secondary px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl shadow-sm overflow-hidden">
+  {uploading ? '⏳ Uploading...' : `📸 ${type === 'cover' ? 'Change Cover' : 'Update Photo'}`}
+
+  <input
+    ref={inputRef}
+    type="file"
+    accept="image/*"
+    onChange={handleFileChange}
+    disabled={uploading}
+    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+  />
+</label>
       {hasImage && (
         <button
           onClick={onRemove}
@@ -79,3 +91,4 @@ export default function ImageUploadControls({
     </div>
   );
 }
+
