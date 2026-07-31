@@ -1962,6 +1962,8 @@ import Investment from '@/shd-models/models/Investment';
 import Savings from '@/shd-models/models/Savings';
 import mongoose from 'mongoose';
 import Advertisement from '@/shd-models/models/Advertisement';
+import VendorSubscription from '@/shd-models/models/VendorSubscription';
+import Subscription from '@/shd-models/models/Subscription';
 
 // Helper function to calculate delivery fee
 function calculateDeliveryFee(totalAmount: number): number {
@@ -2301,6 +2303,130 @@ async function processAdvertisementPayment(transaction: any, receiptNumber: stri
   }
 }
 
+// Add this function to your c2b-webhook/route.ts
+
+// Process subscription payment
+async function processSubscriptionPayment(transaction: any, receiptNumber: string) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    console.log(`🔄 Processing subscription payment for transaction: ${transaction._id}`);
+    
+    // Update transaction status
+    transaction.status = 'success';
+    transaction.receiptNumber = receiptNumber;
+    await transaction.save({ session });
+
+    const subscriptionId = transaction.metadata?.subscriptionId;
+    const vendorId = transaction.metadata?.vendorId;
+
+    if (!subscriptionId || !vendorId) {
+      throw new Error('Missing subscription or vendor ID');
+    }
+
+    // Get subscription details
+    const subscription = await Subscription.findById(subscriptionId).session(session);
+    if (!subscription) {
+      throw new Error('Subscription plan not found');
+    }
+
+    // Check if vendor already has an active subscription
+    const existingVendorSub = await VendorSubscription.findOne({
+      vendorId: vendorId,
+      status: 'active'
+    }).session(session);
+
+    // End current subscription if exists
+    if (existingVendorSub) {
+      existingVendorSub.status = 'expired';
+      existingVendorSub.endDate = new Date();
+      await existingVendorSub.save({ session });
+      console.log(`📅 Ended existing subscription for vendor ${vendorId}`);
+    }
+
+    // Calculate end date based on billing cycle
+    const startDate = new Date();
+    let endDate = new Date();
+    
+    switch (subscription.billingCycle) {
+      case 'monthly':
+        endDate.setMonth(endDate.getMonth() + 1);
+        break;
+      case 'quarterly':
+        endDate.setMonth(endDate.getMonth() + 3);
+        break;
+      case 'yearly':
+        endDate.setFullYear(endDate.getFullYear() + 1);
+        break;
+      default:
+        endDate.setMonth(endDate.getMonth() + 1); // Default to monthly
+    }
+
+    // Create vendor subscription record
+    const vendorSubscription = await VendorSubscription.create([{
+      vendorId: vendorId,
+      subscriptionId: subscriptionId,
+      status: 'active',
+      startDate: startDate,
+      endDate: endDate,
+      autoRenew: true,
+      paymentMethod: 'mpesa',
+      amountPaid: transaction.amount,
+      transactionId: transaction._id,
+      features: subscription.features,
+      maxProducts: subscription.maxProducts,
+      maxOrders: subscription.maxOrders,
+      commissionRate: subscription.commissionRate,
+      prioritySupport: subscription.prioritySupport,
+      analyticsAccess: subscription.analyticsAccess,
+      promoFeatures: subscription.promoFeatures,
+      customDomain: subscription.customDomain,
+      apiAccess: subscription.apiAccess,
+      teamMembers: subscription.teamMembers,
+      storageLimit: subscription.storageLimit,
+      renewalDate: endDate
+    }], { session });
+
+    // Update vendor with subscription details
+    await Vendor.findByIdAndUpdate(
+      vendorId,
+      {
+        subscriptionId: subscriptionId,
+        subscriptionStatus: 'active',
+        subscriptionTier: subscription.tier,
+        subscriptionEndDate: endDate
+      },
+      { session }
+    );
+
+    // Handle referral commission if applicable
+    const user = await User.findById(transaction.userId).session(session);
+    if (user?.referredBy) {
+      const referrer = await User.findById(user.referredBy).session(session);
+      if (referrer) {
+        const commissionAmount = transaction.amount * 0.01; // 1% referral commission
+        referrer.referralSubscriptionEarnings = (referrer.referralSubscriptionEarnings || 0) + commissionAmount;
+        referrer.referralEarnings = (referrer.referralEarnings || 0) + commissionAmount;
+        referrer.availableBalance = (referrer.availableBalance || 0) + commissionAmount;
+        await referrer.save({ session });
+        console.log(`💰 Added ${commissionAmount} subscription referral commission to ${referrer.name}`);
+      }
+    }
+
+    await session.commitTransaction();
+    console.log(`✅ Subscription activated for vendor ${vendorId} - Plan: ${subscription.name}`);
+    return true;
+
+  } catch (error) {
+    await session.abortTransaction();
+    console.error('❌ Error processing subscription payment:', error);
+    return false;
+  } finally {
+    session.endSession();
+  }
+}
+
 // Process investment payment
 async function processInvestmentPayment(transaction: any, receiptNumber: string) {
   const session = await mongoose.startSession();
@@ -2514,6 +2640,10 @@ export async function POST(req: NextRequest) {
             processed = await processAdvertisementPayment(transaction, receiptNumber);
             break;
 
+              case "subscription":  // ADD THIS CASE
+    processed = await processSubscriptionPayment(transaction, receiptNumber);
+    break;
+
           default:
             transaction.status = "success";
             transaction.receiptNumber = receiptNumber;
@@ -2621,6 +2751,10 @@ export async function POST(req: NextRequest) {
         case 'advertisement': // THIS IS THE FIX - ADD THIS CASE
           processed = await processAdvertisementPayment(transaction, receiptNumber);
           break;
+
+          case 'subscription':  // ADD THIS CASE
+    processed = await processSubscriptionPayment(transaction, receiptNumber);
+    break;  
         default:
           console.log(`Unknown transaction type: ${transaction.type}`);
           transaction.status = 'success';
