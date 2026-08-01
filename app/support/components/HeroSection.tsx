@@ -399,7 +399,7 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex items-end">
         <div className="p-6 sm:p-8 lg:p-12 text-white max-w-2xl">
           <div className="flex items-center gap-3 mb-3">
-            {ad.vendorId?.profileImage && (
+            {/*{ad.vendorId?.profileImage && (
               <Image
                 src={ad.vendorId.profileImage}
                 alt={ad.vendorId.businessName}
@@ -407,7 +407,7 @@ export default function HeroSection() {
                 height={40}
                 className="rounded-full"
               />
-            )}
+            )}*/}
             <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
               {ad.vendorId?.businessName || 'Vendor'}
             </span>
