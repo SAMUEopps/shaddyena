@@ -58,6 +58,10 @@ export interface IVendor extends Document {
   phoneNumber: string;
   businessLocation: string;
   payoutMethod: 'MPESA' | 'POCHI' | 'TILL' | 'PAYBILL';
+  subscriptionId?: mongoose.Types.ObjectId;
+  subscriptionStatus?: 'active' | 'inactive' | 'expired' | 'cancelled';
+  subscriptionTier?: string;
+  subscriptionEndDate?: Date;
   payoutDetails: {
     mpesaNumber?: string;
     pochiNumber?: string;
@@ -84,6 +88,14 @@ const VendorSchema = new Schema<IVendor>({
   phoneNumber: { type: String, required: true },
   businessLocation: { type: String, required: true },
   payoutMethod: { type: String, enum: ['MPESA', 'POCHI', 'TILL', 'PAYBILL'], default: 'MPESA' },
+  subscriptionId: { type: Schema.Types.ObjectId, ref: 'Subscription' },
+  subscriptionStatus: { 
+    type: String, 
+    enum: ['active', 'inactive', 'expired', 'cancelled'],
+    default: 'inactive'
+  },
+  subscriptionTier: { type: String },
+  subscriptionEndDate: { type: Date },
   payoutDetails: {
     mpesaNumber: String,
     pochiNumber: String,

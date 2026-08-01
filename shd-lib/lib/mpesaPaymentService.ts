@@ -274,9 +274,9 @@ export class MpesaPaymentService {
 
   async initiatePayment(
     amount: number,
-    purpose: 'membership' | 'savings' | 'investment',
+    purpose: 'membership' | 'savings' | 'investment' | 'subscription',
     metadata: any = {}
-  ): Promise<{ checkoutRequestId: string; transactionId: string }> {
+  ): Promise<{ checkoutRequestId: string;  merchantRequestId: string; transactionId: string }> {
     const user = await this.getUser();
     if (!user) throw new Error('User not found');
 
@@ -326,6 +326,7 @@ export class MpesaPaymentService {
 
       return {
         checkoutRequestId: response.CheckoutRequestID,
+        merchantRequestId: response.MerchantRequestID,
         transactionId: transaction._id.toString()
       };
 
@@ -342,10 +343,10 @@ export class MpesaPaymentService {
 // shd-lib/services/mpesaPaymentService.ts - Add accountReference to transaction
 async initiatePaymentWithPhone(
   amount: number,
-  purpose: 'membership' | 'savings' | 'investment' | 'advertisement',
+  purpose: 'membership' | 'savings' | 'investment' | 'advertisement' | 'subscription',
   phoneNumber: string,
   metadata: any = {}
-): Promise<{ checkoutRequestId: string; transactionId: string }> {
+): Promise<{ checkoutRequestId: string; merchantRequestId: string; transactionId: string }> {
   const user = await this.getUser();
   if (!user) throw new Error('User not found');
 
@@ -409,6 +410,7 @@ async initiatePaymentWithPhone(
 
     return {
       checkoutRequestId: response.CheckoutRequestID,
+      merchantRequestId: response.MerchantRequestID,
       transactionId: transaction._id.toString()
     };
 
