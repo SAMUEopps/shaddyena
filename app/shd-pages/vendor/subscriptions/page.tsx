@@ -746,7 +746,7 @@ export default function VendorSubscriptions() {
       const subsData = await subsResponse.json();
       setSubscriptions(subsData.subscriptions || []);
 
-      const currentResponse = await fetch('/api/shd-api/api/vendor/subscriptions/current', {
+      const currentResponse = await fetch('/api/shd-api/api/vendors/subscriptions/current', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -777,7 +777,7 @@ export default function VendorSubscriptions() {
       const token = localStorage.getItem('token');
       
       // Initiate payment
-      const response = await fetch('/api/shd-api/api/vendor/subscriptions/initiate-payment', {
+      const response = await fetch('/api/shd-api/api/vendors/subscriptions/initiate-payment', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -827,7 +827,7 @@ export default function VendorSubscriptions() {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/shd-api/api/vendor/subscriptions/cancel-auto-renew', {
+      const response = await fetch('/api/shd-api/api/vendors/subscriptions/cancel-auto-renew', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

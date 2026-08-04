@@ -109,7 +109,7 @@ export interface ITransaction extends Document {
   phoneNumber: string;
   amount: number;
   status: 'pending' | 'success' | 'failed' | 'cancelled';
-  type: 'order' | 'membership' | 'savings' | 'investment' | 'payout' | 'refund' | 'advertisement';
+  type: 'order' | 'membership' | 'savings' | 'investment' | 'payout' | 'refund' | 'advertisement' | 'subscription';
   purpose?: string;
   orderId?: mongoose.Types.ObjectId;
   vendorId?: mongoose.Types.ObjectId;
@@ -134,7 +134,7 @@ const TransactionSchema = new Schema<ITransaction>({
   },
   type: { 
     type: String, 
-    enum: ['order', 'membership', 'savings', 'investment', 'payout', 'refund', 'advertisement'],
+    enum: ['order', 'membership', 'savings', 'investment', 'payout', 'refund', 'advertisement', 'subscription'],
     required: true
   },
   purpose: { type: String },
