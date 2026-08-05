@@ -169,7 +169,7 @@ const OrderSchema = new Schema<IOrder>({
   orderNumber: { type: String, required: true, unique: true },
   customerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   vendorId: { type: Schema.Types.ObjectId, ref: 'Vendor', required: true },
-  referredBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  referredBy: { type: Schema.Types.ObjectId, ref: 'User', required: false},
   products: [{
     productId: { type: Schema.Types.ObjectId, ref: 'Product' },
     name: String,
