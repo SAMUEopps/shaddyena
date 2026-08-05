@@ -62,6 +62,11 @@ export interface IVendor extends Document {
   subscriptionStatus?: 'active' | 'inactive' | 'expired' | 'cancelled';
   subscriptionTier?: string;
   subscriptionEndDate?: Date;
+  totalRevenue: number; // Total revenue from all orders
+  availableBalance: number; // Immediate withdrawable amount
+  pendingBalance: number; // Amount held until delivery
+  totalWithdrawn: number; // Total amount withdrawn
+  lifetimeEarnings: number; // Total earned (including pending)
   payoutDetails: {
     mpesaNumber?: string;
     pochiNumber?: string;
@@ -96,6 +101,11 @@ const VendorSchema = new Schema<IVendor>({
   },
   subscriptionTier: { type: String },
   subscriptionEndDate: { type: Date },
+  totalRevenue: { type: Number, default: 0 },
+  availableBalance: { type: Number, default: 0 },
+  pendingBalance: { type: Number, default: 0 },
+  totalWithdrawn: { type: Number, default: 0 },
+  lifetimeEarnings: { type: Number, default: 0 },
   payoutDetails: {
     mpesaNumber: String,
     pochiNumber: String,

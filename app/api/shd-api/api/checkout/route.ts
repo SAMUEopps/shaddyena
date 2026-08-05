@@ -347,9 +347,40 @@ export async function POST(req: NextRequest) {
       }
 
       // Calculate commissions
-      const platformCommission = data.subtotal * 0.025; // 2.5%
-      const referralCommission = referredBy ? data.subtotal * 0.005 : 0; // 0.5% if referred
+      // const platformCommission = data.subtotal * 0.025; // 2.5%
+      // const referralCommission = referredBy ? data.subtotal * 0.005 : 0; // 0.5% if referred
+      // const vendorAmount = data.subtotal - platformCommission - referralCommission;
+
+
+
+      // Calculate commissions properly
+      const platformCommissionRate = referredBy ? 0.025 : 0.03; // 2.5% if referred, else 3%
+      const referralCommissionRate = referredBy ? 0.005 : 0; // 0.5% if referred
+
+      const platformCommission = data.subtotal * platformCommissionRate;
+      const referralCommission = referredBy ? data.subtotal * referralCommissionRate : 0;
       const vendorAmount = data.subtotal - platformCommission - referralCommission;
+
+      // Calculate split for vendor
+      const immediateWithdrawable = vendorAmount * 0.8; // 80% available immediately
+      const pendingWithdrawable = vendorAmount * 0.2; // 20% held until delivery
+
+      // const order = await Order.create({
+      //   orderNumber: generateOrderNumber(),
+      //   customerId: decoded.userId,
+      //   vendorId: vendor._id,
+      //   referredBy: referredBy || null,
+      //   products: data.products,
+      //   totalAmount: data.subtotal,
+      //   platformCommission,
+      //   referralCommission,
+      //   vendorAmount,
+      //   deliveryAddress,
+      //   deliveryPhone,
+      //   shippingMethod,
+      //   status: 'pending',
+      //   isPaid: false
+      // });
 
       const order = await Order.create({
         orderNumber: generateOrderNumber(),
@@ -361,6 +392,10 @@ export async function POST(req: NextRequest) {
         platformCommission,
         referralCommission,
         vendorAmount,
+        immediateWithdrawable,
+        pendingWithdrawable,
+        isImmediatePayoutAvailable: true, // Available once paid
+        isPendingPayoutReleased: false, // Released on delivery
         deliveryAddress,
         deliveryPhone,
         shippingMethod,

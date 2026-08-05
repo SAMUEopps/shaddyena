@@ -136,9 +136,6 @@ export interface IOrder extends Document {
     price: number;
   }>;
   totalAmount: number;
-  platformCommission: number;
-  referralCommission: number;
-  vendorAmount: number;
   status: 'pending' | 'processing' | 'packed' | 'shipped' | 'delivered' | 'cancelled';
   deliveryAddress: string;
   deliveryPhone: string;
@@ -148,6 +145,13 @@ export interface IOrder extends Document {
   isPaid: boolean;
   isPayoutComplete: boolean;
   referralPayoutComplete: boolean;
+  platformCommission: number; // 3% or 2.5% depending on referral
+  referralCommission: number; // 0.5% if referred
+  vendorAmount: number; // 97% of total
+  immediateWithdrawable: number; // 80% of vendorAmount (77.6% of total)
+  pendingWithdrawable: number; // 20% of vendorAmount (19.4% of total) - released on delivery
+  isImmediatePayoutAvailable: boolean; // true once order is paid
+  isPendingPayoutReleased: boolean; // true once order is delivered
   // Delivery/Rider fields
   deliveryId?: mongoose.Types.ObjectId;
   riderId?: mongoose.Types.ObjectId;
@@ -176,6 +180,11 @@ const OrderSchema = new Schema<IOrder>({
   platformCommission: { type: Number, required: true, default: 0 },
   referralCommission: { type: Number, required: true, default: 0 },
   vendorAmount: { type: Number, required: true },
+  immediateWithdrawable: { type: Number, default: 0 },
+  pendingWithdrawable: { type: Number, default: 0 },
+  isImmediatePayoutAvailable: { type: Boolean, default: false },
+  isPendingPayoutReleased: { type: Boolean, default: false },
+ 
   status: { 
     type: String, 
     enum: ['pending', 'processing', 'packed', 'shipped', 'delivered', 'cancelled'],
