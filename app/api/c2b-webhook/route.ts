@@ -139,13 +139,10 @@ function calculateDeliveryFee(totalAmount: number): number {
 //   }
 // }
 
-// app/api/callback/route.ts
-async function processOrderPayment(
-  transaction: any,
-  receiptNumber: string,
-  amount: string,
-  phoneNumber: string
-) {
+
+// app/api/callback/route.ts - Update the processOrderPayment function
+
+async function processOrderPayment(transaction: any, receiptNumber: string, amount: string, phoneNumber: string) {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -156,164 +153,122 @@ async function processOrderPayment(
     transaction.metadata = {
       ...transaction.metadata,
       mpesaReceipt: receiptNumber,
-      amount,
-      phoneNumber,
+      amount: amount,
+      phoneNumber: phoneNumber
     };
-
     await transaction.save({ session });
 
     // Get ALL order IDs from metadata
     const orderIds = transaction.metadata?.orders || [];
     const customerId = transaction.metadata?.customerId;
     const referredBy = transaction.metadata?.referredBy;
-
-    console.log(
-      `📦 Processing ${orderIds.length} orders for payment ${receiptNumber}`
-    );
+    
+    console.log(`📦 Processing ${orderIds.length} orders for payment ${receiptNumber}`);
 
     // Update ALL orders
-    const updatedOrders: string[] = [];
-
+    const updatedOrders = [];
     for (const orderId of orderIds) {
       const order = await Order.findById(orderId).session(session);
-
       if (!order) {
         console.warn(`⚠️ Order ${orderId} not found, skipping...`);
         continue;
       }
 
-      // Get customer and vendor
-      const customer = await User.findById(order.customerId).session(session);
+      // Find vendor
       const vendor = await Vendor.findById(order.vendorId).session(session);
+      if (!vendor) {
+        console.warn(`⚠️ Vendor ${order.vendorId} not found, skipping...`);
+        continue;
+      }
 
-      // Create delivery record only if it doesn't already exist
+      // Create delivery record for this order
+      const customer = await User.findById(order.customerId).session(session);
+
+      // Only create delivery if not already created
       if (!order.deliveryId) {
-        const delivery = await Delivery.create(
-          [
-            {
-              orderId: order._id,
-              customerName: customer?.name || 'Customer',
-              customerPhone:
-                order.deliveryPhone ||
-                customer?.phoneNumber ||
-                'N/A',
-              pickupLocation:
-                vendor?.businessLocation || 'Vendor Location',
-              dropoffLocation: order.deliveryAddress,
-              status: 'pending',
-              distance: 0,
-              earnings: calculateDeliveryFee(order.totalAmount),
-              estimatedTime: '30 min',
-              createdAt: new Date(),
-            },
-          ],
-          { session }
-        );
+        const delivery = await Delivery.create([{
+          orderId: order._id,
+          customerName: customer?.name || 'Customer',
+          customerPhone: order.deliveryPhone || customer?.phoneNumber || 'N/A',
+          pickupLocation: vendor?.businessLocation || 'Vendor Location',
+          dropoffLocation: order.deliveryAddress,
+          status: 'pending',
+          distance: 0,
+          earnings: calculateDeliveryFee(order.totalAmount),
+          estimatedTime: '30 min',
+          createdAt: new Date()
+        }], { session });
 
+        // Update order with delivery ID
         order.deliveryId = delivery[0]._id;
         order.deliveryStatus = 'pending';
       }
 
-      // ==========================
-      // MARK ORDER AS PAID
-      // ==========================
+      // Mark as paid and make immediate payout available
       order.isPaid = true;
       order.transactionId = transaction.transactionId;
       order.status = 'processing';
-
-      // Make immediate payout available
-      order.isImmediatePayoutAvailable = true;
-
+      order.isImmediatePayoutAvailable = true; // Available for withdrawal
+      
       await order.save({ session });
       updatedOrders.push(order.orderNumber);
 
-      // ==========================
-      // UPDATE PRODUCT STOCK
-      // ==========================
+      // Update product stock
       for (const item of order.products) {
         await Product.findByIdAndUpdate(
           item.productId,
-          {
-            $inc: {
-              stock: -item.quantity,
-            },
-          },
+          { $inc: { stock: -item.quantity } },
           { session }
         );
       }
 
-      // ==========================
-      // UPDATE VENDOR BALANCES
-      // ==========================
-      if (vendor) {
-        // Money vendor can withdraw immediately
-        vendor.availableBalance =
-          (vendor.availableBalance || 0) +
-          (order.immediateWithdrawable || 0);
+      // CRITICAL: Update vendor's balances
+      const immediateAmount = order.immediateWithdrawable || (order.vendorAmount * 0.8);
+      const pendingAmount = order.pendingWithdrawable || (order.vendorAmount * 0.2);
+      
+      // Update vendor balances
+      vendor.availableBalance = (vendor.availableBalance || 0) + immediateAmount;
+      vendor.pendingBalance = (vendor.pendingBalance || 0) + pendingAmount;
+      vendor.totalRevenue = (vendor.totalRevenue || 0) + order.vendorAmount;
+      vendor.lifetimeEarnings = (vendor.lifetimeEarnings || 0) + order.vendorAmount;
+      
+      // Also update legacy fields for compatibility
+      vendor.totalEarned = vendor.totalRevenue;
+      vendor.pendingPayout = vendor.pendingBalance;
+      
+      await vendor.save({ session });
+      
+      console.log(`💰 Vendor ${vendor.businessName} balance updated:
+        Available: ${vendor.availableBalance}, 
+        Pending: ${vendor.pendingBalance},
+        Total Revenue: ${vendor.totalRevenue}`);
 
-        // Money held until settlement
-        vendor.pendingBalance =
-          (vendor.pendingBalance || 0) +
-          (order.pendingWithdrawable || 0);
-
-        // Revenue statistics
-        vendor.totalRevenue =
-          (vendor.totalRevenue || 0) +
-          (order.vendorAmount || 0);
-
-        vendor.lifetimeEarnings =
-          (vendor.lifetimeEarnings || 0) +
-          (order.vendorAmount || 0);
-
-        await vendor.save({ session });
-
-        console.log(
-          `💰 Vendor ${vendor.businessName} balance updated:\n` +
-          `   Available: ${vendor.availableBalance}\n` +
-          `   Pending: ${vendor.pendingBalance}`
-        );
-      }
-
-      console.log(
-        `✅ Order ${order.orderNumber} (${order.vendorId}) marked as paid`
-      );
+      console.log(`✅ Order ${order.orderNumber} marked as paid with immediate payout available`);
     }
 
-    // ==========================
-    // HANDLE REFERRAL COMMISSION
-    // ==========================
+    // Handle referral commission (once for the entire transaction)
     if (referredBy && customerId) {
-      const commissionAmount = transaction.amount * 0.005; // 0.5%
-
+      const commissionAmount = transaction.amount * 0.005; // 0.5% of total
+      
       await User.findByIdAndUpdate(
         referredBy,
-        {
-          $inc: {
+        { 
+          $inc: { 
             referralCommissionEarnings: commissionAmount,
             referralEarnings: commissionAmount,
-            availableBalance: commissionAmount,
-          },
+            availableBalance: commissionAmount
+          } 
         },
         { session }
       );
-
-      console.log(
-        `💰 Added ${commissionAmount} referral commission to user ${referredBy}`
-      );
+      
+      console.log(`💰 Added ${commissionAmount} referral commission to user ${referredBy}`);
     }
 
-    // ==========================
-    // COMMIT TRANSACTION
-    // ==========================
     await session.commitTransaction();
-
-    console.log(
-      `✅ Successfully processed ${updatedOrders.length} orders: ${updatedOrders.join(
-        ', '
-      )}`
-    );
-
+    console.log(`✅ Successfully processed ${updatedOrders.length} orders: ${updatedOrders.join(', ')}`);
     return true;
+
   } catch (error) {
     await session.abortTransaction();
     console.error('❌ Error processing order payment:', error);
