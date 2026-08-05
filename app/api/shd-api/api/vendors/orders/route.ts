@@ -2,7 +2,7 @@ import { verifyToken } from '@/shd-lib/lib/auth';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import Order from '@/shd-models/models/Order';
 import Vendor from '@/shd-models/models/Vendor';
-import User from '@/shd-models/models/User';
+import '@/shd-models/models/User';
 import { NextRequest, NextResponse } from 'next/server';
 
 

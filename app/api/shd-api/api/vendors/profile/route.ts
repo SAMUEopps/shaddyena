@@ -114,6 +114,7 @@ import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import Vendor from '@/shd-models/models/Vendor';
 import { NextRequest, NextResponse } from 'next/server';
 import { IVendor } from '@/shd-models/models/Vendor';
+import '@/shd-models/models/User';
 
 export async function GET(req: NextRequest) {
   try {
