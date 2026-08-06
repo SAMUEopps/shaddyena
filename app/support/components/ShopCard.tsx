@@ -173,9 +173,9 @@ export default function ShopCard({ shop }: ShopCardProps) {
           <span className="text-[10px] sm:text-xs md:text-sm text-muted flex items-center gap-0.5 sm:gap-1">
             📦 {shop.productCount} product{shop.productCount !== 1 ? 's' : ''}
           </span>
-          <span className="text-primary font-bold text-[10px] sm:text-xs md:text-sm lg:text-base">
+          {/*<span className="text-primary font-bold text-[10px] sm:text-xs md:text-sm lg:text-base">
             KSh {shop.totalEarned?.toLocaleString() || 0}
-          </span>
+          </span>*/}
         </div>
       </div>
     </Link>
