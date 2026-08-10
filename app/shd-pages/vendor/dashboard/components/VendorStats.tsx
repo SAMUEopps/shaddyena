@@ -137,7 +137,8 @@ export default function VendorStats({
       label: 'Total Orders',
       value: totalOrders,
       icon: '📋',
-      iconBg: 'bg-blue-100'
+      iconBg: 'bg-blue-100',
+      href: '/shd-pages/vendor/orders'
     },
     {
       label: 'Revenue',
