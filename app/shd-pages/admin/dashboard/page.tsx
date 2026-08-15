@@ -440,7 +440,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-secondary">Recent Users</h2>
             <Link 
-              href="/admin/users" 
+              href="/shad-pages/admin/users" 
               className="text-primary hover:text-accent-dark transition-colors duration-200 font-medium text-sm"
             >
               View All →
