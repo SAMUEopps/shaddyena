@@ -452,9 +452,9 @@ export default function ShopsPage() {
                     <span className="text-muted text-sm">
                       📦 {shop.productCount} product{shop.productCount !== 1 ? 's' : ''}
                     </span>
-                    <span className="text-primary font-bold text-sm">
+                    {/*<span className="text-primary font-bold text-sm">
                       KSh {shop.totalEarned?.toLocaleString() || 0}
-                    </span>
+                    </span>*/}
                   </div>
                 </div>
               </Link>

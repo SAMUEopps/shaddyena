@@ -716,14 +716,14 @@ export default function ShopDetail() {
                 <span className="flex items-center gap-1.5 text-sm bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">
                   📱 {shop.phoneNumber}
                 </span>
-                <span className="flex items-center gap-1.5 text-sm bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">
+                {/*<span className="flex items-center gap-1.5 text-sm bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">
                   💰 {shop.payoutMethod}
-                </span>
+                </span>*/}
               </div>
             </div>
 
             {/* Stats */}
-            <div className="flex flex-wrap sm:flex-nowrap gap-3 pb-4 w-full sm:w-auto">
+            {/*<div className="flex flex-wrap sm:flex-nowrap gap-3 pb-4 w-full sm:w-auto">
               <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2.5 text-center min-w-[80px] shadow-sm flex-1 sm:flex-none">
                 <p className="text-xl sm:text-2xl font-black text-primary">{shop.stats.totalOrders}</p>
                 <p className="text-xs text-muted font-medium">Orders</p>
@@ -738,7 +738,7 @@ export default function ShopDetail() {
                 <p className="text-xl sm:text-2xl font-black text-secondary">{shop.stats.completedOrders}</p>
                 <p className="text-xs text-muted font-medium">Completed</p>
               </div>
-            </div>
+            </div>*/}
           </div>
         </div>
       </div>
