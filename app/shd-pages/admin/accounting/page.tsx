@@ -296,7 +296,7 @@ export default function AccountingPage() {
         {/* Revenue Trend */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-surface">
           <h3 className="text-lg font-bold text-secondary mb-4">📈 Revenue Trend</h3>
-          <ResponsiveContainer width="100%" height={300}>
+          {/*<ResponsiveContainer width="100%" height={300}>
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -319,13 +319,51 @@ export default function AccountingPage() {
                 fill="url(#colorRevenue)" 
               />
             </AreaChart>
+          </ResponsiveContainer>*/}
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#e50986" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#e50986" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 12 }}
+              />
+
+              <YAxis
+                tickFormatter={(value) =>
+                  `KSh ${(Number(value) / 1000).toFixed(0)}K`
+                }
+              />
+
+              <Tooltip
+                formatter={(value) =>
+                  formatCurrency(Number(value ?? 0))
+                }
+                labelFormatter={(label) => `Date: ${label}`}
+              />
+
+              <Area
+                type="monotone"
+                dataKey="amount"
+                stroke="#e50986"
+                fillOpacity={1}
+                fill="url(#colorRevenue)"
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
 
         {/* Revenue by Type */}
         <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-surface">
           <h3 className="text-lg font-bold text-secondary mb-4">🎯 Revenue by Type</h3>
-          <ResponsiveContainer width="100%" height={300}>
+          {/*<ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
                 data={pieData}
@@ -342,6 +380,36 @@ export default function AccountingPage() {
                 ))}
               </Pie>
               <Tooltip formatter={(value: number) => formatCurrency(value)} />
+            </PieChart>
+          </ResponsiveContainer>*/}
+
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) =>
+                  `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+                }
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {pieData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+
+              <Tooltip
+                formatter={(value) =>
+                  formatCurrency(Number(value ?? 0))
+                }
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
