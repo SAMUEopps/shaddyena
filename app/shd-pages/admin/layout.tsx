@@ -188,6 +188,7 @@ export default function AdminLayout({
 
   const navItems = [
     { href: '/shd-pages/admin/dashboard', label: 'Dashboard', icon: '📊' },
+    { href: '/shd-pages/admin/accounting', label: ' Accounting', icon: '📊' },
     { href: '/shd-pages/admin/users', label: 'Users', icon: '👥' },
     { href: '/shd-pages/admin/vendors', label: 'Vendors', icon: '🏪' },
     { href: '/shd-pages/admin/riders', label: 'Riders', icon: '🏍️' },
