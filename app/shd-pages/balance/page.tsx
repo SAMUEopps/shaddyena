@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
@@ -7,8 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
    TYPES
 ========================================================= */
 
-interface CurrentBalance {
-  _id?: string;
+interface BalanceAccount {
   accountName: string;
   currency: string;
   availableBalance: number;
@@ -18,20 +16,15 @@ interface CurrentBalance {
 }
 
 interface BalanceData {
-  balance: CurrentBalance | null;
+  balance: BalanceAccount | null;
+
+  // Individual Safaricom accounts
+  accounts: BalanceAccount[];
+
   timestamp: string;
   resultCode: string;
   resultDesc: string;
   success: boolean;
-}
-
-interface FullBalanceItem {
-  accountName: string;
-  currency: string;
-  availableBalance: number;
-  currentBalance: number;
-  unclearedBalance: number;
-  reservedBalance: number;
 }
 
 interface BalanceHistory {
@@ -39,7 +32,7 @@ interface BalanceHistory {
   accountName: string;
   balance: number;
   currency: string;
-  fullBalance: FullBalanceItem[];
+  fullBalance: BalanceAccount[];
   resultCode: string;
   resultDesc: string;
   timestamp: string;
@@ -51,122 +44,221 @@ interface BalanceHistory {
 
 export default function BalancePage() {
   const [loading, setLoading] = useState(false);
-  const [balanceData, setBalanceData] = useState<BalanceData | null>(null);
-  const [balanceHistory, setBalanceHistory] = useState<BalanceHistory[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [lastChecked, setLastChecked] = useState<string | null>(null);
-  const [showHistory, setShowHistory] = useState(false);
+
+  const [balanceData, setBalanceData] =
+    useState<BalanceData | null>(null);
+
+  const [balanceHistory, setBalanceHistory] =
+    useState<BalanceHistory[]>([]);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  const [lastChecked, setLastChecked] =
+    useState<string | null>(null);
+
+  const [showHistory, setShowHistory] =
+    useState(false);
+
+  /* =======================================================
+     FORMAT MONEY
+  ======================================================= */
+
+  const formatAmount = (
+    amount: number | undefined | null
+  ) => {
+    if (
+      amount === undefined ||
+      amount === null ||
+      Number.isNaN(Number(amount))
+    ) {
+      return '0.00';
+    }
+
+    return Number(amount).toLocaleString('en-KE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
 
   /* =======================================================
      FETCH HISTORY
   ======================================================= */
 
-  const fetchBalanceHistory = useCallback(async () => {
-    try {
-      const response = await fetch(
-        '/api/shd-api/api/mpesa/balance/history',
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cache: 'no-store',
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch balance history');
-      }
-
-      const data = await response.json();
-
-      if (data.success && Array.isArray(data.data)) {
-        setBalanceHistory(data.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch history:', error);
-    }
-  }, []);
-
-  /* =======================================================
-     GET LATEST BALANCE RESULT
-  ======================================================= */
-
-  const getLatestBalance = useCallback(async () => {
-    try {
-      const response = await fetch(
-        '/api/shd-api/api/mpesa/balance-result/get',
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cache: 'no-store',
-        }
-      );
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const data = await response.json();
-
-      if (data.success && data.balance) {
-        return data as BalanceData;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Failed to get balance result:', error);
-      return null;
-    }
-  }, []);
-
-  /* =======================================================
-     POLL BALANCE RESULT
-  ======================================================= */
-
-  const pollBalanceResult = useCallback(async () => {
-    const maxAttempts = 15;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  const fetchBalanceHistory = useCallback(
+    async () => {
       try {
-        const result = await getLatestBalance();
+        const response = await fetch(
+          '/api/shd-api/api/mpesa/balance/history',
+          {
+            method: 'GET',
+            cache: 'no-store',
+          }
+        );
 
-        if (result?.success && result.balance) {
-          setBalanceData(result);
-          setLastChecked(
-            new Date(result.timestamp).toLocaleString()
+        if (!response.ok) {
+          throw new Error(
+            'Failed to fetch balance history'
           );
+        }
 
-          await fetchBalanceHistory();
+        const data = await response.json();
 
-          setLoading(false);
-
-          return true;
+        if (
+          data.success &&
+          Array.isArray(data.data)
+        ) {
+          setBalanceHistory(data.data);
         }
       } catch (error) {
-        console.error('Polling error:', error);
-      }
-
-      /*
-       * Wait 3 seconds before checking again.
-       * Don't wait after the final attempt.
-       */
-      if (attempt < maxAttempts) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, 3000)
+        console.error(
+          'Failed to fetch history:',
+          error
         );
       }
-    }
+    },
+    []
+  );
 
-    setLoading(false);
-    setError(
-      'Balance query timed out. Please try again.'
-    );
+  /* =======================================================
+     GET LATEST BALANCE
+  ======================================================= */
 
-    return false;
-  }, [fetchBalanceHistory, getLatestBalance]);
+  const getLatestBalance = useCallback(
+    async (): Promise<BalanceData | null> => {
+      try {
+        const response = await fetch(
+          '/api/shd-api/api/mpesa/balance-result/get',
+          {
+            method: 'GET',
+            cache: 'no-store',
+          }
+        );
+
+        if (!response.ok) {
+          return null;
+        }
+
+        const data = await response.json();
+
+        if (
+          data.success &&
+          data.balance
+        ) {
+          return {
+            success: true,
+
+            balance: data.balance,
+
+            accounts: Array.isArray(
+              data.accounts
+            )
+              ? data.accounts
+              : [],
+
+            timestamp: data.timestamp,
+
+            resultCode: String(
+              data.resultCode
+            ),
+
+            resultDesc:
+              data.resultDesc || '',
+          };
+        }
+
+        return null;
+      } catch (error) {
+        console.error(
+          'Failed to get balance result:',
+          error
+        );
+
+        return null;
+      }
+    },
+    []
+  );
+
+  /* =======================================================
+     POLL FOR NEW BALANCE
+  ======================================================= */
+
+  const pollBalanceResult = useCallback(
+    async (requestStartedAt: number) => {
+      const maxAttempts = 15;
+
+      for (
+        let attempt = 1;
+        attempt <= maxAttempts;
+        attempt++
+      ) {
+        try {
+          const result =
+            await getLatestBalance();
+
+          if (
+            result?.success &&
+            result.balance
+          ) {
+            const resultTime =
+              new Date(
+                result.timestamp
+              ).getTime();
+
+            /*
+             * Only accept a result created after
+             * this balance request started.
+             *
+             * This prevents us from accidentally
+             * displaying an old balance.
+             */
+            if (
+              resultTime >= requestStartedAt
+            ) {
+              setBalanceData(result);
+
+              setLastChecked(
+                new Date(
+                  result.timestamp
+                ).toLocaleString()
+              );
+
+              await fetchBalanceHistory();
+
+              setLoading(false);
+
+              return true;
+            }
+          }
+        } catch (error) {
+          console.error(
+            'Polling error:',
+            error
+          );
+        }
+
+        if (attempt < maxAttempts) {
+          await new Promise(
+            (resolve) =>
+              setTimeout(resolve, 3000)
+          );
+        }
+      }
+
+      setLoading(false);
+
+      setError(
+        'Balance query timed out. Please try again.'
+      );
+
+      return false;
+    },
+    [
+      fetchBalanceHistory,
+      getLatestBalance,
+    ]
+  );
 
   /* =======================================================
      REQUEST NEW BALANCE
@@ -176,48 +268,76 @@ export default function BalancePage() {
     setLoading(true);
     setError(null);
 
+    /*
+     * Record the exact time before making the
+     * request. We use this to identify the new
+     * webhook response.
+     */
+    const requestStartedAt =
+      Date.now();
+
     try {
       const response = await fetch(
         '/api/shd-api/api/mpesa/balance',
         {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type':
+              'application/json',
           },
           cache: 'no-store',
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.error || 'Failed to initiate balance request'
+          data.error ||
+            'Failed to initiate balance request'
         );
       }
 
-      console.log('Balance request response:', data);
+      console.log(
+        'Balance request response:',
+        data
+      );
 
       /*
-       * Show pending state immediately.
+       * Pending state.
        */
       setBalanceData({
         success: true,
+
         balance: null,
-        timestamp: new Date().toISOString(),
+
+        accounts: [],
+
+        timestamp:
+          new Date().toISOString(),
+
         resultCode: 'pending',
+
         resultDesc:
           'Balance query initiated. Waiting for M-PESA response...',
       });
 
-      setLastChecked(new Date().toLocaleString());
+      setLastChecked(
+        new Date().toLocaleString()
+      );
 
       /*
-       * Start polling.
+       * Wait for Safaricom webhook.
        */
-      await pollBalanceResult();
+      await pollBalanceResult(
+        requestStartedAt
+      );
     } catch (error: any) {
-      console.error('Error fetching balance:', error);
+      console.error(
+        'Error fetching balance:',
+        error
+      );
 
       setError(
         error?.message ||
@@ -233,63 +353,60 @@ export default function BalancePage() {
   ======================================================= */
 
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const latestBalance = await getLatestBalance();
+    const loadInitialData =
+      async () => {
+        try {
+          const latestBalance =
+            await getLatestBalance();
 
-        if (latestBalance?.balance) {
-          setBalanceData(latestBalance);
+          if (
+            latestBalance?.balance
+          ) {
+            setBalanceData(
+              latestBalance
+            );
 
-          setLastChecked(
-            new Date(
-              latestBalance.timestamp
-            ).toLocaleString()
+            setLastChecked(
+              new Date(
+                latestBalance.timestamp
+              ).toLocaleString()
+            );
+          }
+
+          await fetchBalanceHistory();
+        } catch (error) {
+          console.error(
+            'Failed to load initial balance data:',
+            error
           );
         }
-
-        await fetchBalanceHistory();
-      } catch (error) {
-        console.error(
-          'Failed to load initial balance data:',
-          error
-        );
-      }
-    };
+      };
 
     loadInitialData();
-  }, [fetchBalanceHistory, getLatestBalance]);
+  }, [
+    fetchBalanceHistory,
+    getLatestBalance,
+  ]);
 
   /* =======================================================
-     HELPERS
+     STATUS
   ======================================================= */
-
-  const formatAmount = (
-    amount: number | undefined | null
-  ) => {
-    if (
-      amount === undefined ||
-      amount === null ||
-      Number.isNaN(amount)
-    ) {
-      return '0.00';
-    }
-
-    return amount.toLocaleString('en-KE', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
 
   const getStatusLabel = () => {
     if (!balanceData) {
       return 'Unknown';
     }
 
-    if (balanceData.resultCode === '0') {
+    if (
+      balanceData.resultCode === '0'
+    ) {
       return 'Success';
     }
 
-    if (balanceData.resultCode === 'pending') {
+    if (
+      balanceData.resultCode ===
+      'pending'
+    ) {
       return 'Pending';
     }
 
@@ -301,16 +418,49 @@ export default function BalancePage() {
       return 'bg-gray-100 text-gray-800';
     }
 
-    if (balanceData.resultCode === '0') {
+    if (
+      balanceData.resultCode === '0'
+    ) {
       return 'bg-green-100 text-green-800';
     }
 
-    if (balanceData.resultCode === 'pending') {
+    if (
+      balanceData.resultCode ===
+      'pending'
+    ) {
       return 'bg-yellow-100 text-yellow-800';
     }
 
     return 'bg-red-100 text-red-800';
   };
+
+  const getStatusDotClasses = () => {
+    if (!balanceData) {
+      return 'bg-gray-500';
+    }
+
+    if (
+      balanceData.resultCode === '0'
+    ) {
+      return 'bg-green-500';
+    }
+
+    if (
+      balanceData.resultCode ===
+      'pending'
+    ) {
+      return 'bg-yellow-500';
+    }
+
+    return 'bg-red-500';
+  };
+
+  /* =======================================================
+     TOTALS
+  ======================================================= */
+
+  const totalAccounts =
+    balanceData?.accounts?.length || 0;
 
   /* =======================================================
      RENDER
@@ -333,8 +483,8 @@ export default function BalancePage() {
               </h1>
 
               <p className="mt-1 text-sm text-gray-500">
-                View your current M-PESA account balance and
-                balance history.
+                View your current M-PESA account
+                balance and account breakdown.
               </p>
             </div>
 
@@ -343,9 +493,11 @@ export default function BalancePage() {
               <button
                 type="button"
                 onClick={() =>
-                  setShowHistory(!showHistory)
+                  setShowHistory(
+                    !showHistory
+                  )
                 }
-                className="inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition"
+                className="inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 transition"
               >
                 {showHistory
                   ? 'Hide History'
@@ -356,12 +508,12 @@ export default function BalancePage() {
                 type="button"
                 onClick={fetchBalance}
                 disabled={loading}
-                className="inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {loading ? (
                   <>
                     <svg
-                      className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                      className="animate-spin -ml-1 mr-2 h-5 w-5"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -401,19 +553,17 @@ export default function BalancePage() {
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-start">
 
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
+              <svg
+                className="h-5 w-5 text-red-500 flex-shrink-0"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
 
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">
@@ -430,15 +580,15 @@ export default function BalancePage() {
         )}
 
         {/* =================================================
-            BALANCE CARDS
+            BALANCE SECTION
         ================================================= */}
 
         {balanceData && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {/* =============================================
+            {/* =================================================
                 MAIN BALANCE
-            ============================================= */}
+            ================================================= */}
 
             <div className="lg:col-span-2 bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl shadow-lg p-6 sm:p-8 text-white">
 
@@ -447,8 +597,9 @@ export default function BalancePage() {
                   <div className="flex items-start justify-between">
 
                     <div>
+
                       <p className="text-sm font-medium text-green-100">
-                        Current Balance
+                        Total Current Balance
                       </p>
 
                       <h2 className="mt-3 text-4xl sm:text-5xl font-bold tracking-tight">
@@ -459,11 +610,13 @@ export default function BalancePage() {
                       </h2>
 
                       <p className="mt-3 text-sm text-green-100">
-                        {balanceData.balance.accountName}
+                        All M-PESA accounts combined
                       </p>
+
                     </div>
 
                     <div className="hidden sm:flex h-12 w-12 rounded-full bg-white/10 items-center justify-center">
+
                       <svg
                         className="h-6 w-6"
                         fill="none"
@@ -477,9 +630,12 @@ export default function BalancePage() {
                           d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v1m0-1v-1m0 1V6m0 1V5m0 1V4m0 1V3"
                         />
                       </svg>
+
                     </div>
 
                   </div>
+
+                  {/* TOTAL BALANCE METRICS */}
 
                   <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
 
@@ -534,9 +690,9 @@ export default function BalancePage() {
                   </h2>
 
                   <p className="mt-2 text-sm text-green-100 max-w-md">
-                    The balance request has been submitted.
-                    We are waiting for the asynchronous M-PESA
-                    response.
+                    Your balance request has been
+                    submitted. Waiting for the
+                    asynchronous M-PESA response.
                   </p>
 
                 </div>
@@ -544,9 +700,9 @@ export default function BalancePage() {
 
             </div>
 
-            {/* =============================================
+            {/* =================================================
                 STATUS
-            ============================================= */}
+            ================================================= */}
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
 
@@ -555,25 +711,20 @@ export default function BalancePage() {
               </p>
 
               <div className="mt-4">
+
                 <span
                   className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusClasses()}`}
                 >
                   <span
-                    className={`mr-2 h-2 w-2 rounded-full ${
-                      balanceData.resultCode === '0'
-                        ? 'bg-green-500'
-                        : balanceData.resultCode ===
-                          'pending'
-                        ? 'bg-yellow-500'
-                        : 'bg-red-500'
-                    }`}
+                    className={`mr-2 h-2 w-2 rounded-full ${getStatusDotClasses()}`}
                   />
 
                   {getStatusLabel()}
                 </span>
+
               </div>
 
-              <div className="mt-6 space-y-4">
+              <div className="mt-6 space-y-5">
 
                 <div>
                   <p className="text-xs text-gray-500">
@@ -598,11 +749,22 @@ export default function BalancePage() {
 
                 <div>
                   <p className="text-xs text-gray-500">
+                    Accounts Returned
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-gray-900">
+                    {totalAccounts}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500">
                     Last Updated
                   </p>
 
                   <p className="mt-1 text-sm text-gray-900">
-                    {lastChecked || 'Not checked yet'}
+                    {lastChecked ||
+                      'Not checked yet'}
                   </p>
                 </div>
 
@@ -643,8 +805,9 @@ export default function BalancePage() {
             </h3>
 
             <p className="mt-2 text-sm text-gray-500 max-w-md mx-auto">
-              Click the "Check Balance" button to request
-              the current M-PESA Paybill balance.
+              Click the "Check Balance" button to
+              request the current M-PESA Paybill
+              balance.
             </p>
 
             <button
@@ -660,6 +823,134 @@ export default function BalancePage() {
 
           </div>
         )}
+
+        {/* =================================================
+            INDIVIDUAL ACCOUNT BREAKDOWN
+        ================================================= */}
+
+        {balanceData?.balance &&
+          balanceData.accounts.length > 0 && (
+            <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+
+              <div className="px-6 py-5 border-b border-gray-200">
+
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      M-PESA Account Breakdown
+                    </h2>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                      Individual accounts returned by
+                      the M-PESA Account Balance API.
+                    </p>
+                  </div>
+
+                  <span className="text-sm text-gray-500">
+                    {totalAccounts}{' '}
+                    {totalAccounts === 1
+                      ? 'account'
+                      : 'accounts'}
+                  </span>
+
+                </div>
+
+              </div>
+
+              <div className="overflow-x-auto">
+
+                <table className="min-w-full divide-y divide-gray-200">
+
+                  <thead className="bg-gray-50">
+
+                    <tr>
+
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Account
+                      </th>
+
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Current
+                      </th>
+
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Available
+                      </th>
+
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Uncleared
+                      </th>
+
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Reserved
+                      </th>
+
+                    </tr>
+
+                  </thead>
+
+                  <tbody className="bg-white divide-y divide-gray-200">
+
+                    {balanceData.accounts.map(
+                      (account, index) => (
+                        <tr
+                          key={`${account.accountName}-${index}`}
+                          className="hover:bg-gray-50 transition"
+                        >
+
+                          <td className="px-6 py-4 whitespace-nowrap">
+
+                            <div className="text-sm font-medium text-gray-900">
+                              {account.accountName}
+                            </div>
+
+                            <div className="text-xs text-gray-500">
+                              {account.currency}
+                            </div>
+
+                          </td>
+
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
+                            {account.currency}{' '}
+                            {formatAmount(
+                              account.currentBalance
+                            )}
+                          </td>
+
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+                            {account.currency}{' '}
+                            {formatAmount(
+                              account.availableBalance
+                            )}
+                          </td>
+
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+                            {account.currency}{' '}
+                            {formatAmount(
+                              account.unclearedBalance
+                            )}
+                          </td>
+
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+                            {account.currency}{' '}
+                            {formatAmount(
+                              account.reservedBalance
+                            )}
+                          </td>
+
+                        </tr>
+                      )
+                    )}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+          )}
 
         {/* =================================================
             HISTORY
@@ -715,7 +1006,7 @@ export default function BalancePage() {
                       </th>
 
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Balance
+                        Total Balance
                       </th>
 
                       <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -732,74 +1023,78 @@ export default function BalancePage() {
 
                   <tbody className="bg-white divide-y divide-gray-200">
 
-                    {balanceHistory.map((record) => (
+                    {balanceHistory.map(
+                      (record) => (
+                        <tr
+                          key={record._id}
+                          className="hover:bg-gray-50 transition"
+                        >
 
-                      <tr
-                        key={record._id}
-                        className="hover:bg-gray-50 transition"
-                      >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {record.timestamp
+                              ? new Date(
+                                  record.timestamp
+                                ).toLocaleString()
+                              : '—'}
+                          </td>
 
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {record.timestamp
-                            ? new Date(
-                                record.timestamp
-                              ).toLocaleString()
-                            : '—'}
-                        </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
 
-                        <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {record.accountName ||
+                                'M-Pesa Total'}
+                            </div>
 
-                          <div className="text-sm font-medium text-gray-900">
-                            {record.accountName || '—'}
-                          </div>
+                            <div className="text-xs text-gray-500">
+                              {record.currency ||
+                                'KES'}
+                            </div>
 
-                          <div className="text-xs text-gray-500">
-                            {record.currency || 'KES'}
-                          </div>
+                          </td>
 
-                        </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-semibold">
 
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-semibold">
+                            {record.currency ||
+                              'KES'}{' '}
 
-                          {record.currency || 'KES'}{' '}
+                            {formatAmount(
+                              record.balance
+                            )}
 
-                          {formatAmount(
-                            record.balance
-                          )}
+                          </td>
 
-                        </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
 
-                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                            {Array.isArray(
+                              record.fullBalance
+                            )
+                              ? record.fullBalance
+                                  .length
+                              : 0}
 
-                          {Array.isArray(
-                            record.fullBalance
-                          )
-                            ? record.fullBalance.length
-                            : 0}
+                          </td>
 
-                        </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
 
-                        <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                                record.resultCode ===
+                                '0'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              {record.resultCode ===
+                              '0'
+                                ? 'Success'
+                                : 'Failed'}
+                            </span>
 
-                          <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                              record.resultCode === '0'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}
-                          >
+                          </td>
 
-                            {record.resultCode === '0'
-                              ? 'Success'
-                              : 'Failed'}
-
-                          </span>
-
-                        </td>
-
-                      </tr>
-
-                    ))}
+                        </tr>
+                      )
+                    )}
 
                   </tbody>
 
@@ -807,92 +1102,6 @@ export default function BalancePage() {
 
               </div>
             )}
-
-          </div>
-        )}
-
-        {/* =================================================
-            DETAILED ACCOUNTS FROM LATEST RESPONSE
-        ================================================= */}
-
-        {balanceData?.balance && (
-          <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-
-            <div className="mb-5">
-
-              <h2 className="text-xl font-semibold text-gray-900">
-                Account Details
-              </h2>
-
-              <p className="mt-1 text-sm text-gray-500">
-                Detailed balances returned by M-PESA.
-              </p>
-
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
-              <div className="rounded-xl bg-gray-50 border border-gray-200 p-4">
-
-                <p className="text-xs text-gray-500">
-                  Current Balance
-                </p>
-
-                <p className="mt-2 text-lg font-semibold text-gray-900">
-                  {balanceData.balance.currency}{' '}
-                  {formatAmount(
-                    balanceData.balance.currentBalance
-                  )}
-                </p>
-
-              </div>
-
-              <div className="rounded-xl bg-gray-50 border border-gray-200 p-4">
-
-                <p className="text-xs text-gray-500">
-                  Available Balance
-                </p>
-
-                <p className="mt-2 text-lg font-semibold text-gray-900">
-                  {balanceData.balance.currency}{' '}
-                  {formatAmount(
-                    balanceData.balance.availableBalance
-                  )}
-                </p>
-
-              </div>
-
-              <div className="rounded-xl bg-gray-50 border border-gray-200 p-4">
-
-                <p className="text-xs text-gray-500">
-                  Uncleared Balance
-                </p>
-
-                <p className="mt-2 text-lg font-semibold text-gray-900">
-                  {balanceData.balance.currency}{' '}
-                  {formatAmount(
-                    balanceData.balance.unclearedBalance
-                  )}
-                </p>
-
-              </div>
-
-              <div className="rounded-xl bg-gray-50 border border-gray-200 p-4">
-
-                <p className="text-xs text-gray-500">
-                  Reserved Balance
-                </p>
-
-                <p className="mt-2 text-lg font-semibold text-gray-900">
-                  {balanceData.balance.currency}{' '}
-                  {formatAmount(
-                    balanceData.balance.reservedBalance
-                  )}
-                </p>
-
-              </div>
-
-            </div>
 
           </div>
         )}
