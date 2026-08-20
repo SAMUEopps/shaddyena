@@ -59,7 +59,7 @@ export interface TransactionDocument extends Document {
     checkoutRequestId?: string;
     [key: string]: any;
   };
-  save(): Promise<this>;
+  //save(): Promise<this>;
 }
 
 export interface PaymentResult {
