@@ -56,8 +56,8 @@ export async function GET(request: NextRequest) {
       PartyA: SHORTCODE,
       IdentifierType: '4',
       Remarks: 'Balance Query',
-      QueueTimeOutURL: `${baseUrl}/api/mpesa/balance-timeout`,
-      ResultURL: `${baseUrl}/api/mpesa/balance-result`, // This will go to your callback system
+      QueueTimeOutURL: `${baseUrl}/api/shd-api/api/mpesa/balance-timeout`,
+      ResultURL: `${baseUrl}/api/shd-api/api/mpesa/balance-result`, // This will go to your callback system
     };
 
     console.log('📊 Balance Query Payload:', payload);

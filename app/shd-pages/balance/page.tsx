@@ -37,7 +37,7 @@ export default function BalancePage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/shad-api/api/mpesa/balance', {
+      const response = await fetch('/api/shd-api/api/mpesa/balance', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
