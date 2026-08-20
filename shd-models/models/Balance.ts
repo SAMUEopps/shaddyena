@@ -83,6 +83,90 @@
 // export default mongoose.models.Balance || mongoose.model<IBalance>('Balance', BalanceSchema);
 
 
+// import mongoose, { Schema, Document } from 'mongoose';
+
+// export interface IBalance extends Document {
+//   shortcode: string;
+//   accountName: string;
+//   balance: number;
+//   currency: string;
+//   fullBalance: string;
+//   resultCode: string;
+//   resultDesc: string;
+//   conversationID?: string;
+//   originatorConversationID?: string;
+//   transactionID?: string;
+//   timestamp: Date;
+//   expiresAt?: Date;
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
+
+// const BalanceSchema = new Schema<IBalance>(
+//   {
+//     shortcode: {
+//       type: String,
+//       required: true,
+//       index: true,
+//     },
+//     accountName: {
+//       type: String,
+//       required: true,
+//     },
+//     balance: {
+//       type: Number,
+//       required: true,
+//     },
+//     currency: {
+//       type: String,
+//       default: 'KES',
+//     },
+//     fullBalance: {
+//       type: String,
+//       required: true,
+//     },
+//     resultCode: {
+//       type: String,
+//       required: true,
+//     },
+//     resultDesc: {
+//       type: String,
+//       required: true,
+//     },
+//     conversationID: {
+//       type: String,
+//       sparse: true,
+//     },
+//     originatorConversationID: {
+//       type: String,
+//       sparse: true,
+//     },
+//     transactionID: {
+//       type: String,
+//       sparse: true,
+//     },
+//     timestamp: {
+//       type: Date,
+//       default: Date.now,
+//     },
+//     expiresAt: {
+//       type: Date,
+//       default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+//     },
+//   },
+//   {
+//     timestamps: true,
+//   }
+// );
+
+// // Index for TTL (auto-delete after expiry)
+// BalanceSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+// // Index for querying latest balance
+// BalanceSchema.index({ shortcode: 1, timestamp: -1 });
+
+// export default mongoose.models.Balance || mongoose.model<IBalance>('Balance', BalanceSchema);
+
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IBalance extends Document {
@@ -90,7 +174,17 @@ export interface IBalance extends Document {
   accountName: string;
   balance: number;
   currency: string;
-  fullBalance: string;
+
+  // Stores all M-Pesa account balances
+  fullBalance: Array<{
+    accountName: string;
+    currency: string;
+    availableBalance: number;
+    currentBalance: number;
+    unclearedBalance: number;
+    reservedBalance: number;
+  }>;
+
   resultCode: string;
   resultDesc: string;
   conversationID?: string;
@@ -109,60 +203,118 @@ const BalanceSchema = new Schema<IBalance>(
       required: true,
       index: true,
     },
+
     accountName: {
       type: String,
       required: true,
     },
+
     balance: {
       type: Number,
       required: true,
     },
+
     currency: {
       type: String,
       default: 'KES',
     },
+
     fullBalance: {
-      type: String,
+      type: [
+        {
+          accountName: {
+            type: String,
+            required: true,
+          },
+
+          currency: {
+            type: String,
+            required: true,
+          },
+
+          availableBalance: {
+            type: Number,
+            default: 0,
+          },
+
+          currentBalance: {
+            type: Number,
+            default: 0,
+          },
+
+          unclearedBalance: {
+            type: Number,
+            default: 0,
+          },
+
+          reservedBalance: {
+            type: Number,
+            default: 0,
+          },
+        },
+      ],
       required: true,
     },
+
     resultCode: {
       type: String,
       required: true,
     },
+
     resultDesc: {
       type: String,
       required: true,
     },
+
     conversationID: {
       type: String,
       sparse: true,
     },
+
     originatorConversationID: {
       type: String,
       sparse: true,
     },
+
     transactionID: {
       type: String,
       sparse: true,
     },
+
     timestamp: {
       type: Date,
       default: Date.now,
     },
+
     expiresAt: {
       type: Date,
-      default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      default: () =>
+        new Date(
+          Date.now() +
+          30 * 24 * 60 * 60 * 1000
+        ),
     },
   },
+
   {
     timestamps: true,
   }
 );
 
-// Index for TTL (auto-delete after expiry)
-BalanceSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// TTL index
+BalanceSchema.index(
+  { expiresAt: 1 },
+  { expireAfterSeconds: 0 }
+);
 
-// Index for querying latest balance
-BalanceSchema.index({ shortcode: 1, timestamp: -1 });
+// Latest balance
+BalanceSchema.index({
+  shortcode: 1,
+  timestamp: -1,
+});
 
-export default mongoose.models.Balance || mongoose.model<IBalance>('Balance', BalanceSchema);
+export default mongoose.models.Balance ||
+  mongoose.model<IBalance>(
+    'Balance',
+    BalanceSchema
+  );
