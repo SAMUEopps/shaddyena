@@ -34,16 +34,45 @@ export interface C2BCallbackData {
   TransTime?: string;
 }
 
+// export interface TransactionDocument extends Document {
+//   _id: Types.ObjectId;
+//   transactionId: string;
+//   checkoutRequestId?: string;
+//   accountReference?: string;
+//   type: 'order' | 'membership' | 'savings' | 'investment' | 'advertisement' | 'subscription';
+//   status: 'pending' | 'success' | 'failed';
+//   amount: number;
+//   phoneNumber: string;
+//   userId: Types.ObjectId;
+//   receiptNumber?: string;
+//   errorMessage?: string;
+//   metadata?: {
+//     orders?: string[];
+//     customerId?: string;
+//     referredBy?: string;
+//     adId?: string;
+//     vendorId?: string;
+//     subscriptionId?: string;
+//     investmentId?: string;
+//     description?: string;
+//     accountReference?: string;
+//     checkoutRequestId?: string;
+//     [key: string]: any;
+//   };
+//   //save(): Promise<this>;
+// }
+
 export interface TransactionDocument extends Document {
   _id: Types.ObjectId;
   transactionId: string;
   checkoutRequestId?: string;
   accountReference?: string;
-  type: 'order' | 'membership' | 'savings' | 'investment' | 'advertisement' | 'subscription';
-  status: 'pending' | 'success' | 'failed';
+  type: 'order' | 'membership' | 'savings' | 'investment' | 'payout' | 'refund' | 'advertisement' | 'subscription' | 'petty_cash_deposit' | 'petty_cash_payout';
+  status: 'pending' | 'success' | 'failed' | 'cancelled';
   amount: number;
   phoneNumber: string;
   userId: Types.ObjectId;
+  budgetId?: Types.ObjectId;
   receiptNumber?: string;
   errorMessage?: string;
   metadata?: {
@@ -54,12 +83,14 @@ export interface TransactionDocument extends Document {
     vendorId?: string;
     subscriptionId?: string;
     investmentId?: string;
+    budgetId?: string;
     description?: string;
     accountReference?: string;
     checkoutRequestId?: string;
     [key: string]: any;
   };
-  //save(): Promise<this>;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface PaymentResult {

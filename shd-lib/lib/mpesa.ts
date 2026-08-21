@@ -1,3 +1,5 @@
+//C:\Users\Administrator\Desktop\new\New folder\shaddyena\shd-lib\lib\mpesa.ts
+
 import axios from 'axios';
 import crypto from 'crypto';
 
@@ -37,40 +39,7 @@ export async function getAccessToken() {
   }
 }
 
-/*export async function initSTKPush(phoneNumber: string, amount: number, accountReference: string) {
-  try {
-    const token = await getAccessToken();
-    const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
-    const password = Buffer.from(`${SHORTCODE}${PASSKEY}${timestamp}`).toString('base64');
 
-    const response = await axios.post(
-      `${BASE_URL}/mpesa/stkpush/v1/processrequest`,
-      {
-        BusinessShortCode: SHORTCODE,
-        Password: password,
-        Timestamp: timestamp,
-        TransactionType: 'CustomerPayBillOnline',
-        Amount: Math.round(amount),
-        PartyA: phoneNumber,
-        PartyB: SHORTCODE,
-        PhoneNumber: phoneNumber,
-        CallBackURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api/callback`,
-        AccountReference: accountReference,
-        TransactionDesc: 'Shaddyna Payment',
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error('STK Push failed:', error);
-    throw error;
-  }
-}*/
 
 export async function initSTKPush(
   phoneNumber: string,
@@ -165,42 +134,7 @@ export async function queryTransactionStatus(checkoutRequestId: string) {
   }
 }
 
-/*export async function processB2CPayment(
-  phoneNumber: string,
-  amount: number,
-  commandId: 'BusinessPayment' | 'SalaryPayment' | 'PromotionPayment',
-  remarks: string,
-  occasion?: string
-) {
-  try {
-    const token = await getAccessToken();
-    const response = await axios.post(
-      `${BASE_URL}/mpesa/b2c/v3/paymentrequest`,
-      {
-        InitiatorName: process.env.MPESA_INITIATOR_NAME,
-        SecurityCredential: process.env.MPESA_SECURITY_CREDENTIAL,
-        CommandID: commandId,
-        Amount: Math.round(amount),
-        PartyA: SHORTCODE,
-        PartyB: phoneNumber,
-        Remarks: remarks,
-        QueueTimeOutURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api/payouts/timeout`,
-        ResultURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api/payouts/result`,
-        Occasion: occasion || 'Shaddyna Payout',
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
 
-    return response.data;
-  } catch (error) {
-    console.error('B2C payment failed:', error);
-    throw error;
-  }
-}*/
 
 export async function processB2CPayment(
   phoneNumber: string,
