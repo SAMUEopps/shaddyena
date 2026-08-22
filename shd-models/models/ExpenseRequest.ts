@@ -9,7 +9,7 @@ export interface IExpenseRequest extends Document {
   recipientName: string;
   category: string;
   description: string;
-  status: 'pending' | 'approved' | 'rejected' | 'paid' | 'failed';
+  status: 'pending' | 'approved' | 'rejected' | 'paid' | 'failed' | 'processing';
   requesterId: mongoose.Types.ObjectId;
   approverId?: mongoose.Types.ObjectId;
   rejectionReason?: string;
@@ -33,7 +33,7 @@ const ExpenseRequestSchema = new Schema<IExpenseRequest>({
   description: { type: String, required: true },
   status: {
     type: String,
-    enum: ['pending', 'approved', 'rejected', 'paid', 'failed','processing'],
+    enum: ['pending', 'approved', 'rejected', 'paid', 'failed', 'processing'],
     default: 'pending'
   },
   requesterId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
