@@ -262,8 +262,6 @@
 
 // // Request Detail Modal
 // function RequestDetailModal({ request, onClose, onApprove, onReject }: any) {
-//   const [rejectionReason, setRejectionReason] = useState('');
-
 //   return (
 //     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 //       <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -497,11 +495,9 @@
 //   );
 // }
 
-
-// // Update BudgetTab component to use DepositModal for adding funds
-// function BudgetTab({ budget, onAllocate, onDeposit, isDepositing }: any) {
+// // Updated BudgetTab component with DepositModal properly integrated
+// function BudgetTab({ budget, onAllocate, onDeposit, isDepositing, onOpenDepositModal }: any) {
 //   const [showAllocateModal, setShowAllocateModal] = useState(false);
-//   const [showPettyDepositModal, setShowPettyDepositModal] = useState(false);
 
 //   return (
 //     <div className="space-y-6">
@@ -511,7 +507,7 @@
 //           <h3 className="text-lg font-semibold">Current Budget</h3>
 //           <div className="flex gap-2">
 //             <button
-//               onClick={() => setShowPettyDepositModal(true)}
+//               onClick={onOpenDepositModal}
 //               className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
 //             >
 //               <span>💰</span>
@@ -527,8 +523,8 @@
 //           </div>
 //         </div>
 
-//         {/* Budget display remains the same */}
-// {budget ? (
+//         {/* Budget display */}
+//         {budget ? (
 //           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 //             <div>
 //               <div className="space-y-3">
@@ -574,6 +570,11 @@
 //                   <span className="text-gray-500">Created By</span>
 //                   <span>{budget.createdBy?.name || 'Unknown'}</span>
 //                 </div>
+//                 {/* Display Budget ID for debugging */}
+//                 <div className="flex justify-between">
+//                   <span className="text-gray-500">Budget ID</span>
+//                   <span className="text-xs font-mono text-gray-500">{budget._id}</span>
+//                 </div>
 //               </div>
 //             </div>
 //           </div>
@@ -590,17 +591,6 @@
 //         )}
 //       </div>
 
-//       {/* Deposit Modal */}
-//       {/* {showPettyDepositModal && (
-//         <DepositPettyModal
-//           isOpen={showPettyDepositModal}
-//           onClose={() => setShowPettyDepositModal(false)}
-//           onDeposit={handleDeposit}
-//           isLoading={isDepositing}
-//           budgetId={budget?._id}
-//         />
-//       )} */}
-
 //       {/* Budget Allocation Modal */}
 //       {showAllocateModal && (
 //         <BudgetAllocationModal
@@ -614,6 +604,7 @@
 //     </div>
 //   );
 // }
+
 // // Requests Tab Component
 // function RequestsTab({ requests, onApprove, onReject, onViewDetails }: any) {
 //   const [filter, setFilter] = useState('all');
@@ -979,7 +970,11 @@
 //       const budgetRes = await fetch('/api/shd-api/api/petty-cash/budget');
 //       const budgetData = await budgetRes.json();
 //       if (budgetData.success) {
+//         console.log('Fetched budget:', budgetData.budget);
 //         setBudget(budgetData.budget);
+//       } else {
+//         console.warn('No budget found:', budgetData.error);
+//         setBudget(null);
 //       }
 
 //       // Fetch requests
@@ -1002,8 +997,6 @@
 //       setLoading(false);
 //     }
 //   };
-
-
 
 //   const calculateStats = (requests: ExpenseRequest[]) => {
 //     const pending = requests.filter(r => r.status === 'pending');
@@ -1063,10 +1056,18 @@
 
 //   const handleCreateBudget = async (formData: any) => {
 //     try {
+//       const token = localStorage.getItem('token');
 //       const response = await fetch('/api/shd-api/api/petty-cash/budget', {
 //         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify(formData)
+//         headers: { 
+//           'Content-Type': 'application/json',
+//           'Authorization': `Bearer ${token}`
+//         },
+//         body: JSON.stringify({
+//           allocatedAmount: formData.amount,
+//           weekStart: formData.weekStart,
+//           weekEnd: formData.weekEnd
+//         })
 //       });
       
 //       const data = await response.json();
@@ -1083,51 +1084,96 @@
 //     }
 //   };
 
+//   const handleDeposit = async (amount: number, phoneNumber: string) => {
+//     setIsDepositing(true);
+//     try {
+//       const token = localStorage.getItem('token');
+      
+//       // Log what we're sending
+//       console.log('=== DEPOSIT REQUEST ===');
+//       console.log('Amount:', amount);
+//       console.log('Phone:', phoneNumber);
+//       console.log('Budget ID:', budget?._id);
+//       console.log('Budget object:', budget);
+      
+//       // If no budget, try to find one
+//       if (!budget?._id) {
+//         console.warn('No budget ID available, trying to fetch active budget...');
+//         // Try to fetch the active budget
+//         const budgetRes = await fetch('/api/shd-api/api/petty-cash/budget', {
+//           headers: {
+//             'Authorization': `Bearer ${token}`
+//           }
+//         });
+//         const budgetData = await budgetRes.json();
+//         if (budgetData.success && budgetData.budget) {
+//           console.log('Found budget via API:', budgetData.budget);
+//           setBudget(budgetData.budget);
+          
+//           // Make the deposit with the found budget ID
+//           const response = await fetch('/api/shd-api/api/petty-cash/deposit', {
+//             method: 'POST',
+//             headers: {
+//               'Content-Type': 'application/json',
+//               'Authorization': `Bearer ${token}`
+//             },
+//             body: JSON.stringify({
+//               amount,
+//               phoneNumber,
+//               budgetId: budgetData.budget._id
+//             })
+//           });
 
-//   // Update the PettyCashAdminDashboard component
-// // Add this function inside the main component
+//           const data = await response.json();
+//           console.log('Deposit response:', data);
+//           return data;
+//         } else {
+//           throw new Error('No active budget found. Please create a budget first.');
+//         }
+//       }
 
-// const handleDeposit = async (amount: number, phoneNumber: string) => {
-//   try {
-//     // Get token from localStorage
-//     const token = localStorage.getItem('token');
-    
-//     const response = await fetch('/api/shd-api/api/petty-cash/deposit', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${token}`
-//       },
-//       body: JSON.stringify({
-//         amount,
-//         phoneNumber,
-//         budgetId: budget?._id
-//       })
-//     });
+//       // Make the deposit with the current budget ID
+//       const response = await fetch('/api/shd-api/api/petty-cash/deposit', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           'Authorization': `Bearer ${token}`
+//         },
+//         body: JSON.stringify({
+//           amount,
+//           phoneNumber,
+//           budgetId: budget._id
+//         })
+//       });
 
-//     const data = await response.json();
+//       const data = await response.json();
+//       console.log('Deposit response:', data);
 
-//     if (!response.ok) {
-//       throw new Error(data.error || 'Failed to initiate deposit');
+//       if (!response.ok) {
+//         throw new Error(data.error || 'Failed to initiate deposit');
+//       }
+
+//       return {
+//         success: true,
+//         checkoutRequestId: data.checkoutRequestId,
+//         transactionId: data.transactionId,
+//         message: data.message
+//       };
+//     } catch (error: any) {
+//       console.error('Deposit error:', error);
+//       return {
+//         success: false,
+//         message: error.message || 'Failed to process deposit'
+//       };
+//     } finally {
+//       setIsDepositing(false);
 //     }
+//   };
 
-//     return {
-//       success: true,
-//       checkoutRequestId: data.checkoutRequestId,
-//       transactionId: data.transactionId,
-//       message: data.message
-//     };
-//   } catch (error: any) {
-//     console.error('Deposit error:', error);
-//     return {
-//       success: false,
-//       message: error.message || 'Failed to process deposit'
-//     };
-//   }
-// };
-
-// // Update the "Allocate Budget" button to use the deposit modal
-// // Replace the budget allocation modal with deposit modal for adding funds
+//   const openDepositModal = () => {
+//     console.log('Opening deposit modal with budget:', budget);
+//     setShowPettyDepositModal(true);
+//   };
 
 //   if (loading) {
 //     return (
@@ -1150,7 +1196,7 @@
 //           </div>
 //           <div className="flex gap-3">
 //             <button
-//               onClick={() => setShowPettyDepositModal(true)}
+//               onClick={openDepositModal}
 //               className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
 //             >
 //               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1205,19 +1251,9 @@
 //             onAllocate={handleCreateBudget}
 //             onDeposit={handleDeposit}
 //             isDepositing={isDepositing}
+//             onOpenDepositModal={openDepositModal}
 //           />
 //         )}
-
-//               {/* Deposit Modal */}
-//       {showPettyDepositModal && (
-//         <DepositPettyModal
-//           isOpen={showPettyDepositModal}
-//           onClose={() => setShowPettyDepositModal(false)}
-//           onDeposit={handleDeposit}
-//           isLoading={isDepositing}
-//           budgetId={budget?._id}
-//         />
-//       )}
 
 //         {activeTab === 'requests' && (
 //           <RequestsTab 
@@ -1236,7 +1272,22 @@
 //         )}
 //       </div>
 
-//       {/* Modals */}
+//       {/* Deposit Modal - Rendered at root level */}
+//       {showPettyDepositModal && (
+//         <DepositPettyModal
+//           isOpen={showPettyDepositModal}
+//           onClose={() => {
+//             setShowPettyDepositModal(false);
+//             // Refresh data after modal closes
+//             fetchData();
+//           }}
+//           onDeposit={handleDeposit}
+//           isLoading={isDepositing}
+//           budgetId={budget?._id}
+//         />
+//       )}
+
+//       {/* Other Modals */}
 //       {showBudgetModal && (
 //         <BudgetAllocationModal
 //           onClose={() => setShowBudgetModal(false)}
@@ -1248,9 +1299,13 @@
 //         <RequestModal
 //           onClose={() => setShowRequestModal(false)}
 //           onSubmit={async (data: any) => {
+//             const token = localStorage.getItem('token');
 //             const response = await fetch('/api/shd-api/api/petty-cash/requests', {
 //               method: 'POST',
-//               headers: { 'Content-Type': 'application/json' },
+//               headers: { 
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `Bearer ${token}`
+//               },
 //               body: JSON.stringify(data)
 //             });
 //             const result = await response.json();
@@ -1289,7 +1344,6 @@
 'use client';
 
 import { useState, useEffect, SetStateAction } from 'react';
-
 import { format } from 'date-fns';
 import DepositPettyModal from '@/app/SHD-COMPONENTS/components/DepositPettyModal';
 
@@ -2025,9 +2079,13 @@ function SettingsTab({ organization, onUpdate }: any) {
 
   const handleSave = async () => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/organization/settings', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(settings)
       });
       
@@ -2246,6 +2304,9 @@ export default function PettyCashAdminDashboard() {
     totalFees: 0
   });
 
+  // Define API base path - FIXED: removed /shd-api
+  const API_BASE = '/api/shd-api/api';
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -2254,30 +2315,56 @@ export default function PettyCashAdminDashboard() {
     try {
       setLoading(true);
       
-      // Fetch budget
-      const budgetRes = await fetch('/api/shd-api/api/petty-cash/budget');
-      const budgetData = await budgetRes.json();
-      if (budgetData.success) {
-        console.log('Fetched budget:', budgetData.budget);
-        setBudget(budgetData.budget);
+      const token = localStorage.getItem('token');
+      
+      // Fetch budget - FIXED PATH
+      const budgetRes = await fetch(`${API_BASE}/petty-cash/budget`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (budgetRes.ok) {
+        const budgetData = await budgetRes.json();
+        if (budgetData.success) {
+          console.log('Fetched budget:', budgetData.budget);
+          setBudget(budgetData.budget);
+        } else {
+          console.warn('No budget found:', budgetData.error);
+          setBudget(null);
+        }
       } else {
-        console.warn('No budget found:', budgetData.error);
+        console.warn('Budget API returned:', budgetRes.status);
         setBudget(null);
       }
 
-      // Fetch requests
-      const requestsRes = await fetch('/api/shd-api/api/petty-cash/requests');
-      const requestsData = await requestsRes.json();
-      if (requestsData.success) {
-        setRequests(requestsData.requests);
-        calculateStats(requestsData.requests);
+      // Fetch requests - FIXED PATH
+      const requestsRes = await fetch(`${API_BASE}/petty-cash/requests`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (requestsRes.ok) {
+        const requestsData = await requestsRes.json();
+        if (requestsData.success) {
+          setRequests(requestsData.requests);
+          calculateStats(requestsData.requests);
+        }
       }
 
-      // Fetch organization
-      const orgRes = await fetch('/api/shd-api/api/organization');
-      const orgData = await orgRes.json();
-      if (orgData.success) {
-        setOrganization(orgData.organization);
+      // Fetch organization - FIXED PATH
+      const orgRes = await fetch(`${API_BASE}/organization`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (orgRes.ok) {
+        const orgData = await orgRes.json();
+        if (orgData.success) {
+          setOrganization(orgData.organization);
+        }
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -2305,9 +2392,13 @@ export default function PettyCashAdminDashboard() {
 
   const handleApproveRequest = async (requestId: string) => {
     try {
-      const response = await fetch(`/api/shd-api/api/petty-cash/requests/${requestId}/approve`, {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE}/petty-cash/requests/${requestId}/approve`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
       });
       
       const data = await response.json();
@@ -2325,9 +2416,13 @@ export default function PettyCashAdminDashboard() {
 
   const handleRejectRequest = async (requestId: string, reason: string) => {
     try {
-      const response = await fetch(`/api/shd-api/api/petty-cash/requests/${requestId}/reject`, {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE}/petty-cash/requests/${requestId}/reject`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ reason })
       });
       
@@ -2345,7 +2440,9 @@ export default function PettyCashAdminDashboard() {
   const handleCreateBudget = async (formData: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/shd-api/api/petty-cash/budget', {
+      
+      // FIXED PATH
+      const response = await fetch(`${API_BASE}/petty-cash/budget`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -2357,6 +2454,11 @@ export default function PettyCashAdminDashboard() {
           weekEnd: formData.weekEnd
         })
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error: ${response.status} - ${errorText}`);
+      }
       
       const data = await response.json();
       if (data.success) {
@@ -2377,51 +2479,47 @@ export default function PettyCashAdminDashboard() {
     try {
       const token = localStorage.getItem('token');
       
-      // Log what we're sending
       console.log('=== DEPOSIT REQUEST ===');
       console.log('Amount:', amount);
       console.log('Phone:', phoneNumber);
       console.log('Budget ID:', budget?._id);
-      console.log('Budget object:', budget);
       
-      // If no budget, try to find one
       if (!budget?._id) {
         console.warn('No budget ID available, trying to fetch active budget...');
-        // Try to fetch the active budget
-        const budgetRes = await fetch('/api/shd-api/api/petty-cash/budget', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        const budgetRes = await fetch(`${API_BASE}/petty-cash/budget`, {
+          headers: { 'Authorization': `Bearer ${token}` }
         });
-        const budgetData = await budgetRes.json();
-        if (budgetData.success && budgetData.budget) {
-          console.log('Found budget via API:', budgetData.budget);
-          setBudget(budgetData.budget);
-          
-          // Make the deposit with the found budget ID
-          const response = await fetch('/api/shd-api/api/petty-cash/deposit', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              amount,
-              phoneNumber,
-              budgetId: budgetData.budget._id
-            })
-          });
+        
+        if (budgetRes.ok) {
+          const budgetData = await budgetRes.json();
+          if (budgetData.success && budgetData.budget) {
+            console.log('Found budget via API:', budgetData.budget);
+            setBudget(budgetData.budget);
+            
+            const response = await fetch(`${API_BASE}/petty-cash/deposit`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                amount,
+                phoneNumber,
+                budgetId: budgetData.budget._id
+              })
+            });
 
-          const data = await response.json();
-          console.log('Deposit response:', data);
-          return data;
-        } else {
-          throw new Error('No active budget found. Please create a budget first.');
+            const data = await response.json();
+            console.log('Deposit response:', data);
+            return data;
+          }
         }
+        
+        throw new Error('No active budget found. Please create a budget first.');
       }
 
-      // Make the deposit with the current budget ID
-      const response = await fetch('/api/shd-api/api/petty-cash/deposit', {
+      // FIXED PATH
+      const response = await fetch(`${API_BASE}/petty-cash/deposit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2434,12 +2532,13 @@ export default function PettyCashAdminDashboard() {
         })
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error: ${response.status} - ${errorText}`);
+      }
+
       const data = await response.json();
       console.log('Deposit response:', data);
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to initiate deposit');
-      }
 
       return {
         success: true,
@@ -2566,7 +2665,6 @@ export default function PettyCashAdminDashboard() {
           isOpen={showPettyDepositModal}
           onClose={() => {
             setShowPettyDepositModal(false);
-            // Refresh data after modal closes
             fetchData();
           }}
           onDeposit={handleDeposit}
@@ -2588,7 +2686,7 @@ export default function PettyCashAdminDashboard() {
           onClose={() => setShowRequestModal(false)}
           onSubmit={async (data: any) => {
             const token = localStorage.getItem('token');
-            const response = await fetch('/api/shd-api/api/petty-cash/requests', {
+            const response = await fetch(`${API_BASE}/petty-cash/requests`, {
               method: 'POST',
               headers: { 
                 'Content-Type': 'application/json',
