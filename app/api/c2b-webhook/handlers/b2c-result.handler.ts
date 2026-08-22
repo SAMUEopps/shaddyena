@@ -13,53 +13,116 @@ export class B2CResultHandler {
    */
   async handle(callbackData: any): Promise<boolean> {
     try {
+      logger.info('=== B2C RESULT CALLBACK RECEIVED ===');
+      logger.info('Full callback data:', JSON.stringify(callbackData, null, 2));
+
       const { Result } = callbackData;
+      
+      if (!Result) {
+        logger.error('No Result object in callback');
+        return false;
+      }
+
       const {
         ResultCode,
         ResultDesc,
         OriginatorConversationID,
         ConversationID,
-        TransactionID,
-        ResultParameters
+        TransactionID
       } = Result;
 
-      logger.info(`Processing B2C result: ${ConversationID}, ResultCode: ${ResultCode}`);
+      logger.info(`B2C Result - ConversationID: ${ConversationID}, ResultCode: ${ResultCode}`);
 
-      // Extract the OriginatorConversationID to find the request
-      const originatorConvId = OriginatorConversationID || ConversationID;
-      
-      // Find the expense request by the originator conversation ID
+      // Find the request by OriginatorConversationID
       const request = await ExpenseRequest.findOne({
-        'metadata.originatorConversationId': originatorConvId
+        'metadata.originatorConversationId': OriginatorConversationID
       });
 
       if (!request) {
-        // Try to find by transaction ID
-        const transaction = await Transaction.findOne({
-          'metadata.b2cResult.OriginatorConversationID': originatorConvId
-        });
-
-        if (!transaction) {
-          logger.error(`No transaction found for OriginatorConversationID: ${originatorConvId}`);
-          return false;
-        }
-
-        // Find the request by transaction reference
-        const requestByTransaction = await ExpenseRequest.findOne({
-          _id: transaction.metadata?.requestId
-        });
-
-        if (!requestByTransaction) {
-          logger.error(`No request found for transaction: ${transaction._id}`);
-          return false;
-        }
-
-        await this.processResult(requestByTransaction, Result);
-        return true;
+        logger.error(`No request found for OriginatorConversationID: ${OriginatorConversationID}`);
+        return false;
       }
 
-      await this.processResult(request, Result);
-      return true;
+      logger.info(`Found request: ${request._id}, Current status: ${request.status}`);
+
+      // Find the associated transaction
+      const transaction = await Transaction.findOne({
+        'metadata.requestId': request._id
+      });
+
+      if (ResultCode === '0' || String(ResultCode) === '0') {
+        // SUCCESS - Payment completed
+        logger.info(`✅ B2C payment successful for request ${request._id}`);
+
+        // Update request
+        request.status = 'paid';
+        request.paidAt = new Date();
+        request.mpesaReference = TransactionID || ConversationID;
+        request.metadata = {
+          ...request.metadata,
+          b2cResult: Result,
+          paidVia: 'M-Pesa B2C',
+          paidAt: new Date().toISOString(),
+          transactionId: TransactionID,
+          conversationId: ConversationID,
+          resultCode: ResultCode,
+          resultDesc: ResultDesc
+        };
+        await request.save();
+
+        // Update transaction
+        if (transaction) {
+          transaction.status = 'success';
+          transaction.receiptNumber = TransactionID || ConversationID;
+          transaction.metadata = {
+            ...transaction.metadata,
+            b2cResult: Result,
+            completedAt: new Date().toISOString(),
+            transactionId: TransactionID
+          };
+          await transaction.save();
+          logger.info(`Transaction ${transaction._id} updated to success`);
+        } else {
+          logger.warn(`No transaction found for request ${request._id}`);
+        }
+
+        logger.info(`✅ Request ${request._id} marked as paid`);
+        return true;
+
+      } else {
+        // FAILURE - Payment failed
+        logger.error(`❌ B2C payment failed for request ${request._id}: ${ResultDesc}`);
+
+        // Update request as failed
+        request.status = 'failed';
+        request.metadata = {
+          ...request.metadata,
+          b2cError: ResultDesc || 'B2C payment failed',
+          b2cResult: Result,
+          failedAt: new Date().toISOString(),
+          resultCode: ResultCode,
+          resultDesc: ResultDesc
+        };
+        await request.save();
+
+        // Update transaction
+        if (transaction) {
+          transaction.status = 'failed';
+          transaction.errorMessage = ResultDesc || 'B2C payment failed';
+          transaction.metadata = {
+            ...transaction.metadata,
+            b2cResult: Result,
+            failedAt: new Date().toISOString()
+          };
+          await transaction.save();
+        }
+
+        // REVERT BUDGET
+        await this.revertBudget(request);
+
+        logger.info(`❌ Request ${request._id} marked as failed, budget reverted`);
+        return true;
+      }
 
     } catch (error) {
       logger.error('Error processing B2C result:', error);
@@ -68,18 +131,27 @@ export class B2CResultHandler {
   }
 
   /**
-   * Process B2C timeout callback
+   * Handle B2C timeout callback
    */
   async handleTimeout(callbackData: any): Promise<boolean> {
     try {
+      logger.info('=== B2C TIMEOUT CALLBACK RECEIVED ===');
+      logger.info('Timeout data:', JSON.stringify(callbackData, null, 2));
+
       const { Result } = callbackData;
+      
+      if (!Result) {
+        logger.error('No Result object in timeout callback');
+        return false;
+      }
+
       const {
         OriginatorConversationID,
         ConversationID,
         ResultDesc
       } = Result;
 
-      logger.info(`Processing B2C timeout: ${ConversationID}`);
+      logger.info(`B2C Timeout - ConversationID: ${ConversationID}`);
 
       const request = await ExpenseRequest.findOne({
         'metadata.originatorConversationId': OriginatorConversationID
@@ -96,11 +168,31 @@ export class B2CResultHandler {
         ...request.metadata,
         b2cTimeout: true,
         b2cError: ResultDesc || 'B2C payment timeout',
-        b2cTimeoutData: Result
+        b2cTimeoutData: Result,
+        failedAt: new Date().toISOString()
       };
       await request.save();
 
-      logger.info(`Request ${request._id} marked as failed due to timeout`);
+      // Update transaction
+      const transaction = await Transaction.findOne({
+        'metadata.requestId': request._id
+      });
+
+      if (transaction) {
+        transaction.status = 'failed';
+        transaction.errorMessage = ResultDesc || 'B2C payment timeout';
+        transaction.metadata = {
+          ...transaction.metadata,
+          b2cTimeout: true,
+          failedAt: new Date().toISOString()
+        };
+        await transaction.save();
+      }
+
+      // REVERT BUDGET
+      await this.revertBudget(request);
+
+      logger.info(`Request ${request._id} marked as failed due to timeout, budget reverted`);
       return true;
 
     } catch (error) {
@@ -110,112 +202,38 @@ export class B2CResultHandler {
   }
 
   /**
-   * Process the result for a specific request
-   */
-  private async processResult(request: any, result: any): Promise<void> {
-    const {
-      ResultCode,
-      ResultDesc,
-      TransactionID,
-      OriginatorConversationID,
-      ConversationID
-    } = result;
-
-    if (ResultCode === '0' || ResultCode === '0') {
-      // B2C was successful
-      logger.info(`B2C payment successful for request ${request._id}`);
-
-      // Update request
-      request.status = 'paid';
-      request.paidAt = new Date();
-      request.mpesaReference = TransactionID || ConversationID;
-      request.metadata = {
-        ...request.metadata,
-        b2cResult: result,
-        paidVia: 'M-Pesa B2C',
-        paidAt: new Date().toISOString(),
-        conversationId: ConversationID,
-        transactionId: TransactionID
-      };
-      await request.save();
-
-      // Update the associated transaction
-      const transaction = await Transaction.findOne({
-        'metadata.requestId': request._id
-      });
-
-      if (transaction) {
-        transaction.status = 'success';
-        transaction.receiptNumber = TransactionID || ConversationID;
-        transaction.metadata = {
-          ...transaction.metadata,
-          b2cResult: result,
-          completedAt: new Date().toISOString()
-        };
-        await transaction.save();
-      }
-
-      logger.info(`Request ${request._id} marked as paid`);
-
-    } else {
-      // B2C failed
-      logger.error(`B2C payment failed for request ${request._id}: ${ResultDesc}`);
-
-      // Update request as failed
-      request.status = 'failed';
-      request.metadata = {
-        ...request.metadata,
-        b2cError: ResultDesc || 'B2C payment failed',
-        b2cResult: result,
-        failedAt: new Date().toISOString()
-      };
-      await request.save();
-
-      // Update the associated transaction
-      const transaction = await Transaction.findOne({
-        'metadata.requestId': request._id
-      });
-
-      if (transaction) {
-        transaction.status = 'failed';
-        transaction.errorMessage = ResultDesc || 'B2C payment failed';
-        transaction.metadata = {
-          ...transaction.metadata,
-          b2cResult: result,
-          failedAt: new Date().toISOString()
-        };
-        await transaction.save();
-      }
-
-      // Revert budget changes if payment failed
-      await this.revertBudgetChanges(request);
-    }
-  }
-
-  /**
    * Revert budget changes if payment failed
    */
-  private async revertBudgetChanges(request: any): Promise<void> {
+  private async revertBudget(request: any): Promise<void> {
     try {
+      // Only revert if budget was updated
+      if (!request.metadata?.budgetWasUpdated) {
+        logger.info(`Budget was not updated for request ${request._id}, skipping revert`);
+        return;
+      }
+
       const budget = await Budget.findOne({
         status: 'active',
         createdBy: request.requesterId
       });
 
       if (budget) {
-        // Only revert if the request was marked as approved before
-        if (request.metadata?.budgetWasUpdated) {
-          budget.spentAmount = Math.max(0, (budget.spentAmount || 0) - request.amount);
-          budget.platformFees = Math.max(0, (budget.platformFees || 0) - request.platformFee);
-          budget.remainingAmount = budget.allocatedAmount - budget.spentAmount - budget.platformFees;
-          
-          if (budget.remainingAmount >= 0) {
-            budget.status = 'active';
-          }
-          
-          await budget.save();
-          logger.info(`Budget ${budget._id} reverted for failed request ${request._id}`);
+        const previousSpent = budget.spentAmount || 0;
+        const previousFees = budget.platformFees || 0;
+        
+        budget.spentAmount = Math.max(0, previousSpent - request.amount);
+        budget.platformFees = Math.max(0, previousFees - request.platformFee);
+        budget.remainingAmount = budget.allocatedAmount - budget.spentAmount - budget.platformFees;
+        
+        if (budget.remainingAmount >= 0) {
+          budget.status = 'active';
         }
+        
+        await budget.save();
+        logger.info(`✅ Budget ${budget._id} reverted for failed request ${request._id}`);
+        logger.info(`Budget reverted: spent ${previousSpent} → ${budget.spentAmount}, fees ${previousFees} → ${budget.platformFees}`);
+      } else {
+        logger.warn(`No active budget found for user ${request.requesterId}`);
       }
     } catch (error) {
       logger.error('Error reverting budget:', error);

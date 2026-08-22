@@ -153,7 +153,6 @@ import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import { createLogger } from '@/app/api/c2b-webhook/utils/logger';
 import { B2CResultHandler } from '@/app/api/c2b-webhook/handlers/b2c-result.handler';
 
-
 const logger = createLogger('B2CResultRoute');
 
 export async function POST(req: NextRequest) {
@@ -161,18 +160,25 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     
     const callbackData = await req.json();
-    logger.info('Received B2C result callback', callbackData);
+    logger.info('=== B2C RESULT ENDPOINT HIT ===');
+    logger.info('Raw callback data:', JSON.stringify(callbackData, null, 2));
 
     const handler = new B2CResultHandler();
     const processed = await handler.handle(callbackData);
 
+    logger.info(`B2C result processing completed: ${processed}`);
+
     // Always return success to M-Pesa
     return NextResponse.json(
-      { ResultCode: 0, ResultDesc: 'Success' },
+      { 
+        ResultCode: 0, 
+        ResultDesc: processed ? 'Success' : 'Processed with warnings' 
+      },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
     logger.error('B2C result callback error:', error);
+    // Always return success to M-Pesa to prevent retries
     return NextResponse.json(
       { ResultCode: 0, ResultDesc: 'Success' },
       { status: 200 }

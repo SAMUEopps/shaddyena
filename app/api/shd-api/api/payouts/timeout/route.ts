@@ -49,6 +49,7 @@ import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import { createLogger } from '@/app/api/c2b-webhook/utils/logger';
 import { B2CResultHandler } from '@/app/api/c2b-webhook/handlers/b2c-result.handler';
 
+
 const logger = createLogger('B2CTimeoutRoute');
 
 export async function POST(req: NextRequest) {
@@ -56,17 +57,20 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     
     const callbackData = await req.json();
-    logger.info('Received B2C timeout callback', callbackData);
+    logger.info('=== B2C TIMEOUT ENDPOINT HIT ===');
+    logger.info('Raw timeout data:', JSON.stringify(callbackData, null, 2));
 
     const handler = new B2CResultHandler();
     const processed = await handler.handleTimeout(callbackData);
+
+    logger.info(`B2C timeout processing completed: ${processed}`);
 
     // Always return success to M-Pesa
     return NextResponse.json(
       { ResultCode: 0, ResultDesc: 'Success' },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
     logger.error('B2C timeout callback error:', error);
     return NextResponse.json(
       { ResultCode: 0, ResultDesc: 'Success' },
