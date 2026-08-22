@@ -1,7 +1,6 @@
 //C:\Users\Administrator\Desktop\new\New folder\shaddyena\shd-lib\lib\mpesa.ts
 
 import axios from 'axios';
-import crypto from 'crypto';
 
 const CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || '';
 const CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || '';

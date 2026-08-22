@@ -1039,6 +1039,72 @@
 
 // app/api/callback/route.ts
 
+// import { NextRequest, NextResponse } from 'next/server';
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import { StkCallbackHandler } from './handlers/stk-callback.handler';
+// import { C2bCallbackHandler } from './handlers/c2b-callback.handler';
+
+// import { createLogger } from './utils/logger';
+// import { BalanceCallbackHandler } from './handlers/balance-callback.handler';
+
+// const logger = createLogger('CallbackRoute');
+
+// /**
+//  * Main webhook handler for M-Pesa callbacks
+//  * Handles STK Push, C2B Pay Bill, and Balance Query callbacks
+//  */
+// export async function POST(req: NextRequest) {
+//   try {
+//     // Connect to database
+//     await connectToDatabase();
+
+//     // Parse callback data
+//     const callbackData = await req.json();
+//     logger.info('Received M-Pesa callback', callbackData);
+
+//     let processed = false;
+
+//     // Handle STK Push callback (has Body.stkCallback)
+//     if (callbackData.Body?.stkCallback) {
+//       const stkHandler = new StkCallbackHandler();
+//       processed = await stkHandler.handle(callbackData);
+//     }
+//     // Handle C2B Pay Bill callback (has TransactionType)
+//     else if (callbackData.TransactionType) {
+//       const c2bHandler = new C2bCallbackHandler();
+//       processed = await c2bHandler.handle(callbackData);
+//     }
+//     // Handle Balance Query callback (has ResultParameters with AccountBalance)
+//     else if (callbackData.ResultParameters?.ResultParameter) {
+//       const balanceHandler = new BalanceCallbackHandler();
+//       processed = await balanceHandler.handle(callbackData);
+//     }
+//     // Unknown callback format
+//     else {
+//       logger.error('Unknown callback format', callbackData);
+//     }
+
+//     // Always return success to M-Pesa
+//     return NextResponse.json(
+//       {
+//         ResultCode: 0,
+//         ResultDesc: processed ? 'Success' : 'Processed successfully'
+//       },
+//       { status: 200 }
+//     );
+//   } catch (error) {
+//     logger.error('Callback processing error', error);
+
+//     // Always return success to M-Pesa to prevent retries
+//     return NextResponse.json(
+//       { ResultCode: 0, ResultDesc: 'Success' },
+//       { status: 200 }
+//     );
+//   }
+// }
+
+
+// app/api/callback/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import { StkCallbackHandler } from './handlers/stk-callback.handler';
@@ -1046,12 +1112,13 @@ import { C2bCallbackHandler } from './handlers/c2b-callback.handler';
 
 import { createLogger } from './utils/logger';
 import { BalanceCallbackHandler } from './handlers/balance-callback.handler';
+import { B2CResultHandler } from './handlers/b2c-result.handler';
 
 const logger = createLogger('CallbackRoute');
 
 /**
  * Main webhook handler for M-Pesa callbacks
- * Handles STK Push, C2B Pay Bill, and Balance Query callbacks
+ * Handles STK Push, C2B Pay Bill, B2C Result, and Balance Query callbacks
  */
 export async function POST(req: NextRequest) {
   try {
@@ -1073,6 +1140,16 @@ export async function POST(req: NextRequest) {
     else if (callbackData.TransactionType) {
       const c2bHandler = new C2bCallbackHandler();
       processed = await c2bHandler.handle(callbackData);
+    }
+    // Handle B2C Result callback (has Result and ResultParameters)
+    else if (callbackData.Result && callbackData.Result.ResultParameters) {
+      const b2cHandler = new B2CResultHandler();
+      processed = await b2cHandler.handle(callbackData);
+    }
+    // Handle B2C Timeout callback
+    else if (callbackData.Result && callbackData.Result.ResultCode === '1001') {
+      const b2cHandler = new B2CResultHandler();
+      processed = await b2cHandler.handleTimeout(callbackData);
     }
     // Handle Balance Query callback (has ResultParameters with AccountBalance)
     else if (callbackData.ResultParameters?.ResultParameter) {
