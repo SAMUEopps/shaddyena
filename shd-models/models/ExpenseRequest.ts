@@ -33,7 +33,7 @@ const ExpenseRequestSchema = new Schema<IExpenseRequest>({
   description: { type: String, required: true },
   status: {
     type: String,
-    enum: ['pending', 'approved', 'rejected', 'paid', 'failed'],
+    enum: ['pending', 'approved', 'rejected', 'paid', 'failed','processing'],
     default: 'pending'
   },
   requesterId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
