@@ -166,7 +166,7 @@ export interface ITransaction extends Document {
   receiptNumber: string;
   phoneNumber: string;
   amount: number;
-  status: 'pending' | 'success' | 'failed' | 'cancelled';
+  status: 'pending' | 'success' | 'failed' | 'cancelled'| 'processing';
   type: 'order' | 'membership' | 'savings' | 'investment' | 'payout' | 'refund' | 'advertisement' | 'subscription' | 'petty_cash_deposit' | 'petty_cash_payout';
   purpose?: string;
   orderId?: mongoose.Types.ObjectId;
@@ -188,7 +188,7 @@ const TransactionSchema = new Schema<ITransaction>({
   amount: { type: Number, required: true },
   status: { 
     type: String, 
-    enum: ['pending', 'success', 'failed', 'cancelled'],
+    enum: ['pending', 'success', 'failed', 'cancelled','processing'],
     default: 'pending'
   },
   type: { 
