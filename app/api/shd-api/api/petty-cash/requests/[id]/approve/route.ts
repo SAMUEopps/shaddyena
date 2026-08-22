@@ -403,6 +403,7 @@
 
 
 // app/api/petty-cash/requests/[id]/approve/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import ExpenseRequest from '@/shd-models/models/ExpenseRequest';
@@ -412,130 +413,285 @@ import { processB2CPayment } from '@/shd-lib/lib/mpesa';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 
+/* =========================================================
+   AUTHENTICATION
+========================================================= */
+
 async function verifyAuth(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization');
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return { error: 'No token provided', status: 401 };
+      return {
+        error: 'No token provided',
+        status: 401,
+      };
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { userId: string; role: string };
-    return { userId: decoded.userId, role: decoded.role };
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || 'secret'
+    ) as {
+      userId: string;
+      role: string;
+    };
+
+    return {
+      userId: decoded.userId,
+      role: decoded.role,
+    };
   } catch (error) {
-    return { error: 'Invalid token', status: 401 };
+    console.error('Authentication error:', error);
+
+    return {
+      error: 'Invalid token',
+      status: 401,
+    };
   }
 }
 
+/* =========================================================
+   APPROVE PETTY CASH REQUEST
+========================================================= */
+
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    /* =====================================================
+       AUTH
+    ===================================================== */
+
     const auth = await verifyAuth(req);
+
     if (auth.error) {
       return NextResponse.json(
-        { success: false, error: auth.error },
-        { status: auth.status }
+        {
+          success: false,
+          error: auth.error,
+        },
+        {
+          status: auth.status,
+        }
       );
     }
+
+    /* =====================================================
+       NEXT.JS 15/16 DYNAMIC PARAMS
+    ===================================================== */
+
+    const { id } = await params;
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid request ID',
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    /* =====================================================
+       DATABASE
+    ===================================================== */
 
     await connectToDatabase();
 
-    // Find the request
-    const request = await ExpenseRequest.findById(params.id);
+    /* =====================================================
+       FIND EXPENSE REQUEST
+    ===================================================== */
+
+    const request = await ExpenseRequest.findById(id);
 
     if (!request) {
       return NextResponse.json(
-        { success: false, error: 'Request not found' },
-        { status: 404 }
+        {
+          success: false,
+          error: 'Request not found',
+        },
+        {
+          status: 404,
+        }
       );
     }
 
-    if (request.status !== 'pending' && request.status !== 'failed') {
+    /* =====================================================
+       CHECK REQUEST STATUS
+    ===================================================== */
+
+    if (
+      request.status !== 'pending' &&
+      request.status !== 'failed'
+    ) {
       return NextResponse.json(
-        { success: false, error: 'Request is not pending or failed' },
-        { status: 400 }
+        {
+          success: false,
+          error: 'Request is not pending or failed',
+        },
+        {
+          status: 400,
+        }
       );
     }
 
-    // Get active budget
+    /* =====================================================
+       FIND ACTIVE BUDGET
+    ===================================================== */
+
     const budget = await Budget.findOne({
       status: 'active',
-      createdBy: auth.userId
+      createdBy: auth.userId,
     });
 
     if (!budget) {
       return NextResponse.json(
-        { success: false, error: 'No active budget found' },
-        { status: 400 }
+        {
+          success: false,
+          error: 'No active budget found',
+        },
+        {
+          status: 400,
+        }
       );
     }
 
-    // Check if budget has enough remaining amount
+    /* =====================================================
+       CHECK BUDGET
+    ===================================================== */
+
     if (request.totalAmount > budget.remainingAmount) {
-      return NextResponse.json({
-        success: false,
-        error: `Insufficient budget. Required: KES ${request.totalAmount.toFixed(2)}, Available: KES ${budget.remainingAmount.toFixed(2)}`
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Insufficient budget. Required: KES ${request.totalAmount.toFixed(
+            2
+          )}, Available: KES ${budget.remainingAmount.toFixed(2)}`,
+        },
+        {
+          status: 400,
+        }
+      );
     }
 
-    // Update budget first (deduct amounts)
-    budget.spentAmount = (budget.spentAmount || 0) + request.amount;
-    budget.platformFees = (budget.platformFees || 0) + request.platformFee;
-    budget.remainingAmount = budget.allocatedAmount - budget.spentAmount - budget.platformFees;
+    /* =====================================================
+       UPDATE BUDGET
+    ===================================================== */
+
+    budget.spentAmount =
+      (budget.spentAmount || 0) + request.amount;
+
+    budget.platformFees =
+      (budget.platformFees || 0) + request.platformFee;
+
+    budget.remainingAmount =
+      budget.allocatedAmount -
+      budget.spentAmount -
+      budget.platformFees;
 
     if (budget.remainingAmount < 0) {
       budget.status = 'overdrawn';
     }
+
     await budget.save();
 
-    // Update request to approved status
+    /* =====================================================
+       UPDATE REQUEST
+    ===================================================== */
+
     request.status = 'approved';
-    request.approverId = new mongoose.Types.ObjectId(auth.userId);
+
+    request.approverId = new mongoose.Types.ObjectId(
+      auth.userId
+    );
+
     request.approvedAt = new Date();
+
     request.metadata = {
       ...request.metadata,
       approvedBy: auth.userId,
       approvedAt: new Date().toISOString(),
-      budgetWasUpdated: true
+      budgetWasUpdated: true,
     };
+
     await request.save();
 
-    // Create transaction record for tracking
+    /* =====================================================
+       CREATE TRANSACTION
+    ===================================================== */
+
     const transaction = await Transaction.create({
-      transactionId: `TXN-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      transactionId: `TXN-${Date.now()}-${Math.floor(
+        Math.random() * 10000
+      )}`,
+
       type: 'petty_cash_payout',
+
       status: 'pending',
+
       amount: request.amount,
+
       phoneNumber: request.recipientPhone,
+
       userId: new mongoose.Types.ObjectId(auth.userId),
+
       budgetId: budget._id,
+
       purpose: `Petty Cash Payout - ${request.description}`,
+
       metadata: {
         requestId: request._id,
         description: request.description,
         category: request.category,
         platformFee: request.platformFee,
         totalAmount: request.totalAmount,
-        initiatedAt: new Date().toISOString()
-      }
+        initiatedAt: new Date().toISOString(),
+      },
     });
 
-    // Process B2C payment
-    try {
-        console.log(`Processing B2C payment for request ${request._id}`);
-        console.log(`Recipient: ${request.recipientPhone}, Amount: ${request.amount}`);
+    /* =====================================================
+       PROCESS B2C PAYMENT
+    ===================================================== */
 
-      const originatorConversationId = `SHAD_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-      
-      // Store the originator conversation ID in the request for callback matching
+    try {
+      console.log(
+        `Processing B2C payment for request ${request._id}`
+      );
+
+      console.log(
+        `Recipient: ${request.recipientPhone}, Amount: ${request.amount}`
+      );
+
+      /* ===================================================
+         ORIGINATOR CONVERSATION ID
+      =================================================== */
+
+      const originatorConversationId = `SHAD_${Date.now()}_${Math.floor(
+        Math.random() * 10000
+      )}`;
+
+      /* ===================================================
+         SAVE INITIAL B2C TRACKING DATA
+      =================================================== */
+
       request.metadata = {
         ...request.metadata,
-        originatorConversationId: originatorConversationId,
-        transactionId: transaction._id
+
+        originatorConversationId,
+
+        transactionId: transaction._id,
       };
+
       await request.save();
+
+      /* ===================================================
+         INITIATE B2C
+      =================================================== */
 
       const b2cResult = await processB2CPayment(
         request.recipientPhone,
@@ -545,90 +701,215 @@ export async function POST(
         `PC-${request._id.toString().slice(-8)}`
       );
 
-        console.log('B2C Result:', b2cResult);
+      console.log('B2C Result:', b2cResult);
 
-      // Check if B2C was initiated successfully
-      if (b2cResult && b2cResult.ResponseCode === '0') {
-        // Update request with B2C details
+      /* ===================================================
+         CHECK B2C RESPONSE
+      =================================================== */
+
+      if (
+        b2cResult &&
+        b2cResult.ResponseCode === '0'
+      ) {
+        /* ===============================================
+           UPDATE REQUEST WITH B2C DETAILS
+        =============================================== */
+
         request.metadata = {
           ...request.metadata,
+
           b2cInitiated: true,
+
           b2cResponse: b2cResult,
-          conversationId: b2cResult.ConversationID,
-          originatorConversationId: b2cResult.OriginatorConversationID || originatorConversationId
+
+          conversationId:
+            b2cResult.ConversationID,
+
+          originatorConversationId:
+            b2cResult.OriginatorConversationID ||
+            originatorConversationId,
         };
+
         await request.save();
 
-        // Update transaction
+        /* ===============================================
+           UPDATE TRANSACTION
+        =============================================== */
+
         transaction.metadata = {
           ...transaction.metadata,
+
           b2cInitiated: true,
+
           b2cResponse: b2cResult,
-          conversationId: b2cResult.ConversationID,
-          originatorConversationId: b2cResult.OriginatorConversationID || originatorConversationId
+
+          conversationId:
+            b2cResult.ConversationID,
+
+          originatorConversationId:
+            b2cResult.OriginatorConversationID ||
+            originatorConversationId,
         };
+
         await transaction.save();
 
-        // Note: The request will be marked as 'paid' when the callback is received
-        // For now, keep it as 'approved' and wait for callback
+        /* ===============================================
+           IMPORTANT
+           
+           Do NOT mark as paid here.
+           
+           M-Pesa callback should confirm the actual
+           payment before changing the transaction/request
+           to paid.
+        =============================================== */
 
-        return NextResponse.json({
-          success: true,
-          message: 'B2C payment initiated successfully. Waiting for confirmation from M-Pesa.',
-          request: request,
-          transaction: transaction,
-          b2cResult: b2cResult
-        });
-      } else {
-        // B2C initiation failed
-        throw new Error(b2cResult?.ResponseDescription || 'B2C payment initiation failed');
+        return NextResponse.json(
+          {
+            success: true,
+
+            message:
+              'B2C payment initiated successfully. Waiting for confirmation from M-Pesa.',
+
+            request,
+
+            transaction,
+
+            b2cResult,
+          },
+          {
+            status: 200,
+          }
+        );
       }
 
-    } catch (b2cError: any) {
-        console.log('B2C Payment Error:', b2cError);
+      /* =================================================
+         B2C INITIATION FAILED
+      ================================================= */
 
-      // Revert budget changes
-      budget.spentAmount = Math.max(0, (budget.spentAmount || 0) - request.amount);
-      budget.platformFees = Math.max(0, (budget.platformFees || 0) - request.platformFee);
-      budget.remainingAmount = budget.allocatedAmount - budget.spentAmount - budget.platformFees;
-      
+      throw new Error(
+        b2cResult?.ResponseDescription ||
+          'B2C payment initiation failed'
+      );
+    } catch (b2cError: any) {
+      console.error(
+        'B2C Payment Error:',
+        b2cError
+      );
+
+      /* =================================================
+         REVERT BUDGET
+      ================================================= */
+
+      budget.spentAmount = Math.max(
+        0,
+        (budget.spentAmount || 0) -
+          request.amount
+      );
+
+      budget.platformFees = Math.max(
+        0,
+        (budget.platformFees || 0) -
+          request.platformFee
+      );
+
+      budget.remainingAmount =
+        budget.allocatedAmount -
+        budget.spentAmount -
+        budget.platformFees;
+
       if (budget.remainingAmount >= 0) {
         budget.status = 'active';
       }
+
       await budget.save();
 
-      // Update request as failed
+      /* =================================================
+         UPDATE REQUEST AS FAILED
+      ================================================= */
+
       request.status = 'failed';
+
       request.metadata = {
         ...request.metadata,
-        b2cError: b2cError.message || 'B2C payment failed',
-        b2cErrorDetails: b2cError.response?.data || b2cError,
-        failedAt: new Date().toISOString()
+
+        b2cError:
+          b2cError?.message ||
+          'B2C payment failed',
+
+        b2cErrorDetails:
+          b2cError?.response?.data ||
+          b2cError,
+
+        failedAt:
+          new Date().toISOString(),
       };
+
       await request.save();
 
-      // Update transaction
+      /* =================================================
+         UPDATE TRANSACTION AS FAILED
+      ================================================= */
+
       transaction.status = 'failed';
-      transaction.errorMessage = b2cError.message || 'B2C payment failed';
+
+      transaction.errorMessage =
+        b2cError?.message ||
+        'B2C payment failed';
+
       transaction.metadata = {
         ...transaction.metadata,
-        b2cError: b2cError.message || 'B2C payment failed',
-        failedAt: new Date().toISOString()
+
+        b2cError:
+          b2cError?.message ||
+          'B2C payment failed',
+
+        failedAt:
+          new Date().toISOString(),
       };
+
       await transaction.save();
 
-      return NextResponse.json({
-        success: false,
-        error: 'Failed to process B2C payment. Please try again.',
-        details: b2cError.message
-      }, { status: 500 });
-    }
+      /* =================================================
+         RETURN ERROR
+      ================================================= */
 
+      return NextResponse.json(
+        {
+          success: false,
+
+          error:
+            'Failed to process B2C payment. Please try again.',
+
+          details:
+            b2cError?.message ||
+            'B2C payment failed',
+        },
+        {
+          status: 500,
+        }
+      );
+    }
   } catch (error: any) {
-    console.error('Error approving request:', error);
+    /* ===================================================
+       GENERAL ERROR
+    =================================================== */
+
+    console.error(
+      'Error approving request:',
+      error
+    );
+
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
-      { status: 500 }
+      {
+        success: false,
+
+        error:
+          error?.message ||
+          'Internal server error',
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
