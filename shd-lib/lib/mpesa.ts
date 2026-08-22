@@ -174,10 +174,10 @@ export async function processB2CPayment(
       Remarks: remarks,
 
       QueueTimeOutURL:
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/payouts/timeout`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/shd-api/api/payouts/timeout`,
 
       ResultURL:
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/payouts/result`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/shd-api/api/payouts/result`,
 
       Occasion: occasion || 'Shaddyna Vendor Payout'
     };
