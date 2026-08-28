@@ -1459,35 +1459,74 @@ export async function POST(req: NextRequest) {
     console.log('Transaction ID:', transactionId);
     console.log('External Reference:', externalReference);
 
+    // const transaction = await Transaction.create({
+    //   transactionId,
+    //   organizationId,
+    //   type: 'deposit',
+    //   category: 'petty_cash',
+    //   amount,
+    //   currency: 'KES',
+    //   status: 'pending',
+    //   phoneNumber: cleanPhone,
+    //   accountReference,
+    //   externalReference: externalReference,
+    //   externalEntityId: budgetId || null,
+    //   externalEntityType: budgetId ? 'budget' : null,
+    //   provider: 'mpesa',
+    //   checkoutRequestId: null,
+    //   purpose: `Petty Cash Deposit${budgetWeekRange}`,
+    //   idempotencyKey: idempotencyKey || undefined,
+    //   metadata: {
+    //     userId: userId,
+    //     budgetId: budgetId || null,
+    //     budgetObjectId: budgetObjectId ? budgetObjectId.toString() : null,
+    //     description: `Petty Cash Deposit${budgetWeekRange}`,
+    //     accountReference,
+    //     depositType: 'petty_cash',
+    //     initiatedBy: userId,
+    //     initiatedAt: new Date().toISOString(),
+    //     organizationName: organization.name
+    //   }
+    // });
+
+
     const transaction = await Transaction.create({
-      transactionId,
-      organizationId,
-      type: 'deposit',
-      category: 'petty_cash',
-      amount,
-      currency: 'KES',
-      status: 'pending',
-      phoneNumber: cleanPhone,
-      accountReference,
-      externalReference: externalReference,
-      externalEntityId: budgetId || null,
-      externalEntityType: budgetId ? 'budget' : null,
-      provider: 'mpesa',
-      checkoutRequestId: null,
-      purpose: `Petty Cash Deposit${budgetWeekRange}`,
-      idempotencyKey: idempotencyKey || undefined,
-      metadata: {
-        userId: userId,
-        budgetId: budgetId || null,
-        budgetObjectId: budgetObjectId ? budgetObjectId.toString() : null,
-        description: `Petty Cash Deposit${budgetWeekRange}`,
-        accountReference,
-        depositType: 'petty_cash',
-        initiatedBy: userId,
-        initiatedAt: new Date().toISOString(),
-        organizationName: organization.name
+  transactionId,
+  organizationId,
+  type: 'deposit',
+  category: 'petty_cash',
+  amount,
+  currency: 'KES',
+  status: 'pending',
+  phoneNumber: cleanPhone,
+  accountReference,
+  externalReference,
+  externalEntityId: budgetId || null,
+  externalEntityType: budgetId ? 'budget' : null,
+  provider: 'mpesa',
+  checkoutRequestId: null,
+  purpose: `Petty Cash Deposit${budgetWeekRange}`,
+
+  ...(idempotencyKey?.trim()
+    ? {
+        idempotencyKey: idempotencyKey.trim(),
       }
-    });
+    : {}),
+
+  metadata: {
+    userId,
+    budgetId: budgetId || null,
+    budgetObjectId: budgetObjectId
+      ? budgetObjectId.toString()
+      : null,
+    description: `Petty Cash Deposit${budgetWeekRange}`,
+    accountReference,
+    depositType: 'petty_cash',
+    initiatedBy: userId,
+    initiatedAt: new Date().toISOString(),
+    organizationName: organization.name,
+  },
+});
 
     console.log('Transaction created:', transaction._id);
     console.log('Transaction organizationId:', transaction.organizationId);
@@ -1553,91 +1592,6 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
-// ============================================================
-// GET - Check deposit transaction status
-// ============================================================
-// export async function GET(req: NextRequest) {
-//   try {
-//     const userId = getTestUserId();
-//     const organizationId = getTestOrgObjectId();
-
-//     const searchParams = req.nextUrl.searchParams;
-//     const transactionId = searchParams.get('transactionId');
-//     const checkoutRequestId = searchParams.get('checkoutRequestId');
-//     const externalReference = searchParams.get('externalReference');
-
-//     if (!transactionId && !checkoutRequestId && !externalReference) {
-//       return NextResponse.json(
-//         { success: false, error: 'TransactionId, CheckoutRequestId, or ExternalReference required' },
-//         { status: 400 }
-//       );
-//     }
-
-//     await connectToDatabase();
-
-//     let query: any = { organizationId };
-
-//     if (transactionId) {
-//       if (!mongoose.Types.ObjectId.isValid(transactionId)) {
-//         return NextResponse.json(
-//           { success: false, error: 'Invalid transaction ID' },
-//           { status: 400 }
-//         );
-//       }
-//       query._id = transactionId;
-//     } else if (checkoutRequestId) {
-//       query.checkoutRequestId = checkoutRequestId;
-//     } else if (externalReference) {
-//       query.externalReference = externalReference;
-//     }
-
-//     const transaction = await Transaction.findOne(query);
-
-//     if (!transaction) {
-//       return NextResponse.json(
-//         { success: false, error: 'Transaction not found' },
-//         { status: 404 }
-//       );
-//     }
-
-//     if (transaction.metadata?.userId?.toString() !== userId) {
-//       return NextResponse.json(
-//         { success: false, error: 'Unauthorized' },
-//         { status: 403 }
-//       );
-//     }
-
-//     return NextResponse.json({
-//       success: true,
-//       status: transaction.status,
-//       transaction: {
-//         id: transaction._id,
-//         transactionId: transaction.transactionId,
-//         amount: transaction.amount,
-//         currency: transaction.currency,
-//         receiptNumber: transaction.receiptNumber,
-//         status: transaction.status,
-//         createdAt: transaction.createdAt,
-//         updatedAt: transaction.updatedAt,
-//         accountReference: transaction.accountReference,
-//         externalReference: transaction.externalReference,
-//         checkoutRequestId: transaction.checkoutRequestId,
-//         providerTransactionId: transaction.providerTransactionId,
-//         budgetId: transaction.metadata?.budgetId || null,
-//         errorMessage: transaction.errorMessage,
-//         purpose: transaction.purpose
-//       }
-//     });
-
-//   } catch (error: any) {
-//     console.error('Status check error:', error);
-//     return NextResponse.json(
-//       { success: false, error: error.message || 'Internal server error' },
-//       { status: 500 }
-//     );
-//   }
-// }
 
 
 // ============================================================
