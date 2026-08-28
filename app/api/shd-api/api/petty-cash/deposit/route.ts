@@ -1557,83 +1557,249 @@ export async function POST(req: NextRequest) {
 // ============================================================
 // GET - Check deposit transaction status
 // ============================================================
+// export async function GET(req: NextRequest) {
+//   try {
+//     const userId = getTestUserId();
+//     const organizationId = getTestOrgObjectId();
+
+//     const searchParams = req.nextUrl.searchParams;
+//     const transactionId = searchParams.get('transactionId');
+//     const checkoutRequestId = searchParams.get('checkoutRequestId');
+//     const externalReference = searchParams.get('externalReference');
+
+//     if (!transactionId && !checkoutRequestId && !externalReference) {
+//       return NextResponse.json(
+//         { success: false, error: 'TransactionId, CheckoutRequestId, or ExternalReference required' },
+//         { status: 400 }
+//       );
+//     }
+
+//     await connectToDatabase();
+
+//     let query: any = { organizationId };
+
+//     if (transactionId) {
+//       if (!mongoose.Types.ObjectId.isValid(transactionId)) {
+//         return NextResponse.json(
+//           { success: false, error: 'Invalid transaction ID' },
+//           { status: 400 }
+//         );
+//       }
+//       query._id = transactionId;
+//     } else if (checkoutRequestId) {
+//       query.checkoutRequestId = checkoutRequestId;
+//     } else if (externalReference) {
+//       query.externalReference = externalReference;
+//     }
+
+//     const transaction = await Transaction.findOne(query);
+
+//     if (!transaction) {
+//       return NextResponse.json(
+//         { success: false, error: 'Transaction not found' },
+//         { status: 404 }
+//       );
+//     }
+
+//     if (transaction.metadata?.userId?.toString() !== userId) {
+//       return NextResponse.json(
+//         { success: false, error: 'Unauthorized' },
+//         { status: 403 }
+//       );
+//     }
+
+//     return NextResponse.json({
+//       success: true,
+//       status: transaction.status,
+//       transaction: {
+//         id: transaction._id,
+//         transactionId: transaction.transactionId,
+//         amount: transaction.amount,
+//         currency: transaction.currency,
+//         receiptNumber: transaction.receiptNumber,
+//         status: transaction.status,
+//         createdAt: transaction.createdAt,
+//         updatedAt: transaction.updatedAt,
+//         accountReference: transaction.accountReference,
+//         externalReference: transaction.externalReference,
+//         checkoutRequestId: transaction.checkoutRequestId,
+//         providerTransactionId: transaction.providerTransactionId,
+//         budgetId: transaction.metadata?.budgetId || null,
+//         errorMessage: transaction.errorMessage,
+//         purpose: transaction.purpose
+//       }
+//     });
+
+//   } catch (error: any) {
+//     console.error('Status check error:', error);
+//     return NextResponse.json(
+//       { success: false, error: error.message || 'Internal server error' },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
+// ============================================================
+// GET - Check deposit transaction status
+// ============================================================
 export async function GET(req: NextRequest) {
   try {
     const userId = getTestUserId();
-    const organizationId = getTestOrgObjectId();
+    const userObjectId = getTestUserObjectId();
 
+    await connectToDatabase();
+
+    // ----------------------------------------------------------
+    // Find organization belonging to test user
+    // ----------------------------------------------------------
+    const organization = await Organization.findOne({
+      createdBy: userObjectId,
+    });
+
+    if (!organization) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Organization not found for test user',
+        },
+        { status: 404 }
+      );
+    }
+
+    const organizationId = organization._id;
+
+    // ----------------------------------------------------------
+    // Read query parameters
+    // ----------------------------------------------------------
     const searchParams = req.nextUrl.searchParams;
+
     const transactionId = searchParams.get('transactionId');
     const checkoutRequestId = searchParams.get('checkoutRequestId');
     const externalReference = searchParams.get('externalReference');
 
     if (!transactionId && !checkoutRequestId && !externalReference) {
       return NextResponse.json(
-        { success: false, error: 'TransactionId, CheckoutRequestId, or ExternalReference required' },
+        {
+          success: false,
+          error:
+            'TransactionId, CheckoutRequestId, or ExternalReference required',
+        },
         { status: 400 }
       );
     }
 
-    await connectToDatabase();
-
-    let query: any = { organizationId };
+    // ----------------------------------------------------------
+    // Build transaction query
+    // ----------------------------------------------------------
+    const query: any = {
+      organizationId,
+    };
 
     if (transactionId) {
-      if (!mongoose.Types.ObjectId.isValid(transactionId)) {
-        return NextResponse.json(
-          { success: false, error: 'Invalid transaction ID' },
-          { status: 400 }
-        );
-      }
-      query._id = transactionId;
+      // IMPORTANT:
+      // transactionId is our custom TXN-... identifier.
+      // It is NOT the MongoDB _id.
+      query.transactionId = transactionId;
     } else if (checkoutRequestId) {
       query.checkoutRequestId = checkoutRequestId;
     } else if (externalReference) {
       query.externalReference = externalReference;
     }
 
+    console.log('========================================');
+    console.log('PETTY CASH STATUS CHECK');
+    console.log('Organization ID:', organizationId);
+    console.log('Transaction ID:', transactionId);
+    console.log('Checkout Request ID:', checkoutRequestId);
+    console.log('External Reference:', externalReference);
+    console.log('Query:', query);
+    console.log('========================================');
+
+    // ----------------------------------------------------------
+    // Find transaction
+    // ----------------------------------------------------------
     const transaction = await Transaction.findOne(query);
 
     if (!transaction) {
       return NextResponse.json(
-        { success: false, error: 'Transaction not found' },
+        {
+          success: false,
+          error: 'Transaction not found',
+        },
         { status: 404 }
       );
     }
 
-    if (transaction.metadata?.userId?.toString() !== userId) {
+    // ----------------------------------------------------------
+    // Verify transaction belongs to test user
+    // ----------------------------------------------------------
+    if (
+      transaction.metadata?.userId?.toString() !== userId
+    ) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        {
+          success: false,
+          error: 'Unauthorized',
+        },
         { status: 403 }
       );
     }
 
+    // ----------------------------------------------------------
+    // Return transaction status
+    // ----------------------------------------------------------
     return NextResponse.json({
       success: true,
+
       status: transaction.status,
+
       transaction: {
         id: transaction._id,
+
         transactionId: transaction.transactionId,
+
         amount: transaction.amount,
+
         currency: transaction.currency,
+
         receiptNumber: transaction.receiptNumber,
+
         status: transaction.status,
+
         createdAt: transaction.createdAt,
+
         updatedAt: transaction.updatedAt,
+
         accountReference: transaction.accountReference,
+
         externalReference: transaction.externalReference,
+
         checkoutRequestId: transaction.checkoutRequestId,
-        providerTransactionId: transaction.providerTransactionId,
-        budgetId: transaction.metadata?.budgetId || null,
-        errorMessage: transaction.errorMessage,
-        purpose: transaction.purpose
-      }
+
+        providerTransactionId:
+          transaction.providerTransactionId,
+
+        budgetId:
+          transaction.metadata?.budgetId || null,
+
+        errorMessage:
+          transaction.errorMessage,
+
+        purpose:
+          transaction.purpose,
+      },
     });
 
   } catch (error: any) {
     console.error('Status check error:', error);
+
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      {
+        success: false,
+        error:
+          error.message || 'Internal server error',
+      },
       { status: 500 }
     );
   }
