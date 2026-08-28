@@ -1305,7 +1305,7 @@ import mongoose from 'mongoose';
 // REPLACE WITH ACTUAL VALUES AND RESTORE JWT AUTH AFTER TESTING
 // ============================================================
 const TEST_USER_ID = '6a648fb076014722ae88bac6';
-const TEST_ORG_ID = '000000000000000000000000'; // VALID 24-char hex placeholder
+const TEST_ORG_ID = '6a919e90136d24f1374bc223'; // VALID 24-char hex placeholder
 
 // Lazy ObjectId creation — only runs inside handlers, not at module load
 function getTestUserId() {
