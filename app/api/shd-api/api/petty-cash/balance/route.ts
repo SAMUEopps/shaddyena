@@ -1,37 +1,141 @@
+// // app/api/petty-cash/balance/route.ts
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import Transaction from '@/shd-models/models/Transaction';
+
+// // TEMPORARY TEST USER
+// const TEST_USER_ID = '6a648fb076014722ae88bac6';
+
+// // GET - Fetch petty cash balance for the test user
+// export async function GET(req: NextRequest) {
+//   try {
+//     await connectToDatabase();
+
+//     console.log(
+//       'Fetching petty cash balance for test user:',
+//       TEST_USER_ID
+//     );
+
+//     // ---------------------------------------------------------
+//     // Get all successful petty cash transactions
+//     // ---------------------------------------------------------
+
+//     const transactions = await Transaction.find({
+//       userId: TEST_USER_ID,
+
+//       type: {
+//         $in: [
+//           'petty_cash_deposit',
+//           'petty_cash_payout'
+//         ]
+//       },
+
+//       status: 'success'
+//     })
+//       .sort({ createdAt: -1 })
+//       .lean();
+
+//     // ---------------------------------------------------------
+//     // Calculate totals
+//     // ---------------------------------------------------------
+
+//     let totalDeposits = 0;
+//     let totalPayouts = 0;
+
+//     for (const transaction of transactions) {
+//       const amount = Number(transaction.amount || 0);
+
+//       if (transaction.type === 'petty_cash_deposit') {
+//         totalDeposits += amount;
+//       }
+
+//       if (transaction.type === 'petty_cash_payout') {
+//         totalPayouts += amount;
+//       }
+//     }
+
+//     // ---------------------------------------------------------
+//     // Calculate balance
+//     // ---------------------------------------------------------
+
+//     const balance = totalDeposits - totalPayouts;
+
+//     // ---------------------------------------------------------
+//     // Return response
+//     // ---------------------------------------------------------
+
+//     return NextResponse.json({
+//       success: true,
+
+//       data: {
+//         balance: Number(balance.toFixed(2)),
+
+//         totalDeposits: Number(
+//           totalDeposits.toFixed(2)
+//         ),
+
+//         totalPayouts: Number(
+//           totalPayouts.toFixed(2)
+//         ),
+
+//         currency: 'KES',
+
+//         transactionCount: transactions.length
+//       }
+//     });
+
+//   } catch (error: any) {
+//     console.error(
+//       'Error fetching petty cash balance:',
+//       error
+//     );
+
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         error:
+//           error.message ||
+//           'Internal server error'
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
 // app/api/petty-cash/balance/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import Transaction from '@/shd-models/models/Transaction';
+import mongoose from 'mongoose';
 
 // TEMPORARY TEST USER
 const TEST_USER_ID = '6a648fb076014722ae88bac6';
+const TEST_ORG_ID = 'your-test-org-id-here'; // REPLACE WITH ACTUAL ORG ID
 
 // GET - Fetch petty cash balance for the test user
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
 
-    console.log(
-      'Fetching petty cash balance for test user:',
-      TEST_USER_ID
-    );
+    console.log('Fetching petty cash balance for test user:', TEST_USER_ID);
 
     // ---------------------------------------------------------
     // Get all successful petty cash transactions
     // ---------------------------------------------------------
-
+    // Query by category='petty_cash' and type in ['deposit', 'payout']
+    // userId is stored in metadata, not at the top level
     const transactions = await Transaction.find({
-      userId: TEST_USER_ID,
-
-      type: {
-        $in: [
-          'petty_cash_deposit',
-          'petty_cash_payout'
-        ]
-      },
-
-      status: 'success'
+      organizationId: new mongoose.Types.ObjectId(TEST_ORG_ID),
+      category: 'petty_cash',
+      type: { $in: ['deposit', 'payout'] },
+      status: 'success',
+      $or: [
+        { 'metadata.userId': TEST_USER_ID },
+        { 'metadata.initiatedBy': TEST_USER_ID }
+      ]
     })
       .sort({ createdAt: -1 })
       .lean();
@@ -46,11 +150,11 @@ export async function GET(req: NextRequest) {
     for (const transaction of transactions) {
       const amount = Number(transaction.amount || 0);
 
-      if (transaction.type === 'petty_cash_deposit') {
+      if (transaction.type === 'deposit') {
         totalDeposits += amount;
       }
 
-      if (transaction.type === 'petty_cash_payout') {
+      if (transaction.type === 'payout') {
         totalPayouts += amount;
       }
     }
@@ -67,36 +171,22 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-
       data: {
         balance: Number(balance.toFixed(2)),
-
-        totalDeposits: Number(
-          totalDeposits.toFixed(2)
-        ),
-
-        totalPayouts: Number(
-          totalPayouts.toFixed(2)
-        ),
-
+        totalDeposits: Number(totalDeposits.toFixed(2)),
+        totalPayouts: Number(totalPayouts.toFixed(2)),
         currency: 'KES',
-
         transactionCount: transactions.length
       }
     });
 
   } catch (error: any) {
-    console.error(
-      'Error fetching petty cash balance:',
-      error
-    );
+    console.error('Error fetching petty cash balance:', error);
 
     return NextResponse.json(
       {
         success: false,
-        error:
-          error.message ||
-          'Internal server error'
+        error: error.message || 'Internal server error'
       },
       { status: 500 }
     );
