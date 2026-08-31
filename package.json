@@ -10,7 +10,8 @@
     "lint": "eslint",
     "seed:categories": "node scripts/seedCategories.js",
     "migrate:orders-viewed": "node scripts/migrate-orders-viewed.js",
-    "seed:organization": "node scripts/seedOrganization.js"
+    "seed:organization": "node scripts/seedOrganization.js",
+     "migrate:transactions": "node scripts/migrateTransactionSchema.js"
   },
   "dependencies": {
     "africastalking": "^0.7.7",
