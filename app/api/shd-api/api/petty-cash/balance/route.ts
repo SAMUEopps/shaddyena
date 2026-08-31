@@ -113,7 +113,7 @@ import mongoose from 'mongoose';
 
 // TEMPORARY TEST USER
 const TEST_USER_ID = '6a648fb076014722ae88bac6';
-const TEST_ORG_ID = 'your-test-org-id-here'; // REPLACE WITH ACTUAL ORG ID
+const TEST_ORG_ID = '6a919e90136d24f1374bc223'; // REPLACE WITH ACTUAL ORG ID
 
 // GET - Fetch petty cash balance for the test user
 export async function GET(req: NextRequest) {
