@@ -1143,11 +1143,777 @@
 
 // app/api/petty-cash/requests/[id]/approve/route.ts
 
+// import { NextRequest, NextResponse } from 'next/server';
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import ExpenseRequest from '@/shd-models/models/ExpenseRequest';
+// import Budget from '@/shd-models/models/Budget';
+// import Transaction from '@/shd-models/models/Transaction';
+// import { processB2CPayment } from '@/shd-lib/lib/mpesa';
+// import mongoose from 'mongoose';
+
+// // TEMPORARY TEST USER
+// const TEST_USER_ID = '6a648fb076014722ae88bac6';
+
+// // =============================================================
+// // LOGGING HELPERS
+// // =============================================================
+
+// function logSuccess(
+//   stage: string,
+//   data: Record<string, any> = {}
+// ) {
+//   console.log(
+//     JSON.stringify({
+//       level: 'SUCCESS',
+//       service: 'PettyCashApproval',
+//       stage,
+//       timestamp: new Date().toISOString(),
+//       ...data
+//     })
+//   );
+// }
+
+// function logFailure(
+//   stage: string,
+//   error: any,
+//   data: Record<string, any> = {}
+// ) {
+//   console.error(
+//     JSON.stringify({
+//       level: 'FAILURE',
+//       service: 'PettyCashApproval',
+//       stage,
+//       timestamp: new Date().toISOString(),
+//       error:
+//         error?.message ||
+//         error ||
+//         'Unknown error',
+//       stack: error?.stack,
+//       ...data
+//     })
+//   );
+// }
+
+// function logInfo(
+//   stage: string,
+//   data: Record<string, any> = {}
+// ) {
+//   console.log(
+//     JSON.stringify({
+//       level: 'INFO',
+//       service: 'PettyCashApproval',
+//       stage,
+//       timestamp: new Date().toISOString(),
+//       ...data
+//     })
+//   );
+// }
+
+// // =============================================================
+// // POST - APPROVE EXPENSE REQUEST
+// // =============================================================
+
+// export async function POST(
+//   req: NextRequest,
+//   { params }: { params: Promise<{ id: string }> }
+// ) {
+//   let requestId: string | undefined;
+//   let transactionId: string | undefined;
+
+//   try {
+
+//     // =========================================================
+//     // 1. TEST USER
+//     // =========================================================
+
+//     console.log(
+//       'Processing petty cash approval for test user:',
+//       TEST_USER_ID
+//     );
+
+//     // =========================================================
+//     // 2. PARAMS
+//     // =========================================================
+
+//     const { id } = await params;
+
+//     requestId = id;
+
+//     logInfo('APPROVAL_STARTED', {
+//       requestId,
+//       userId: TEST_USER_ID
+//     });
+
+//     // =========================================================
+//     // 3. DATABASE CONNECTION
+//     // =========================================================
+
+//     await connectToDatabase();
+
+//     logSuccess('DATABASE_CONNECTED', {
+//       requestId
+//     });
+
+//     // =========================================================
+//     // 4. FIND EXPENSE REQUEST
+//     // =========================================================
+
+//     const request = await ExpenseRequest.findById(id);
+
+//     if (!request) {
+//       logFailure(
+//         'REQUEST_NOT_FOUND',
+//         'Expense request not found',
+//         {
+//           requestId,
+//           userId: TEST_USER_ID
+//         }
+//       );
+
+//       return NextResponse.json(
+//         {
+//           success: false,
+//           error: 'Request not found'
+//         },
+//         { status: 404 }
+//       );
+//     }
+
+//     logInfo('REQUEST_FOUND', {
+//       requestId: request._id.toString(),
+//       currentStatus: request.status,
+//       amount: request.amount,
+//       totalAmount: request.totalAmount,
+//       recipientPhone: request.recipientPhone,
+//       category: request.category
+//     });
+
+//     // =========================================================
+//     // 5. VALIDATE STATUS
+//     // =========================================================
+
+//     if (
+//       request.status !== 'pending' &&
+//       request.status !== 'failed'
+//     ) {
+//       logFailure(
+//         'INVALID_REQUEST_STATUS',
+//         `Request status is ${request.status}`,
+//         {
+//           requestId,
+//           currentStatus: request.status,
+//           userId: TEST_USER_ID
+//         }
+//       );
+
+//       return NextResponse.json(
+//         {
+//           success: false,
+//           error: 'Request is not pending or failed'
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     // =========================================================
+//     // 6. FIND ACTIVE BUDGET
+//     // =========================================================
+
+//     const budget = await Budget.findOne({
+//       status: 'active',
+//       createdBy: TEST_USER_ID
+//     }).sort({
+//       createdAt: -1
+//     });
+
+//     if (!budget) {
+//       logFailure(
+//         'ACTIVE_BUDGET_NOT_FOUND',
+//         'No active budget found',
+//         {
+//           requestId,
+//           userId: TEST_USER_ID
+//         }
+//       );
+
+//       return NextResponse.json(
+//         {
+//           success: false,
+//           error: 'No active budget found'
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     logSuccess('ACTIVE_BUDGET_FOUND', {
+//       requestId,
+//       budgetId: budget._id.toString(),
+//       allocatedAmount: budget.allocatedAmount,
+//       spentAmount: budget.spentAmount,
+//       platformFees: budget.platformFees,
+//       remainingAmount: budget.remainingAmount
+//     });
+
+//     // =========================================================
+//     // 7. CHECK BUDGET
+//     // =========================================================
+
+//     if (
+//       request.totalAmount >
+//       budget.remainingAmount
+//     ) {
+//       logFailure(
+//         'INSUFFICIENT_BUDGET',
+//         'Insufficient budget',
+//         {
+//           requestId,
+//           budgetId: budget._id.toString(),
+//           requiredAmount: request.totalAmount,
+//           availableAmount: budget.remainingAmount,
+//           userId: TEST_USER_ID
+//         }
+//       );
+
+//       return NextResponse.json(
+//         {
+//           success: false,
+//           error:
+//             `Insufficient budget. Required: KES ${request.totalAmount.toFixed(
+//               2
+//             )}, Available: KES ${budget.remainingAmount.toFixed(2)}`
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     // =========================================================
+//     // 8. DEDUCT BUDGET
+//     // =========================================================
+
+//     const oldBudgetRemaining =
+//       budget.remainingAmount;
+
+//     budget.spentAmount =
+//       (budget.spentAmount || 0) +
+//       request.amount;
+
+//     budget.platformFees =
+//       (budget.platformFees || 0) +
+//       request.platformFee;
+
+//     budget.remainingAmount =
+//       budget.allocatedAmount -
+//       budget.spentAmount -
+//       budget.platformFees;
+
+//     if (budget.remainingAmount < 0) {
+//       budget.status = 'overdrawn';
+//     }
+
+//     await budget.save();
+
+//     logSuccess('BUDGET_DEDUCTED', {
+//       requestId,
+//       budgetId: budget._id.toString(),
+//       amount: request.amount,
+//       platformFee: request.platformFee,
+//       previousRemainingAmount:
+//         oldBudgetRemaining,
+//       newRemainingAmount:
+//         budget.remainingAmount
+//     });
+
+//     // =========================================================
+//     // 9. UPDATE REQUEST TO PROCESSING
+//     // =========================================================
+
+//     const originatorConversationId =
+//       `SHAD_${Date.now()}_${Math.floor(
+//         Math.random() * 10000
+//       )}`;
+
+//     request.status = 'processing';
+
+//     request.approverId =
+//       new mongoose.Types.ObjectId(
+//         TEST_USER_ID
+//       );
+
+//     request.approvedAt = new Date();
+
+//     request.metadata = {
+//       ...request.metadata,
+
+//       approvedBy: TEST_USER_ID,
+
+//       approvedAt:
+//         new Date().toISOString(),
+
+//       budgetWasUpdated: true,
+
+//       originatorConversationId,
+
+//       processingStarted:
+//         new Date().toISOString()
+//     };
+
+//     await request.save();
+
+//     logSuccess(
+//       'REQUEST_SET_TO_PROCESSING',
+//       {
+//         requestId,
+//         userId: TEST_USER_ID,
+//         originatorConversationId
+//       }
+//     );
+
+//     // =========================================================
+//     // 10. CREATE TRANSACTION
+//     // =========================================================
+
+//     const transaction =
+//       await Transaction.create({
+//         transactionId:
+//           `TXN-${Date.now()}-${Math.floor(
+//             Math.random() * 10000
+//           )}`,
+
+//         type: 'petty_cash_payout',
+
+//         status: 'processing',
+
+//         amount: request.amount,
+
+//         phoneNumber:
+//           request.recipientPhone,
+
+//         userId:
+//           new mongoose.Types.ObjectId(
+//             TEST_USER_ID
+//           ),
+
+//         budgetId:
+//           budget._id,
+
+//         purpose:
+//           `Petty Cash Payout - ${request.description}`,
+
+//         metadata: {
+//           requestId:
+//             request._id,
+
+//           description:
+//             request.description,
+
+//           category:
+//             request.category,
+
+//           platformFee:
+//             request.platformFee,
+
+//           totalAmount:
+//             request.totalAmount,
+
+//           originatorConversationId,
+
+//           initiatedAt:
+//             new Date().toISOString()
+//         }
+//       });
+
+//     transactionId =
+//       transaction.transactionId;
+
+//     logSuccess(
+//       'TRANSACTION_CREATED',
+//       {
+//         requestId,
+//         transactionId,
+//         //transactionMongoId:
+//           //stransaction._id.toString(),
+//         amount:
+//           request.amount,
+//         phoneNumber:
+//           request.recipientPhone,
+//         status:
+//           transaction.status
+//       }
+//     );
+
+//     // =========================================================
+//     // 11. INITIATE B2C
+//     // =========================================================
+
+//     logInfo(
+//       'B2C_INITIATION_STARTED',
+//       {
+//         requestId,
+//         transactionId,
+//         phoneNumber:
+//           request.recipientPhone,
+//         amount:
+//           request.amount,
+//         originatorConversationId
+//       }
+//     );
+
+//     try {
+
+//       const b2cResult =
+//         await processB2CPayment(
+//           request.recipientPhone,
+//           request.amount,
+//           'BusinessPayment',
+//           `Petty Cash - ${request.description}`,
+//           `PC-${request._id
+//             .toString()
+//             .slice(-8)}`
+//         );
+
+//       logInfo(
+//         'B2C_RESPONSE_RECEIVED',
+//         {
+//           requestId,
+//           transactionId,
+//           responseCode:
+//             b2cResult?.ResponseCode,
+//           responseDescription:
+//             b2cResult?.ResponseDescription,
+//           conversationId:
+//             b2cResult?.ConversationID,
+//           originatorConversationId:
+//             b2cResult?.OriginatorConversationID
+//         }
+//       );
+
+//       // =======================================================
+//       // 12. B2C INITIATED SUCCESSFULLY
+//       // =======================================================
+
+//       if (
+//         b2cResult &&
+//         b2cResult.ResponseCode === '0'
+//       ) {
+
+//         const finalOriginatorConversationId =
+//           b2cResult.OriginatorConversationID ||
+//           originatorConversationId;
+
+//         request.metadata = {
+//           ...request.metadata,
+
+//           b2cInitiated: true,
+
+//           b2cResponse:
+//             b2cResult,
+
+//           conversationId:
+//             b2cResult.ConversationID,
+
+//           originatorConversationId:
+//             finalOriginatorConversationId,
+
+//           b2cInitiatedAt:
+//             new Date().toISOString()
+//         };
+
+//         await request.save();
+
+//         transaction.metadata = {
+//           ...transaction.metadata,
+
+//           b2cInitiated: true,
+
+//           b2cResponse:
+//             b2cResult,
+
+//           conversationId:
+//             b2cResult.ConversationID,
+
+//           originatorConversationId:
+//             finalOriginatorConversationId,
+
+//           b2cInitiatedAt:
+//             new Date().toISOString()
+//         };
+
+//         await transaction.save();
+
+//         logSuccess(
+//           'B2C_PAYMENT_INITIATED_SUCCESSFULLY',
+//           {
+//             requestId,
+//             transactionId,
+//             amount:
+//               request.amount,
+//             phoneNumber:
+//               request.recipientPhone,
+//             conversationId:
+//               b2cResult.ConversationID,
+//             originatorConversationId:
+//               finalOriginatorConversationId,
+//             responseCode:
+//               b2cResult.ResponseCode
+//           }
+//         );
+
+//         return NextResponse.json({
+//           success: true,
+
+//           message:
+//             'B2C payment initiated. Waiting for confirmation from M-Pesa.',
+
+//           request,
+
+//           transaction,
+
+//           b2cResult
+//         });
+//       }
+
+//       // =======================================================
+//       // 13. B2C INITIATION FAILED
+//       // =======================================================
+
+//       logFailure(
+//         'B2C_INITIATION_REJECTED',
+//         b2cResult?.ResponseDescription ||
+//           'B2C payment initiation failed',
+//         {
+//           requestId,
+//           transactionId,
+//           responseCode:
+//             b2cResult?.ResponseCode,
+//           responseDescription:
+//             b2cResult?.ResponseDescription,
+//           conversationId:
+//             b2cResult?.ConversationID
+//         }
+//       );
+
+//       throw new Error(
+//         b2cResult?.ResponseDescription ||
+//           'B2C payment initiation failed'
+//       );
+
+//     } catch (b2cError: any) {
+
+//       // =======================================================
+//       // 14. B2C FAILURE
+//       // =======================================================
+
+//       logFailure(
+//         'B2C_PAYMENT_FAILED',
+//         b2cError,
+//         {
+//           requestId,
+//           transactionId,
+//           amount:
+//             request.amount,
+//           phoneNumber:
+//             request.recipientPhone
+//         }
+//       );
+
+//       // =======================================================
+//       // 15. REVERT BUDGET
+//       // =======================================================
+
+//       const budgetBeforeRevert = {
+//         spentAmount:
+//           budget.spentAmount,
+
+//         platformFees:
+//           budget.platformFees,
+
+//         remainingAmount:
+//           budget.remainingAmount
+//       };
+
+//       budget.spentAmount =
+//         Math.max(
+//           0,
+//           (budget.spentAmount || 0) -
+//             request.amount
+//         );
+
+//       budget.platformFees =
+//         Math.max(
+//           0,
+//           (budget.platformFees || 0) -
+//             request.platformFee
+//         );
+
+//       budget.remainingAmount =
+//         budget.allocatedAmount -
+//         budget.spentAmount -
+//         budget.platformFees;
+
+//       if (budget.remainingAmount >= 0) {
+//         budget.status = 'active';
+//       }
+
+//       await budget.save();
+
+//       logSuccess(
+//         'BUDGET_REVERTED_AFTER_B2C_FAILURE',
+//         {
+//           requestId,
+//           transactionId,
+//           budgetId:
+//             budget._id.toString(),
+
+//           before:
+//             budgetBeforeRevert,
+
+//           after: {
+//             spentAmount:
+//               budget.spentAmount,
+
+//             platformFees:
+//               budget.platformFees,
+
+//             remainingAmount:
+//               budget.remainingAmount,
+
+//             status:
+//               budget.status
+//           }
+//         }
+//       );
+
+//       // =======================================================
+//       // 16. UPDATE REQUEST AS FAILED
+//       // =======================================================
+
+//       request.status = 'failed';
+
+//       request.metadata = {
+//         ...request.metadata,
+
+//         b2cInitiated: false,
+
+//         b2cError:
+//           b2cError.message ||
+//           'B2C payment failed',
+
+//         failedAt:
+//           new Date().toISOString()
+//       };
+
+//       await request.save();
+
+//       logSuccess(
+//         'REQUEST_MARKED_FAILED',
+//         {
+//           requestId,
+//           transactionId,
+//           error:
+//             b2cError.message ||
+//             'B2C payment failed'
+//         }
+//       );
+
+//       // =======================================================
+//       // 17. UPDATE TRANSACTION AS FAILED
+//       // =======================================================
+
+//       transaction.status = 'failed';
+
+//       transaction.errorMessage =
+//         b2cError.message ||
+//         'B2C payment failed';
+
+//       transaction.metadata = {
+//         ...transaction.metadata,
+
+//         b2cInitiated: false,
+
+//         b2cError:
+//           b2cError.message ||
+//           'B2C payment failed',
+
+//         failedAt:
+//           new Date().toISOString()
+//       };
+
+//       await transaction.save();
+
+//       logSuccess(
+//         'TRANSACTION_MARKED_FAILED',
+//         {
+//           requestId,
+//           transactionId,
+//           error:
+//             transaction.errorMessage
+//         }
+//       );
+
+//       // =======================================================
+//       // 18. FINAL FAILURE LOG
+//       // =======================================================
+
+//       logFailure(
+//         'PETTY_CASH_APPROVAL_FAILED',
+//         b2cError,
+//         {
+//           requestId,
+//           transactionId,
+//           budgetReverted: true,
+//           requestStatus: 'failed',
+//           transactionStatus: 'failed'
+//         }
+//       );
+
+//       return NextResponse.json(
+//         {
+//           success: false,
+//           error:
+//             'Failed to process B2C payment. Please try again.',
+//           details:
+//             b2cError.message
+//         },
+//         { status: 500 }
+//       );
+//     }
+
+//   } catch (error: any) {
+
+//     // =========================================================
+//     // 19. UNEXPECTED ROUTE ERROR
+//     // =========================================================
+
+//     logFailure(
+//       'UNEXPECTED_APPROVAL_ERROR',
+//       error,
+//       {
+//         requestId,
+//         transactionId
+//       }
+//     );
+
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         error:
+//           error.message ||
+//           'Internal server error'
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
+// app/api/petty-cash/requests/[id]/approve/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import ExpenseRequest from '@/shd-models/models/ExpenseRequest';
 import Budget from '@/shd-models/models/Budget';
 import Transaction from '@/shd-models/models/Transaction';
+import Organization from '@/shd-models/models/Organization';
 import { processB2CPayment } from '@/shd-lib/lib/mpesa';
 import mongoose from 'mongoose';
 
@@ -1158,55 +1924,36 @@ const TEST_USER_ID = '6a648fb076014722ae88bac6';
 // LOGGING HELPERS
 // =============================================================
 
-function logSuccess(
-  stage: string,
-  data: Record<string, any> = {}
-) {
-  console.log(
-    JSON.stringify({
-      level: 'SUCCESS',
-      service: 'PettyCashApproval',
-      stage,
-      timestamp: new Date().toISOString(),
-      ...data
-    })
-  );
+function logSuccess(stage: string, data: Record<string, any> = {}) {
+  console.log(JSON.stringify({
+    level: 'SUCCESS',
+    service: 'PettyCashApproval',
+    stage,
+    timestamp: new Date().toISOString(),
+    ...data
+  }));
 }
 
-function logFailure(
-  stage: string,
-  error: any,
-  data: Record<string, any> = {}
-) {
-  console.error(
-    JSON.stringify({
-      level: 'FAILURE',
-      service: 'PettyCashApproval',
-      stage,
-      timestamp: new Date().toISOString(),
-      error:
-        error?.message ||
-        error ||
-        'Unknown error',
-      stack: error?.stack,
-      ...data
-    })
-  );
+function logFailure(stage: string, error: any, data: Record<string, any> = {}) {
+  console.error(JSON.stringify({
+    level: 'FAILURE',
+    service: 'PettyCashApproval',
+    stage,
+    timestamp: new Date().toISOString(),
+    error: error?.message || error || 'Unknown error',
+    stack: error?.stack,
+    ...data
+  }));
 }
 
-function logInfo(
-  stage: string,
-  data: Record<string, any> = {}
-) {
-  console.log(
-    JSON.stringify({
-      level: 'INFO',
-      service: 'PettyCashApproval',
-      stage,
-      timestamp: new Date().toISOString(),
-      ...data
-    })
-  );
+function logInfo(stage: string, data: Record<string, any> = {}) {
+  console.log(JSON.stringify({
+    level: 'INFO',
+    service: 'PettyCashApproval',
+    stage,
+    timestamp: new Date().toISOString(),
+    ...data
+  }));
 }
 
 // =============================================================
@@ -1221,22 +1968,11 @@ export async function POST(
   let transactionId: string | undefined;
 
   try {
-
     // =========================================================
-    // 1. TEST USER
-    // =========================================================
-
-    console.log(
-      'Processing petty cash approval for test user:',
-      TEST_USER_ID
-    );
-
-    // =========================================================
-    // 2. PARAMS
+    // 1. PARAMS
     // =========================================================
 
     const { id } = await params;
-
     requestId = id;
 
     logInfo('APPROVAL_STARTED', {
@@ -1245,13 +1981,38 @@ export async function POST(
     });
 
     // =========================================================
-    // 3. DATABASE CONNECTION
+    // 2. DATABASE CONNECTION
     // =========================================================
 
     await connectToDatabase();
 
-    logSuccess('DATABASE_CONNECTED', {
-      requestId
+    // =========================================================
+    // 3. FIND ORGANIZATION (MALEX)
+    // =========================================================
+
+    const organization = await Organization.findOne({
+      name: { $regex: /^Malex$/i }
+    });
+
+    if (!organization) {
+      logFailure('ORGANIZATION_NOT_FOUND', 'Malex organization not found', {
+        requestId
+      });
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Organization not found'
+        },
+        { status: 404 }
+      );
+    }
+
+    const organizationId = organization._id;
+    logInfo('ORGANIZATION_FOUND', {
+      requestId,
+      organizationId: organizationId.toString(),
+      organizationName: organization.name
     });
 
     // =========================================================
@@ -1261,14 +2022,10 @@ export async function POST(
     const request = await ExpenseRequest.findById(id);
 
     if (!request) {
-      logFailure(
-        'REQUEST_NOT_FOUND',
-        'Expense request not found',
-        {
-          requestId,
-          userId: TEST_USER_ID
-        }
-      );
+      logFailure('REQUEST_NOT_FOUND', 'Expense request not found', {
+        requestId,
+        userId: TEST_USER_ID
+      });
 
       return NextResponse.json(
         {
@@ -1292,19 +2049,12 @@ export async function POST(
     // 5. VALIDATE STATUS
     // =========================================================
 
-    if (
-      request.status !== 'pending' &&
-      request.status !== 'failed'
-    ) {
-      logFailure(
-        'INVALID_REQUEST_STATUS',
-        `Request status is ${request.status}`,
-        {
-          requestId,
-          currentStatus: request.status,
-          userId: TEST_USER_ID
-        }
-      );
+    if (request.status !== 'pending' && request.status !== 'failed') {
+      logFailure('INVALID_REQUEST_STATUS', `Request status is ${request.status}`, {
+        requestId,
+        currentStatus: request.status,
+        userId: TEST_USER_ID
+      });
 
       return NextResponse.json(
         {
@@ -1322,19 +2072,13 @@ export async function POST(
     const budget = await Budget.findOne({
       status: 'active',
       createdBy: TEST_USER_ID
-    }).sort({
-      createdAt: -1
-    });
+    }).sort({ createdAt: -1 });
 
     if (!budget) {
-      logFailure(
-        'ACTIVE_BUDGET_NOT_FOUND',
-        'No active budget found',
-        {
-          requestId,
-          userId: TEST_USER_ID
-        }
-      );
+      logFailure('ACTIVE_BUDGET_NOT_FOUND', 'No active budget found', {
+        requestId,
+        userId: TEST_USER_ID
+      });
 
       return NextResponse.json(
         {
@@ -1358,29 +2102,19 @@ export async function POST(
     // 7. CHECK BUDGET
     // =========================================================
 
-    if (
-      request.totalAmount >
-      budget.remainingAmount
-    ) {
-      logFailure(
-        'INSUFFICIENT_BUDGET',
-        'Insufficient budget',
-        {
-          requestId,
-          budgetId: budget._id.toString(),
-          requiredAmount: request.totalAmount,
-          availableAmount: budget.remainingAmount,
-          userId: TEST_USER_ID
-        }
-      );
+    if (request.totalAmount > budget.remainingAmount) {
+      logFailure('INSUFFICIENT_BUDGET', 'Insufficient budget', {
+        requestId,
+        budgetId: budget._id.toString(),
+        requiredAmount: request.totalAmount,
+        availableAmount: budget.remainingAmount,
+        userId: TEST_USER_ID
+      });
 
       return NextResponse.json(
         {
           success: false,
-          error:
-            `Insufficient budget. Required: KES ${request.totalAmount.toFixed(
-              2
-            )}, Available: KES ${budget.remainingAmount.toFixed(2)}`
+          error: `Insufficient budget. Required: KES ${request.totalAmount.toFixed(2)}, Available: KES ${budget.remainingAmount.toFixed(2)}`
         },
         { status: 400 }
       );
@@ -1390,21 +2124,11 @@ export async function POST(
     // 8. DEDUCT BUDGET
     // =========================================================
 
-    const oldBudgetRemaining =
-      budget.remainingAmount;
+    const oldBudgetRemaining = budget.remainingAmount;
 
-    budget.spentAmount =
-      (budget.spentAmount || 0) +
-      request.amount;
-
-    budget.platformFees =
-      (budget.platformFees || 0) +
-      request.platformFee;
-
-    budget.remainingAmount =
-      budget.allocatedAmount -
-      budget.spentAmount -
-      budget.platformFees;
+    budget.spentAmount = (budget.spentAmount || 0) + request.amount;
+    budget.platformFees = (budget.platformFees || 0) + request.platformFee;
+    budget.remainingAmount = budget.allocatedAmount - budget.spentAmount - budget.platformFees;
 
     if (budget.remainingAmount < 0) {
       budget.status = 'overdrawn';
@@ -1417,257 +2141,167 @@ export async function POST(
       budgetId: budget._id.toString(),
       amount: request.amount,
       platformFee: request.platformFee,
-      previousRemainingAmount:
-        oldBudgetRemaining,
-      newRemainingAmount:
-        budget.remainingAmount
+      previousRemainingAmount: oldBudgetRemaining,
+      newRemainingAmount: budget.remainingAmount
     });
 
     // =========================================================
     // 9. UPDATE REQUEST TO PROCESSING
     // =========================================================
 
-    const originatorConversationId =
-      `SHAD_${Date.now()}_${Math.floor(
-        Math.random() * 10000
-      )}`;
+    const originatorConversationId = `SHAD_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
     request.status = 'processing';
-
-    request.approverId =
-      new mongoose.Types.ObjectId(
-        TEST_USER_ID
-      );
-
+    request.approverId = new mongoose.Types.ObjectId(TEST_USER_ID);
     request.approvedAt = new Date();
-
     request.metadata = {
       ...request.metadata,
-
       approvedBy: TEST_USER_ID,
-
-      approvedAt:
-        new Date().toISOString(),
-
+      approvedAt: new Date().toISOString(),
       budgetWasUpdated: true,
-
       originatorConversationId,
-
-      processingStarted:
-        new Date().toISOString()
+      processingStarted: new Date().toISOString()
     };
 
     await request.save();
 
-    logSuccess(
-      'REQUEST_SET_TO_PROCESSING',
-      {
-        requestId,
+    logSuccess('REQUEST_SET_TO_PROCESSING', {
+      requestId,
+      userId: TEST_USER_ID,
+      originatorConversationId
+    });
+
+    // =========================================================
+    // 10. CREATE TRANSACTION - FIXED VERSION
+    // =========================================================
+
+    const transaction = await Transaction.create({
+      transactionId: `TXN-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      
+      // FIXED: Use valid enum values
+      type: 'payout', // NOT 'petty_cash_payout'
+      category: 'petty_cash', // REQUIRED field
+      
+      organizationId: organizationId, // REQUIRED field
+      
+      amount: request.amount,
+      currency: 'KES',
+      status: 'processing',
+      
+      phoneNumber: request.recipientPhone,
+      
+      accountReference: `PC-${request._id.toString().slice(-8)}`,
+      externalReference: budget._id.toString(),
+      externalEntityId: request._id.toString(),
+      externalEntityType: 'expense_request',
+      
+      provider: 'mpesa',
+      
+      purpose: `Petty Cash Payout - ${request.description}`,
+      
+      // Store additional data in metadata
+      metadata: {
+        requestId: request._id.toString(),
+        description: request.description,
+        category: request.category,
+        platformFee: request.platformFee,
+        totalAmount: request.totalAmount,
+        originatorConversationId,
+        initiatedAt: new Date().toISOString(),
         userId: TEST_USER_ID,
-        originatorConversationId
+        budgetId: budget._id.toString(),
+        recipientName: request.recipientName,
+        recipientPhone: request.recipientPhone
       }
-    );
+    });
 
-    // =========================================================
-    // 10. CREATE TRANSACTION
-    // =========================================================
+    transactionId = transaction.transactionId;
 
-    const transaction =
-      await Transaction.create({
-        transactionId:
-          `TXN-${Date.now()}-${Math.floor(
-            Math.random() * 10000
-          )}`,
-
-        type: 'petty_cash_payout',
-
-        status: 'processing',
-
-        amount: request.amount,
-
-        phoneNumber:
-          request.recipientPhone,
-
-        userId:
-          new mongoose.Types.ObjectId(
-            TEST_USER_ID
-          ),
-
-        budgetId:
-          budget._id,
-
-        purpose:
-          `Petty Cash Payout - ${request.description}`,
-
-        metadata: {
-          requestId:
-            request._id,
-
-          description:
-            request.description,
-
-          category:
-            request.category,
-
-          platformFee:
-            request.platformFee,
-
-          totalAmount:
-            request.totalAmount,
-
-          originatorConversationId,
-
-          initiatedAt:
-            new Date().toISOString()
-        }
-      });
-
-    transactionId =
-      transaction.transactionId;
-
-    logSuccess(
-      'TRANSACTION_CREATED',
-      {
-        requestId,
-        transactionId,
-        //transactionMongoId:
-          //stransaction._id.toString(),
-        amount:
-          request.amount,
-        phoneNumber:
-          request.recipientPhone,
-        status:
-          transaction.status
-      }
-    );
+    logSuccess('TRANSACTION_CREATED', {
+      requestId,
+      transactionId,
+      transactionMongoId: transaction.id.toString(),
+      amount: request.amount,
+      phoneNumber: request.recipientPhone,
+      status: transaction.status
+    });
 
     // =========================================================
     // 11. INITIATE B2C
     // =========================================================
 
-    logInfo(
-      'B2C_INITIATION_STARTED',
-      {
-        requestId,
-        transactionId,
-        phoneNumber:
-          request.recipientPhone,
-        amount:
-          request.amount,
-        originatorConversationId
-      }
-    );
+    logInfo('B2C_INITIATION_STARTED', {
+      requestId,
+      transactionId,
+      phoneNumber: request.recipientPhone,
+      amount: request.amount,
+      originatorConversationId
+    });
 
     try {
-
-      const b2cResult =
-        await processB2CPayment(
-          request.recipientPhone,
-          request.amount,
-          'BusinessPayment',
-          `Petty Cash - ${request.description}`,
-          `PC-${request._id
-            .toString()
-            .slice(-8)}`
-        );
-
-      logInfo(
-        'B2C_RESPONSE_RECEIVED',
-        {
-          requestId,
-          transactionId,
-          responseCode:
-            b2cResult?.ResponseCode,
-          responseDescription:
-            b2cResult?.ResponseDescription,
-          conversationId:
-            b2cResult?.ConversationID,
-          originatorConversationId:
-            b2cResult?.OriginatorConversationID
-        }
+      const b2cResult = await processB2CPayment(
+        request.recipientPhone,
+        request.amount,
+        'BusinessPayment',
+        `Petty Cash - ${request.description}`,
+        `PC-${request._id.toString().slice(-8)}`
       );
+
+      logInfo('B2C_RESPONSE_RECEIVED', {
+        requestId,
+        transactionId,
+        responseCode: b2cResult?.ResponseCode,
+        responseDescription: b2cResult?.ResponseDescription,
+        conversationId: b2cResult?.ConversationID,
+        originatorConversationId: b2cResult?.OriginatorConversationID
+      });
 
       // =======================================================
       // 12. B2C INITIATED SUCCESSFULLY
       // =======================================================
 
-      if (
-        b2cResult &&
-        b2cResult.ResponseCode === '0'
-      ) {
+      if (b2cResult && b2cResult.ResponseCode === '0') {
+        const finalOriginatorConversationId = b2cResult.OriginatorConversationID || originatorConversationId;
 
-        const finalOriginatorConversationId =
-          b2cResult.OriginatorConversationID ||
-          originatorConversationId;
-
+        // Update request
         request.metadata = {
           ...request.metadata,
-
           b2cInitiated: true,
-
-          b2cResponse:
-            b2cResult,
-
-          conversationId:
-            b2cResult.ConversationID,
-
-          originatorConversationId:
-            finalOriginatorConversationId,
-
-          b2cInitiatedAt:
-            new Date().toISOString()
+          b2cResponse: b2cResult,
+          conversationId: b2cResult.ConversationID,
+          originatorConversationId: finalOriginatorConversationId,
+          b2cInitiatedAt: new Date().toISOString()
         };
-
         await request.save();
 
+        // Update transaction with B2C response
+        transaction.status = 'processing';
+        transaction.providerTransactionId = b2cResult.ConversationID;
         transaction.metadata = {
           ...transaction.metadata,
-
           b2cInitiated: true,
-
-          b2cResponse:
-            b2cResult,
-
-          conversationId:
-            b2cResult.ConversationID,
-
-          originatorConversationId:
-            finalOriginatorConversationId,
-
-          b2cInitiatedAt:
-            new Date().toISOString()
+          b2cResponse: b2cResult,
+          conversationId: b2cResult.ConversationID,
+          originatorConversationId: finalOriginatorConversationId,
+          b2cInitiatedAt: new Date().toISOString()
         };
-
         await transaction.save();
 
-        logSuccess(
-          'B2C_PAYMENT_INITIATED_SUCCESSFULLY',
-          {
-            requestId,
-            transactionId,
-            amount:
-              request.amount,
-            phoneNumber:
-              request.recipientPhone,
-            conversationId:
-              b2cResult.ConversationID,
-            originatorConversationId:
-              finalOriginatorConversationId,
-            responseCode:
-              b2cResult.ResponseCode
-          }
-        );
+        logSuccess('B2C_PAYMENT_INITIATED_SUCCESSFULLY', {
+          requestId,
+          transactionId,
+          amount: request.amount,
+          phoneNumber: request.recipientPhone,
+          conversationId: b2cResult.ConversationID,
+          originatorConversationId: finalOriginatorConversationId,
+          responseCode: b2cResult.ResponseCode
+        });
 
         return NextResponse.json({
           success: true,
-
-          message:
-            'B2C payment initiated. Waiting for confirmation from M-Pesa.',
-
+          message: 'B2C payment initiated. Waiting for confirmation from M-Pesa.',
           request,
-
           transaction,
-
           b2cResult
         });
       }
@@ -1676,229 +2310,93 @@ export async function POST(
       // 13. B2C INITIATION FAILED
       // =======================================================
 
-      logFailure(
-        'B2C_INITIATION_REJECTED',
-        b2cResult?.ResponseDescription ||
-          'B2C payment initiation failed',
-        {
-          requestId,
-          transactionId,
-          responseCode:
-            b2cResult?.ResponseCode,
-          responseDescription:
-            b2cResult?.ResponseDescription,
-          conversationId:
-            b2cResult?.ConversationID
-        }
-      );
+      logFailure('B2C_INITIATION_REJECTED', b2cResult?.ResponseDescription || 'B2C payment initiation failed', {
+        requestId,
+        transactionId,
+        responseCode: b2cResult?.ResponseCode,
+        responseDescription: b2cResult?.ResponseDescription,
+        conversationId: b2cResult?.ConversationID
+      });
 
-      throw new Error(
-        b2cResult?.ResponseDescription ||
-          'B2C payment initiation failed'
-      );
+      throw new Error(b2cResult?.ResponseDescription || 'B2C payment initiation failed');
 
     } catch (b2cError: any) {
-
       // =======================================================
-      // 14. B2C FAILURE
-      // =======================================================
-
-      logFailure(
-        'B2C_PAYMENT_FAILED',
-        b2cError,
-        {
-          requestId,
-          transactionId,
-          amount:
-            request.amount,
-          phoneNumber:
-            request.recipientPhone
-        }
-      );
-
-      // =======================================================
-      // 15. REVERT BUDGET
+      // 14. B2C FAILURE - REVERT EVERYTHING
       // =======================================================
 
-      const budgetBeforeRevert = {
-        spentAmount:
-          budget.spentAmount,
+      logFailure('B2C_PAYMENT_FAILED', b2cError, {
+        requestId,
+        transactionId,
+        amount: request.amount,
+        phoneNumber: request.recipientPhone
+      });
 
-        platformFees:
-          budget.platformFees,
-
-        remainingAmount:
-          budget.remainingAmount
-      };
-
-      budget.spentAmount =
-        Math.max(
-          0,
-          (budget.spentAmount || 0) -
-            request.amount
-        );
-
-      budget.platformFees =
-        Math.max(
-          0,
-          (budget.platformFees || 0) -
-            request.platformFee
-        );
-
-      budget.remainingAmount =
-        budget.allocatedAmount -
-        budget.spentAmount -
-        budget.platformFees;
-
+      // REVERT BUDGET
+      budget.spentAmount = Math.max(0, (budget.spentAmount || 0) - request.amount);
+      budget.platformFees = Math.max(0, (budget.platformFees || 0) - request.platformFee);
+      budget.remainingAmount = budget.allocatedAmount - budget.spentAmount - budget.platformFees;
       if (budget.remainingAmount >= 0) {
         budget.status = 'active';
       }
-
       await budget.save();
 
-      logSuccess(
-        'BUDGET_REVERTED_AFTER_B2C_FAILURE',
-        {
-          requestId,
-          transactionId,
-          budgetId:
-            budget._id.toString(),
+      logSuccess('BUDGET_REVERTED_AFTER_B2C_FAILURE', {
+        requestId,
+        transactionId,
+        budgetId: budget._id.toString(),
+        newRemainingAmount: budget.remainingAmount
+      });
 
-          before:
-            budgetBeforeRevert,
-
-          after: {
-            spentAmount:
-              budget.spentAmount,
-
-            platformFees:
-              budget.platformFees,
-
-            remainingAmount:
-              budget.remainingAmount,
-
-            status:
-              budget.status
-          }
-        }
-      );
-
-      // =======================================================
-      // 16. UPDATE REQUEST AS FAILED
-      // =======================================================
-
+      // UPDATE REQUEST AS FAILED
       request.status = 'failed';
-
       request.metadata = {
         ...request.metadata,
-
         b2cInitiated: false,
-
-        b2cError:
-          b2cError.message ||
-          'B2C payment failed',
-
-        failedAt:
-          new Date().toISOString()
+        b2cError: b2cError.message || 'B2C payment failed',
+        failedAt: new Date().toISOString()
       };
-
       await request.save();
 
-      logSuccess(
-        'REQUEST_MARKED_FAILED',
-        {
-          requestId,
-          transactionId,
-          error:
-            b2cError.message ||
-            'B2C payment failed'
-        }
-      );
-
-      // =======================================================
-      // 17. UPDATE TRANSACTION AS FAILED
-      // =======================================================
-
+      // UPDATE TRANSACTION AS FAILED
       transaction.status = 'failed';
-
-      transaction.errorMessage =
-        b2cError.message ||
-        'B2C payment failed';
-
+      transaction.errorMessage = b2cError.message || 'B2C payment failed';
       transaction.metadata = {
         ...transaction.metadata,
-
         b2cInitiated: false,
-
-        b2cError:
-          b2cError.message ||
-          'B2C payment failed',
-
-        failedAt:
-          new Date().toISOString()
+        b2cError: b2cError.message || 'B2C payment failed',
+        failedAt: new Date().toISOString()
       };
-
       await transaction.save();
 
-      logSuccess(
-        'TRANSACTION_MARKED_FAILED',
-        {
-          requestId,
-          transactionId,
-          error:
-            transaction.errorMessage
-        }
-      );
-
-      // =======================================================
-      // 18. FINAL FAILURE LOG
-      // =======================================================
-
-      logFailure(
-        'PETTY_CASH_APPROVAL_FAILED',
-        b2cError,
-        {
-          requestId,
-          transactionId,
-          budgetReverted: true,
-          requestStatus: 'failed',
-          transactionStatus: 'failed'
-        }
-      );
+      logFailure('PETTY_CASH_APPROVAL_FAILED', b2cError, {
+        requestId,
+        transactionId,
+        budgetReverted: true,
+        requestStatus: 'failed',
+        transactionStatus: 'failed'
+      });
 
       return NextResponse.json(
         {
           success: false,
-          error:
-            'Failed to process B2C payment. Please try again.',
-          details:
-            b2cError.message
+          error: 'Failed to process B2C payment. Please try again.',
+          details: b2cError.message
         },
         { status: 500 }
       );
     }
 
   } catch (error: any) {
-
-    // =========================================================
-    // 19. UNEXPECTED ROUTE ERROR
-    // =========================================================
-
-    logFailure(
-      'UNEXPECTED_APPROVAL_ERROR',
-      error,
-      {
-        requestId,
-        transactionId
-      }
-    );
+    logFailure('UNEXPECTED_APPROVAL_ERROR', error, {
+      requestId,
+      transactionId
+    });
 
     return NextResponse.json(
       {
         success: false,
-        error:
-          error.message ||
-          'Internal server error'
+        error: error.message || 'Internal server error'
       },
       { status: 500 }
     );
