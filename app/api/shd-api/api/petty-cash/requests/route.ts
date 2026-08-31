@@ -535,21 +535,261 @@
 
 // app/api/petty-cash/requests/route.ts
 
+// import { NextRequest, NextResponse } from 'next/server';
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import ExpenseRequest from '@/shd-models/models/ExpenseRequest';
+// import Organization from '@/shd-models/models/Organization';
+// import mongoose from 'mongoose';
+
+// // Helper to get Malex organization
+// async function getMalexOrganization() {
+//   const organization = await Organization.findOne({ 
+//     name: { $regex: /^Malex$/i } 
+//   });
+//   return organization;
+// }
+
+// // GET - Fetch all expense requests for Malex organization
+// export async function GET(req: NextRequest) {
+//   try {
+//     await connectToDatabase();
+
+//     const organization = await getMalexOrganization();
+
+//     if (!organization) {
+//       console.error('Malex organization not found');
+//       return NextResponse.json(
+//         {
+//           success: false,
+//           error: 'Organization not found'
+//         },
+//         { status: 404 }
+//       );
+//     }
+
+//     console.log('Fetching requests for Malex org:', organization._id);
+
+//     // Parse query parameters for filtering
+//     const searchParams = req.nextUrl.searchParams;
+//     const status = searchParams.get('status');
+//     const requesterId = searchParams.get('requesterId');
+//     const category = searchParams.get('category');
+//     const limit = parseInt(searchParams.get('limit') || '100');
+//     const page = parseInt(searchParams.get('page') || '1');
+//     const skip = (page - 1) * limit;
+
+//     // Build query
+//     const query: any = {
+//       organizationId: new mongoose.Types.ObjectId(organization._id)
+//     };
+
+//     if (status) {
+//       query.status = status;
+//     }
+
+//     if (requesterId) {
+//       query.requesterId = new mongoose.Types.ObjectId(requesterId);
+//     }
+
+//     if (category) {
+//       query.category = category;
+//     }
+
+//     console.log('Query:', query);
+
+//     // Fetch requests with pagination
+//     const requests = await ExpenseRequest.find(query)
+//       .populate('requesterId', 'name email')
+//       .populate('approverId', 'name email')
+//       .sort({ createdAt: -1 })
+//       .skip(skip)
+//       .limit(limit)
+//       .lean();
+
+//     // Get total count for pagination
+//     const total = await ExpenseRequest.countDocuments(query);
+
+//     console.log(`Found ${requests.length} requests (total: ${total})`);
+
+//     return NextResponse.json({
+//       success: true,
+//       requests: requests,
+//       pagination: {
+//         total,
+//         page,
+//         limit,
+//         pages: Math.ceil(total / limit)
+//       }
+//     });
+
+//   } catch (error: any) {
+//     console.error('Error fetching requests:', error);
+
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         error: error.message || 'Internal server error'
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+// // POST - Create a new expense request
+// export async function POST(req: NextRequest) {
+//   try {
+//     const body = await req.json();
+
+//     const {
+//       amount,
+//       recipientPhone,
+//       recipientName,
+//       category,
+//       description,
+//       requesterId,
+//       platformFee = 0,
+//       totalAmount,
+//       receiptUrl,
+//       metadata = {}
+//     } = body;
+
+//     // Validate required fields
+//     if (!amount || amount <= 0) {
+//       return NextResponse.json(
+//         { 
+//           success: false, 
+//           error: 'Valid amount is required (must be greater than 0)' 
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!recipientPhone) {
+//       return NextResponse.json(
+//         { 
+//           success: false, 
+//           error: 'Recipient phone number is required' 
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!requesterId) {
+//       return NextResponse.json(
+//         { 
+//           success: false, 
+//           error: 'Requester ID is required' 
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!category) {
+//       return NextResponse.json(
+//         { 
+//           success: false, 
+//           error: 'Category is required' 
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     await connectToDatabase();
+
+//     const organization = await getMalexOrganization();
+
+//     if (!organization) {
+//       console.error('Malex organization not found');
+//       return NextResponse.json(
+//         {
+//           success: false,
+//           error: 'Organization not found'
+//         },
+//         { status: 404 }
+//       );
+//     }
+
+//     console.log('Creating request for Malex org:', organization._id);
+
+//     // Calculate total amount if not provided
+//     const calculatedTotalAmount = totalAmount || amount + platformFee;
+
+//     // Create the expense request
+//     const request = await ExpenseRequest.create({
+//       amount,
+//       platformFee,
+//       totalAmount: calculatedTotalAmount,
+//       recipientPhone,
+//       recipientName: recipientName || 'Unknown',
+//       category,
+//       description: description || 'Expense Request',
+//       requesterId: new mongoose.Types.ObjectId(requesterId),
+//       organizationId: organization._id,
+//       status: 'pending',
+//       receiptUrl: receiptUrl || null,
+//       metadata: {
+//         ...metadata,
+//         organizationName: organization.name,
+//         createdVia: 'api',
+//         createdAt: new Date().toISOString()
+//       }
+//     });
+
+//     console.log('Request created:', request._id);
+
+//     // Populate requester info for response
+//     await request.populate('requesterId', 'name email');
+
+//     return NextResponse.json({
+//       success: true,
+//       message: 'Request submitted successfully',
+//       request
+//     });
+
+//   } catch (error: any) {
+//     console.error('Error creating request:', error);
+
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         error: error.message || 'Internal server error'
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
+// app/api/petty-cash/requests/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import ExpenseRequest from '@/shd-models/models/ExpenseRequest';
 import Organization from '@/shd-models/models/Organization';
 import mongoose from 'mongoose';
 
-// Helper to get Malex organization
+// =============================================================
+// TEMPORARY TEST USER
+// =============================================================
+
+const TEST_USER_ID = '6a648fb076014722ae88bac6';
+
+// =============================================================
+// HELPER - GET MALEX ORGANIZATION
+// =============================================================
+
 async function getMalexOrganization() {
-  const organization = await Organization.findOne({ 
-    name: { $regex: /^Malex$/i } 
+  const organization = await Organization.findOne({
+    name: { $regex: /^Malex$/i }
   });
+
   return organization;
 }
 
-// GET - Fetch all expense requests for Malex organization
+// =============================================================
+// GET - FETCH EXPENSE REQUESTS
+// =============================================================
+
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -558,6 +798,7 @@ export async function GET(req: NextRequest) {
 
     if (!organization) {
       console.error('Malex organization not found');
+
       return NextResponse.json(
         {
           success: false,
@@ -567,20 +808,41 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    console.log('Fetching requests for Malex org:', organization._id);
+    console.log(
+      'Fetching requests for Malex org:',
+      organization._id.toString()
+    );
 
-    // Parse query parameters for filtering
+    // ---------------------------------------------------------
+    // Query parameters
+    // ---------------------------------------------------------
+
     const searchParams = req.nextUrl.searchParams;
+
     const status = searchParams.get('status');
     const requesterId = searchParams.get('requesterId');
     const category = searchParams.get('category');
-    const limit = parseInt(searchParams.get('limit') || '100');
-    const page = parseInt(searchParams.get('page') || '1');
+
+    const limit = parseInt(
+      searchParams.get('limit') || '100',
+      10
+    );
+
+    const page = parseInt(
+      searchParams.get('page') || '1',
+      10
+    );
+
     const skip = (page - 1) * limit;
 
+    // ---------------------------------------------------------
     // Build query
+    // ---------------------------------------------------------
+
     const query: any = {
-      organizationId: new mongoose.Types.ObjectId(organization._id)
+      organizationId: new mongoose.Types.ObjectId(
+        organization._id
+      )
     };
 
     if (status) {
@@ -588,7 +850,19 @@ export async function GET(req: NextRequest) {
     }
 
     if (requesterId) {
-      query.requesterId = new mongoose.Types.ObjectId(requesterId);
+      if (!mongoose.Types.ObjectId.isValid(requesterId)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Invalid requester ID'
+          },
+          { status: 400 }
+        );
+      }
+
+      query.requesterId = new mongoose.Types.ObjectId(
+        requesterId
+      );
     }
 
     if (category) {
@@ -597,7 +871,10 @@ export async function GET(req: NextRequest) {
 
     console.log('Query:', query);
 
-    // Fetch requests with pagination
+    // ---------------------------------------------------------
+    // Fetch requests
+    // ---------------------------------------------------------
+
     const requests = await ExpenseRequest.find(query)
       .populate('requesterId', 'name email')
       .populate('approverId', 'name email')
@@ -606,14 +883,20 @@ export async function GET(req: NextRequest) {
       .limit(limit)
       .lean();
 
-    // Get total count for pagination
-    const total = await ExpenseRequest.countDocuments(query);
+    // ---------------------------------------------------------
+    // Total
+    // ---------------------------------------------------------
 
-    console.log(`Found ${requests.length} requests (total: ${total})`);
+    const total =
+      await ExpenseRequest.countDocuments(query);
+
+    console.log(
+      `Found ${requests.length} requests (total: ${total})`
+    );
 
     return NextResponse.json({
       success: true,
-      requests: requests,
+      requests,
       pagination: {
         total,
         page,
@@ -623,21 +906,31 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Error fetching requests:', error);
+    console.error(
+      'Error fetching requests:',
+      error
+    );
 
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Internal server error'
+        error:
+          error.message ||
+          'Internal server error'
       },
       { status: 500 }
     );
   }
 }
 
-// POST - Create a new expense request
+// =============================================================
+// POST - CREATE EXPENSE REQUEST
+// =============================================================
+
 export async function POST(req: NextRequest) {
   try {
+    await connectToDatabase();
+
     const body = await req.json();
 
     const {
@@ -653,106 +946,213 @@ export async function POST(req: NextRequest) {
       metadata = {}
     } = body;
 
-    // Validate required fields
+    // =========================================================
+    // USE TEST USER WHEN REQUESTER ID IS NOT PROVIDED
+    // =========================================================
+
+    const effectiveRequesterId =
+      requesterId || TEST_USER_ID;
+
+    console.log(
+      'Requester ID:',
+      effectiveRequesterId
+    );
+
+    // =========================================================
+    // VALIDATE AMOUNT
+    // =========================================================
+
     if (!amount || amount <= 0) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Valid amount is required (must be greater than 0)' 
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!recipientPhone) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Recipient phone number is required' 
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!requesterId) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Requester ID is required' 
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!category) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Category is required' 
-        },
-        { status: 400 }
-      );
-    }
-
-    await connectToDatabase();
-
-    const organization = await getMalexOrganization();
-
-    if (!organization) {
-      console.error('Malex organization not found');
       return NextResponse.json(
         {
           success: false,
-          error: 'Organization not found'
+          error:
+            'Valid amount is required (must be greater than 0)'
+        },
+        { status: 400 }
+      );
+    }
+
+    // =========================================================
+    // VALIDATE PHONE
+    // =========================================================
+
+    if (!recipientPhone) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Recipient phone number is required'
+        },
+        { status: 400 }
+      );
+    }
+
+    // =========================================================
+    // VALIDATE REQUESTER ID
+    // =========================================================
+
+    if (
+      !mongoose.Types.ObjectId.isValid(
+        effectiveRequesterId
+      )
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Invalid requester ID'
+        },
+        { status: 400 }
+      );
+    }
+
+    // =========================================================
+    // VALIDATE CATEGORY
+    // =========================================================
+
+    if (!category) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Category is required'
+        },
+        { status: 400 }
+      );
+    }
+
+    // =========================================================
+    // FIND MALEX ORGANIZATION
+    // =========================================================
+
+    const organization =
+      await getMalexOrganization();
+
+    if (!organization) {
+      console.error(
+        'Malex organization not found'
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Organization not found'
         },
         { status: 404 }
       );
     }
 
-    console.log('Creating request for Malex org:', organization._id);
+    console.log(
+      'Creating request for Malex org:',
+      organization._id.toString()
+    );
 
-    // Calculate total amount if not provided
-    const calculatedTotalAmount = totalAmount || amount + platformFee;
+    // =========================================================
+    // CALCULATE TOTAL
+    // =========================================================
 
-    // Create the expense request
-    const request = await ExpenseRequest.create({
-      amount,
-      platformFee,
-      totalAmount: calculatedTotalAmount,
-      recipientPhone,
-      recipientName: recipientName || 'Unknown',
-      category,
-      description: description || 'Expense Request',
-      requesterId: new mongoose.Types.ObjectId(requesterId),
-      organizationId: organization._id,
-      status: 'pending',
-      receiptUrl: receiptUrl || null,
-      metadata: {
-        ...metadata,
-        organizationName: organization.name,
-        createdVia: 'api',
-        createdAt: new Date().toISOString()
-      }
-    });
+    const calculatedTotalAmount =
+      totalAmount ||
+      Number(amount) + Number(platformFee);
 
-    console.log('Request created:', request._id);
+    // =========================================================
+    // CREATE EXPENSE REQUEST
+    // =========================================================
 
-    // Populate requester info for response
-    await request.populate('requesterId', 'name email');
+    const request =
+      await ExpenseRequest.create({
+        amount: Number(amount),
+
+        platformFee: Number(platformFee),
+
+        totalAmount:
+          Number(calculatedTotalAmount),
+
+        recipientPhone,
+
+        recipientName:
+          recipientName || 'Unknown',
+
+        category,
+
+        description:
+          description ||
+          'Expense Request',
+
+        requesterId:
+          new mongoose.Types.ObjectId(
+            effectiveRequesterId
+          ),
+
+        organizationId:
+          organization._id,
+
+        status: 'pending',
+
+        receiptUrl:
+          receiptUrl || null,
+
+        metadata: {
+          ...metadata,
+
+          organizationName:
+            organization.name,
+
+          createdVia: 'api',
+
+          createdAt:
+            new Date().toISOString(),
+
+          // Useful while testing
+          testUserId:
+            effectiveRequesterId,
+
+          isTestRequest:
+            !requesterId
+        }
+      });
+
+    console.log(
+      'Request created:',
+      request._id.toString()
+    );
+
+    // =========================================================
+    // POPULATE REQUESTER
+    // =========================================================
+
+    await request.populate(
+      'requesterId',
+      'name email'
+    );
+
+    // =========================================================
+    // RESPONSE
+    // =========================================================
 
     return NextResponse.json({
       success: true,
-      message: 'Request submitted successfully',
+
+      message:
+        'Request submitted successfully',
+
       request
     });
 
   } catch (error: any) {
-    console.error('Error creating request:', error);
+    console.error(
+      'Error creating request:',
+      error
+    );
 
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Internal server error'
+        error:
+          error.message ||
+          'Internal server error'
       },
       { status: 500 }
     );
