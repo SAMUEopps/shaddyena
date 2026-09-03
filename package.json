@@ -11,7 +11,7 @@
     "seed:categories": "node scripts/seedCategories.js",
     "migrate:orders-viewed": "node scripts/migrate-orders-viewed.js",
     "seed:organization": "node scripts/seedOrganization.js",
-     "migrate:transactions": "node scripts/migrateTransactionSchema.js"
+    "migrate:transactions": "node scripts/migrateTransactionSchema.js"
   },
   "dependencies": {
     "africastalking": "^0.7.7",
@@ -20,6 +20,7 @@
     "cloudinary": "^2.10.0",
     "date-fns": "^4.4.0",
     "dotenv": "^17.3.1",
+    "framer-motion": "^13.2.0",
     "html2canvas": "^1.4.1",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.4",
