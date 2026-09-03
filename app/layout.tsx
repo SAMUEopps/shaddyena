@@ -207,8 +207,11 @@ export default async function RootLayout({
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || "";
 
-  const isSocialsPage =
-    pathname === "/socials" || pathname.startsWith("/socials/");
+const isNoNavigationPage =
+  pathname === "/socials" ||
+  pathname.startsWith("/socials/") ||
+  pathname === "/m/mizzo-chat" ||
+  pathname.startsWith("/m/mizzo-chat/");
 
   return (
     <html lang="en">
@@ -217,7 +220,7 @@ export default async function RootLayout({
       >
         <AuthProvider>
           <div className="flex min-h-screen flex-col">
-            {!isSocialsPage && <Navigation />}
+            {!isNoNavigationPage && <Navigation />}
 
             <main className="flex-1">
               {children}
