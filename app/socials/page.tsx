@@ -219,7 +219,7 @@ const socials = [
     name: "TikTok",
     username: "@protrix_254",
     icon: "♪",
-    url: "https://www.tiktok.com/@protrix_254",
+    url: "https://www.tiktok.com/@projectronix254?_r=1&_t=ZS-99QTlRveno5",
   },
   {
     name: "Instagram",
