@@ -306,7 +306,7 @@ export default function SocialsPage() {
         {/* Footer */}
         <div className="mt-12 text-center">
           <p className="text-xs text-gray-600">
-            Scan • Connect • Follow
+            Connect • Follow
           </p>
         </div>
 

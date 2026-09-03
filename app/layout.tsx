@@ -136,12 +136,56 @@
 //   );
 // }
 
+// import type { Metadata } from "next";
+// import { Comfortaa } from "next/font/google";
+// import "./globals.css";
+
+// import { AuthProvider } from "@/shd-contexts/AuthContext";
+// import Navigation from "./SHD-COMPONENTS/components/Navigation";
+
+// const comfortaa = Comfortaa({
+//   subsets: ["latin"],
+//   display: "swap",
+//   variable: "--font-comfortaa",
+//   weight: ["300", "400", "500", "600", "700"],
+// });
+
+// export const metadata: Metadata = {
+//   title: "Shaddyna",
+//   description: "For great ideas and great products",
+// };
+
+// export default function RootLayout({
+//   children,
+// }: {
+//   children: React.ReactNode;
+// }) {
+//   return (
+//     <html lang="en">
+//       <body
+//         className={`${comfortaa.variable} font-comfortaa bg-background text-text antialiased`}
+//       >
+//         <AuthProvider>
+//           <div className="flex min-h-screen flex-col">
+//             <Navigation />
+
+//             <main className="flex-1">
+//               {children}
+//             </main>
+//           </div>
+//         </AuthProvider>
+//       </body>
+//     </html>
+//   );
+// }
+
 import type { Metadata } from "next";
 import { Comfortaa } from "next/font/google";
 import "./globals.css";
 
 import { AuthProvider } from "@/shd-contexts/AuthContext";
 import Navigation from "./SHD-COMPONENTS/components/Navigation";
+import { headers } from "next/headers";
 
 const comfortaa = Comfortaa({
   subsets: ["latin"],
@@ -155,11 +199,17 @@ export const metadata: Metadata = {
   description: "For great ideas and great products",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+
+  const isSocialsPage =
+    pathname === "/socials" || pathname.startsWith("/socials/");
+
   return (
     <html lang="en">
       <body
@@ -167,7 +217,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <div className="flex min-h-screen flex-col">
-            <Navigation />
+            {!isSocialsPage && <Navigation />}
 
             <main className="flex-1">
               {children}
