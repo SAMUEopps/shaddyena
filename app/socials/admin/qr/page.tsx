@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 
-const QR_URL = "https://www.shaddyna.com/protrix_254/socials";
+const QR_URL = "https://www.shaddyna.com/socials/protrix_254/socials";
 
 export default function QRGeneratorPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
