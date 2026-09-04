@@ -468,11 +468,488 @@
 //   }
 // }
 
+// // app/api/shd-api/api/checkout/route.ts
+// import { verifyToken } from '@/shd-lib/lib/auth';
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import { initSTKPush } from '@/shd-lib/lib/mpesa';
+// import { generateOrderNumber } from '@/shd-lib/lib/utils';
+// import Order from '@/shd-models/models/Order';
+// import Product from '@/shd-models/models/Product';
+// import Transaction from '@/shd-models/models/Transaction';
+// import Vendor from '@/shd-models/models/Vendor';
+// import User from '@/shd-models/models/User';
+// import { NextRequest, NextResponse } from 'next/server';
+// import mongoose from 'mongoose';
+
+// export async function POST(req: NextRequest) {
+//   try {
+//     await connectToDatabase();
+//     const token = req.headers.get('authorization')?.split(' ')[1];
+//     const decoded = verifyToken(token);
+    
+//     if (!decoded) {
+//       return NextResponse.json(
+//         { error: 'Unauthorized' },
+//         { status: 401 }
+//       );
+//     }
+
+//     const body = await req.json();
+//     const { items, deliveryAddress, deliveryPhone, shippingMethod, phoneNumber } = body;
+
+//     // Get user to check referral
+//     const user = await User.findById(decoded.userId);
+    
+//     // IMPORTANT: referredBy in User model is a string (referral code)
+//     // We need to find the actual user who owns this referral code
+//     let referredByUser = null;
+//     if (user?.referredBy) {
+//       // Find the user who owns this referral code
+//       const referrer = await User.findOne({ referralCode: user.referredBy });
+//       if (referrer) {
+//         referredByUser = referrer._id;
+//       }
+//     }
+
+//     // Validate and group items by vendor
+//     const vendorMap = new Map();
+//     let totalAmount = 0;
+
+//     for (const item of items) {
+//       const product = await Product.findById(item.productId);
+//       if (!product || !product.isActive) {
+//         return NextResponse.json(
+//           { error: `Product ${item.productId} not available` },
+//           { status: 400 }
+//         );
+//       }
+
+//       if (product.stock < item.quantity) {
+//         return NextResponse.json(
+//           { error: `Insufficient stock for ${product.name}` },
+//           { status: 400 }
+//         );
+//       }
+
+//       const vendorId = product.vendorId.toString();
+//       if (!vendorMap.has(vendorId)) {
+//         vendorMap.set(vendorId, {
+//           vendorId: product.vendorId,
+//           products: [],
+//           subtotal: 0
+//         });
+//       }
+
+//       const vendorData = vendorMap.get(vendorId);
+//       vendorData.products.push({
+//         productId: product._id,
+//         name: product.name,
+//         quantity: item.quantity,
+//         price: product.price
+//       });
+//       vendorData.subtotal += product.price * item.quantity;
+//       totalAmount += product.price * item.quantity;
+//     }
+
+//     // Create separate orders for each vendor
+//     const createdOrders = [];
+//     const orderIds = [];
+
+//     for (const [vendorId, data] of vendorMap) {
+//       const vendor = await Vendor.findById(vendorId);
+//       if (!vendor) {
+//         return NextResponse.json(
+//           { error: `Vendor ${vendorId} not found` },
+//           { status: 400 }
+//         );
+//       }
+
+//       // Calculate commissions properly
+//       const hasReferral = !!referredByUser;
+//       const platformCommissionRate = hasReferral ? 0.025 : 0.03; // 2.5% if referred, else 3%
+//       const referralCommissionRate = hasReferral ? 0.005 : 0; // 0.5% if referred
+
+//       const platformCommission = data.subtotal * platformCommissionRate;
+//       const referralCommission = hasReferral ? data.subtotal * referralCommissionRate : 0;
+//       const vendorAmount = data.subtotal - platformCommission - referralCommission;
+
+//       // Calculate split for vendor
+//       const immediateWithdrawable = vendorAmount * 0.8; // 80% available immediately
+//       const pendingWithdrawable = vendorAmount * 0.2; // 20% held until delivery
+
+//       // Create order with proper referral handling
+//       const orderData: any = {
+//         orderNumber: generateOrderNumber(),
+//         customerId: new mongoose.Types.ObjectId(decoded.userId),
+//         vendorId: vendor._id,
+//         products: data.products,
+//         totalAmount: data.subtotal,
+//         platformCommission,
+//         referralCommission,
+//         vendorAmount,
+//         immediateWithdrawable,
+//         pendingWithdrawable,
+//         isImmediatePayoutAvailable: false, // Will be set to true when payment is confirmed
+//         isPendingPayoutReleased: false,
+//         deliveryAddress,
+//         deliveryPhone,
+//         shippingMethod,
+//         status: 'pending',
+//         isPaid: false
+//       };
+
+//       // Only add referredBy if we have a valid referrer ObjectId
+//       if (referredByUser) {
+//         orderData.referredBy = referredByUser;
+//       }
+
+//       const order = await Order.create(orderData);
+//       createdOrders.push(order);
+//       orderIds.push(order._id);
+
+//       console.log(`✅ Created order ${order.orderNumber} for vendor ${vendor.businessName}`);
+//     }
+
+//     // Generate a single account reference for all orders
+//     const accountReference = `SHAD-${Date.now()}`;
+
+//     // Initiate M-Pesa payment for total amount
+//     const stkResponse = await initSTKPush(
+//       phoneNumber || body.phoneNumber,
+//       totalAmount,
+//       accountReference
+//     );
+
+//     // Store single transaction with ALL order IDs
+//     const transaction = await Transaction.create({
+//       transactionId: stkResponse.CheckoutRequestID,
+//       checkoutRequestId: stkResponse.CheckoutRequestID,
+//       phoneNumber: phoneNumber || body.phoneNumber,
+//       amount: totalAmount,
+//       status: 'pending',
+//       type: 'order',
+//       metadata: {
+//         accountReference,
+//         orders: orderIds,
+//         customerId: decoded.userId,
+//         referredBy: referredByUser ? referredByUser.toString() : null,
+//         vendorOrders: createdOrders.map(o => ({
+//           orderId: o._id,
+//           vendorId: o.vendorId,
+//           amount: o.totalAmount
+//         }))
+//       }
+//     });
+
+//     return NextResponse.json({
+//       message: 'Payment initiated successfully',
+//       success: true,
+//       checkoutRequestId: stkResponse.CheckoutRequestID,
+//       accountReference,
+//       totalAmount,
+//       orders: createdOrders.map(o => ({
+//         orderId: o._id,
+//         orderNumber: o.orderNumber,
+//         vendorId: o.vendorId,
+//         amount: o.totalAmount,
+//         status: o.status
+//       })),
+//       transactionId: transaction._id
+//     });
+
+//   } catch (error) {
+//     console.error('❌ Checkout error:', error);
+//     return NextResponse.json(
+//       { 
+//         error: 'Checkout failed', 
+//         details: error instanceof Error ? error.message : 'Unknown error' 
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
+// // app/api/shd-api/api/checkout/route.ts
+// import { verifyToken } from '@/shd-lib/lib/auth';
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import { initSTKPush } from '@/shd-lib/lib/mpesa';
+// import { generateOrderNumber } from '@/shd-lib/lib/utils';
+// import Order from '@/shd-models/models/Order';
+// import Product from '@/shd-models/models/Product';
+// import Transaction from '@/shd-models/models/Transaction';
+// import Vendor from '@/shd-models/models/Vendor';
+// import User from '@/shd-models/models/User';
+// import Organization from '@/shd-models/models/Organization';
+// import { NextRequest, NextResponse } from 'next/server';
+// import mongoose from 'mongoose';
+
+// export async function POST(req: NextRequest) {
+//   try {
+//     await connectToDatabase();
+//     const token = req.headers.get('authorization')?.split(' ')[1];
+//     const decoded = verifyToken(token);
+    
+//     if (!decoded) {
+//       return NextResponse.json(
+//         { error: 'Unauthorized' },
+//         { status: 401 }
+//       );
+//     }
+
+//     const body = await req.json();
+//     const { items, deliveryAddress, deliveryPhone, shippingMethod, phoneNumber } = body;
+
+//     // Get user
+//     const user = await User.findById(decoded.userId);
+//     if (!user) {
+//       return NextResponse.json(
+//         { error: 'User not found' },
+//         { status: 404 }
+//       );
+//     }
+
+//     // ============================================================
+//     // AUTO-CREATE ORGANIZATION FOR SHADDYNA
+//     // ============================================================
+    
+//     // Check if Shaddyna organization exists
+//     let organization = await Organization.findOne({ name: 'Shaddyna' });
+    
+//     if (!organization) {
+//       // Create default Shaddyna organization
+//       organization = await Organization.create({
+//         name: 'Shaddyna',
+//         createdBy: new mongoose.Types.ObjectId(decoded.userId),
+//         settings: {
+//           weeklyBudget: 0,
+//           monthlyBudget: 0,
+//           approvalThresholds: {
+//             admin: 0,
+//             director: 0
+//           },
+//           categories: [
+//             {
+//               name: 'order',
+//               maxAmount: 5000,
+//               isActive: true
+//             },
+//             {
+//               name: 'membership',
+//               maxAmount: 5000,
+//               isActive: true
+//             },
+//             {
+//               name: 'savings',
+//               maxAmount: 5000,
+//               isActive: true
+//             },
+//             {
+//               name: 'investment',
+//               maxAmount: 5000,
+//               isActive: true
+//             },
+//             {
+//               name: 'petty_cash',
+//               maxAmount: 5000,
+//               isActive: true
+//             },
+//             {
+//               name: 'advertisement',
+//               maxAmount: 5000,
+//               isActive: true
+//             }
+//           ],
+//           platformFeePercentage: 0,
+//           feeBearer: 'payer'
+//         }
+//       });
+      
+//       console.log('✅ Created default Shaddyna organization');
+//     }
+
+//     // Find referrer user
+//     let referredByUser = null;
+//     if (user?.referredBy) {
+//       const referrer = await User.findOne({ referralCode: user.referredBy });
+//       if (referrer) {
+//         referredByUser = referrer._id;
+//       }
+//     }
+
+//     // Validate and group items by vendor
+//     const vendorMap = new Map();
+//     let totalAmount = 0;
+
+//     for (const item of items) {
+//       const product = await Product.findById(item.productId);
+//       if (!product || !product.isActive) {
+//         return NextResponse.json(
+//           { error: `Product ${item.productId} not available` },
+//           { status: 400 }
+//         );
+//       }
+
+//       if (product.stock < item.quantity) {
+//         return NextResponse.json(
+//           { error: `Insufficient stock for ${product.name}` },
+//           { status: 400 }
+//         );
+//       }
+
+//       const vendorId = product.vendorId.toString();
+//       if (!vendorMap.has(vendorId)) {
+//         vendorMap.set(vendorId, {
+//           vendorId: product.vendorId,
+//           products: [],
+//           subtotal: 0
+//         });
+//       }
+
+//       const vendorData = vendorMap.get(vendorId);
+//       vendorData.products.push({
+//         productId: product._id,
+//         name: product.name,
+//         quantity: item.quantity,
+//         price: product.price
+//       });
+//       vendorData.subtotal += product.price * item.quantity;
+//       totalAmount += product.price * item.quantity;
+//     }
+
+//     // Create separate orders for each vendor
+//     const createdOrders = [];
+//     const orderIds = [];
+
+//     for (const [vendorId, data] of vendorMap) {
+//       const vendor = await Vendor.findById(vendorId);
+//       if (!vendor) {
+//         return NextResponse.json(
+//           { error: `Vendor ${vendorId} not found` },
+//           { status: 400 }
+//         );
+//       }
+
+//       // Calculate commissions
+//       const hasReferral = !!referredByUser;
+//       const platformCommissionRate = hasReferral ? 0.025 : 0.03;
+//       const referralCommissionRate = hasReferral ? 0.005 : 0;
+
+//       const platformCommission = data.subtotal * platformCommissionRate;
+//       const referralCommission = hasReferral ? data.subtotal * referralCommissionRate : 0;
+//       const vendorAmount = data.subtotal - platformCommission - referralCommission;
+
+//       const immediateWithdrawable = vendorAmount * 0.8;
+//       const pendingWithdrawable = vendorAmount * 0.2;
+
+//       const orderData: any = {
+//         orderNumber: generateOrderNumber(),
+//         customerId: new mongoose.Types.ObjectId(decoded.userId),
+//         vendorId: vendor._id,
+//         products: data.products,
+//         totalAmount: data.subtotal,
+//         platformCommission,
+//         referralCommission,
+//         vendorAmount,
+//         immediateWithdrawable,
+//         pendingWithdrawable,
+//         isImmediatePayoutAvailable: false,
+//         isPendingPayoutReleased: false,
+//         deliveryAddress,
+//         deliveryPhone,
+//         shippingMethod,
+//         status: 'pending',
+//         isPaid: false
+//       };
+
+//       if (referredByUser) {
+//         orderData.referredBy = referredByUser;
+//       }
+
+//       const order = await Order.create(orderData);
+//       createdOrders.push(order);
+//       orderIds.push(order._id);
+
+//       console.log(`✅ Created order ${order.orderNumber} for vendor ${vendor.businessName}`);
+//     }
+
+//     // Generate account reference
+//     const accountReference = `SHAD-${Date.now()}`;
+
+//     // Initiate M-Pesa payment
+//     const stkResponse = await initSTKPush(
+//       phoneNumber || body.phoneNumber,
+//       totalAmount,
+//       accountReference
+//     );
+
+//     // ============================================================
+//     // CREATE TRANSACTION WITH ORGANIZATION ID
+//     // ============================================================
+
+//     const transaction = await Transaction.create({
+//       transactionId: `TXN-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+//       organizationId: organization._id,  // Use the organization ID
+//       type: 'order',  // Now 'order' is valid in the enum
+//       category: 'order',
+//       amount: totalAmount,
+//       currency: 'KES',
+//       status: 'pending',
+//       phoneNumber: phoneNumber || body.phoneNumber,
+//       accountReference,
+//       provider: 'mpesa',
+//       checkoutRequestId: stkResponse.CheckoutRequestID,
+//       purpose: `Payment for order(s): ${orderIds.join(', ')}`,
+//       metadata: {
+//         accountReference,
+//         orders: orderIds,
+//         customerId: decoded.userId,
+//         referredBy: referredByUser ? referredByUser.toString() : null,
+//         vendorOrders: createdOrders.map(o => ({
+//           orderId: o._id,
+//           vendorId: o.vendorId,
+//           amount: o.totalAmount,
+//           orderNumber: o.orderNumber
+//         }))
+//       }
+//     });
+
+//     return NextResponse.json({
+//       message: 'Payment initiated successfully',
+//       success: true,
+//       checkoutRequestId: stkResponse.CheckoutRequestID,
+//       accountReference,
+//       totalAmount,
+//       orders: createdOrders.map(o => ({
+//         orderId: o._id,
+//         orderNumber: o.orderNumber,
+//         vendorId: o.vendorId,
+//         amount: o.totalAmount,
+//         status: o.status
+//       })),
+//       transactionId: transaction._id,
+//       organizationId: organization._id
+//     });
+
+//   } catch (error) {
+//     console.error('❌ Checkout error:', error);
+//     return NextResponse.json(
+//       { 
+//         error: 'Checkout failed', 
+//         details: error instanceof Error ? error.message : 'Unknown error' 
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
 // app/api/shd-api/api/checkout/route.ts
 import { verifyToken } from '@/shd-lib/lib/auth';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import { initSTKPush } from '@/shd-lib/lib/mpesa';
 import { generateOrderNumber } from '@/shd-lib/lib/utils';
+import { getOrCreateOrganization } from '@/shd-lib/lib/organization';
 import Order from '@/shd-models/models/Order';
 import Product from '@/shd-models/models/Product';
 import Transaction from '@/shd-models/models/Transaction';
@@ -484,6 +961,9 @@ import mongoose from 'mongoose';
 export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
+    
+    // Get organization from header
+    const orgIdFromHeader = req.headers.get('x-organization-id');
     const token = req.headers.get('authorization')?.split(' ')[1];
     const decoded = verifyToken(token);
     
@@ -497,14 +977,35 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { items, deliveryAddress, deliveryPhone, shippingMethod, phoneNumber } = body;
 
-    // Get user to check referral
+    // Get user
     const user = await User.findById(decoded.userId);
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Get or create organization
+    let organization;
     
-    // IMPORTANT: referredBy in User model is a string (referral code)
-    // We need to find the actual user who owns this referral code
+    // If organization ID is provided in header, use it
+    if (orgIdFromHeader) {
+      const Organization = (await import('@/shd-models/models/Organization')).default;
+      organization = await Organization.findById(orgIdFromHeader);
+      
+      // If organization doesn't exist, create it
+      if (!organization) {
+        organization = await getOrCreateOrganization(decoded.userId);
+      }
+    } else {
+      // Otherwise get or create from user
+      organization = await getOrCreateOrganization(decoded.userId);
+    }
+
+    // Find referrer user
     let referredByUser = null;
     if (user?.referredBy) {
-      // Find the user who owns this referral code
       const referrer = await User.findOne({ referralCode: user.referredBy });
       if (referrer) {
         referredByUser = referrer._id;
@@ -564,20 +1065,18 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Calculate commissions properly
+      // Calculate commissions
       const hasReferral = !!referredByUser;
-      const platformCommissionRate = hasReferral ? 0.025 : 0.03; // 2.5% if referred, else 3%
-      const referralCommissionRate = hasReferral ? 0.005 : 0; // 0.5% if referred
+      const platformCommissionRate = hasReferral ? 0.025 : 0.03;
+      const referralCommissionRate = hasReferral ? 0.005 : 0;
 
       const platformCommission = data.subtotal * platformCommissionRate;
       const referralCommission = hasReferral ? data.subtotal * referralCommissionRate : 0;
       const vendorAmount = data.subtotal - platformCommission - referralCommission;
 
-      // Calculate split for vendor
-      const immediateWithdrawable = vendorAmount * 0.8; // 80% available immediately
-      const pendingWithdrawable = vendorAmount * 0.2; // 20% held until delivery
+      const immediateWithdrawable = vendorAmount * 0.8;
+      const pendingWithdrawable = vendorAmount * 0.2;
 
-      // Create order with proper referral handling
       const orderData: any = {
         orderNumber: generateOrderNumber(),
         customerId: new mongoose.Types.ObjectId(decoded.userId),
@@ -589,7 +1088,7 @@ export async function POST(req: NextRequest) {
         vendorAmount,
         immediateWithdrawable,
         pendingWithdrawable,
-        isImmediatePayoutAvailable: false, // Will be set to true when payment is confirmed
+        isImmediatePayoutAvailable: false,
         isPendingPayoutReleased: false,
         deliveryAddress,
         deliveryPhone,
@@ -598,7 +1097,6 @@ export async function POST(req: NextRequest) {
         isPaid: false
       };
 
-      // Only add referredBy if we have a valid referrer ObjectId
       if (referredByUser) {
         orderData.referredBy = referredByUser;
       }
@@ -610,24 +1108,30 @@ export async function POST(req: NextRequest) {
       console.log(`✅ Created order ${order.orderNumber} for vendor ${vendor.businessName}`);
     }
 
-    // Generate a single account reference for all orders
+    // Generate account reference
     const accountReference = `SHAD-${Date.now()}`;
 
-    // Initiate M-Pesa payment for total amount
+    // Initiate M-Pesa payment
     const stkResponse = await initSTKPush(
       phoneNumber || body.phoneNumber,
       totalAmount,
       accountReference
     );
 
-    // Store single transaction with ALL order IDs
+    // Create transaction with organization ID
     const transaction = await Transaction.create({
-      transactionId: stkResponse.CheckoutRequestID,
-      checkoutRequestId: stkResponse.CheckoutRequestID,
-      phoneNumber: phoneNumber || body.phoneNumber,
-      amount: totalAmount,
-      status: 'pending',
+      transactionId: `TXN-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      organizationId: organization._id,
       type: 'order',
+      category: 'order',
+      amount: totalAmount,
+      currency: 'KES',
+      status: 'pending',
+      phoneNumber: phoneNumber || body.phoneNumber,
+      accountReference,
+      provider: 'mpesa',
+      checkoutRequestId: stkResponse.CheckoutRequestID,
+      purpose: `Payment for order(s): ${orderIds.join(', ')}`,
       metadata: {
         accountReference,
         orders: orderIds,
@@ -636,7 +1140,8 @@ export async function POST(req: NextRequest) {
         vendorOrders: createdOrders.map(o => ({
           orderId: o._id,
           vendorId: o.vendorId,
-          amount: o.totalAmount
+          amount: o.totalAmount,
+          orderNumber: o.orderNumber
         }))
       }
     });
@@ -654,7 +1159,8 @@ export async function POST(req: NextRequest) {
         amount: o.totalAmount,
         status: o.status
       })),
-      transactionId: transaction._id
+      transactionId: transaction._id,
+      organizationId: organization._id
     });
 
   } catch (error) {

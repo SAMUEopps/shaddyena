@@ -861,6 +861,7 @@ export type TransactionType =
   | 'payment'
   | 'deposit'
   | 'payout'
+  | 'order'
   | 'refund';
 
 export type TransactionCategory =
@@ -1058,6 +1059,7 @@ const TransactionSchema = new Schema<ITransaction>(
         'deposit',
         'payout',
         'refund',
+         'order',
       ],
       required: true,
     },
