@@ -176,18 +176,22 @@
 //   }
 // }
 
-
 // app/api/shd-api/api/admin/transactions/route.ts
 import { verifyToken } from '@/shd-lib/lib/auth';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import Transaction from '@/shd-models/models/Transaction';
 import Order from '@/shd-models/models/Order';
 import Vendor from '@/shd-models/models/Vendor';
+import Organization from '@/shd-models/models/Organization';
+import mongoose from 'mongoose';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+    
+    // Ensure Organization model is registered
+    const OrganizationModel = mongoose.models.Organization || Organization;
     
     const token = req.headers.get('authorization')?.split(' ')[1];
     if (!token) {
@@ -207,6 +211,9 @@ export async function GET(req: NextRequest) {
     const endDate = searchParams.get('endDate');
     const search = searchParams.get('search');
     const organizationId = searchParams.get('organizationId');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const skip = (page - 1) * limit;
     
     let query: any = {};
     
@@ -235,10 +242,19 @@ export async function GET(req: NextRequest) {
       ];
     }
 
+    // Get total count for pagination
+    const totalCount = await Transaction.countDocuments(query);
+
     // Get transactions with proper population
     const transactions = await Transaction.find(query)
-      .populate('organizationId', 'name email')
-      .sort({ createdAt: -1 });
+      .populate({
+        path: 'organizationId',
+        select: 'name email',
+        model: OrganizationModel
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     // Enrich transactions with related data
     const enrichedTransactions = await Promise.all(
@@ -321,7 +337,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ 
       success: true,
       transactions: enrichedTransactions,
-      total: enrichedTransactions.length,
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+        pages: Math.ceil(totalCount / limit)
+      },
       stats: stats[0] || {
         totalAmount: 0,
         totalPending: 0,
@@ -379,6 +400,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!body.amount) {
+      return NextResponse.json(
+        { error: 'Amount is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!body.type) {
+      return NextResponse.json(
+        { error: 'Transaction type is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!body.category) {
+      return NextResponse.json(
+        { error: 'Transaction category is required' },
+        { status: 400 }
+      );
+    }
+
     // Check if order exists if provided in metadata
     if (body.metadata?.orderId) {
       const order = await Order.findById(body.metadata.orderId);
@@ -395,6 +437,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Check if organization exists
+    const organization = await Organization.findById(body.organizationId);
+    if (!organization) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+    }
+
+    // Check for duplicate idempotency key
+    if (body.idempotencyKey) {
+      const existing = await Transaction.findOne({
+        organizationId: body.organizationId,
+        idempotencyKey: body.idempotencyKey
+      });
+      if (existing) {
+        return NextResponse.json({
+          success: true,
+          message: 'Transaction already exists with this idempotency key',
+          transaction: existing
+        }, { status: 200 });
+      }
+    }
+
     const transaction = await Transaction.create({
       ...body,
       createdAt: new Date(),
@@ -402,7 +465,11 @@ export async function POST(req: NextRequest) {
     });
 
     const populatedTransaction = await Transaction.findById(transaction._id)
-      .populate('organizationId', 'name email');
+      .populate({
+        path: 'organizationId',
+        select: 'name email',
+        model: mongoose.models.Organization || Organization
+      });
 
     return NextResponse.json({
       success: true,
@@ -419,7 +486,121 @@ export async function POST(req: NextRequest) {
       );
     }
     return NextResponse.json(
-      { error: 'Failed to create transaction' },
+      { error: 'Failed to create transaction: ' + error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    await connectToDatabase();
+    
+    const token = req.headers.get('authorization')?.split(' ')[1];
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const decoded = verifyToken(token);
+    if (!decoded || decoded.role !== 'admin') {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
+    const body = await req.json();
+    const { transactionId, ...updateData } = body;
+
+    if (!transactionId) {
+      return NextResponse.json(
+        { error: 'Transaction ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const transaction = await Transaction.findOne({ transactionId });
+    if (!transaction) {
+      return NextResponse.json(
+        { error: 'Transaction not found' },
+        { status: 404 }
+      );
+    }
+
+    // Update the transaction
+    const updatedTransaction = await Transaction.findOneAndUpdate(
+      { transactionId },
+      { ...updateData, updatedAt: new Date() },
+      { new: true }
+    ).populate({
+      path: 'organizationId',
+      select: 'name email',
+      model: mongoose.models.Organization || Organization
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Transaction updated successfully',
+      transaction: updatedTransaction
+    });
+
+  } catch (error: any) {
+    console.error('Error updating transaction:', error);
+    return NextResponse.json(
+      { error: 'Failed to update transaction: ' + error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    await connectToDatabase();
+    
+    const token = req.headers.get('authorization')?.split(' ')[1];
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const decoded = verifyToken(token);
+    if (!decoded || decoded.role !== 'admin') {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const transactionId = searchParams.get('transactionId');
+
+    if (!transactionId) {
+      return NextResponse.json(
+        { error: 'Transaction ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const transaction = await Transaction.findOne({ transactionId });
+    if (!transaction) {
+      return NextResponse.json(
+        { error: 'Transaction not found' },
+        { status: 404 }
+      );
+    }
+
+    // Only allow deletion of pending or failed transactions
+    if (transaction.status === 'success' || transaction.status === 'processing') {
+      return NextResponse.json(
+        { error: 'Cannot delete successful or processing transactions' },
+        { status: 400 }
+      );
+    }
+
+    await Transaction.deleteOne({ transactionId });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Transaction deleted successfully'
+    });
+
+  } catch (error: any) {
+    console.error('Error deleting transaction:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete transaction: ' + error.message },
       { status: 500 }
     );
   }

@@ -140,11 +140,16 @@
 import { verifyToken } from '@/shd-lib/lib/auth';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import Transaction from '@/shd-models/models/Transaction';
+import Organization from '@/shd-models/models/Organization';
+import mongoose from 'mongoose';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+    
+    // Ensure Organization model is registered
+    const OrganizationModel = mongoose.models.Organization || Organization;
     
     const token = req.headers.get('authorization')?.split(' ')[1];
     if (!token) {
@@ -176,7 +181,7 @@ export async function GET(req: NextRequest) {
       matchQuery.createdAt = { $gte: startDate };
     }
     if (organizationId) {
-      matchQuery.organizationId = organizationId;
+      matchQuery.organizationId = new mongoose.Types.ObjectId(organizationId);
     }
 
     const [
@@ -187,7 +192,9 @@ export async function GET(req: NextRequest) {
       dailyStats,
       monthlyStats,
       topCustomers,
-      recentTransactions
+      recentTransactions,
+      totalRevenue,
+      averageTransactionValue
     ] = await Promise.all([
       Transaction.countDocuments(matchQuery),
       Transaction.aggregate([
@@ -217,6 +224,12 @@ export async function GET(req: NextRequest) {
             },
             pending: {
               $sum: { $cond: [{ $eq: ['$status', 'pending'] }, '$amount', 0] }
+            },
+            processing: {
+              $sum: { $cond: [{ $eq: ['$status', 'processing'] }, '$amount', 0] }
+            },
+            cancelled: {
+              $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, '$amount', 0] }
             }
           }
         },
@@ -231,6 +244,12 @@ export async function GET(req: NextRequest) {
             total: { $sum: '$amount' },
             success: {
               $sum: { $cond: [{ $eq: ['$status', 'success'] }, '$amount', 0] }
+            },
+            failed: {
+              $sum: { $cond: [{ $eq: ['$status', 'failed'] }, '$amount', 0] }
+            },
+            pending: {
+              $sum: { $cond: [{ $eq: ['$status', 'pending'] }, '$amount', 0] }
             }
           }
         },
@@ -243,6 +262,8 @@ export async function GET(req: NextRequest) {
             _id: '$phoneNumber',
             count: { $sum: 1 },
             total: { $sum: '$amount' },
+            average: { $avg: '$amount' },
+            lastTransaction: { $max: '$createdAt' },
             transactions: { $push: '$$ROOT' }
           }
         },
@@ -252,7 +273,19 @@ export async function GET(req: NextRequest) {
       Transaction.find(matchQuery)
         .sort({ createdAt: -1 })
         .limit(10)
-        .populate('organizationId', 'name email')
+        .populate({
+          path: 'organizationId',
+          select: 'name email',
+          model: OrganizationModel
+        }),
+      Transaction.aggregate([
+        { $match: { ...matchQuery, status: 'success' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]),
+      Transaction.aggregate([
+        { $match: { ...matchQuery, status: 'success' } },
+        { $group: { _id: null, average: { $avg: '$amount' } } }
+      ])
     ]);
 
     // Enrich recent transactions with related data
@@ -273,13 +306,26 @@ export async function GET(req: NextRequest) {
     const totalAmount = statusBreakdown.reduce((sum: number, item: any) => sum + (item.total || 0), 0);
     const averageAmount = totalTransactions > 0 ? totalAmount / totalTransactions : 0;
 
+    // Get organization name if filtering by organization
+    let organizationName = null;
+    if (organizationId) {
+      const org = await OrganizationModel.findById(organizationId).select('name');
+      if (org) {
+        organizationName = org.name;
+      }
+    }
+
     return NextResponse.json({
       success: true,
       stats: {
         period,
+        organizationId: organizationId || null,
+        organizationName: organizationName,
         totalTransactions,
-        successRate: successRate.toFixed(2),
-        averageAmount,
+        successRate: parseFloat(successRate.toFixed(2)),
+        averageAmount: parseFloat(averageAmount.toFixed(2)),
+        totalRevenue: totalRevenue[0]?.total || 0,
+        averageTransactionValue: averageTransactionValue[0]?.average || 0,
         statusBreakdown,
         typeBreakdown,
         categoryBreakdown,
@@ -288,7 +334,9 @@ export async function GET(req: NextRequest) {
         topCustomers: topCustomers.map((customer: any) => ({
           phoneNumber: customer._id,
           count: customer.count,
-          total: customer.total
+          total: customer.total,
+          average: parseFloat(customer.average.toFixed(2)),
+          lastTransaction: customer.lastTransaction
         })),
         recentTransactions: enrichedRecentTransactions,
         summary: {
@@ -313,7 +361,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching transaction stats:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch statistics' },
+      { error: 'Failed to fetch statistics: ' + (error as Error).message },
       { status: 500 }
     );
   }
