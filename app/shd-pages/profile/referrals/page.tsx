@@ -1587,26 +1587,37 @@ export default function ReferralsPage() {
         </div>
 
         {/* Referral Info */}
-        <div className="mt-6 bg-surface/50 border border-surface rounded-2xl p-6 sm:p-8">
-          <h3 className="text-lg font-bold text-secondary mb-3">How it works 💡</h3>
-          <ul className="space-y-2.5 text-muted">
-            <li className="flex items-start gap-3">
-              <span className="text-primary font-bold">✓</span>
-              Share your referral code or link with friends
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-primary font-bold">✓</span>
-              When someone registers with your code, they become your referral
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-primary font-bold">✓</span>
-              Earn <span className="font-bold text-primary">KSh 500</span> when a referral becomes a vendor
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-primary font-bold">✓</span>
-              Track all your referrals and earnings here
-            </li>
-          </ul>
+        {/* How It Works */}
+        <div className="mt-8 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-6 sm:p-8 border border-primary/10">
+          <h3 className="text-lg font-bold text-secondary mb-4">💰 How Referral Earnings Work</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-surface">
+              <div className="text-3xl mb-3">👥</div>
+              <h4 className="font-bold text-secondary">1. Refer a Vendor</h4>
+              <p className="text-sm text-muted mt-2">
+                Share your referral code with potential vendors. When they register, you become their referrer.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-surface">
+              <div className="text-3xl mb-3">📦</div>
+              <h4 className="font-bold text-secondary">2. Earn on Orders</h4>
+              <p className="text-sm text-muted mt-2">
+                Get <strong className="text-primary">0.5%</strong> commission on every order your referred vendor completes.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-surface">
+              <div className="text-3xl mb-3">📋</div>
+              <h4 className="font-bold text-secondary">3. Earn on Subscriptions</h4>
+              <p className="text-sm text-muted mt-2">
+                Get <strong className="text-primary">20%</strong> commission when your referred vendor subscribes to a plan.
+              </p>
+            </div>
+          </div>
+          <div className="mt-6 p-4 bg-white rounded-xl border border-surface">
+            <p className="text-sm text-muted text-center">
+              💡 Payouts are automatically processed via M-Pesa when orders are delivered or subscriptions are activated
+            </p>
+          </div>
         </div>
       </div>
     </div>
