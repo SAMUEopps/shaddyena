@@ -777,16 +777,462 @@
 // }
 
 
+// // shd-lib/services/mpesaPaymentService.ts
+
+// import { initSTKPush, queryTransactionStatus } from '@/shd-lib/lib/mpesa';
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import Transaction from '@/shd-models/models/Transaction';
+// import User from '@/shd-models/models/User';
+// import mongoose from 'mongoose';
+
+// // TEMPORARY: Replace with actual org ID from auth context
+// const DEFAULT_ORG_ID = 'your-org-id-here';
+
+// export class MpesaPaymentService {
+//   private userId: string;
+//   private user: any;
+//   private organizationId: string;
+
+//   constructor(userId: string, organizationId?: string) {
+//     this.userId = userId;
+//     this.organizationId = organizationId || DEFAULT_ORG_ID;
+//   }
+
+//   private async getUser() {
+//     if (!this.user) {
+//       await connectToDatabase();
+//       this.user = await User.findById(this.userId);
+//     }
+//     return this.user;
+//   }
+
+//   private generateReference(prefix: string): string {
+//     return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+//   }
+
+//   async initiatePayment(
+//     amount: number,
+//     purpose: 'membership' | 'savings' | 'investment' | 'subscription' | 'advertisement',
+//     metadata: any = {}
+//   ): Promise<{ checkoutRequestId: string; merchantRequestId: string; transactionId: string }> {
+//     const user = await this.getUser();
+//     if (!user) throw new Error('User not found');
+
+//     // Map purpose to Transaction model fields
+//     const categoryMap: Record<string, string> = {
+//       membership: 'membership',
+//       savings: 'savings',
+//       investment: 'investment',
+//       subscription: 'subscription',
+//       advertisement: 'advertisement'
+//     };
+
+//     const referencePrefix = purpose === 'membership' ? 'MEM' :
+//                            purpose === 'savings' ? 'SAV' :
+//                            purpose === 'investment' ? 'INV' :
+//                            purpose === 'advertisement' ? 'ADS' : 'SUB';
+//     const accountReference = this.generateReference(referencePrefix);
+//     const internalTransactionId = `STK-${Date.now()}`;
+
+//     // Create transaction record aligned with Transaction model
+//     const transaction = await Transaction.create({
+//       transactionId: internalTransactionId,
+//       organizationId: new mongoose.Types.ObjectId(this.organizationId),
+//       type: 'deposit', // Money coming into the platform
+//       category: categoryMap[purpose] || 'other',
+//       amount: amount,
+//       currency: 'KES',
+//       status: 'pending',
+//       phoneNumber: user.phoneNumber,
+//       accountReference: accountReference,
+//       purpose: purpose,
+//       metadata: {
+//         ...metadata,
+//         userId: user._id.toString(),
+//         userPhoneNumber: user.phoneNumber,
+//         userEmail: user.email,
+//         purpose: purpose,
+//         amount: amount,
+//         userName: user.name,
+//         accountReference: accountReference
+//       }
+//     });
+
+//     try {
+//       // Initiate STK Push
+//       const response = await initSTKPush(
+//         user.phoneNumber,
+//         amount,
+//         accountReference
+//       );
+
+//       // Update transaction with checkout request ID
+//       transaction.checkoutRequestId = response.CheckoutRequestID;
+//       transaction.metadata = {
+//         ...transaction.metadata,
+//         checkoutRequestId: response.CheckoutRequestID,
+//         merchantRequestId: response.MerchantRequestID
+//       };
+//       await transaction.save();
+
+//       return {
+//         checkoutRequestId: response.CheckoutRequestID,
+//         merchantRequestId: response.MerchantRequestID,
+//         transactionId: transaction.transactionId // Return internal transaction ID, not _id
+//       };
+
+//     } catch (error: any) {
+//       transaction.status = 'failed';
+//       transaction.errorMessage = error.message || 'Failed to initiate payment';
+//       await transaction.save();
+//       throw error;
+//     }
+//   }
+
+//   async initiatePaymentWithPhone(
+//     amount: number,
+//     purpose: 'membership' | 'savings' | 'investment' | 'advertisement' | 'subscription',
+//     phoneNumber: string,
+//     metadata: any = {}
+//   ): Promise<{ checkoutRequestId: string; merchantRequestId: string; transactionId: string }> {
+//     const user = await this.getUser();
+//     if (!user) throw new Error('User not found');
+
+//     let cleanPhone = phoneNumber.replace(/[+\s]/g, '');
+//     if (cleanPhone.startsWith('0')) {
+//       cleanPhone = '254' + cleanPhone.substring(1);
+//     }
+//     if (!cleanPhone.startsWith('254')) {
+//       cleanPhone = '254' + cleanPhone;
+//     }
+
+//     if (!/^254[0-9]{9}$/.test(cleanPhone)) {
+//       throw new Error('Invalid phone number format');
+//     }
+
+//     const categoryMap: Record<string, string> = {
+//       membership: 'membership',
+//       savings: 'savings',
+//       investment: 'investment',
+//       subscription: 'subscription',
+//       advertisement: 'advertisement'
+//     };
+
+//     const referencePrefix = purpose === 'membership' ? 'MEM' :
+//                            purpose === 'savings' ? 'SAV' :
+//                            purpose === 'investment' ? 'INV' :
+//                            purpose === 'advertisement' ? 'ADS' : 'SUB';
+//     const accountReference = this.generateReference(referencePrefix);
+//     const internalTransactionId = `STK-${Date.now()}`;
+
+//     // Create transaction record aligned with Transaction model
+//     const transaction = await Transaction.create({
+//       transactionId: internalTransactionId,
+//       organizationId: new mongoose.Types.ObjectId(this.organizationId),
+//       type: 'deposit',
+//       category: categoryMap[purpose] || 'other',
+//       amount: amount,
+//       currency: 'KES',
+//       status: 'pending',
+//       phoneNumber: cleanPhone,
+//       accountReference: accountReference,
+//       purpose: purpose,
+//       metadata: {
+//         ...metadata,
+//         userId: user._id.toString(),
+//         userPhoneNumber: user.phoneNumber,
+//         providedPhone: cleanPhone,
+//         userEmail: user.email,
+//         purpose: purpose,
+//         amount: amount,
+//         userName: user.name,
+//         accountReference: accountReference
+//       }
+//     });
+
+//     try {
+//       const response = await initSTKPush(
+//         cleanPhone,
+//         amount,
+//         accountReference
+//       );
+
+//       transaction.checkoutRequestId = response.CheckoutRequestID;
+//       transaction.metadata = {
+//         ...transaction.metadata,
+//         checkoutRequestId: response.CheckoutRequestID,
+//         merchantRequestId: response.MerchantRequestID
+//       };
+//       await transaction.save();
+
+//       return {
+//         checkoutRequestId: response.CheckoutRequestID,
+//         merchantRequestId: response.MerchantRequestID,
+//         transactionId: transaction.transactionId
+//       };
+
+//     } catch (error: any) {
+//       transaction.status = 'failed';
+//       transaction.errorMessage = error.message || 'Failed to initiate payment';
+//       await transaction.save();
+//       throw error;
+//     }
+//   }
+
+//   async queryPaymentStatus(checkoutRequestId: string): Promise<any> {
+//     try {
+//       const result = await queryTransactionStatus(checkoutRequestId);
+
+//       const transaction = await Transaction.findOne({
+//         checkoutRequestId
+//       });
+
+//       if (!transaction) {
+//         throw new Error('Transaction not found');
+//       }
+
+//       console.log('M-Pesa Result:', result);
+
+//       // Ensure metadata exists before spreading
+//       const currentMetadata = transaction.metadata || {};
+
+//       if (result.ResultCode === 0) {
+//         transaction.status = 'success';
+//         await this.handleSuccessfulPayment(transaction.id.toString());
+
+//         const items = result.CallbackMetadata?.Item || [];
+//         const receipt = items.find((i: any) => i.Name === 'MpesaReceiptNumber')?.Value;
+
+//         transaction.receiptNumber = receipt || transaction.receiptNumber;
+//         transaction.metadata = {
+//           ...currentMetadata,
+//           mpesaReceipt: receipt,
+//           callbackMetadata: result.CallbackMetadata
+//         };
+//       } else if (result.ResultDesc?.toLowerCase().includes('still under processing')) {
+//         transaction.status = 'pending';
+//         transaction.errorMessage = undefined;
+//       } else if (result.ResultCode === 1032 || result.ResultCode === 1037) {
+//         transaction.status = 'failed';
+//         transaction.errorMessage = result.ResultDesc || 'Payment cancelled';
+//       } else {
+//         transaction.status = 'pending';
+//       }
+
+//       await transaction.save();
+
+//       return {
+//         status: transaction.status,
+//         message: result.ResultDesc,
+//         transaction
+//       };
+
+//     } catch (error) {
+//       console.error('Payment query error:', error);
+//       throw error;
+//     }
+//   }
+
+//   async handleSuccessfulPayment(transactionId: string): Promise<any> {
+//     const session = await mongoose.startSession();
+//     session.startTransaction();
+
+//     try {
+//       const transaction = await Transaction.findById(transactionId).session(session);
+//       if (!transaction) throw new Error('Transaction not found');
+
+//       // Get userId from metadata, not top-level
+//       const metadata = transaction.metadata || {};
+//       const userId = metadata.userId;
+//       if (!userId) throw new Error('User ID not found in transaction metadata');
+
+//       const user = await User.findById(userId).session(session);
+//       if (!user) throw new Error('User not found');
+
+//       let result = {};
+
+//       switch (transaction.category) {
+//         case 'membership':
+//           result = await this.processMembershipActivation(user, transaction, session);
+//           break;
+
+//         case 'savings':
+//           result = await this.processSavingsDeposit(user, transaction, session);
+//           break;
+
+//         case 'investment':
+//           result = await this.processInvestmentPayment(user, transaction, session);
+//           break;
+
+//         case 'advertisement':
+//           result = await this.processAdvertisementPayment(user, transaction, session);
+//           break;
+
+//         default:
+//           throw new Error(`Unknown transaction category: ${transaction.category}`);
+//       }
+
+//       transaction.status = 'success';
+//       await transaction.save({ session });
+
+//       await session.commitTransaction();
+//       return result;
+
+//     } catch (error) {
+//       await session.abortTransaction();
+//       throw error;
+//     } finally {
+//       session.endSession();
+//     }
+//   }
+
+//   private async processMembershipActivation(
+//     user: any,
+//     transaction: any,
+//     session: any
+//   ) {
+//     if (user.isMember) {
+//       throw new Error('Already a member');
+//     }
+
+//     user.isMember = true;
+//     user.memberSince = new Date();
+//     user.totalSavings = (user.totalSavings || 0) + transaction.amount;
+//     user.availableBalance = (user.availableBalance || 0) + transaction.amount;
+//     await user.save({ session });
+
+//     return {
+//       success: true,
+//       message: 'Membership activated successfully!',
+//       user: {
+//         isMember: user.isMember,
+//         memberSince: user.memberSince,
+//         totalSavings: user.totalSavings,
+//         availableBalance: user.availableBalance
+//       }
+//     };
+//   }
+
+//   private async processSavingsDeposit(
+//     user: any,
+//     transaction: any,
+//     session: any
+//   ) {
+//     if (!user.isMember) {
+//       throw new Error('Must be a member to save');
+//     }
+
+//     user.totalSavings = (user.totalSavings || 0) + transaction.amount;
+//     user.availableBalance = (user.availableBalance || 0) + transaction.amount;
+//     await user.save({ session });
+
+//     return {
+//       success: true,
+//       message: 'Deposit successful!',
+//       user: {
+//         totalSavings: user.totalSavings,
+//         availableBalance: user.availableBalance
+//       }
+//     };
+//   }
+
+//   private async processAdvertisementPayment(
+//     user: any,
+//     transaction: any,
+//     session: any
+//   ) {
+//     const metadata = transaction.metadata || {};
+//     const { adId } = metadata;
+
+//     if (!adId) {
+//       throw new Error('Advertisement ID missing');
+//     }
+
+//     const Advertisement = mongoose.model('Advertisement');
+
+//     const advertisement = await Advertisement.findByIdAndUpdate(
+//       adId,
+//       {
+//         paymentStatus: 'paid',
+//         isActive: true
+//       },
+//       {
+//         session,
+//         new: true
+//       }
+//     );
+
+//     if (!advertisement) {
+//       throw new Error('Advertisement not found');
+//     }
+
+//     return {
+//       success: true,
+//       message: 'Advertisement payment completed',
+//       advertisement
+//     };
+//   }
+
+//   private async processInvestmentPayment(
+//     user: any,
+//     transaction: any,
+//     session: any
+//   ) {
+//     if (!user.isMember) {
+//       throw new Error('Must be a member to invest');
+//     }
+
+//     const metadata = transaction.metadata || {};
+//     const { investmentId, investmentType, expectedReturn } = metadata;
+
+//     if ((user.availableBalance || 0) < transaction.amount) {
+//       throw new Error('Insufficient balance');
+//     }
+
+//     user.availableBalance = (user.availableBalance || 0) - transaction.amount;
+//     user.totalInvestments = (user.totalInvestments || 0) + transaction.amount;
+//     await user.save({ session });
+
+//     if (investmentId) {
+//       const Investment = mongoose.model('Investment');
+//       await Investment.findByIdAndUpdate(
+//         investmentId,
+//         {
+//           status: 'active',
+//           startDate: new Date()
+//         },
+//         { session }
+//       );
+//     }
+
+//     return {
+//       success: true,
+//       message: 'Investment payment confirmed!',
+//       user: {
+//         totalInvestments: user.totalInvestments,
+//         availableBalance: user.availableBalance
+//       }
+//     };
+//   }
+// }
+
+
 // shd-lib/services/mpesaPaymentService.ts
 
 import { initSTKPush, queryTransactionStatus } from '@/shd-lib/lib/mpesa';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import Transaction from '@/shd-models/models/Transaction';
 import User from '@/shd-models/models/User';
+import Subscription from '@/shd-models/models/Subscription';
+import Vendor from '@/shd-models/models/Vendor';
 import mongoose from 'mongoose';
 
-// TEMPORARY: Replace with actual org ID from auth context
-const DEFAULT_ORG_ID = 'your-org-id-here';
+type PaymentPurpose =
+  | 'membership'
+  | 'savings'
+  | 'investment'
+  | 'subscription'
+  | 'advertisement';
 
 export class MpesaPaymentService {
   private userId: string;
@@ -794,8 +1240,20 @@ export class MpesaPaymentService {
   private organizationId: string;
 
   constructor(userId: string, organizationId?: string) {
+    if (!userId) {
+      throw new Error('MpesaPaymentService: userId is required');
+    }
+    if (!organizationId) {
+      throw new Error('MpesaPaymentService: organizationId is required');
+    }
+    if (!mongoose.Types.ObjectId.isValid(organizationId)) {
+      throw new Error(
+        `MpesaPaymentService: invalid organizationId "${organizationId}"`
+      );
+    }
+
     this.userId = userId;
-    this.organizationId = organizationId || DEFAULT_ORG_ID;
+    this.organizationId = organizationId;
   }
 
   private async getUser() {
@@ -807,97 +1265,29 @@ export class MpesaPaymentService {
   }
 
   private generateReference(prefix: string): string {
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    return `${prefix}-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 7)
+      .toUpperCase()}`;
   }
 
-  async initiatePayment(
-    amount: number,
-    purpose: 'membership' | 'savings' | 'investment' | 'subscription' | 'advertisement',
-    metadata: any = {}
-  ): Promise<{ checkoutRequestId: string; merchantRequestId: string; transactionId: string }> {
-    const user = await this.getUser();
-    if (!user) throw new Error('User not found');
-
-    // Map purpose to Transaction model fields
-    const categoryMap: Record<string, string> = {
-      membership: 'membership',
-      savings: 'savings',
-      investment: 'investment',
-      subscription: 'subscription',
-      advertisement: 'advertisement'
-    };
-
-    const referencePrefix = purpose === 'membership' ? 'MEM' :
-                           purpose === 'savings' ? 'SAV' :
-                           purpose === 'investment' ? 'INV' :
-                           purpose === 'advertisement' ? 'ADS' : 'SUB';
-    const accountReference = this.generateReference(referencePrefix);
-    const internalTransactionId = `STK-${Date.now()}`;
-
-    // Create transaction record aligned with Transaction model
-    const transaction = await Transaction.create({
-      transactionId: internalTransactionId,
-      organizationId: new mongoose.Types.ObjectId(this.organizationId),
-      type: 'deposit', // Money coming into the platform
-      category: categoryMap[purpose] || 'other',
-      amount: amount,
-      currency: 'KES',
-      status: 'pending',
-      phoneNumber: user.phoneNumber,
-      accountReference: accountReference,
-      purpose: purpose,
-      metadata: {
-        ...metadata,
-        userId: user._id.toString(),
-        userPhoneNumber: user.phoneNumber,
-        userEmail: user.email,
-        purpose: purpose,
-        amount: amount,
-        userName: user.name,
-        accountReference: accountReference
-      }
-    });
-
-    try {
-      // Initiate STK Push
-      const response = await initSTKPush(
-        user.phoneNumber,
-        amount,
-        accountReference
-      );
-
-      // Update transaction with checkout request ID
-      transaction.checkoutRequestId = response.CheckoutRequestID;
-      transaction.metadata = {
-        ...transaction.metadata,
-        checkoutRequestId: response.CheckoutRequestID,
-        merchantRequestId: response.MerchantRequestID
-      };
-      await transaction.save();
-
-      return {
-        checkoutRequestId: response.CheckoutRequestID,
-        merchantRequestId: response.MerchantRequestID,
-        transactionId: transaction.transactionId // Return internal transaction ID, not _id
-      };
-
-    } catch (error: any) {
-      transaction.status = 'failed';
-      transaction.errorMessage = error.message || 'Failed to initiate payment';
-      await transaction.save();
-      throw error;
+  private getReferencePrefix(purpose: PaymentPurpose): string {
+    switch (purpose) {
+      case 'membership':
+        return 'MEM';
+      case 'savings':
+        return 'SAV';
+      case 'investment':
+        return 'INV';
+      case 'advertisement':
+        return 'ADS';
+      case 'subscription':
+      default:
+        return 'SUB';
     }
   }
 
-  async initiatePaymentWithPhone(
-    amount: number,
-    purpose: 'membership' | 'savings' | 'investment' | 'advertisement' | 'subscription',
-    phoneNumber: string,
-    metadata: any = {}
-  ): Promise<{ checkoutRequestId: string; merchantRequestId: string; transactionId: string }> {
-    const user = await this.getUser();
-    if (!user) throw new Error('User not found');
-
+  private normalizePhone(phoneNumber: string): string {
     let cleanPhone = phoneNumber.replace(/[+\s]/g, '');
     if (cleanPhone.startsWith('0')) {
       cleanPhone = '254' + cleanPhone.substring(1);
@@ -905,171 +1295,214 @@ export class MpesaPaymentService {
     if (!cleanPhone.startsWith('254')) {
       cleanPhone = '254' + cleanPhone;
     }
-
     if (!/^254[0-9]{9}$/.test(cleanPhone)) {
       throw new Error('Invalid phone number format');
     }
-
-    const categoryMap: Record<string, string> = {
-      membership: 'membership',
-      savings: 'savings',
-      investment: 'investment',
-      subscription: 'subscription',
-      advertisement: 'advertisement'
-    };
-
-    const referencePrefix = purpose === 'membership' ? 'MEM' :
-                           purpose === 'savings' ? 'SAV' :
-                           purpose === 'investment' ? 'INV' :
-                           purpose === 'advertisement' ? 'ADS' : 'SUB';
-    const accountReference = this.generateReference(referencePrefix);
-    const internalTransactionId = `STK-${Date.now()}`;
-
-    // Create transaction record aligned with Transaction model
-    const transaction = await Transaction.create({
-      transactionId: internalTransactionId,
-      organizationId: new mongoose.Types.ObjectId(this.organizationId),
-      type: 'deposit',
-      category: categoryMap[purpose] || 'other',
-      amount: amount,
-      currency: 'KES',
-      status: 'pending',
-      phoneNumber: cleanPhone,
-      accountReference: accountReference,
-      purpose: purpose,
-      metadata: {
-        ...metadata,
-        userId: user._id.toString(),
-        userPhoneNumber: user.phoneNumber,
-        providedPhone: cleanPhone,
-        userEmail: user.email,
-        purpose: purpose,
-        amount: amount,
-        userName: user.name,
-        accountReference: accountReference
-      }
-    });
-
-    try {
-      const response = await initSTKPush(
-        cleanPhone,
-        amount,
-        accountReference
-      );
-
-      transaction.checkoutRequestId = response.CheckoutRequestID;
-      transaction.metadata = {
-        ...transaction.metadata,
-        checkoutRequestId: response.CheckoutRequestID,
-        merchantRequestId: response.MerchantRequestID
-      };
-      await transaction.save();
-
-      return {
-        checkoutRequestId: response.CheckoutRequestID,
-        merchantRequestId: response.MerchantRequestID,
-        transactionId: transaction.transactionId
-      };
-
-    } catch (error: any) {
-      transaction.status = 'failed';
-      transaction.errorMessage = error.message || 'Failed to initiate payment';
-      await transaction.save();
-      throw error;
-    }
+    return cleanPhone;
   }
 
+  /**
+   * Initiate payment using the user's phone number on file.
+   *
+   * IMPORTANT: This method does NOT create a Transaction record.
+   * The caller (route/controller) is responsible for creating the
+   * Transaction document and passing its `transactionId` via metadata.
+   */
+  async initiatePayment(
+    amount: number,
+    purpose: PaymentPurpose,
+    metadata: any = {}
+  ): Promise<{
+    checkoutRequestId: string;
+    merchantRequestId: string;
+    transactionId: string;
+  }> {
+    const user = await this.getUser();
+    if (!user) throw new Error('User not found');
+
+    if (!user.phoneNumber) {
+      throw new Error('User has no phone number on file');
+    }
+
+    return this.initiatePaymentWithPhone(
+      amount,
+      purpose,
+      user.phoneNumber,
+      metadata
+    );
+  }
+
+  /**
+   * Initiate payment using a supplied phone number.
+   *
+   * IMPORTANT: This method does NOT create a Transaction record.
+   * The caller must create the Transaction first and pass
+   * `metadata.transactionId`. The same value is returned.
+   */
+  async initiatePaymentWithPhone(
+    amount: number,
+    purpose: PaymentPurpose,
+    phoneNumber: string,
+    metadata: any = {}
+  ): Promise<{
+    checkoutRequestId: string;
+    merchantRequestId: string;
+    transactionId: string;
+  }> {
+    const user = await this.getUser();
+    if (!user) throw new Error('User not found');
+
+    const cleanPhone = this.normalizePhone(phoneNumber);
+
+    const accountReference =
+      metadata.accountReference ||
+      this.generateReference(this.getReferencePrefix(purpose));
+
+    // ⚠️ Transaction is owned by the caller. We just pass through.
+    if (!metadata.transactionId) {
+      throw new Error(
+        'initiatePaymentWithPhone: metadata.transactionId is required. ' +
+          'Create the Transaction document before calling this method.'
+      );
+    }
+
+    const response = await initSTKPush(cleanPhone, amount, accountReference);
+
+    return {
+      checkoutRequestId: response.CheckoutRequestID,
+      merchantRequestId: response.MerchantRequestID,
+      transactionId: metadata.transactionId,
+    };
+  }
+
+  /**
+   * Query payment status and update the matching Transaction.
+   */
   async queryPaymentStatus(checkoutRequestId: string): Promise<any> {
     try {
       const result = await queryTransactionStatus(checkoutRequestId);
 
-      const transaction = await Transaction.findOne({
-        checkoutRequestId
-      });
-
+      const transaction = await Transaction.findOne({ checkoutRequestId });
       if (!transaction) {
         throw new Error('Transaction not found');
       }
 
-      console.log('M-Pesa Result:', result);
-
-      // Ensure metadata exists before spreading
       const currentMetadata = transaction.metadata || {};
 
       if (result.ResultCode === 0) {
-        transaction.status = 'success';
-        await this.handleSuccessfulPayment(transaction.id.toString());
-
         const items = result.CallbackMetadata?.Item || [];
-        const receipt = items.find((i: any) => i.Name === 'MpesaReceiptNumber')?.Value;
+        const receipt = items.find(
+          (i: any) => i.Name === 'MpesaReceiptNumber'
+        )?.Value;
 
         transaction.receiptNumber = receipt || transaction.receiptNumber;
         transaction.metadata = {
           ...currentMetadata,
           mpesaReceipt: receipt,
-          callbackMetadata: result.CallbackMetadata
+          callbackMetadata: result.CallbackMetadata,
         };
-      } else if (result.ResultDesc?.toLowerCase().includes('still under processing')) {
+
+        // Handles post-payment side effects and marks status success.
+        await this.handleSuccessfulPayment(transaction.id.toString());
+      } else if (
+        result.ResultDesc?.toLowerCase().includes('still under processing')
+      ) {
         transaction.status = 'pending';
         transaction.errorMessage = undefined;
+        await transaction.save();
       } else if (result.ResultCode === 1032 || result.ResultCode === 1037) {
         transaction.status = 'failed';
         transaction.errorMessage = result.ResultDesc || 'Payment cancelled';
+        await transaction.save();
       } else {
         transaction.status = 'pending';
+        await transaction.save();
       }
 
-      await transaction.save();
+      // Re-read to reflect status set by handleSuccessfulPayment
+      const updated = await Transaction.findById(transaction._id);
 
       return {
-        status: transaction.status,
+        status: updated?.status,
         message: result.ResultDesc,
-        transaction
+        transaction: updated,
       };
-
     } catch (error) {
       console.error('Payment query error:', error);
       throw error;
     }
   }
 
+  /**
+   * Handle a successful payment: run category-specific side effects
+   * and mark the transaction as success.
+   */
   async handleSuccessfulPayment(transactionId: string): Promise<any> {
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-      const transaction = await Transaction.findById(transactionId).session(session);
+      const transaction = await Transaction.findById(transactionId).session(
+        session
+      );
       if (!transaction) throw new Error('Transaction not found');
 
-      // Get userId from metadata, not top-level
       const metadata = transaction.metadata || {};
       const userId = metadata.userId;
-      if (!userId) throw new Error('User ID not found in transaction metadata');
+      if (!userId) {
+        throw new Error('User ID not found in transaction metadata');
+      }
 
       const user = await User.findById(userId).session(session);
       if (!user) throw new Error('User not found');
 
-      let result = {};
+      let result: any = { success: true };
 
       switch (transaction.category) {
         case 'membership':
-          result = await this.processMembershipActivation(user, transaction, session);
+          result = await this.processMembershipActivation(
+            user,
+            transaction,
+            session
+          );
           break;
 
         case 'savings':
-          result = await this.processSavingsDeposit(user, transaction, session);
+          result = await this.processSavingsDeposit(
+            user,
+            transaction,
+            session
+          );
           break;
 
         case 'investment':
-          result = await this.processInvestmentPayment(user, transaction, session);
+          result = await this.processInvestmentPayment(
+            user,
+            transaction,
+            session
+          );
           break;
 
         case 'advertisement':
-          result = await this.processAdvertisementPayment(user, transaction, session);
+          result = await this.processAdvertisementPayment(
+            user,
+            transaction,
+            session
+          );
+          break;
+
+        case 'subscription':
+          result = await this.processSubscriptionPayment(
+            user,
+            transaction,
+            session
+          );
           break;
 
         default:
-          throw new Error(`Unknown transaction category: ${transaction.category}`);
+          throw new Error(
+            `Unknown transaction category: ${transaction.category}`
+          );
       }
 
       transaction.status = 'success';
@@ -1077,7 +1510,6 @@ export class MpesaPaymentService {
 
       await session.commitTransaction();
       return result;
-
     } catch (error) {
       await session.abortTransaction();
       throw error;
@@ -1085,6 +1517,10 @@ export class MpesaPaymentService {
       session.endSession();
     }
   }
+
+  // ─────────────────────────────────────────────
+  // Category processors
+  // ─────────────────────────────────────────────
 
   private async processMembershipActivation(
     user: any,
@@ -1108,8 +1544,8 @@ export class MpesaPaymentService {
         isMember: user.isMember,
         memberSince: user.memberSince,
         totalSavings: user.totalSavings,
-        availableBalance: user.availableBalance
-      }
+        availableBalance: user.availableBalance,
+      },
     };
   }
 
@@ -1131,8 +1567,8 @@ export class MpesaPaymentService {
       message: 'Deposit successful!',
       user: {
         totalSavings: user.totalSavings,
-        availableBalance: user.availableBalance
-      }
+        availableBalance: user.availableBalance,
+      },
     };
   }
 
@@ -1144,32 +1580,22 @@ export class MpesaPaymentService {
     const metadata = transaction.metadata || {};
     const { adId } = metadata;
 
-    if (!adId) {
-      throw new Error('Advertisement ID missing');
-    }
+    if (!adId) throw new Error('Advertisement ID missing');
 
     const Advertisement = mongoose.model('Advertisement');
 
     const advertisement = await Advertisement.findByIdAndUpdate(
       adId,
-      {
-        paymentStatus: 'paid',
-        isActive: true
-      },
-      {
-        session,
-        new: true
-      }
+      { paymentStatus: 'paid', isActive: true },
+      { session, new: true }
     );
 
-    if (!advertisement) {
-      throw new Error('Advertisement not found');
-    }
+    if (!advertisement) throw new Error('Advertisement not found');
 
     return {
       success: true,
       message: 'Advertisement payment completed',
-      advertisement
+      advertisement,
     };
   }
 
@@ -1183,7 +1609,7 @@ export class MpesaPaymentService {
     }
 
     const metadata = transaction.metadata || {};
-    const { investmentId, investmentType, expectedReturn } = metadata;
+    const { investmentId } = metadata;
 
     if ((user.availableBalance || 0) < transaction.amount) {
       throw new Error('Insufficient balance');
@@ -1197,10 +1623,7 @@ export class MpesaPaymentService {
       const Investment = mongoose.model('Investment');
       await Investment.findByIdAndUpdate(
         investmentId,
-        {
-          status: 'active',
-          startDate: new Date()
-        },
+        { status: 'active', startDate: new Date() },
         { session }
       );
     }
@@ -1210,8 +1633,69 @@ export class MpesaPaymentService {
       message: 'Investment payment confirmed!',
       user: {
         totalInvestments: user.totalInvestments,
-        availableBalance: user.availableBalance
-      }
+        availableBalance: user.availableBalance,
+      },
+    };
+  }
+
+  /**
+   * Activate (or renew) a vendor subscription.
+   * Reads `metadata.subscriptionId` and `metadata.vendorId`
+   * that the route attached to the transaction.
+   */
+  private async processSubscriptionPayment(
+    user: any,
+    transaction: any,
+    session: any
+  ) {
+    const metadata = transaction.metadata || {};
+    const { subscriptionId, vendorId } = metadata;
+
+    if (!subscriptionId || !vendorId) {
+      throw new Error(
+        'Subscription payment missing subscriptionId or vendorId in metadata'
+      );
+    }
+
+    const subscription = await Subscription.findById(subscriptionId).session(
+      session
+    );
+    if (!subscription) throw new Error('Subscription plan not found');
+
+    const VendorSubscription = mongoose.model('VendorSubscription');
+
+    const now = new Date();
+    const billingCycle = subscription.billingCycle || 'monthly';
+    const endDate = new Date(now);
+
+    if (billingCycle === 'yearly' || billingCycle === 'annual') {
+      endDate.setFullYear(endDate.getFullYear() + 1);
+    } else if (billingCycle === 'quarterly') {
+      endDate.setMonth(endDate.getMonth() + 3);
+    } else {
+      endDate.setMonth(endDate.getMonth() + 1);
+    }
+
+    // Upsert the vendor's subscription record
+    const vendorSubscription = await VendorSubscription.findOneAndUpdate(
+      { vendorId },
+      {
+        vendorId,
+        subscriptionId,
+        status: 'active',
+        startDate: now,
+        endDate,
+        autoRenew: true,
+        amountPaid: transaction.amount,
+        lastPaymentId: transaction._id,
+      },
+      { session, upsert: true, new: true }
+    );
+
+    return {
+      success: true,
+      message: 'Subscription activated successfully!',
+      subscription: vendorSubscription,
     };
   }
 }

@@ -718,7 +718,7 @@ interface VendorSubscription {
 }
 
 export default function VendorSubscriptions() {
-  const { user, token } = useAuth();
+  const { user, token, organizationId } = useAuth(); // ✅ Add organizationId
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<VendorSubscription | null>(null);
   const [loading, setLoading] = useState(true);
@@ -767,6 +767,63 @@ export default function VendorSubscriptions() {
   };
 
   // Handle payment submission
+  // const handlePayment = async (amount: number, phoneNumber: string) => {
+  //   if (!selectedSubscription) return;
+    
+  //   setIsPaymentProcessing(true);
+  //   setMessage(null);
+
+  //   try {
+  //     const token = localStorage.getItem('token');
+      
+  //     // Initiate payment
+  //     const response = await fetch('/api/shd-api/api/vendors/subscriptions/initiate-payment', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Authorization': `Bearer ${token}`,
+  //         'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify({
+  //         subscriptionId: selectedSubscription._id,
+  //         phoneNumber: phoneNumber,
+  //         amount: amount
+  //       })
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(data.error || 'Payment initiation failed');
+  //     }
+
+  //     // Payment initiated successfully
+  //     setMessage({ 
+  //       type: 'success', 
+  //       text: `Payment initiated! Check your phone for the M-Pesa prompt.` 
+  //     });
+
+  //     // Close modal
+  //     setPaymentModalOpen(false);
+  //     setSelectedSubscription(null);
+
+  //     // Wait a few seconds then refresh subscription data
+  //     setTimeout(() => {
+  //       fetchData();
+  //     }, 5000);
+
+  //   } catch (error: any) {
+  //     setMessage({ 
+  //       type: 'error', 
+  //       text: error.message || 'Payment failed. Please try again.' 
+  //     });
+  //     throw error; // Re-throw for the modal to handle
+  //   } finally {
+  //     setIsPaymentProcessing(false);
+  //   }
+  // };
+
+
+    // Handle payment submission
   const handlePayment = async (amount: number, phoneNumber: string) => {
     if (!selectedSubscription) return;
     
@@ -774,6 +831,13 @@ export default function VendorSubscriptions() {
     setMessage(null);
 
     try {
+      // ✅ Resolve organizationId with fallbacks
+      const orgId = organizationId || user?.organizationId;
+      
+      if (!orgId) {
+        throw new Error('Organization not found. Please log out and log in again.');
+      }
+
       const token = localStorage.getItem('token');
       
       // Initiate payment
@@ -786,7 +850,8 @@ export default function VendorSubscriptions() {
         body: JSON.stringify({
           subscriptionId: selectedSubscription._id,
           phoneNumber: phoneNumber,
-          amount: amount
+          amount: amount,
+          organizationId: orgId, // ✅ ADD THIS
         })
       });
 
@@ -796,17 +861,14 @@ export default function VendorSubscriptions() {
         throw new Error(data.error || 'Payment initiation failed');
       }
 
-      // Payment initiated successfully
       setMessage({ 
         type: 'success', 
         text: `Payment initiated! Check your phone for the M-Pesa prompt.` 
       });
 
-      // Close modal
       setPaymentModalOpen(false);
       setSelectedSubscription(null);
 
-      // Wait a few seconds then refresh subscription data
       setTimeout(() => {
         fetchData();
       }, 5000);
@@ -816,7 +878,7 @@ export default function VendorSubscriptions() {
         type: 'error', 
         text: error.message || 'Payment failed. Please try again.' 
       });
-      throw error; // Re-throw for the modal to handle
+      throw error;
     } finally {
       setIsPaymentProcessing(false);
     }
