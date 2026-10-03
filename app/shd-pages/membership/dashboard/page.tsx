@@ -853,6 +853,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import DepositModal from '@/app/SHD-COMPONENTS/components/DepositModal';
+import { useAuth } from '@/shd-contexts/AuthContext';
 
 interface DashboardData {
   user: {
@@ -886,6 +887,7 @@ export default function MembershipDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'investments' | 'savings'>('overview');
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const { user: authUser, organizationId } = useAuth();
   
   // Modal states
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
@@ -927,56 +929,127 @@ export default function MembershipDashboard() {
     }
   };
 
+  // const handleDeposit = async (amount: number, password: string, phoneNumber: string) => {
+  //   setIsDepositing(true);
+  //   setMessage(null);
+
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     const response = await fetch('/api/shd-api/api/savings/deposit', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Authorization': `Bearer ${token}`,
+  //         'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify({ 
+  //         amount, 
+  //         password,
+  //         phoneNumber,
+  //         description: 'Savings deposit' 
+  //       })
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (response.ok) {
+  //       setMessage({ 
+  //         type: 'success', 
+  //         text: `💳 M-Pesa STK Push sent to ${phoneNumber}. Please enter your PIN to complete deposit.` 
+  //       });
+
+  //       // Start polling for payment status
+  //       const interval = setInterval(() => {
+  //         checkPaymentStatus(data.payment.checkoutRequestId);
+  //       }, 3000);
+
+  //       // Clean up interval after 2 minutes
+  //       setTimeout(() => {
+  //         clearInterval(interval);
+  //       }, 120000);
+
+  //     } else {
+  //       setMessage({ type: 'error', text: data.error || 'Deposit failed' });
+  //       throw new Error(data.error || 'Deposit failed');
+  //     }
+  //   } catch (error: any) {
+  //     setMessage({ type: 'error', text: error.message || 'An error occurred' });
+  //     throw error;
+  //   } finally {
+  //     setIsDepositing(false);
+  //     setIsDepositModalOpen(false);
+  //   }
+  // };
+
+
   const handleDeposit = async (amount: number, password: string, phoneNumber: string) => {
-    setIsDepositing(true);
-    setMessage(null);
+  setIsDepositing(true);
+  setMessage(null);
 
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/shd-api/api/savings/deposit', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          amount, 
-          password,
-          phoneNumber,
-          description: 'Savings deposit' 
-        })
+  try {
+    // ✅ Resolve organizationId: AuthContext → localStorage → user object
+    const orgId =
+      organizationId ||
+      localStorage.getItem('organizationId') ||
+      authUser?.organizationId;
+
+    if (!orgId) {
+      setMessage({
+        type: 'error',
+        text: 'Organization not found. Please log out and log in again.',
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage({ 
-          type: 'success', 
-          text: `💳 M-Pesa STK Push sent to ${phoneNumber}. Please enter your PIN to complete deposit.` 
-        });
-
-        // Start polling for payment status
-        const interval = setInterval(() => {
-          checkPaymentStatus(data.payment.checkoutRequestId);
-        }, 3000);
-
-        // Clean up interval after 2 minutes
-        setTimeout(() => {
-          clearInterval(interval);
-        }, 120000);
-
-      } else {
-        setMessage({ type: 'error', text: data.error || 'Deposit failed' });
-        throw new Error(data.error || 'Deposit failed');
-      }
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'An error occurred' });
-      throw error;
-    } finally {
-      setIsDepositing(false);
-      setIsDepositModalOpen(false);
+      throw new Error('Organization not found. Please log out and log in again.');
     }
-  };
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setMessage({ type: 'error', text: 'Please log in again.' });
+      throw new Error('Not authenticated');
+    }
+
+    const response = await fetch('/api/shd-api/api/savings/deposit', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount,
+        password,
+        phoneNumber,
+        description: 'Savings deposit',
+        organizationId: orgId, // ✅ ADD THIS
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setMessage({ type: 'error', text: data.error || 'Deposit failed' });
+      throw new Error(data.error || 'Deposit failed');
+    }
+
+    setMessage({
+      type: 'success',
+      text: `💳 M-Pesa STK Push sent to ${phoneNumber}. Please enter your PIN to complete deposit.`,
+    });
+
+    // Start polling for payment status
+    const interval = setInterval(() => {
+      checkPaymentStatus(data.payment.checkoutRequestId);
+    }, 3000);
+
+    // Clean up interval after 2 minutes
+    setTimeout(() => {
+      clearInterval(interval);
+    }, 120000);
+  } catch (error: any) {
+    setMessage({ type: 'error', text: error.message || 'An error occurred' });
+    throw error;
+  } finally {
+    setIsDepositing(false);
+    setIsDepositModalOpen(false);
+  }
+};
 
   const checkPaymentStatus = async (checkoutId: string) => {
     try {
