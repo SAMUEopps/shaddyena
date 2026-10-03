@@ -333,10 +333,138 @@
 //   }
 // }
 
+// // app/api/shd-api/api/savings/deposit/route.ts
+// import { verifyToken } from '@/shd-lib/lib/auth';
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import User from '@/shd-models/models/User';
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import bcrypt from 'bcryptjs';
+// import { MpesaPaymentService } from '@/shd-lib/lib/mpesaPaymentService';
+
+// export async function POST(req: NextRequest) {
+//   try {
+//     await connectToDatabase();
+    
+//     const token = req.headers.get('authorization')?.split(' ')[1];
+//     if (!token) {
+//       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+//     }
+
+//     const decoded = verifyToken(token);
+//     if (!decoded) {
+//       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+//     }
+
+//     const body = await req.json();
+//     const { amount, description, password, phoneNumber } = body;
+
+//     if (!amount || amount < 1) {
+//       return NextResponse.json(
+//         { error: 'Invalid amount' },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!password) {
+//       return NextResponse.json(
+//         { error: 'Password is required' },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!phoneNumber) {
+//       return NextResponse.json(
+//         { error: 'Phone number is required' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // Clean and validate phone number
+//     let cleanPhone = phoneNumber.replace(/[+\s]/g, '');
+//     if (cleanPhone.startsWith('0')) {
+//       cleanPhone = '254' + cleanPhone.substring(1);
+//     }
+//     if (!cleanPhone.startsWith('254')) {
+//       cleanPhone = '254' + cleanPhone;
+//     }
+
+//     if (!/^254[0-9]{9}$/.test(cleanPhone)) {
+//       return NextResponse.json(
+//         { error: 'Invalid phone number format. Use 254XXXXXXXXX' },
+//         { status: 400 }
+//       );
+//     }
+
+//     const user = await User.findById(decoded.userId);
+//     if (!user) {
+//       return NextResponse.json({ error: 'User not found' }, { status: 404 });
+//     }
+
+//     if (!user.isMember) {
+//       return NextResponse.json(
+//         { error: 'You must be a member to save' },
+//         { status: 403 }
+//       );
+//     }
+
+//     // Verify password
+//     const isValidPassword = await bcrypt.compare(password, user.password);
+//     if (!isValidPassword) {
+//       return NextResponse.json(
+//         { error: 'Incorrect password' },
+//         { status: 401 }
+//       );
+//     }
+
+//     try {
+//       // Initialize M-Pesa payment with the provided phone number
+//       const mpesaService = new MpesaPaymentService(user._id);
+      
+//       const paymentResult = await mpesaService.initiatePaymentWithPhone(
+//         amount,
+//         'savings',
+//         cleanPhone, // Use the provided phone number
+//         {
+//           description: description || 'Savings deposit',
+//           memberName: user.name,
+//           memberEmail: user.email,
+//           providedPhone: cleanPhone
+//         }
+//       );
+
+//       return NextResponse.json({
+//         message: 'Deposit initiated. Please complete M-Pesa payment.',
+//         payment: {
+//           checkoutRequestId: paymentResult.checkoutRequestId,
+//           transactionId: paymentResult.transactionId,
+//           phoneNumber: cleanPhone
+//         }
+//       });
+
+//     } catch (mpesaError: any) {
+//       console.error('M-Pesa error:', mpesaError);
+//       return NextResponse.json(
+//         { error: mpesaError.message || 'Failed to initiate deposit' },
+//         { status: 500 }
+//       );
+//     }
+
+//   } catch (error: any) {
+//     console.error('Deposit error:', error);
+//     return NextResponse.json(
+//       { error: error.message || 'Failed to initiate deposit' },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
 // app/api/shd-api/api/savings/deposit/route.ts
 import { verifyToken } from '@/shd-lib/lib/auth';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import User from '@/shd-models/models/User';
+import Transaction from '@/shd-models/models/Transaction';
 
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
@@ -345,7 +473,7 @@ import { MpesaPaymentService } from '@/shd-lib/lib/mpesaPaymentService';
 export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
-    
+
     const token = req.headers.get('authorization')?.split(' ')[1];
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -360,10 +488,7 @@ export async function POST(req: NextRequest) {
     const { amount, description, password, phoneNumber } = body;
 
     if (!amount || amount < 1) {
-      return NextResponse.json(
-        { error: 'Invalid amount' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
     }
 
     if (!password) {
@@ -417,31 +542,86 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ─────────────────────────────────────────────
+    // Resolve organizationId (user's own organization)
+    // ─────────────────────────────────────────────
+    const organizationId =
+      user.organizationId?.toString() ;
+
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: 'Organization context is missing for this user' },
+        { status: 400 }
+      );
+    }
+
     try {
-      // Initialize M-Pesa payment with the provided phone number
-      const mpesaService = new MpesaPaymentService(user._id);
-      
+      // ─────────────────────────────────────────────
+      // 1. Create the Transaction FIRST
+      // ─────────────────────────────────────────────
+      const transactionId = `TXN-${Date.now()}-${Math.floor(
+        Math.random() * 10000
+      )
+        .toString()
+        .padStart(4, '0')}`;
+
+      const transaction = await Transaction.create({
+        transactionId,
+        organizationId,
+        type: 'deposit',
+        category: 'savings',
+        amount,
+        currency: 'KES',
+        status: 'pending',
+        phoneNumber: cleanPhone,
+        provider: 'mpesa',
+        purpose: 'savings',
+        metadata: {
+          userId: user._id.toString(),
+          description: description || 'Savings deposit',
+          memberName: user.name,
+          memberEmail: user.email,
+          providedPhone: cleanPhone,
+          purpose: 'savings',
+        },
+      });
+
+      // ─────────────────────────────────────────────
+      // 2. Initiate M-Pesa STK push
+      // ─────────────────────────────────────────────
+      const mpesaService = new MpesaPaymentService(
+        user._id.toString(),
+        organizationId
+      );
+
       const paymentResult = await mpesaService.initiatePaymentWithPhone(
         amount,
         'savings',
-        cleanPhone, // Use the provided phone number
+        cleanPhone,
         {
           description: description || 'Savings deposit',
           memberName: user.name,
           memberEmail: user.email,
-          providedPhone: cleanPhone
+          providedPhone: cleanPhone,
+          transactionId: transaction.id.toString(), // ✅ required
         }
       );
+
+      // ─────────────────────────────────────────────
+      // 3. Persist M-Pesa request IDs back to Transaction
+      // ─────────────────────────────────────────────
+      transaction.checkoutRequestId = paymentResult.checkoutRequestId;
+      transaction.providerTransactionId = paymentResult.merchantRequestId;
+      await transaction.save();
 
       return NextResponse.json({
         message: 'Deposit initiated. Please complete M-Pesa payment.',
         payment: {
           checkoutRequestId: paymentResult.checkoutRequestId,
-          transactionId: paymentResult.transactionId,
-          phoneNumber: cleanPhone
-        }
+          transactionId: transaction.id.toString(),
+          phoneNumber: cleanPhone,
+        },
       });
-
     } catch (mpesaError: any) {
       console.error('M-Pesa error:', mpesaError);
       return NextResponse.json(
@@ -449,7 +629,6 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
-
   } catch (error: any) {
     console.error('Deposit error:', error);
     return NextResponse.json(
