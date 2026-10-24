@@ -1288,7 +1288,7 @@ export async function GET(req: NextRequest) {
     logSuccess('ORGANIZATION_FOUND', {
       requestId,
       organizationId:
-        organization._id.toString(),
+        organization.id.toString(),
       organizationName:
         organization.name
     });
@@ -1339,7 +1339,7 @@ export async function GET(req: NextRequest) {
     const query: any = {
       organizationId:
         new mongoose.Types.ObjectId(
-          organization._id
+          organization.id
         )
     };
 
@@ -1760,7 +1760,7 @@ export async function POST(
       {
         requestId,
         organizationId:
-          organization._id.toString(),
+          organization.id.toString(),
         organizationName:
           organization.name
       }
@@ -1798,7 +1798,7 @@ export async function POST(
       {
         requestId,
         organizationId:
-          organization._id.toString(),
+          organization.id.toString(),
         requesterId:
           effectiveRequesterId,
         amount:
@@ -1882,7 +1882,7 @@ export async function POST(
         expenseRequestId:
           request._id.toString(),
         organizationId:
-          organization._id.toString(),
+          organization.id.toString(),
         requesterId:
           effectiveRequesterId,
         amount:
