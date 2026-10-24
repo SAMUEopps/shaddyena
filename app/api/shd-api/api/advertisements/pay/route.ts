@@ -318,7 +318,322 @@
 
 
 
- // app/api/shd-api/api/advertisements/pay/route.ts
+//  // app/api/shd-api/api/advertisements/pay/route.ts
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import mongoose from 'mongoose';
+
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import { verifyToken } from '@/shd-lib/lib/auth';
+// import Advertisement from '@/shd-models/models/Advertisement';
+// import Vendor from '@/shd-models/models/Vendor';
+// import User from '@/shd-models/models/User';
+// import { MpesaPaymentService } from '@/shd-lib/lib/mpesaPaymentService';
+
+
+// export const runtime = 'nodejs';
+
+// type AuthenticatedUser = {
+//   userId: string;
+// };
+
+// function normalizePhoneNumber(phone: string): string {
+//   let normalized = phone.replace(/[\s+\-()]/g, '');
+
+//   if (normalized.startsWith('0')) {
+//     normalized = `254${normalized.slice(1)}`;
+//   } else if (normalized.startsWith('7') || normalized.startsWith('1')) {
+//     normalized = `254${normalized}`;
+//   }
+
+//   return normalized;
+// }
+
+// export async function POST(req: NextRequest) {
+//   try {
+//     await connectToDatabase();
+
+//     // 1. Authenticate the caller.
+//     const authorization = req.headers.get('authorization');
+
+//     if (!authorization?.startsWith('Bearer ')) {
+//       return NextResponse.json(
+//         { error: 'Authentication token is required.' },
+//         { status: 401 }
+//       );
+//     }
+
+//     let authenticatedUser: AuthenticatedUser;
+
+//     try {
+//       authenticatedUser = verifyToken(
+//         authorization.slice('Bearer '.length)
+//       ) as AuthenticatedUser;
+//     } catch {
+//       return NextResponse.json(
+//         { error: 'Invalid or expired authentication token.' },
+//         { status: 401 }
+//       );
+//     }
+
+//     const userId = authenticatedUser?.userId;
+
+//     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+//       return NextResponse.json(
+//         { error: 'Invalid authenticated user.' },
+//         { status: 401 }
+//       );
+//     }
+
+//     // 2. Validate the request body.
+//     const body = await req.json();
+
+//     const adId =
+//       typeof body.adId === 'string' ? body.adId.trim() : '';
+
+//     const requestedPhone =
+//       typeof body.phoneNumber === 'string'
+//         ? body.phoneNumber.trim()
+//         : '';
+
+//     const requestedOrganizationId =
+//       typeof body.organizationId === 'string'
+//         ? body.organizationId.trim()
+//         : '';
+
+//     if (
+//       !adId ||
+//       !requestedPhone ||
+//       !requestedOrganizationId
+//     ) {
+//       return NextResponse.json(
+//         {
+//           error:
+//             'Advertisement ID, phone number, and organization ID are required.',
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!mongoose.Types.ObjectId.isValid(adId)) {
+//       return NextResponse.json(
+//         { error: 'Invalid advertisement ID.' },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!mongoose.Types.ObjectId.isValid(requestedOrganizationId)) {
+//       return NextResponse.json(
+//         { error: 'Invalid organization ID.' },
+//         { status: 400 }
+//       );
+//     }
+
+//     const phoneNumber = normalizePhoneNumber(requestedPhone);
+
+//     if (!/^254[17]\d{8}$/.test(phoneNumber)) {
+//       return NextResponse.json(
+//         {
+//           error:
+//             'Invalid Kenyan M-Pesa number. Use a number such as 0712345678 or 254712345678.',
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     // 3. Load the authenticated user and their vendor profile.
+//     const [user, vendor] = await Promise.all([
+//       User.findById(userId),
+//       Vendor.findOne({ userId }),
+//     ]);
+
+//     if (!user) {
+//       return NextResponse.json(
+//         { error: 'Authenticated user was not found.' },
+//         { status: 404 }
+//       );
+//     }
+
+//     if (!vendor) {
+//       return NextResponse.json(
+//         { error: 'Vendor profile was not found for this user.' },
+//         { status: 403 }
+//       );
+//     }
+
+//     // 4. Verify the organization against trusted database records.
+//     // Do not authorize an organization solely because the client sent its ID.
+//     const userOrganizationId =
+//       user.organizationId?.toString() ?? null;
+
+//     const vendorOrganizationId =
+//       vendor.organizationId?.toString() ?? null;
+
+//     const trustedOrganizationId =
+//       vendorOrganizationId || userOrganizationId;
+
+//     if (!trustedOrganizationId) {
+//       console.error('[Advertisement Payment] Missing organization association', {
+//         userId,
+//         vendorId: vendor._id.toString(),
+//         adId,
+//       });
+
+//       return NextResponse.json(
+//         {
+//           error:
+//             'Your account is not linked to an organization. Please select or link your organization before making a payment.',
+//           code: 'ORGANIZATION_CONTEXT_MISSING',
+//         },
+//         { status: 403 }
+//       );
+//     }
+
+//     if (
+//       userOrganizationId &&
+//       vendorOrganizationId &&
+//       userOrganizationId !== vendorOrganizationId
+//     ) {
+//       console.error('[Advertisement Payment] Organization mismatch', {
+//         userId,
+//         userOrganizationId,
+//         vendorId: vendor._id.toString(),
+//         vendorOrganizationId,
+//       });
+
+//       return NextResponse.json(
+//         {
+//           error:
+//             'Your user account and vendor profile are linked to different organizations.',
+//         },
+//         { status: 403 }
+//       );
+//     }
+
+//     if (trustedOrganizationId !== requestedOrganizationId) {
+//       return NextResponse.json(
+//         {
+//           error:
+//             'The selected organization does not match your account organization.',
+//         },
+//         { status: 403 }
+//       );
+//     }
+
+//     // 5. Confirm that the advertisement belongs to this vendor.
+//     const advertisement = await Advertisement.findById(adId);
+
+//     if (!advertisement) {
+//       return NextResponse.json(
+//         { error: 'Advertisement was not found.' },
+//         { status: 404 }
+//       );
+//     }
+
+//     const advertisementVendorId =
+//       advertisement.vendorId?.toString();
+
+//     if (
+//       !advertisementVendorId ||
+//       advertisementVendorId !== vendor._id.toString()
+//     ) {
+//       return NextResponse.json(
+//         {
+//           error:
+//             'You are not authorized to pay for this advertisement.',
+//         },
+//         { status: 403 }
+//       );
+//     }
+
+//     // 6. Prevent arbitrary amounts supplied by the frontend.
+//     const amount = Number(advertisement.paymentAmount);
+
+//     if (!Number.isFinite(amount) || amount <= 0) {
+//       return NextResponse.json(
+//         {
+//           error:
+//             'The advertisement has an invalid payment amount. Please contact support.',
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (
+//       body.amount !== undefined &&
+//       Number(body.amount) !== amount
+//     ) {
+//       return NextResponse.json(
+//         {
+//           error:
+//             'The submitted amount does not match the advertisement payment amount.',
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (advertisement.paymentStatus === 'paid') {
+//       return NextResponse.json(
+//         { error: 'This advertisement has already been paid for.' },
+//         { status: 409 }
+//       );
+//     }
+
+//     // 7. Initiate STK Push.
+//     // The service creates and updates the pending Transaction record.
+//     const paymentService = new MpesaPaymentService(userId);
+
+//     const payment = await paymentService.initiatePaymentWithPhone(
+//       amount,
+//       'advertisement',
+//       phoneNumber,
+//       {
+//         adId: advertisement._id.toString(),
+//         vendorId: vendor._id.toString(),
+//         organizationId: trustedOrganizationId,
+//         purpose: 'advertisement',
+//       }
+//     );
+
+//     // Do not mark the advertisement as paid here.
+//     // The M-Pesa callback/payment confirmation should do that.
+
+//     return NextResponse.json(
+//       {
+//         success: true,
+//         message:
+//           'M-Pesa payment request initiated. Complete the prompt on your phone.',
+//         checkoutRequestId: payment.checkoutRequestId,
+//         transactionId: payment.transactionId,
+//         adId: advertisement._id.toString(),
+//         amount,
+//         phoneNumber,
+//       },
+//       { status: 200 }
+//     );
+//   } catch (error: unknown) {
+//     console.error('[Advertisement Payment] Error:', error);
+
+//     const message =
+//       error instanceof Error
+//         ? error.message
+//         : 'An unexpected error occurred while initiating payment.';
+
+//     return NextResponse.json(
+//       {
+//         error: 'Failed to initiate advertisement payment.',
+//         details:
+//           process.env.NODE_ENV === 'development'
+//             ? message
+//             : undefined,
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
+// app/api/shd-api/api/advertisements/pay/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
@@ -328,8 +643,8 @@ import { verifyToken } from '@/shd-lib/lib/auth';
 import Advertisement from '@/shd-models/models/Advertisement';
 import Vendor from '@/shd-models/models/Vendor';
 import User from '@/shd-models/models/User';
+import Transaction from '@/shd-models/models/Transaction'; // 🔧 FIX: import Transaction
 import { MpesaPaymentService } from '@/shd-lib/lib/mpesaPaymentService';
-
 
 export const runtime = 'nodejs';
 
@@ -401,11 +716,7 @@ export async function POST(req: NextRequest) {
         ? body.organizationId.trim()
         : '';
 
-    if (
-      !adId ||
-      !requestedPhone ||
-      !requestedOrganizationId
-    ) {
+    if (!adId || !requestedPhone || !requestedOrganizationId) {
       return NextResponse.json(
         {
           error:
@@ -462,7 +773,6 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Verify the organization against trusted database records.
-    // Do not authorize an organization solely because the client sent its ID.
     const userOrganizationId =
       user.organizationId?.toString() ?? null;
 
@@ -530,8 +840,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const advertisementVendorId =
-      advertisement.vendorId?.toString();
+    const advertisementVendorId = advertisement.vendorId?.toString();
 
     if (
       !advertisementVendorId ||
@@ -539,8 +848,7 @@ export async function POST(req: NextRequest) {
     ) {
       return NextResponse.json(
         {
-          error:
-            'You are not authorized to pay for this advertisement.',
+          error: 'You are not authorized to pay for this advertisement.',
         },
         { status: 403 }
       );
@@ -559,10 +867,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (
-      body.amount !== undefined &&
-      Number(body.amount) !== amount
-    ) {
+    if (body.amount !== undefined && Number(body.amount) !== amount) {
       return NextResponse.json(
         {
           error:
@@ -579,24 +884,87 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 7. Initiate STK Push.
-    // The service creates and updates the pending Transaction record.
-    const paymentService = new MpesaPaymentService(userId);
+    // 🔧 FIX: guard against duplicate in-flight payments for the same ad.
+    const existingPending = await Transaction.findOne({
+      'metadata.adId': advertisement._id.toString(),
+      category: 'advertisement',
+      status: 'pending',
+    });
 
-    const payment = await paymentService.initiatePaymentWithPhone(
+    if (existingPending) {
+      return NextResponse.json(
+        {
+          error:
+            'A payment for this advertisement is already in progress. Complete it on your phone before retrying.',
+          code: 'PAYMENT_ALREADY_PENDING',
+          transactionId: existingPending.id.toString(),
+          checkoutRequestId: existingPending.checkoutRequestId ?? null,
+        },
+        { status: 409 }
+      );
+    }
+
+    // 🔧 FIX: create the pending Transaction BEFORE calling the service.
+    // The service expects metadata.transactionId to already exist.
+    const transaction = await Transaction.create({
+      userId,
+      organizationId: trustedOrganizationId,
       amount,
-      'advertisement',
+      category: 'advertisement',
+      status: 'pending',
       phoneNumber,
-      {
+      metadata: {
+        userId,
         adId: advertisement._id.toString(),
         vendorId: vendor._id.toString(),
         organizationId: trustedOrganizationId,
         purpose: 'advertisement',
-      }
+      },
+    });
+
+    // 🔧 FIX: pass organizationId into the service constructor.
+    const paymentService = new MpesaPaymentService(
+      userId,
+      trustedOrganizationId
     );
 
+    let payment;
+    try {
+      payment = await paymentService.initiatePaymentWithPhone(
+        amount,
+        'advertisement',
+        phoneNumber,
+        {
+          userId,
+          adId: advertisement._id.toString(),
+          vendorId: vendor._id.toString(),
+          organizationId: trustedOrganizationId,
+          purpose: 'advertisement',
+          transactionId: transaction.id.toString(), // 🔧 REQUIRED
+        }
+      );
+    } catch (stkError) {
+      // 🔧 FIX: if STK push fails, mark the Transaction failed so the
+      // pending-payment guard doesn't lock the user out forever.
+      await Transaction.findByIdAndUpdate(transaction._id, {
+        status: 'failed',
+        errorMessage:
+          stkError instanceof Error
+            ? stkError.message
+            : 'STK push failed',
+      });
+      throw stkError;
+    }
+
+    // 🔧 FIX: persist the M-Pesa identifiers on the Transaction so the
+    // status-query endpoint can find it later.
+    await Transaction.findByIdAndUpdate(transaction._id, {
+      checkoutRequestId: payment.checkoutRequestId,
+      merchantRequestId: payment.merchantRequestId,
+    });
+
     // Do not mark the advertisement as paid here.
-    // The M-Pesa callback/payment confirmation should do that.
+    // The M-Pesa callback / status query will do that.
 
     return NextResponse.json(
       {
@@ -604,7 +972,7 @@ export async function POST(req: NextRequest) {
         message:
           'M-Pesa payment request initiated. Complete the prompt on your phone.',
         checkoutRequestId: payment.checkoutRequestId,
-        transactionId: payment.transactionId,
+        transactionId: transaction.id.toString(),
         adId: advertisement._id.toString(),
         amount,
         phoneNumber,
@@ -623,9 +991,7 @@ export async function POST(req: NextRequest) {
       {
         error: 'Failed to initiate advertisement payment.',
         details:
-          process.env.NODE_ENV === 'development'
-            ? message
-            : undefined,
+          process.env.NODE_ENV === 'development' ? message : undefined,
       },
       { status: 500 }
     );
