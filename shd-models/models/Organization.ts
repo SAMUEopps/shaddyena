@@ -1,5 +1,5 @@
 // shd-models/models/Organization.ts
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IOrganization extends Document {
   name: string;
@@ -45,4 +45,9 @@ const OrganizationSchema = new Schema<IOrganization>({
   updatedAt: { type: Date, default: Date.now }
 });
 
-export default mongoose.models.Organization || mongoose.model<IOrganization>('Organization', OrganizationSchema);
+//export default mongoose.models.Organization || mongoose.model<IOrganization>('Organization', OrganizationSchema);
+const Organization: Model<IOrganization> =
+  (mongoose.models.Organization as Model<IOrganization>) ||
+  mongoose.model<IOrganization>('Organization', OrganizationSchema);
+
+export default Organization;
