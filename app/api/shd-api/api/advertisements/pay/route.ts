@@ -235,6 +235,14 @@ export async function POST(req: NextRequest) {
       vendor.organizationId?.toString() ||
       userData.organizationId?.toString();
 
+    console.log('[Advertisement Payment] Organization diagnostic:', {
+      userId: user.userId,
+      userOrganizationId: userData.organizationId?.toString() ?? null,
+      vendorId: vendor._id.toString(),
+      vendorOrganizationId: vendor.organizationId?.toString() ?? null,
+      advertisementId: advertisement._id.toString(),
+    });  
+
     if (!organizationId) {
       return NextResponse.json(
         { error: 'Organization context is missing for this vendor/user' },
