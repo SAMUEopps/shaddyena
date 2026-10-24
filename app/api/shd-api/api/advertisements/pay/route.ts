@@ -904,15 +904,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 🔧 FIX: generate the internal transaction reference.
+    // Format: ADS-<timestamp>-<5 char base36 upper>
+    const accountReference = `ADS-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 7)
+      .toUpperCase()}`;
+
     // 🔧 FIX: create the pending Transaction BEFORE calling the service.
-    // The service expects metadata.transactionId to already exist.
+    // `type` must be 'payment' (schema enum does NOT include 'advertisement').
     const transaction = await Transaction.create({
-      userId,
-      organizationId: trustedOrganizationId,
+      transactionId: accountReference, // required, unique
+      organizationId: trustedOrganizationId, // required
+      type: 'payment', // 🔧 REQUIRED enum value — NOT 'advertisement'
+      category: 'advertisement', // matches schema enum ✅
       amount,
-      category: 'advertisement',
+      currency: 'KES',
       status: 'pending',
       phoneNumber,
+      provider: 'mpesa',
+      purpose: 'advertisement',
+      accountReference, // top-level column (used by indexes & STK push)
       metadata: {
         userId,
         adId: advertisement._id.toString(),
@@ -941,11 +953,12 @@ export async function POST(req: NextRequest) {
           organizationId: trustedOrganizationId,
           purpose: 'advertisement',
           transactionId: transaction.id.toString(), // 🔧 REQUIRED
+          accountReference, // keep M-Pesa ref identical to our transactionId
         }
       );
     } catch (stkError) {
-      // 🔧 FIX: if STK push fails, mark the Transaction failed so the
-      // pending-payment guard doesn't lock the user out forever.
+      // 🔧 FIX: mark failed so the pending-payment guard doesn't lock
+      // the user out after a transient STK failure.
       await Transaction.findByIdAndUpdate(transaction._id, {
         status: 'failed',
         errorMessage:
