@@ -2011,7 +2011,7 @@ export async function POST(
     const organizationId = organization._id;
     logInfo('ORGANIZATION_FOUND', {
       requestId,
-      organizationId: organizationId.toString(),
+      organizationId: organizationId,
       organizationName: organization.name
     });
 
