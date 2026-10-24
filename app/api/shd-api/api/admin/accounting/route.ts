@@ -383,6 +383,8 @@ function calculateTotals(transactions: TransactionLike[]) {
       subscription: 0,
       vendor_payout: 0,
       customer_payment: 0,
+      wallet_deposit: 0,
+      marketer_payout: 0,
       other: 0,
     } satisfies Record<BusinessCategory, number>,
   };
