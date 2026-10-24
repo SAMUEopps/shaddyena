@@ -297,6 +297,7 @@ import VendorHeader from './components/VendorHeader';
 import MessageBanner from './components/MessageBanner';
 import LoadingSpinner from './components/LoadingSpinner';
 import AdvertisementManager from '@/app/SHD-COMPONENTS/components/AdvertisementManager';
+import { useAuth } from '@/shd-contexts/AuthContext';
 
 interface Rider {
   id: string;
@@ -314,6 +315,7 @@ export default function VendorDashboard() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const { organizationId } = useAuth();
   const [editForm, setEditForm] = useState({
     businessName: '',
     ownerName: '',
@@ -347,6 +349,13 @@ export default function VendorDashboard() {
       console.error('Error fetching riders:', error);
     }
   };
+
+  useEffect(() => {
+    console.log(
+      '[AdvertisementManager] Auth organizationId:',
+      organizationId
+    );
+  }, [organizationId]);
 
   useEffect(() => {
     if (vendor) {
