@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth } from '@/shd-contexts/AuthContext';
 import { useState, useEffect, useCallback } from 'react';
 
 type Wallet = {
@@ -31,9 +32,11 @@ export default function AdminWalletPage() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
-  // Admin/org from your auth session — stub here
-  const adminUserId = 'REPLACE_FROM_SESSION';
-  const organizationId = 'REPLACE_FROM_SESSION';
+
+const { user, token, organizationId, isLoading: authLoading } = useAuth();
+
+const adminUserId = user?.id ?? null;
+const activeOrganizationId = organizationId ?? user?.organizationId ?? null;
 
   // Deposit form
   const [depositAmount, setDepositAmount] = useState('');
@@ -45,21 +48,91 @@ export default function AdminWalletPage() {
   const [payPhone, setPayPhone] = useState('');
   const [payRemarks, setPayRemarks] = useState('');
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `/api/admin/wallet/summary?organizationId=${organizationId}`,
-        { cache: 'no-store' }
+
+// const load = useCallback(async () => {
+//   if (authLoading || !token || !activeOrganizationId) return;
+
+//   setLoading(true);
+
+//   try {
+//     const res = await fetch('/api/admin/wallet/summary', {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//       cache: 'no-store',
+//     });
+
+//     const data = await res.json();
+
+//     if (!res.ok) {
+//       throw new Error(data.error || 'Failed to load wallet summary');
+//     }
+
+//     setWallet(data.wallet);
+//     setOwed(data.owed || []);
+//     setRecent(data.recent || []);
+//   } catch (error) {
+//     setMsg({
+//       type: 'err',
+//       text: error instanceof Error ? error.message : 'Failed to load wallet',
+//     });
+//   } finally {
+//     setLoading(false);
+//   }
+// }, [authLoading, token, activeOrganizationId]);
+
+
+const load = useCallback(async () => {
+  if (authLoading || !token || !activeOrganizationId) return;
+
+  setLoading(true);
+  setMsg(null);
+
+  try {
+    const params = new URLSearchParams({
+      organizationId: String(activeOrganizationId),
+    });
+
+    const res = await fetch(
+      `/api/admin/wallet/summary?${params.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        cache: 'no-store',
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        data.error || `Failed to load wallet (${res.status})`
       );
-      const data = await res.json();
-      setWallet(data.wallet);
-      setOwed(data.owed || []);
-      setRecent(data.recent || []);
-    } finally {
-      setLoading(false);
     }
-  }, [organizationId]);
+
+    setWallet(data.wallet);
+    setOwed(data.owed ?? []);
+    setRecent(data.recent ?? []);
+  } catch (error) {
+    setMsg({
+      type: 'err',
+      text:
+        error instanceof Error
+          ? error.message
+          : 'Failed to load wallet',
+    });
+  } finally {
+    setLoading(false);
+  }
+}, [authLoading, token, activeOrganizationId]);
+
+
+useEffect(() => {
+  if (!authLoading && token && activeOrganizationId) {
+    void load();
+  }
+}, [authLoading, token, activeOrganizationId, load]);
 
   useEffect(() => { load(); }, [load]);
 

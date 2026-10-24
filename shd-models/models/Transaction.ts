@@ -873,6 +873,8 @@ export type TransactionCategory =
   | 'advertisement'
   | 'subscription'
   | 'vendor_payout'
+  | 'wallet_deposit'      // ← NEW
+  | 'marketer_payout'
   | 'customer_payment'
   | 'other';
 
@@ -1078,6 +1080,8 @@ const TransactionSchema = new Schema<ITransaction>(
         'savings',
         'investment',
         'petty_cash',
+        'wallet_deposit',
+        'marketer_payout',
         'advertisement',
         'subscription',
         'vendor_payout',
