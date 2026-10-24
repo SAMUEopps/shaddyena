@@ -177,7 +177,7 @@ export async function GET(req: NextRequest) {
         organization: {
           id: organization._id,
           name: organization.name,
-          code: organization.code || 'MALEX'
+          //code: organization.code || 'MALEX'
         }
       }
     });
