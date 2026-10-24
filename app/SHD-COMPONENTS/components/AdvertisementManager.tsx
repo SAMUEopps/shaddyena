@@ -434,6 +434,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import PaymentModal from '@/app/SHD-COMPONENTS/components/PaymentModal';
+import { useAuth } from '@/shd-contexts/AuthContext';
 
 interface Advertisement {
   _id: string;
@@ -469,6 +470,7 @@ export default function AdvertisementManager({ vendorId, vendorName, onShowMessa
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [pendingAdId, setPendingAdId] = useState<string | null>(null);
   const [pendingAmount, setPendingAmount] = useState<number>(0);
+  const { organizationId } = useAuth();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -631,50 +633,125 @@ export default function AdvertisementManager({ vendorId, vendorName, onShowMessa
     }
   };
 
-  const handlePayment = async (amount: number, phoneNumber: string) => {
-    if (!pendingAdId) {
-      throw new Error('No advertisement selected for payment');
+  // const handlePayment = async (amount: number, phoneNumber: string) => {
+  //   if (!pendingAdId) {
+  //     throw new Error('No advertisement selected for payment');
+  //   }
+
+  //   setPaymentProcessing(true);
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     const response = await fetch('/api/shd-api/api/advertisements/pay', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': `Bearer ${token}`
+  //       },
+  //       body: JSON.stringify({
+  //         adId: pendingAdId,
+  //         amount,
+  //         phoneNumber,
+  //         purpose: 'advertisement'
+  //       }),
+  //     });
+
+  //     if (!response.ok) {
+  //       const error = await response.json();
+  //       throw new Error(error.error || 'Payment initiation failed');
+  //     }
+
+  //     const data = await response.json();
+      
+  //     // Payment initiated successfully
+  //     setShowPaymentModal(false);
+  //     setPendingAdId(null);
+  //     onShowMessage('success', 'Payment initiated! Please complete on your phone.');
+      
+  //     // Refresh to update status
+  //     await fetchAdvertisements();
+
+  //   } catch (error: any) {
+  //     onShowMessage('error', error.message || 'Payment failed');
+  //     throw error;
+  //   } finally {
+  //     setPaymentProcessing(false);
+  //   }
+  // };
+
+
+const handlePayment = async (
+  amount: number,
+  phoneNumber: string
+) => {
+  if (!pendingAdId) {
+    throw new Error('No advertisement selected for payment');
+  }
+
+  if (!organizationId) {
+    const message =
+      'Organization context is missing. Please select your organization and try again.';
+
+    onShowMessage('error', message);
+    throw new Error(message);
+  }
+
+  setPaymentProcessing(true);
+
+  try {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      throw new Error('Your session has expired. Please log in again.');
     }
 
-    setPaymentProcessing(true);
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/shd-api/api/advertisements/pay', {
+    const response = await fetch(
+      '/api/shd-api/api/advertisements/pay',
+      {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           adId: pendingAdId,
           amount,
           phoneNumber,
-          purpose: 'advertisement'
+          organizationId,
+          purpose: 'advertisement',
         }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Payment initiation failed');
       }
+    );
 
-      const data = await response.json();
-      
-      // Payment initiated successfully
-      setShowPaymentModal(false);
-      setPendingAdId(null);
-      onShowMessage('success', 'Payment initiated! Please complete on your phone.');
-      
-      // Refresh to update status
-      await fetchAdvertisements();
+    const data = await response.json();
 
-    } catch (error: any) {
-      onShowMessage('error', error.message || 'Payment failed');
-      throw error;
-    } finally {
-      setPaymentProcessing(false);
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Payment initiation failed'
+      );
     }
-  };
+
+    setShowPaymentModal(false);
+    setPendingAdId(null);
+
+    onShowMessage(
+      'success',
+      'Payment initiated! Please complete the request on your phone.'
+    );
+
+    await fetchAdvertisements();
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Payment failed';
+
+    onShowMessage('error', message);
+    throw error;
+  } finally {
+    setPaymentProcessing(false);
+  }
+};
+
 
   const resetForm = () => {
     setShowForm(false);
