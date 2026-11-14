@@ -542,6 +542,18 @@ export default function RegisterForm() {
                 🏍️ Register as Rider
               </Link>
             </div>
+
+            <div className="border-t border-surface pt-6">
+              <p className="text-sm text-muted text-center mb-4">
+                Want to earn by referring others?
+              </p>
+              <Link
+                href="/shd-pages/marketer/register"
+                className="w-full flex items-center justify-center gap-2 bg-amber-50 text-amber-700 hover:bg-amber-100 px-5 py-3 rounded-xl font-medium transition-all duration-200 border border-amber-200"
+              >
+                📣 Register as Marketer
+              </Link>
+            </div>
           </div>
         </div>
       </div>
