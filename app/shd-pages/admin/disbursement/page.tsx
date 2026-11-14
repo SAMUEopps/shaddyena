@@ -1102,31 +1102,145 @@ export default function AdminWalletPage() {
   }, [authLoading]);
 
   /* ---------------- Load marketers ---------------- */
-  const loadMarketers = useCallback(async () => {
-    const t = tokenRef.current;
-    if (authLoading || !t) return;
-    setMarketersLoading(true);
-    try {
-      const params = new URLSearchParams();
-      const orgId = orgIdRef.current;
-      if (orgId) params.set('organizationId', String(orgId));
+  // const loadMarketers = useCallback(async () => {
+  //   const t = tokenRef.current;
+  //   if (authLoading || !t) return;
+  //   setMarketersLoading(true);
+  //   try {
+  //     const params = new URLSearchParams();
+  //     const orgId = orgIdRef.current;
+  //     if (orgId) params.set('organizationId', String(orgId));
 
-      const res = await fetch(
-        `/api/admin/wallet/marketers?${params.toString()}`,
-        {
-          headers: { Authorization: `Bearer ${t}` },
-          cache: 'no-store',
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to load marketers');
-      setMarketers(data.marketers || []);
-    } catch (error: any) {
-      setMsg({ type: 'err', text: error.message });
-    } finally {
-      setMarketersLoading(false);
+  //     const res = await fetch(
+  //       `/api/admin/wallet/marketers?${params.toString()}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${t}` },
+  //         cache: 'no-store',
+  //       }
+  //     );
+  //     const data = await res.json();
+  //     if (!res.ok) throw new Error(data.error || 'Failed to load marketers');
+  //     setMarketers(data.marketers || []);
+  //   } catch (error: any) {
+  //     setMsg({ type: 'err', text: error.message });
+  //   } finally {
+  //     setMarketersLoading(false);
+  //   }
+  // }, [authLoading]);
+
+
+/* ---------------- Load marketers ---------------- */
+const loadMarketers = useCallback(async () => {
+  const t = tokenRef.current;
+  const orgId = orgIdRef.current;
+
+  console.group('[MARKETERS] Loading diagnostic');
+
+  console.log('Environment:', {
+    url: window.location.href,
+    hostname: window.location.hostname,
+    isProduction: process.env.NODE_ENV === 'production',
+  });
+
+  console.log('Authentication:', {
+    authLoading,
+    hasToken: !!t,
+    tokenLength: t?.length || 0,
+    tokenPrefix: t ? t.substring(0, 10) + '...' : null,
+  });
+
+  console.log('Organization:', {
+    orgId,
+    orgIdType: typeof orgId,
+  });
+
+  if (authLoading || !t) {
+    console.warn('[MARKETERS] Aborting request:', {
+      reason: authLoading ? 'Authentication still loading' : 'Missing token',
+    });
+    console.groupEnd();
+    return;
+  }
+
+  setMarketersLoading(true);
+
+  try {
+    const params = new URLSearchParams();
+
+    if (orgId) {
+      params.set('organizationId', String(orgId));
     }
-  }, [authLoading]);
+
+    const endpoint = `/api/admin/wallet/marketers?${params.toString()}`;
+
+    console.log('[MARKETERS] Request:', endpoint);
+
+    const startTime = performance.now();
+
+    const res = await fetch(endpoint, {
+      headers: {
+        Authorization: `Bearer ${t}`,
+      },
+      cache: 'no-store',
+    });
+
+    const duration = performance.now() - startTime;
+
+    console.log('[MARKETERS] Response metadata:', {
+      status: res.status,
+      statusText: res.statusText,
+      ok: res.ok,
+      durationMs: Math.round(duration),
+      contentType: res.headers.get('content-type'),
+    });
+
+    const responseText = await res.text();
+
+    console.log('[MARKETERS] Raw response:', responseText);
+
+    let data;
+
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      throw new Error(
+        `Invalid JSON response. HTTP ${res.status}: ${responseText.substring(0, 300)}`
+      );
+    }
+
+    console.log('[MARKETERS] Parsed response:', data);
+
+    if (!res.ok) {
+      throw new Error(
+        data.error || `Request failed with HTTP ${res.status}`
+      );
+    }
+
+    const loadedMarketers = data.marketers || [];
+
+    console.log('[MARKETERS] Results:', {
+      count: loadedMarketers.length,
+      marketers: loadedMarketers,
+    });
+
+    setMarketers(loadedMarketers);
+
+    console.log('[MARKETERS] Successfully loaded');
+
+  } catch (error: any) {
+    console.error('[MARKETERS] FAILED:', error);
+
+    setMsg({
+      type: 'err',
+      text: error.message || 'Failed to load marketers',
+    });
+
+  } finally {
+    setMarketersLoading(false);
+    console.groupEnd();
+  }
+}, [authLoading]);
+
 
   /* ---------------- Load payout history ---------------- */
   const loadPayouts = useCallback(async (marketerId?: string) => {
