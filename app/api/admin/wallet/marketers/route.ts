@@ -195,6 +195,35 @@ export async function GET(req: NextRequest) {
     // 5. Fetch marketers
     stage = 'fetch_marketers';
 
+
+const mongoose = require('mongoose');
+
+const marketerQuery = User.find(query);
+
+log('SCHEMA TYPE', {
+  organizationId: User.schema.path('organizationId')?.instance,
+});
+
+log('ORIGINAL QUERY', query);
+
+log('CAST QUERY', marketerQuery.cast(User));
+
+log('MONGOOSE CONNECTION', {
+  host: User.db.host,
+  name: User.db.name,
+  readyState: User.db.readyState,
+});
+
+const explicitObjectId = new mongoose.Types.ObjectId(organizationId);
+
+const explicitCount = await User.countDocuments({
+  role: 'marketer',
+  organizationId: explicitObjectId,
+});
+
+log('EXPLICIT OBJECT ID COUNT', explicitCount);
+
+
     const marketers = await User.find(query)
       .select(
         '_id name email phoneNumber marketerStatus marketerTier ' +
