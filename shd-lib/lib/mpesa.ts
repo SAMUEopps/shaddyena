@@ -1,5 +1,5 @@
-//C:\Users\Administrator\Desktop\new\New folder\shaddyena\shd-lib\lib\mpesa.ts
 
+//C:\Users\Administrator\Desktop\new\New folder\shaddyena\shd-lib\lib\mpesa.ts
 import axios from 'axios';
 
 const CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || '';
