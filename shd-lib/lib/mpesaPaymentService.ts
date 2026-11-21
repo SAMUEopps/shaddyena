@@ -1724,6 +1724,7 @@ export class MpesaPaymentService {
   private organizationId: string;
 
   constructor(userId: string, organizationId?: string) {
+
     if (!userId) {
       throw new Error('MpesaPaymentService: userId is required');
     }

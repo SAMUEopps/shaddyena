@@ -427,7 +427,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { password, initialDeposit, phoneNumber } = body;
+    const { password, initialDeposit, phoneNumber, organizationId } = body;
 
     // Validate initial deposit (minimum 100)
     if (!initialDeposit || initialDeposit < 1) {
@@ -483,8 +483,13 @@ export async function POST(req: NextRequest) {
 
     try {
       // Initialize M-Pesa payment
-      const mpesaService = new MpesaPaymentService(user._id);
-      
+      //const mpesaService = new MpesaPaymentService(user._id);
+
+      const mpesaService = new MpesaPaymentService(
+        user._id.toString(),
+        organizationId
+      );
+            
       // This will create a transaction with both checkoutRequestId AND accountReference
       const paymentResult = await mpesaService.initiatePaymentWithPhone(
         initialDeposit,

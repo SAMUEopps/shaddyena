@@ -987,22 +987,22 @@ export default function MembershipDashboard() {
 
   try {
     // ✅ Resolve organizationId: AuthContext → localStorage → user object
-    // const orgId =
-    //   organizationId ||
-    //   localStorage.getItem('organizationId') ||
-    //   authUser?.organizationId;
+    const orgId =
+      organizationId ||
+      localStorage.getItem('organizationId') ||
+      authUser?.organizationId;
 
-    const orgId = '6a9ae426b93383bc2caacaef';
+    // const orgId = '6a9ae426b93383bc2caacaef';
 
-    if (!orgId) {
-      setMessage({
-        type: 'error',
-        text: 'Organization not found. Please log out and log in again.',
-      });
-      throw new Error('Organization not found. Please log out and log in again.');
-    }
+    // if (!orgId) {
+    //   setMessage({
+    //     type: 'error',
+    //     text: 'Organization not found. Please log out and log in again.',
+    //   });
+    //   throw new Error('Organization not found. Please log out and log in again.');
+    // }
 
-    const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token');
     if (!token) {
       setMessage({ type: 'error', text: 'Please log in again.' });
       throw new Error('Not authenticated');
@@ -1020,6 +1020,7 @@ export default function MembershipDashboard() {
         phoneNumber,
         description: 'Savings deposit',
         organizationId: orgId, // ✅ ADD THIS
+        
       }),
     });
 
