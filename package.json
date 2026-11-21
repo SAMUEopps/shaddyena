@@ -11,7 +11,8 @@
     "seed:categories": "node scripts/seedCategories.js",
     "migrate:orders-viewed": "node scripts/migrate-orders-viewed.js",
     "seed:organization": "node scripts/seedOrganization.js",
-    "migrate:transactions": "node scripts/migrateTransactionSchema.js"
+    "migrate:transactions": "node scripts/migrateTransactionSchema.js",
+    "migrate:user-organizations": "node scripts/migrate-user-organization.js"
   },
   "dependencies": {
     "africastalking": "^0.7.7",

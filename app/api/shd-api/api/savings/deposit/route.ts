@@ -640,6 +640,7 @@
 
 
 // app/api/shd-api/api/savings/deposit/route.ts
+import mongoose from 'mongoose';
 import { verifyToken } from '@/shd-lib/lib/auth';
 import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import User from '@/shd-models/models/User';
