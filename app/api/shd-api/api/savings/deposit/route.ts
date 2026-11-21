@@ -788,6 +788,14 @@ export async function POST(req: NextRequest) {
       logErr('❌ 404: user not found', { userId: decoded.userId });
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
+    log('DB diagnostics:', {
+      connectionName: mongoose.connection.name,
+      databaseName: mongoose.connection.db?.databaseName,
+      host: mongoose.connection.host,
+      mongoUriDb: process.env.MONGODB_URI?.split('/')?.pop()?.split('?')?.[0],
+    });
+    
     log('User found:', {
       id: user._id.toString(),
       email: user.email,
