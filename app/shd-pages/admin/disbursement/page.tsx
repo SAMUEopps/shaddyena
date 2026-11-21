@@ -1,80 +1,126 @@
-// 'use client';
+// // 'use client';
 
-// import { useAuth } from '@/shd-contexts/AuthContext';
-// import { useState, useEffect, useCallback } from 'react';
+// // import { useAuth } from '@/shd-contexts/AuthContext';
+// // import { useState, useEffect, useCallback } from 'react';
 
-// type Wallet = {
-//   balance: number;
-//   availableBalance: number;
-//   pendingPayouts: number;
-//   totalDeposited: number;
-//   totalDisbursed: number;
-//   currency: string;
-// };
+// // type Wallet = {
+// //   balance: number;
+// //   availableBalance: number;
+// //   pendingPayouts: number;
+// //   totalDeposited: number;
+// //   totalDisbursed: number;
+// //   currency: string;
+// // };
 
-// type Owed = { _id: string; owed: number };
-// type Txn = {
-//   _id: string;
-//   transactionId: string;
-//   type: string;
-//   category: string;
-//   amount: number;
-//   status: string;
-//   receiptNumber?: string;
-//   errorMessage?: string;
-//   createdAt: string;
-// };
+// // type Owed = { _id: string; owed: number };
+// // type Txn = {
+// //   _id: string;
+// //   transactionId: string;
+// //   type: string;
+// //   category: string;
+// //   amount: number;
+// //   status: string;
+// //   receiptNumber?: string;
+// //   errorMessage?: string;
+// //   createdAt: string;
+// // };
 
-// export default function AdminWalletPage() {
-//   const [wallet, setWallet] = useState<Wallet | null>(null);
-//   const [owed, setOwed] = useState<Owed[]>([]);
-//   const [recent, setRecent] = useState<Txn[]>([]);
-//   const [loading, setLoading] = useState(false);
-//   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+// // export default function AdminWalletPage() {
+// //   const [wallet, setWallet] = useState<Wallet | null>(null);
+// //   const [owed, setOwed] = useState<Owed[]>([]);
+// //   const [recent, setRecent] = useState<Txn[]>([]);
+// //   const [loading, setLoading] = useState(false);
+// //   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
 
-// const { user, token, organizationId, isLoading: authLoading } = useAuth();
+// // const { user, token, organizationId, isLoading: authLoading } = useAuth();
 
-// const adminUserId = user?.id ?? null;
-// const activeOrganizationId = organizationId ?? user?.organizationId ?? null;
+// // const adminUserId = user?.id ?? null;
+// // const activeOrganizationId = organizationId ?? user?.organizationId ?? null;
 
-//   // Deposit form
-//   const [depositAmount, setDepositAmount] = useState('');
-//   const [depositPhone, setDepositPhone] = useState('');
+// //   // Deposit form
+// //   const [depositAmount, setDepositAmount] = useState('');
+// //   const [depositPhone, setDepositPhone] = useState('');
 
-//   // Payout form
-//   const [payMarketerId, setPayMarketerId] = useState('');
-//   const [payAmount, setPayAmount] = useState('');
-//   const [payPhone, setPayPhone] = useState('');
-//   const [payRemarks, setPayRemarks] = useState('');
+// //   // Payout form
+// //   const [payMarketerId, setPayMarketerId] = useState('');
+// //   const [payAmount, setPayAmount] = useState('');
+// //   const [payPhone, setPayPhone] = useState('');
+// //   const [payRemarks, setPayRemarks] = useState('');
+
+
+// // // const load = useCallback(async () => {
+// // //   if (authLoading || !token || !activeOrganizationId) return;
+
+// // //   setLoading(true);
+
+// // //   try {
+// // //     const res = await fetch('/api/admin/wallet/summary', {
+// // //       headers: {
+// // //         Authorization: `Bearer ${token}`,
+// // //       },
+// // //       cache: 'no-store',
+// // //     });
+
+// // //     const data = await res.json();
+
+// // //     if (!res.ok) {
+// // //       throw new Error(data.error || 'Failed to load wallet summary');
+// // //     }
+
+// // //     setWallet(data.wallet);
+// // //     setOwed(data.owed || []);
+// // //     setRecent(data.recent || []);
+// // //   } catch (error) {
+// // //     setMsg({
+// // //       type: 'err',
+// // //       text: error instanceof Error ? error.message : 'Failed to load wallet',
+// // //     });
+// // //   } finally {
+// // //     setLoading(false);
+// // //   }
+// // // }, [authLoading, token, activeOrganizationId]);
 
 
 // // const load = useCallback(async () => {
 // //   if (authLoading || !token || !activeOrganizationId) return;
 
 // //   setLoading(true);
+// //   setMsg(null);
 
 // //   try {
-// //     const res = await fetch('/api/admin/wallet/summary', {
-// //       headers: {
-// //         Authorization: `Bearer ${token}`,
-// //       },
-// //       cache: 'no-store',
+// //     const params = new URLSearchParams({
+// //       organizationId: String(activeOrganizationId),
 // //     });
+
+// //     const res = await fetch(
+// //       `/api/admin/wallet/summary?${params.toString()}`,
+// //       {
+// //         headers: {
+// //           Authorization: `Bearer ${token}`,
+// //         },
+// //         cache: 'no-store',
+// //       }
+// //     );
 
 // //     const data = await res.json();
 
 // //     if (!res.ok) {
-// //       throw new Error(data.error || 'Failed to load wallet summary');
+// //       throw new Error(
+// //         data.error || `Failed to load wallet (${res.status})`
+// //       );
 // //     }
 
 // //     setWallet(data.wallet);
-// //     setOwed(data.owed || []);
-// //     setRecent(data.recent || []);
+// //     setOwed(data.owed ?? []);
+// //     setRecent(data.recent ?? []);
 // //   } catch (error) {
 // //     setMsg({
 // //       type: 'err',
-// //       text: error instanceof Error ? error.message : 'Failed to load wallet',
+// //       text:
+// //         error instanceof Error
+// //           ? error.message
+// //           : 'Failed to load wallet',
 // //     });
 // //   } finally {
 // //     setLoading(false);
@@ -82,290 +128,840 @@
 // // }, [authLoading, token, activeOrganizationId]);
 
 
-// const load = useCallback(async () => {
-//   if (authLoading || !token || !activeOrganizationId) return;
+// // useEffect(() => {
+// //   if (!authLoading && token && activeOrganizationId) {
+// //     void load();
+// //   }
+// // }, [authLoading, token, activeOrganizationId, load]);
 
-//   setLoading(true);
-//   setMsg(null);
+// //   useEffect(() => { load(); }, [load]);
 
-//   try {
-//     const params = new URLSearchParams({
-//       organizationId: String(activeOrganizationId),
-//     });
+// //   async function handleDeposit(e: React.FormEvent) {
+// //     e.preventDefault();
+// //     setMsg(null);
+// //     if (!depositAmount || Number(depositAmount) <= 0) {
+// //       return setMsg({ type: 'err', text: 'Enter a valid amount' });
+// //     }
+// //     try {
+// //       const res = await fetch('/api/admin/wallet/deposit', {
+// //         method: 'POST',
+// //         headers: { 'Content-Type': 'application/json' },
+// //         body: JSON.stringify({
+// //           adminUserId, organizationId,
+// //           amount: Number(depositAmount),
+// //           phoneNumber: depositPhone || undefined,
+// //         }),
+// //       });
+// //       const data = await res.json();
+// //       if (!res.ok) throw new Error(data.error);
+// //       setMsg({ type: 'ok', text: 'STK sent. Approve on your phone.' });
+// //       setDepositAmount('');
+// //       setTimeout(load, 4000);
+// //     } catch (err: any) {
+// //       setMsg({ type: 'err', text: err.message });
+// //     }
+// //   }
 
-//     const res = await fetch(
-//       `/api/admin/wallet/summary?${params.toString()}`,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//         cache: 'no-store',
-//       }
-//     );
+// //   async function handlePayout(e: React.FormEvent) {
+// //     e.preventDefault();
+// //     setMsg(null);
+// //     if (!payMarketerId || !payAmount) {
+// //       return setMsg({ type: 'err', text: 'Select marketer and amount' });
+// //     }
+// //     if (wallet && Number(payAmount) > wallet.availableBalance) {
+// //       return setMsg({ type: 'err', text: 'Amount exceeds available balance' });
+// //     }
+// //     try {
+// //       const res = await fetch('/api/admin/wallet/payout', {
+// //         method: 'POST',
+// //         headers: { 'Content-Type': 'application/json' },
+// //         body: JSON.stringify({
+// //           adminUserId, organizationId,
+// //           marketerId: payMarketerId,
+// //           amount: Number(payAmount),
+// //           phoneNumber: payPhone || undefined,
+// //           remarks: payRemarks || undefined,
+// //           idempotencyKey: `payout-${Date.now()}`,
+// //         }),
+// //       });
+// //       const data = await res.json();
+// //       if (!res.ok) throw new Error(data.error);
+// //       setMsg({ type: 'ok', text: 'Payout submitted to M-Pesa B2C.' });
+// //       setPayAmount(''); setPayPhone(''); setPayRemarks('');
+// //       load();
+// //     } catch (err: any) {
+// //       setMsg({ type: 'err', text: err.message });
+// //     }
+// //   }
 
-//     const data = await res.json();
+// //   return (
+// //     <main className="container p-6 space-y-6">
+// //       <header className="flex items-center justify-between">
+// //         <h1 className="text-2xl font-bold text-secondary">Admin Wallet</h1>
+// //         <button
+// //           onClick={load}
+// //           className="px-4 py-2 rounded-xl bg-primary text-white hover:opacity-90"
+// //         >
+// //           {loading ? 'Refreshing…' : 'Refresh'}
+// //         </button>
+// //       </header>
 
-//     if (!res.ok) {
-//       throw new Error(
-//         data.error || `Failed to load wallet (${res.status})`
-//       );
-//     }
+// //       {msg && (
+// //         <div
+// //           className={`rounded-xl p-3 text-sm ${
+// //             msg.type === 'ok'
+// //               ? 'bg-green-50 text-green-700 border border-green-200'
+// //               : 'bg-red-50 text-red-700 border border-red-200'
+// //           }`}
+// //         >
+// //           {msg.text}
+// //         </div>
+// //       )}
 
-//     setWallet(data.wallet);
-//     setOwed(data.owed ?? []);
-//     setRecent(data.recent ?? []);
-//   } catch (error) {
-//     setMsg({
-//       type: 'err',
-//       text:
-//         error instanceof Error
-//           ? error.message
-//           : 'Failed to load wallet',
-//     });
-//   } finally {
-//     setLoading(false);
-//   }
-// }, [authLoading, token, activeOrganizationId]);
+// //       {/* Balance cards */}
+// //       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+// //         <StatCard label="Total balance" value={wallet?.balance ?? 0} accent />
+// //         <StatCard label="Available" value={wallet?.availableBalance ?? 0} />
+// //         <StatCard label="Pending payouts" value={wallet?.pendingPayouts ?? 0} />
+// //         <StatCard label="Total disbursed" value={wallet?.totalDisbursed ?? 0} />
+// //       </section>
+
+// //       {/* Deposit + payout forms */}
+// //       <section className="grid md:grid-cols-2 gap-6">
+// //         {/* Deposit */}
+// //         <form onSubmit={handleDeposit} className="bg-white rounded-2xl p-5 shadow-sm space-y-3">
+// //           <h2 className="font-semibold text-secondary">Deposit funds (M-Pesa STK)</h2>
+// //           <input
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             type="number"
+// //             placeholder="Amount (KES)"
+// //             value={depositAmount}
+// //             onChange={(e) => setDepositAmount(e.target.value)}
+// //           />
+// //           <input
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             placeholder="Phone (optional, defaults to your account)"
+// //             value={depositPhone}
+// //             onChange={(e) => setDepositPhone(e.target.value)}
+// //           />
+// //           <button className="w-full rounded-xl bg-primary text-white py-2 hover:opacity-90">
+// //             Send STK push
+// //           </button>
+// //         </form>
+
+// //         {/* Payout */}
+// //         <form onSubmit={handlePayout} className="bg-white rounded-2xl p-5 shadow-sm space-y-3">
+// //           <h2 className="font-semibold text-secondary">Disburse to marketer (B2C)</h2>
+// //           <select
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             value={payMarketerId}
+// //             onChange={(e) => setPayMarketerId(e.target.value)}
+// //           >
+// //             <option value="">Select marketer with earnings owed…</option>
+// //             {owed.map((o) => (
+// //               <option key={o._id} value={o._id}>
+// //                 {o._id} — owed {o.owed}
+// //               </option>
+// //             ))}
+// //           </select>
+// //           <input
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             type="number"
+// //             placeholder="Amount (KES)"
+// //             value={payAmount}
+// //             onChange={(e) => setPayAmount(e.target.value)}
+// //           />
+// //           <input
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             placeholder="Override phone (optional)"
+// //             value={payPhone}
+// //             onChange={(e) => setPayPhone(e.target.value)}
+// //           />
+// //           <input
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             placeholder="Remarks (optional)"
+// //             value={payRemarks}
+// //             onChange={(e) => setPayRemarks(e.target.value)}
+// //           />
+// //           <button className="w-full rounded-xl bg-secondary text-white py-2 hover:opacity-90">
+// //             Send B2C payout
+// //           </button>
+// //         </form>
+// //       </section>
+
+// //       {/* Recent activity */}
+// //       <section className="bg-white rounded-2xl p-5 shadow-sm">
+// //         <h2 className="font-semibold text-secondary mb-3">Recent wallet activity</h2>
+// //         <div className="overflow-x-auto">
+// //           <table className="w-full text-sm">
+// //             <thead className="text-left text-muted">
+// //               <tr>
+// //                 <th className="py-2">Time</th>
+// //                 <th>Ref</th>
+// //                 <th>Category</th>
+// //                 <th>Amount</th>
+// //                 <th>Status</th>
+// //                 <th>Receipt</th>
+// //               </tr>
+// //             </thead>
+// //             <tbody>
+// //               {recent.map((t) => (
+// //                 <tr key={t._id} className="border-t">
+// //                   <td className="py-2">{new Date(t.createdAt).toLocaleString()}</td>
+// //                   <td className="font-mono text-xs">{t.transactionId}</td>
+// //                   <td>{t.category}</td>
+// //                   <td>{t.amount}</td>
+// //                   <td>
+// //                     <StatusPill status={t.status} />
+// //                   </td>
+// //                   <td className="text-xs">{t.receiptNumber || t.errorMessage || '—'}</td>
+// //                 </tr>
+// //               ))}
+// //               {recent.length === 0 && (
+// //                 <tr><td colSpan={6} className="text-center text-muted py-4">No activity yet</td></tr>
+// //               )}
+// //             </tbody>
+// //           </table>
+// //         </div>
+// //       </section>
+// //     </main>
+// //   );
+// // }
+
+// // function StatCard({
+// //   label, value, accent,
+// // }: { label: string; value: number; accent?: boolean }) {
+// //   return (
+// //     <div
+// //       className={`rounded-2xl p-4 shadow-sm ${
+// //         accent ? 'bg-primary text-white' : 'bg-white'
+// //       }`}
+// //     >
+// //       <p className={`text-xs ${accent ? 'text-white/80' : 'text-muted'}`}>{label}</p>
+// //       <p className="text-xl font-bold mt-1">{value.toLocaleString()} KES</p>
+// //     </div>
+// //   );
+// // }
+
+// // function StatusPill({ status }: { status: string }) {
+// //   const color =
+// //     status === 'success'
+// //       ? 'bg-green-100 text-green-700'
+// //       : status === 'failed' || status === 'cancelled'
+// //       ? 'bg-red-100 text-red-700'
+// //       : 'bg-yellow-100 text-yellow-700';
+// //   return (
+// //     <span className={`px-2 py-0.5 rounded-full text-xs ${color}`}>{status}</span>
+// //   );
+// // }
 
 
-// useEffect(() => {
-//   if (!authLoading && token && activeOrganizationId) {
-//     void load();
-//   }
-// }, [authLoading, token, activeOrganizationId, load]);
+// // // app/shd-pages/admin/wallet/page.tsx
+// // 'use client';
 
-//   useEffect(() => { load(); }, [load]);
+// // import { useAuth } from '@/shd-contexts/AuthContext';
+// // import { useState, useEffect, useCallback, useMemo } from 'react';
 
-//   async function handleDeposit(e: React.FormEvent) {
-//     e.preventDefault();
-//     setMsg(null);
-//     if (!depositAmount || Number(depositAmount) <= 0) {
-//       return setMsg({ type: 'err', text: 'Enter a valid amount' });
-//     }
-//     try {
-//       const res = await fetch('/api/admin/wallet/deposit', {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({
-//           adminUserId, organizationId,
-//           amount: Number(depositAmount),
-//           phoneNumber: depositPhone || undefined,
-//         }),
-//       });
-//       const data = await res.json();
-//       if (!res.ok) throw new Error(data.error);
-//       setMsg({ type: 'ok', text: 'STK sent. Approve on your phone.' });
-//       setDepositAmount('');
-//       setTimeout(load, 4000);
-//     } catch (err: any) {
-//       setMsg({ type: 'err', text: err.message });
-//     }
-//   }
+// // type Wallet = {
+// //   balance: number;
+// //   availableBalance: number;
+// //   pendingPayouts: number;
+// //   totalDisbursed: number;
+// //   currency: string;
+// // };
 
-//   async function handlePayout(e: React.FormEvent) {
-//     e.preventDefault();
-//     setMsg(null);
-//     if (!payMarketerId || !payAmount) {
-//       return setMsg({ type: 'err', text: 'Select marketer and amount' });
-//     }
-//     if (wallet && Number(payAmount) > wallet.availableBalance) {
-//       return setMsg({ type: 'err', text: 'Amount exceeds available balance' });
-//     }
-//     try {
-//       const res = await fetch('/api/admin/wallet/payout', {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({
-//           adminUserId, organizationId,
-//           marketerId: payMarketerId,
-//           amount: Number(payAmount),
-//           phoneNumber: payPhone || undefined,
-//           remarks: payRemarks || undefined,
-//           idempotencyKey: `payout-${Date.now()}`,
-//         }),
-//       });
-//       const data = await res.json();
-//       if (!res.ok) throw new Error(data.error);
-//       setMsg({ type: 'ok', text: 'Payout submitted to M-Pesa B2C.' });
-//       setPayAmount(''); setPayPhone(''); setPayRemarks('');
-//       load();
-//     } catch (err: any) {
-//       setMsg({ type: 'err', text: err.message });
-//     }
-//   }
+// // type Marketer = {
+// //   _id: string;
+// //   name: string;
+// //   email: string;
+// //   phoneNumber: string;
+// //   marketerStatus: 'pending' | 'approved' | 'rejected' | 'suspended';
+// //   marketerTier: string;
+// //   totalCommissions: number;
+// //   totalReferralsMade: number;
+// //   disbursed: number;
+// //   owed: number;
+// //   payoutMethod?: 'mpesa' | 'bank';
+// //   payoutDetails?: {
+// //     phoneNumber?: string;
+// //     bankName?: string;
+// //     accountNumber?: string;
+// //     accountName?: string;
+// //   };
+// // };
 
-//   return (
-//     <main className="container p-6 space-y-6">
-//       <header className="flex items-center justify-between">
-//         <h1 className="text-2xl font-bold text-secondary">Admin Wallet</h1>
-//         <button
-//           onClick={load}
-//           className="px-4 py-2 rounded-xl bg-primary text-white hover:opacity-90"
-//         >
-//           {loading ? 'Refreshing…' : 'Refresh'}
-//         </button>
-//       </header>
+// // type Payout = {
+// //   _id: string;
+// //   amount: number;
+// //   status: 'pending' | 'processing' | 'completed' | 'failed';
+// //   method: 'MPESA' | 'BANK';
+// //   reference: string;
+// //   transactionId?: string;
+// //   errorMessage?: string;
+// //   createdAt: string;
+// //   marketerId?: { _id: string; name: string; email: string; phoneNumber: string };
+// // };
 
-//       {msg && (
-//         <div
-//           className={`rounded-xl p-3 text-sm ${
-//             msg.type === 'ok'
-//               ? 'bg-green-50 text-green-700 border border-green-200'
-//               : 'bg-red-50 text-red-700 border border-red-200'
-//           }`}
-//         >
-//           {msg.text}
-//         </div>
-//       )}
+// // type Txn = {
+// //   _id: string;
+// //   transactionId: string;
+// //   type: string;
+// //   category: string;
+// //   amount: number;
+// //   status: string;
+// //   receiptNumber?: string;
+// //   errorMessage?: string;
+// //   createdAt: string;
+// // };
 
-//       {/* Balance cards */}
-//       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-//         <StatCard label="Total balance" value={wallet?.balance ?? 0} accent />
-//         <StatCard label="Available" value={wallet?.availableBalance ?? 0} />
-//         <StatCard label="Pending payouts" value={wallet?.pendingPayouts ?? 0} />
-//         <StatCard label="Total disbursed" value={wallet?.totalDisbursed ?? 0} />
-//       </section>
+// // export default function AdminWalletPage() {
+// //   const { user, token, organizationId, isLoading: authLoading } = useAuth();
+// //   const adminUserId = user?.id ?? null;
+// //   const activeOrganizationId = organizationId ?? user?.organizationId ?? null;
 
-//       {/* Deposit + payout forms */}
-//       <section className="grid md:grid-cols-2 gap-6">
-//         {/* Deposit */}
-//         <form onSubmit={handleDeposit} className="bg-white rounded-2xl p-5 shadow-sm space-y-3">
-//           <h2 className="font-semibold text-secondary">Deposit funds (M-Pesa STK)</h2>
-//           <input
-//             className="w-full rounded-xl border px-3 py-2"
-//             type="number"
-//             placeholder="Amount (KES)"
-//             value={depositAmount}
-//             onChange={(e) => setDepositAmount(e.target.value)}
-//           />
-//           <input
-//             className="w-full rounded-xl border px-3 py-2"
-//             placeholder="Phone (optional, defaults to your account)"
-//             value={depositPhone}
-//             onChange={(e) => setDepositPhone(e.target.value)}
-//           />
-//           <button className="w-full rounded-xl bg-primary text-white py-2 hover:opacity-90">
-//             Send STK push
-//           </button>
-//         </form>
+// //   // Wallet
+// //   const [wallet, setWallet] = useState<Wallet | null>(null);
+// //   const [recent, setRecent] = useState<Txn[]>([]);
+// //   const [loading, setLoading] = useState(false);
+// //   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(
+// //     null
+// //   );
 
-//         {/* Payout */}
-//         <form onSubmit={handlePayout} className="bg-white rounded-2xl p-5 shadow-sm space-y-3">
-//           <h2 className="font-semibold text-secondary">Disburse to marketer (B2C)</h2>
-//           <select
-//             className="w-full rounded-xl border px-3 py-2"
-//             value={payMarketerId}
-//             onChange={(e) => setPayMarketerId(e.target.value)}
-//           >
-//             <option value="">Select marketer with earnings owed…</option>
-//             {owed.map((o) => (
-//               <option key={o._id} value={o._id}>
-//                 {o._id} — owed {o.owed}
-//               </option>
-//             ))}
-//           </select>
-//           <input
-//             className="w-full rounded-xl border px-3 py-2"
-//             type="number"
-//             placeholder="Amount (KES)"
-//             value={payAmount}
-//             onChange={(e) => setPayAmount(e.target.value)}
-//           />
-//           <input
-//             className="w-full rounded-xl border px-3 py-2"
-//             placeholder="Override phone (optional)"
-//             value={payPhone}
-//             onChange={(e) => setPayPhone(e.target.value)}
-//           />
-//           <input
-//             className="w-full rounded-xl border px-3 py-2"
-//             placeholder="Remarks (optional)"
-//             value={payRemarks}
-//             onChange={(e) => setPayRemarks(e.target.value)}
-//           />
-//           <button className="w-full rounded-xl bg-secondary text-white py-2 hover:opacity-90">
-//             Send B2C payout
-//           </button>
-//         </form>
-//       </section>
+// //   // Marketers
+// //   const [marketers, setMarketers] = useState<Marketer[]>([]);
+// //   const [marketersLoading, setMarketersLoading] = useState(false);
 
-//       {/* Recent activity */}
-//       <section className="bg-white rounded-2xl p-5 shadow-sm">
-//         <h2 className="font-semibold text-secondary mb-3">Recent wallet activity</h2>
-//         <div className="overflow-x-auto">
-//           <table className="w-full text-sm">
-//             <thead className="text-left text-muted">
-//               <tr>
-//                 <th className="py-2">Time</th>
-//                 <th>Ref</th>
-//                 <th>Category</th>
-//                 <th>Amount</th>
-//                 <th>Status</th>
-//                 <th>Receipt</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {recent.map((t) => (
-//                 <tr key={t._id} className="border-t">
-//                   <td className="py-2">{new Date(t.createdAt).toLocaleString()}</td>
-//                   <td className="font-mono text-xs">{t.transactionId}</td>
-//                   <td>{t.category}</td>
-//                   <td>{t.amount}</td>
-//                   <td>
-//                     <StatusPill status={t.status} />
-//                   </td>
-//                   <td className="text-xs">{t.receiptNumber || t.errorMessage || '—'}</td>
-//                 </tr>
-//               ))}
-//               {recent.length === 0 && (
-//                 <tr><td colSpan={6} className="text-center text-muted py-4">No activity yet</td></tr>
-//               )}
-//             </tbody>
-//           </table>
-//         </div>
-//       </section>
-//     </main>
-//   );
-// }
+// //   // Deposit form
+// //   const [depositAmount, setDepositAmount] = useState('');
+// //   const [depositPhone, setDepositPhone] = useState('');
 
-// function StatCard({
-//   label, value, accent,
-// }: { label: string; value: number; accent?: boolean }) {
-//   return (
-//     <div
-//       className={`rounded-2xl p-4 shadow-sm ${
-//         accent ? 'bg-primary text-white' : 'bg-white'
-//       }`}
-//     >
-//       <p className={`text-xs ${accent ? 'text-white/80' : 'text-muted'}`}>{label}</p>
-//       <p className="text-xl font-bold mt-1">{value.toLocaleString()} KES</p>
-//     </div>
-//   );
-// }
+// //   // Payout form
+// //   const [payMarketerId, setPayMarketerId] = useState('');
+// //   const [payAmount, setPayAmount] = useState('');
+// //   const [payPhone, setPayPhone] = useState('');
+// //   const [payRemarks, setPayRemarks] = useState('');
+// //   const [paying, setPaying] = useState(false);
 
-// function StatusPill({ status }: { status: string }) {
-//   const color =
-//     status === 'success'
-//       ? 'bg-green-100 text-green-700'
-//       : status === 'failed' || status === 'cancelled'
-//       ? 'bg-red-100 text-red-700'
-//       : 'bg-yellow-100 text-yellow-700';
-//   return (
-//     <span className={`px-2 py-0.5 rounded-full text-xs ${color}`}>{status}</span>
-//   );
-// }
+// //   // Payout history for selected marketer
+// //   const [payouts, setPayouts] = useState<Payout[]>([]);
 
+// //   const selectedMarketer = useMemo(
+// //     () => marketers.find((m) => m._id === payMarketerId) || null,
+// //     [marketers, payMarketerId]
+// //   );
+
+// //   const hasPendingPayouts = payouts.some(
+// //     (p) => p.status === 'pending' || p.status === 'processing'
+// //   );
+
+// //   /* ---------------- Load wallet summary ---------------- */
+// //   const load = useCallback(async () => {
+// //     if (authLoading || !token || !activeOrganizationId) return;
+// //     setLoading(true);
+// //     setMsg(null);
+// //     try {
+// //       const params = new URLSearchParams({
+// //         organizationId: String(activeOrganizationId),
+// //       });
+// //       const res = await fetch(
+// //         `/api/admin/wallet/summary?${params.toString()}`,
+// //         {
+// //           headers: { Authorization: `Bearer ${token}` },
+// //           cache: 'no-store',
+// //         }
+// //       );
+// //       const data = await res.json();
+// //       if (!res.ok) throw new Error(data.error || 'Failed to load wallet');
+// //       setWallet(data.wallet);
+// //       setRecent(data.recent ?? []);
+// //     } catch (error) {
+// //       setMsg({
+// //         type: 'err',
+// //         text: error instanceof Error ? error.message : 'Failed to load wallet',
+// //       });
+// //     } finally {
+// //       setLoading(false);
+// //     }
+// //   }, [authLoading, token, activeOrganizationId]);
+
+// //   /* ---------------- Load marketers ---------------- */
+// //   const loadMarketers = useCallback(async () => {
+// //     if (authLoading || !token) return;
+// //     setMarketersLoading(true);
+// //     try {
+// //       const params = new URLSearchParams();
+// //       if (activeOrganizationId)
+// //         params.set('organizationId', String(activeOrganizationId));
+
+// //       const res = await fetch(
+// //         `/api/admin/wallet/marketers?${params.toString()}`,
+// //         {
+// //           headers: { Authorization: `Bearer ${token}` },
+// //           cache: 'no-store',
+// //         }
+// //       );
+// //       const data = await res.json();
+// //       if (!res.ok) throw new Error(data.error || 'Failed to load marketers');
+// //       setMarketers(data.marketers || []);
+// //     } catch (error: any) {
+// //       setMsg({ type: 'err', text: error.message });
+// //     } finally {
+// //       setMarketersLoading(false);
+// //     }
+// //   }, [authLoading, token, activeOrganizationId]);
+
+// //   /* ---------------- Load payout history ---------------- */
+// //   const loadPayouts = useCallback(
+// //     async (marketerId?: string) => {
+// //       if (!token) return;
+// //       try {
+// //         const params = new URLSearchParams({ limit: '25' });
+// //         if (marketerId) params.set('marketerId', marketerId);
+// //         const res = await fetch(
+// //           `/api/admin/wallet/payouts?${params.toString()}`,
+// //           {
+// //             headers: { Authorization: `Bearer ${token}` },
+// //             cache: 'no-store',
+// //           }
+// //         );
+// //         const data = await res.json();
+// //         if (res.ok) setPayouts(data.payouts || []);
+// //       } catch {
+// //         /* non-fatal */
+// //       }
+// //     },
+// //     [token]
+// //   );
+
+// //   /* ---------------- Initial loads ---------------- */
+// //   useEffect(() => {
+// //     if (!authLoading && token && activeOrganizationId) {
+// //       void load();
+// //       void loadMarketers();
+// //       void loadPayouts(payMarketerId || undefined);
+// //     }
+// //   }, [
+// //     authLoading,
+// //     token,
+// //     activeOrganizationId,
+// //     load,
+// //     loadMarketers,
+// //     loadPayouts,
+// //     payMarketerId,
+// //   ]);
+
+// //   /* ---------------- Poll payout status ---------------- */
+// //   useEffect(() => {
+// //     if (!hasPendingPayouts) return;
+// //     const t = setInterval(
+// //       () => void loadPayouts(payMarketerId || undefined),
+// //       30000
+// //     );
+// //     return () => clearInterval(t);
+// //   }, [hasPendingPayouts, payMarketerId, loadPayouts]);
+
+// //   /* ---------------- When marketer changes, prefill ---------------- */
+// //   useEffect(() => {
+// //     if (!selectedMarketer) {
+// //       setPayAmount('');
+// //       setPayPhone('');
+// //       return;
+// //     }
+// //     setPayAmount(selectedMarketer.owed > 0 ? String(selectedMarketer.owed) : '');
+// //     setPayPhone(
+// //       selectedMarketer.payoutDetails?.phoneNumber ||
+// //         selectedMarketer.phoneNumber ||
+// //         ''
+// //     );
+// //     void loadPayouts(selectedMarketer._id);
+// //   }, [selectedMarketer, loadPayouts]);
+
+// //   /* ---------------- Deposit ---------------- */
+// //   async function handleDeposit(e: React.FormEvent) {
+// //     e.preventDefault();
+// //     setMsg(null);
+// //     if (!depositAmount || Number(depositAmount) <= 0) {
+// //       return setMsg({ type: 'err', text: 'Enter a valid amount' });
+// //     }
+// //     try {
+// //       const res = await fetch('/api/admin/wallet/deposit', {
+// //         method: 'POST',
+// //         headers: { 'Content-Type': 'application/json' },
+// //         body: JSON.stringify({
+// //           adminUserId,
+// //           organizationId,
+// //           amount: Number(depositAmount),
+// //           phoneNumber: depositPhone || undefined,
+// //         }),
+// //       });
+// //       const data = await res.json();
+// //       if (!res.ok) throw new Error(data.error);
+// //       setMsg({ type: 'ok', text: 'STK sent. Approve on your phone.' });
+// //       setDepositAmount('');
+// //       setTimeout(load, 4000);
+// //     } catch (err: any) {
+// //       setMsg({ type: 'err', text: err.message });
+// //     }
+// //   }
+
+// //   /* ---------------- Payout ---------------- */
+// //   async function handlePayout(e: React.FormEvent) {
+// //     e.preventDefault();
+// //     setMsg(null);
+// //     if (!payMarketerId || !payAmount) {
+// //       return setMsg({ type: 'err', text: 'Select marketer and amount' });
+// //     }
+// //     const amt = Number(payAmount);
+// //     if (amt <= 0) {
+// //       return setMsg({ type: 'err', text: 'Amount must be greater than 0' });
+// //     }
+// //     if (selectedMarketer && amt > selectedMarketer.owed) {
+// //       return setMsg({
+// //         type: 'err',
+// //         text: `Amount exceeds owed (KES ${selectedMarketer.owed.toLocaleString()})`,
+// //       });
+// //     }
+
+// //     setPaying(true);
+// //     try {
+// //       const res = await fetch('/api/admin/wallet/payout', {
+// //         method: 'POST',
+// //         headers: {
+// //           'Content-Type': 'application/json',
+// //           Authorization: `Bearer ${token}`,
+// //         },
+// //         body: JSON.stringify({
+// //           adminUserId,
+// //           organizationId,
+// //           marketerId: payMarketerId,
+// //           amount: amt,
+// //           phoneNumber: payPhone || undefined,
+// //           remarks: payRemarks || undefined,
+// //           idempotencyKey: `payout-${Date.now()}`,
+// //         }),
+// //       });
+// //       const data = await res.json();
+// //       if (!res.ok) throw new Error(data.error);
+
+// //       setMsg({ type: 'ok', text: 'Payout sent to M-Pesa B2C.' });
+// //       setPayAmount('');
+// //       setPayPhone('');
+// //       setPayRemarks('');
+
+// //       // Refresh everything
+// //       await Promise.all([
+// //         loadMarketers(),
+// //         loadPayouts(payMarketerId),
+// //         load(),
+// //       ]);
+// //     } catch (err: any) {
+// //       setMsg({ type: 'err', text: err.message });
+// //     } finally {
+// //       setPaying(false);
+// //     }
+// //   }
+
+// //   return (
+// //     <main className="container p-6 space-y-6">
+// //       <header className="flex items-center justify-between">
+// //         <h1 className="text-2xl font-bold text-secondary">Admin Wallet</h1>
+// //         <button
+// //           onClick={() => {
+// //             load();
+// //             loadMarketers();
+// //             loadPayouts(payMarketerId || undefined);
+// //           }}
+// //           className="px-4 py-2 rounded-xl bg-primary text-white hover:opacity-90"
+// //         >
+// //           {loading || marketersLoading ? 'Refreshing…' : 'Refresh'}
+// //         </button>
+// //       </header>
+
+// //       {msg && (
+// //         <div
+// //           className={`rounded-xl p-3 text-sm ${
+// //             msg.type === 'ok'
+// //               ? 'bg-green-50 text-green-700 border border-green-200'
+// //               : 'bg-red-50 text-red-700 border border-red-200'
+// //           }`}
+// //         >
+// //           {msg.text}
+// //         </div>
+// //       )}
+
+// //       {/* Balance cards */}
+// //       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+// //         <StatCard label="Total balance" value={wallet?.balance ?? 0} accent />
+// //         <StatCard label="Available" value={wallet?.availableBalance ?? 0} />
+// //         <StatCard label="Pending payouts" value={wallet?.pendingPayouts ?? 0} />
+// //         <StatCard label="Total disbursed" value={wallet?.totalDisbursed ?? 0} />
+// //       </section>
+
+// //       {/* Deposit + payout forms */}
+// //       <section className="grid md:grid-cols-2 gap-6">
+// //         {/* Deposit */}
+// //         <form
+// //           onSubmit={handleDeposit}
+// //           className="bg-white rounded-2xl p-5 shadow-sm space-y-3"
+// //         >
+// //           <h2 className="font-semibold text-secondary">
+// //             Deposit funds (M-Pesa STK)
+// //           </h2>
+// //           <input
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             type="number"
+// //             placeholder="Amount (KES)"
+// //             value={depositAmount}
+// //             onChange={(e) => setDepositAmount(e.target.value)}
+// //           />
+// //           <input
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             placeholder="Phone (optional, defaults to your account)"
+// //             value={depositPhone}
+// //             onChange={(e) => setDepositPhone(e.target.value)}
+// //           />
+// //           <button className="w-full rounded-xl bg-primary text-white py-2 hover:opacity-90">
+// //             Send STK push
+// //           </button>
+// //         </form>
+
+// //         {/* Payout */}
+// //         <form
+// //           onSubmit={handlePayout}
+// //           className="bg-white rounded-2xl p-5 shadow-sm space-y-3"
+// //         >
+// //           <h2 className="font-semibold text-secondary">
+// //             Disburse to marketer (B2C)
+// //           </h2>
+
+// //           <select
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             value={payMarketerId}
+// //             onChange={(e) => setPayMarketerId(e.target.value)}
+// //           >
+// //             <option value="">
+// //               {marketersLoading
+// //                 ? 'Loading marketers…'
+// //                 : 'Select a marketer…'}
+// //             </option>
+// //             {marketers.map((m) => (
+// //               <option key={m._id} value={m._id}>
+// //                 {m.name} — owed KES {m.owed.toLocaleString()} (
+// //                 {m.marketerStatus})
+// //               </option>
+// //             ))}
+// //           </select>
+
+// //           {selectedMarketer && (
+// //             <div className="rounded-xl bg-gray-50 p-3 text-xs text-muted space-y-1">
+// //               <div className="flex justify-between">
+// //                 <span>Total earned</span>
+// //                 <span className="font-semibold text-secondary">
+// //                   KES {selectedMarketer.totalCommissions.toLocaleString()}
+// //                 </span>
+// //               </div>
+// //               <div className="flex justify-between">
+// //                 <span>Already disbursed</span>
+// //                 <span className="font-semibold">
+// //                   KES {selectedMarketer.disbursed.toLocaleString()}
+// //                 </span>
+// //               </div>
+// //               <div className="flex justify-between">
+// //                 <span>Owed</span>
+// //                 <span className="font-semibold text-green-700">
+// //                   KES {selectedMarketer.owed.toLocaleString()}
+// //                 </span>
+// //               </div>
+// //               <div className="flex justify-between">
+// //                 <span>Referrals</span>
+// //                 <span>{selectedMarketer.totalReferralsMade}</span>
+// //               </div>
+// //             </div>
+// //           )}
+
+// //           <input
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             type="number"
+// //             placeholder="Amount (KES)"
+// //             value={payAmount}
+// //             onChange={(e) => setPayAmount(e.target.value)}
+// //             max={selectedMarketer?.owed ?? undefined}
+// //             min={1}
+// //           />
+// //           <input
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             placeholder="Override phone (optional)"
+// //             value={payPhone}
+// //             onChange={(e) => setPayPhone(e.target.value)}
+// //           />
+// //           <input
+// //             className="w-full rounded-xl border px-3 py-2"
+// //             placeholder="Remarks (optional)"
+// //             value={payRemarks}
+// //             onChange={(e) => setPayRemarks(e.target.value)}
+// //           />
+// //           <button
+// //             disabled={paying || !payMarketerId || (selectedMarketer?.owed ?? 0) <= 0}
+// //             className="w-full rounded-xl bg-secondary text-white py-2 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+// //           >
+// //             {paying ? 'Sending…' : 'Send B2C payout'}
+// //           </button>
+// //         </form>
+// //       </section>
+
+// //       {/* Payout history for selected marketer */}
+// //       <section className="bg-white rounded-2xl p-5 shadow-sm">
+// //         <div className="flex items-center justify-between mb-3">
+// //           <h2 className="font-semibold text-secondary">
+// //             Payouts{selectedMarketer ? ` — ${selectedMarketer.name}` : ''}
+// //           </h2>
+// //           {hasPendingPayouts && (
+// //             <span className="text-xs text-muted flex items-center gap-1">
+// //               <span className="inline-block animate-pulse">⏳</span>
+// //               Auto-refreshing…
+// //             </span>
+// //           )}
+// //         </div>
+// //         <div className="overflow-x-auto">
+// //           <table className="w-full text-sm">
+// //             <thead className="text-left text-muted">
+// //               <tr>
+// //                 <th className="py-2">Time</th>
+// //                 <th>Marketer</th>
+// //                 <th>Ref</th>
+// //                 <th>Amount</th>
+// //                 <th>Status</th>
+// //                 <th>Receipt / Error</th>
+// //               </tr>
+// //             </thead>
+// //             <tbody>
+// //               {payouts.map((p) => (
+// //                 <tr key={p._id} className="border-t">
+// //                   <td className="py-2">
+// //                     {new Date(p.createdAt).toLocaleString()}
+// //                   </td>
+// //                   <td>{p.marketerId?.name ?? '—'}</td>
+// //                   <td className="font-mono text-xs">{p.reference}</td>
+// //                   <td>KES {p.amount.toLocaleString()}</td>
+// //                   <td>
+// //                     <StatusPill status={p.status} />
+// //                   </td>
+// //                   <td className="text-xs">
+// //                     {p.transactionId || p.errorMessage || '—'}
+// //                   </td>
+// //                 </tr>
+// //               ))}
+// //               {payouts.length === 0 && (
+// //                 <tr>
+// //                   <td colSpan={6} className="text-center text-muted py-4">
+// //                     No payouts yet
+// //                   </td>
+// //                 </tr>
+// //               )}
+// //             </tbody>
+// //           </table>
+// //         </div>
+// //       </section>
+
+// //       {/* Recent wallet activity */}
+// //       <section className="bg-white rounded-2xl p-5 shadow-sm">
+// //         <h2 className="font-semibold text-secondary mb-3">
+// //           Recent wallet activity
+// //         </h2>
+// //         <div className="overflow-x-auto">
+// //           <table className="w-full text-sm">
+// //             <thead className="text-left text-muted">
+// //               <tr>
+// //                 <th className="py-2">Time</th>
+// //                 <th>Ref</th>
+// //                 <th>Category</th>
+// //                 <th>Amount</th>
+// //                 <th>Status</th>
+// //                 <th>Receipt</th>
+// //               </tr>
+// //             </thead>
+// //             <tbody>
+// //               {recent.map((t) => (
+// //                 <tr key={t._id} className="border-t">
+// //                   <td className="py-2">
+// //                     {new Date(t.createdAt).toLocaleString()}
+// //                   </td>
+// //                   <td className="font-mono text-xs">{t.transactionId}</td>
+// //                   <td>{t.category}</td>
+// //                   <td>{t.amount}</td>
+// //                   <td>
+// //                     <StatusPill status={t.status} />
+// //                   </td>
+// //                   <td className="text-xs">
+// //                     {t.receiptNumber || t.errorMessage || '—'}
+// //                   </td>
+// //                 </tr>
+// //               ))}
+// //               {recent.length === 0 && (
+// //                 <tr>
+// //                   <td colSpan={6} className="text-center text-muted py-4">
+// //                     No activity yet
+// //                   </td>
+// //                 </tr>
+// //               )}
+// //             </tbody>
+// //           </table>
+// //         </div>
+// //       </section>
+// //     </main>
+// //   );
+// // }
+
+// // function StatCard({
+// //   label,
+// //   value,
+// //   accent,
+// // }: {
+// //   label: string;
+// //   value: number;
+// //   accent?: boolean;
+// // }) {
+// //   return (
+// //     <div
+// //       className={`rounded-2xl p-4 shadow-sm ${
+// //         accent ? 'bg-primary text-white' : 'bg-white'
+// //       }`}
+// //     >
+// //       <p className={`text-xs ${accent ? 'text-white/80' : 'text-muted'}`}>
+// //         {label}
+// //       </p>
+// //       <p className="text-xl font-bold mt-1">{value.toLocaleString()} KES</p>
+// //     </div>
+// //   );
+// // }
+
+// // function StatusPill({ status }: { status: string }) {
+// //   const color =
+// //     status === 'completed' || status === 'success'
+// //       ? 'bg-green-100 text-green-700'
+// //       : status === 'failed' || status === 'cancelled'
+// //       ? 'bg-red-100 text-red-700'
+// //       : status === 'processing'
+// //       ? 'bg-blue-100 text-blue-700'
+// //       : 'bg-yellow-100 text-yellow-700';
+// //   return (
+// //     <span className={`px-2 py-0.5 rounded-full text-xs ${color}`}>
+// //       {status}
+// //     </span>
+// //   );
+// // }
 
 // // app/shd-pages/admin/wallet/page.tsx
 // 'use client';
 
 // import { useAuth } from '@/shd-contexts/AuthContext';
-// import { useState, useEffect, useCallback, useMemo } from 'react';
+// import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 
 // type Wallet = {
 //   balance: number;
 //   availableBalance: number;
 //   pendingPayouts: number;
+//   totalDeposited: number;
 //   totalDisbursed: number;
 //   currency: string;
 // };
@@ -399,7 +995,14 @@
 //   transactionId?: string;
 //   errorMessage?: string;
 //   createdAt: string;
-//   marketerId?: { _id: string; name: string; email: string; phoneNumber: string };
+//   marketerId?:
+//     | {
+//         _id: string;
+//         name: string;
+//         email: string;
+//         phoneNumber: string;
+//       }
+//     | string;
 // };
 
 // type Txn = {
@@ -419,7 +1022,7 @@
 //   const adminUserId = user?.id ?? null;
 //   const activeOrganizationId = organizationId ?? user?.organizationId ?? null;
 
-//   // Wallet
+//   /* ---------------- Wallet ---------------- */
 //   const [wallet, setWallet] = useState<Wallet | null>(null);
 //   const [recent, setRecent] = useState<Txn[]>([]);
 //   const [loading, setLoading] = useState(false);
@@ -427,23 +1030,34 @@
 //     null
 //   );
 
-//   // Marketers
+//   /* ---------------- Marketers ---------------- */
 //   const [marketers, setMarketers] = useState<Marketer[]>([]);
 //   const [marketersLoading, setMarketersLoading] = useState(false);
 
-//   // Deposit form
+//   /* ---------------- Deposit form ---------------- */
 //   const [depositAmount, setDepositAmount] = useState('');
 //   const [depositPhone, setDepositPhone] = useState('');
 
-//   // Payout form
+//   /* ---------------- Payout form ---------------- */
 //   const [payMarketerId, setPayMarketerId] = useState('');
 //   const [payAmount, setPayAmount] = useState('');
 //   const [payPhone, setPayPhone] = useState('');
 //   const [payRemarks, setPayRemarks] = useState('');
 //   const [paying, setPaying] = useState(false);
 
-//   // Payout history for selected marketer
+//   /* ---------------- Payout history ---------------- */
 //   const [payouts, setPayouts] = useState<Payout[]>([]);
+
+//   /* ---------------- Stable refs (prevent effect-dep churn) ---------------- */
+//   const tokenRef = useRef<string | null>(token);
+//   useEffect(() => {
+//     tokenRef.current = token;
+//   }, [token]);
+
+//   const orgIdRef = useRef<string | null>(activeOrganizationId);
+//   useEffect(() => {
+//     orgIdRef.current = activeOrganizationId;
+//   }, [activeOrganizationId]);
 
 //   const selectedMarketer = useMemo(
 //     () => marketers.find((m) => m._id === payMarketerId) || null,
@@ -454,19 +1068,22 @@
 //     (p) => p.status === 'pending' || p.status === 'processing'
 //   );
 
+//   const walletAvailable = wallet?.availableBalance ?? 0;
+
 //   /* ---------------- Load wallet summary ---------------- */
 //   const load = useCallback(async () => {
-//     if (authLoading || !token || !activeOrganizationId) return;
+//     const t = tokenRef.current;
+//     const orgId = orgIdRef.current;
+//     if (authLoading || !t || !orgId) return;
 //     setLoading(true);
-//     setMsg(null);
 //     try {
 //       const params = new URLSearchParams({
-//         organizationId: String(activeOrganizationId),
+//         organizationId: String(orgId),
 //       });
 //       const res = await fetch(
 //         `/api/admin/wallet/summary?${params.toString()}`,
 //         {
-//           headers: { Authorization: `Bearer ${token}` },
+//           headers: { Authorization: `Bearer ${t}` },
 //           cache: 'no-store',
 //         }
 //       );
@@ -482,99 +1099,214 @@
 //     } finally {
 //       setLoading(false);
 //     }
-//   }, [authLoading, token, activeOrganizationId]);
+//   }, [authLoading]);
 
 //   /* ---------------- Load marketers ---------------- */
-//   const loadMarketers = useCallback(async () => {
-//     if (authLoading || !token) return;
-//     setMarketersLoading(true);
-//     try {
-//       const params = new URLSearchParams();
-//       if (activeOrganizationId)
-//         params.set('organizationId', String(activeOrganizationId));
+//   // const loadMarketers = useCallback(async () => {
+//   //   const t = tokenRef.current;
+//   //   if (authLoading || !t) return;
+//   //   setMarketersLoading(true);
+//   //   try {
+//   //     const params = new URLSearchParams();
+//   //     const orgId = orgIdRef.current;
+//   //     if (orgId) params.set('organizationId', String(orgId));
 
+//   //     const res = await fetch(
+//   //       `/api/admin/wallet/marketers?${params.toString()}`,
+//   //       {
+//   //         headers: { Authorization: `Bearer ${t}` },
+//   //         cache: 'no-store',
+//   //       }
+//   //     );
+//   //     const data = await res.json();
+//   //     if (!res.ok) throw new Error(data.error || 'Failed to load marketers');
+//   //     setMarketers(data.marketers || []);
+//   //   } catch (error: any) {
+//   //     setMsg({ type: 'err', text: error.message });
+//   //   } finally {
+//   //     setMarketersLoading(false);
+//   //   }
+//   // }, [authLoading]);
+
+
+// /* ---------------- Load marketers ---------------- */
+// const loadMarketers = useCallback(async () => {
+//   const t = tokenRef.current;
+//   const orgId = orgIdRef.current;
+
+//   console.group('[MARKETERS] Loading diagnostic');
+
+//   console.log('Environment:', {
+//     url: window.location.href,
+//     hostname: window.location.hostname,
+//     isProduction: process.env.NODE_ENV === 'production',
+//   });
+
+//   console.log('Authentication:', {
+//     authLoading,
+//     hasToken: !!t,
+//     tokenLength: t?.length || 0,
+//     tokenPrefix: t ? t.substring(0, 10) + '...' : null,
+//   });
+
+//   console.log('Organization:', {
+//     orgId,
+//     orgIdType: typeof orgId,
+//   });
+
+//   if (authLoading || !t) {
+//     console.warn('[MARKETERS] Aborting request:', {
+//       reason: authLoading ? 'Authentication still loading' : 'Missing token',
+//     });
+//     console.groupEnd();
+//     return;
+//   }
+
+//   setMarketersLoading(true);
+
+//   try {
+//     const params = new URLSearchParams();
+
+//     if (orgId) {
+//       params.set('organizationId', String(orgId));
+//     }
+
+//     const endpoint = `/api/admin/wallet/marketers?${params.toString()}`;
+
+//     console.log('[MARKETERS] Request:', endpoint);
+
+//     const startTime = performance.now();
+
+//     const res = await fetch(endpoint, {
+//       headers: {
+//         Authorization: `Bearer ${t}`,
+//       },
+//       cache: 'no-store',
+//     });
+
+//     const duration = performance.now() - startTime;
+
+//     console.log('[MARKETERS] Response metadata:', {
+//       status: res.status,
+//       statusText: res.statusText,
+//       ok: res.ok,
+//       durationMs: Math.round(duration),
+//       contentType: res.headers.get('content-type'),
+//     });
+
+//     const responseText = await res.text();
+
+//     console.log('[MARKETERS] Raw response:', responseText);
+
+//     let data;
+
+//     try {
+//       data = JSON.parse(responseText);
+//     } catch {
+//       throw new Error(
+//         `Invalid JSON response. HTTP ${res.status}: ${responseText.substring(0, 300)}`
+//       );
+//     }
+
+//     console.log('[MARKETERS] Parsed response:', data);
+
+//     if (!res.ok) {
+//       throw new Error(
+//         data.error || `Request failed with HTTP ${res.status}`
+//       );
+//     }
+
+//     const loadedMarketers = data.marketers || [];
+
+//     console.log('[MARKETERS] Results:', {
+//       count: loadedMarketers.length,
+//       marketers: loadedMarketers,
+//     });
+
+//     setMarketers(loadedMarketers);
+
+//     console.log('[MARKETERS] Successfully loaded');
+
+//   } catch (error: any) {
+//     console.error('[MARKETERS] FAILED:', error);
+
+//     setMsg({
+//       type: 'err',
+//       text: error.message || 'Failed to load marketers',
+//     });
+
+//   } finally {
+//     setMarketersLoading(false);
+//     console.groupEnd();
+//   }
+// }, [authLoading]);
+
+
+//   /* ---------------- Load payout history ---------------- */
+//   const loadPayouts = useCallback(async (marketerId?: string) => {
+//     const t = tokenRef.current;
+//     if (!t) return;
+//     try {
+//       const params = new URLSearchParams({ limit: '25' });
+//       if (marketerId) params.set('marketerId', marketerId);
 //       const res = await fetch(
-//         `/api/admin/wallet/marketers?${params.toString()}`,
+//         `/api/admin/wallet/payouts?${params.toString()}`,
 //         {
-//           headers: { Authorization: `Bearer ${token}` },
+//           headers: { Authorization: `Bearer ${t}` },
 //           cache: 'no-store',
 //         }
 //       );
 //       const data = await res.json();
-//       if (!res.ok) throw new Error(data.error || 'Failed to load marketers');
-//       setMarketers(data.marketers || []);
-//     } catch (error: any) {
-//       setMsg({ type: 'err', text: error.message });
-//     } finally {
-//       setMarketersLoading(false);
+//       if (res.ok) setPayouts(data.payouts || []);
+//     } catch {
+//       /* non-fatal */
 //     }
-//   }, [authLoading, token, activeOrganizationId]);
-
-//   /* ---------------- Load payout history ---------------- */
-//   const loadPayouts = useCallback(
-//     async (marketerId?: string) => {
-//       if (!token) return;
-//       try {
-//         const params = new URLSearchParams({ limit: '25' });
-//         if (marketerId) params.set('marketerId', marketerId);
-//         const res = await fetch(
-//           `/api/admin/wallet/payouts?${params.toString()}`,
-//           {
-//             headers: { Authorization: `Bearer ${token}` },
-//             cache: 'no-store',
-//           }
-//         );
-//         const data = await res.json();
-//         if (res.ok) setPayouts(data.payouts || []);
-//       } catch {
-//         /* non-fatal */
-//       }
-//     },
-//     [token]
-//   );
+//   }, []);
 
 //   /* ---------------- Initial loads ---------------- */
+//   // Fixed-length deps. No payMarketerId / loadPayouts here — the
+//   // marketer-selection effect owns payout loading.
 //   useEffect(() => {
-//     if (!authLoading && token && activeOrganizationId) {
-//       void load();
-//       void loadMarketers();
-//       void loadPayouts(payMarketerId || undefined);
-//     }
-//   }, [
-//     authLoading,
-//     token,
-//     activeOrganizationId,
-//     load,
-//     loadMarketers,
-//     loadPayouts,
-//     payMarketerId,
-//   ]);
+//     if (authLoading || !token || !activeOrganizationId) return;
+//     void load();
+//     void loadMarketers();
+//   }, [authLoading, token, activeOrganizationId, load, loadMarketers]);
 
-//   /* ---------------- Poll payout status ---------------- */
+//   /* ---------------- Marketer selection → prefill + load payouts ---------------- */
+//   // Single owner of payout-history loading. Always runs when the
+//   // selected marketer changes (or when token becomes available).
 //   useEffect(() => {
-//     if (!hasPendingPayouts) return;
-//     const t = setInterval(
-//       () => void loadPayouts(payMarketerId || undefined),
-//       30000
-//     );
-//     return () => clearInterval(t);
-//   }, [hasPendingPayouts, payMarketerId, loadPayouts]);
+//     if (!token) return;
 
-//   /* ---------------- When marketer changes, prefill ---------------- */
-//   useEffect(() => {
 //     if (!selectedMarketer) {
 //       setPayAmount('');
 //       setPayPhone('');
+//       void loadPayouts(undefined);
 //       return;
 //     }
-//     setPayAmount(selectedMarketer.owed > 0 ? String(selectedMarketer.owed) : '');
+
+//     setPayAmount(
+//       selectedMarketer.owed > 0 ? String(selectedMarketer.owed) : ''
+//     );
 //     setPayPhone(
 //       selectedMarketer.payoutDetails?.phoneNumber ||
 //         selectedMarketer.phoneNumber ||
 //         ''
 //     );
 //     void loadPayouts(selectedMarketer._id);
-//   }, [selectedMarketer, loadPayouts]);
+//   }, [selectedMarketer, token, loadPayouts]);
+
+//   /* ---------------- Poll payout status ---------------- */
+//   useEffect(() => {
+//     if (!hasPendingPayouts) return;
+//     const t = setInterval(() => {
+//       void loadPayouts(payMarketerId || undefined);
+//       // Also refresh wallet + marketers because reserved funds may have cleared
+//       void load();
+//       void loadMarketers();
+//     }, 30000);
+//     return () => clearInterval(t);
+//   }, [hasPendingPayouts, payMarketerId, loadPayouts, load, loadMarketers]);
 
 //   /* ---------------- Deposit ---------------- */
 //   async function handleDeposit(e: React.FormEvent) {
@@ -589,7 +1321,7 @@
 //         headers: { 'Content-Type': 'application/json' },
 //         body: JSON.stringify({
 //           adminUserId,
-//           organizationId,
+//           organizationId: activeOrganizationId,
 //           amount: Number(depositAmount),
 //           phoneNumber: depositPhone || undefined,
 //         }),
@@ -598,7 +1330,10 @@
 //       if (!res.ok) throw new Error(data.error);
 //       setMsg({ type: 'ok', text: 'STK sent. Approve on your phone.' });
 //       setDepositAmount('');
+//       // STK callbacks are async — poll a few times to pick up success
 //       setTimeout(load, 4000);
+//       setTimeout(load, 10000);
+//       setTimeout(load, 20000);
 //     } catch (err: any) {
 //       setMsg({ type: 'err', text: err.message });
 //     }
@@ -608,19 +1343,43 @@
 //   async function handlePayout(e: React.FormEvent) {
 //     e.preventDefault();
 //     setMsg(null);
-//     if (!payMarketerId || !payAmount) {
-//       return setMsg({ type: 'err', text: 'Select marketer and amount' });
-//     }
-//     const amt = Number(payAmount);
-//     if (amt <= 0) {
-//       return setMsg({ type: 'err', text: 'Amount must be greater than 0' });
-//     }
-//     if (selectedMarketer && amt > selectedMarketer.owed) {
-//       return setMsg({
-//         type: 'err',
-//         text: `Amount exceeds owed (KES ${selectedMarketer.owed.toLocaleString()})`,
-//       });
-//     }
+
+//     // if (!payMarketerId || !payAmount) {
+//     //   return setMsg({ type: 'err', text: 'Select marketer and amount' });
+//     // }
+
+//     // const amt = Number(payAmount);
+//     // if (!Number.isFinite(amt) || amt <= 0) {
+//     //   return setMsg({ type: 'err', text: 'Amount must be greater than 0' });
+//     // }
+//     // if (selectedMarketer && amt > selectedMarketer.owed) {
+//     //   return setMsg({
+//     //     type: 'err',
+//     //     text: `Amount exceeds owed (KES ${selectedMarketer.owed.toLocaleString()})`,
+//     //   });
+//     // }
+//     // if (amt > walletAvailable) {
+//     //   return setMsg({
+//     //     type: 'err',
+//     //     text: `Amount exceeds wallet balance (KES ${walletAvailable.toLocaleString()})`,
+//     //   });
+//     // }
+
+
+//     // Inside handlePayout
+// if (!payMarketerId || !payAmount || !payPhone) {
+//   return setMsg({ type: 'err', text: 'Select marketer, amount and phone' });
+// }
+// const amt = Number(payAmount);
+// if (!Number.isFinite(amt) || amt <= 0) {
+//   return setMsg({ type: 'err', text: 'Amount must be greater than 0' });
+// }
+// if (amt > walletAvailable) {
+//   return setMsg({
+//     type: 'err',
+//     text: `Amount exceeds wallet balance (KES ${walletAvailable.toLocaleString()})`,
+//   });
+// }
 
 //     setPaying(true);
 //     try {
@@ -632,12 +1391,14 @@
 //         },
 //         body: JSON.stringify({
 //           adminUserId,
-//           organizationId,
+//           organizationId: activeOrganizationId,
 //           marketerId: payMarketerId,
 //           amount: amt,
 //           phoneNumber: payPhone || undefined,
 //           remarks: payRemarks || undefined,
-//           idempotencyKey: `payout-${Date.now()}`,
+//           idempotencyKey: `payout-${Date.now()}-${Math.random()
+//             .toString(36)
+//             .slice(2, 7)}`,
 //         }),
 //       });
 //       const data = await res.json();
@@ -660,6 +1421,25 @@
 //       setPaying(false);
 //     }
 //   }
+
+//   /* ---------------- Derived payout-form guards ---------------- */
+//   const parsedAmount = Number(payAmount) || 0;
+//   const exceedsOwed =
+//     !!selectedMarketer && parsedAmount > selectedMarketer.owed;
+//   const exceedsWallet = parsedAmount > walletAvailable;
+//   // const payoutDisabled =
+//   //   paying ||
+//   //   !payMarketerId ||
+//   //   parsedAmount <= 0 ||
+//   //   exceedsOwed ||
+//   //   exceedsWallet ||
+//   //   (selectedMarketer?.owed ?? 0) <= 0;
+//   const payoutDisabled =
+//   paying ||
+//   !payMarketerId ||
+//   !payPhone ||
+//   parsedAmount <= 0 ||
+//   exceedsWallet;
 
 //   return (
 //     <main className="container p-6 space-y-6">
@@ -740,19 +1520,21 @@
 //             onChange={(e) => setPayMarketerId(e.target.value)}
 //           >
 //             <option value="">
-//               {marketersLoading
-//                 ? 'Loading marketers…'
-//                 : 'Select a marketer…'}
+//               {marketersLoading ? 'Loading marketers…' : 'Select a marketer…'}
 //             </option>
-//             {marketers.map((m) => (
+//             {/* {marketers.map((m) => (
 //               <option key={m._id} value={m._id}>
-//                 {m.name} — owed KES {m.owed.toLocaleString()} (
-//                 {m.marketerStatus})
+//                 {m.name} — owed KES {m.owed.toLocaleString()} ({m.marketerStatus})
 //               </option>
-//             ))}
+//             ))} */}
+//             {marketers.map((m) => (
+//   <option key={m._id} value={m._id}>
+//     {m.name} — {m.marketerStatus}
+//   </option>
+// ))}
 //           </select>
 
-//           {selectedMarketer && (
+//           {/* {selectedMarketer && (
 //             <div className="rounded-xl bg-gray-50 p-3 text-xs text-muted space-y-1">
 //               <div className="flex justify-between">
 //                 <span>Total earned</span>
@@ -776,8 +1558,33 @@
 //                 <span>Referrals</span>
 //                 <span>{selectedMarketer.totalReferralsMade}</span>
 //               </div>
+//               <div className="flex justify-between pt-1 border-t">
+//                 <span>Wallet available</span>
+//                 <span className="font-semibold text-secondary">
+//                   KES {walletAvailable.toLocaleString()}
+//                 </span>
+//               </div>
 //             </div>
-//           )}
+//           )} */}
+
+//           {selectedMarketer && (
+//   <div className="rounded-xl bg-gray-50 p-3 text-xs text-muted space-y-1">
+//     <div className="flex justify-between">
+//       <span>Marketer</span>
+//       <span className="font-semibold text-secondary">{selectedMarketer.name}</span>
+//     </div>
+//     <div className="flex justify-between">
+//       <span>Phone</span>
+//       <span className="font-mono">{selectedMarketer.phoneNumber || '—'}</span>
+//     </div>
+//     <div className="flex justify-between pt-1 border-t">
+//       <span>Wallet available</span>
+//       <span className="font-semibold text-secondary">
+//         KES {walletAvailable.toLocaleString()}
+//       </span>
+//     </div>
+//   </div>
+// )}
 
 //           <input
 //             className="w-full rounded-xl border px-3 py-2"
@@ -785,7 +1592,11 @@
 //             placeholder="Amount (KES)"
 //             value={payAmount}
 //             onChange={(e) => setPayAmount(e.target.value)}
-//             max={selectedMarketer?.owed ?? undefined}
+//             // max={Math.min(
+//             //   selectedMarketer?.owed ?? Infinity,
+//             //   walletAvailable || Infinity
+//             // )}
+//             max={walletAvailable || undefined}
 //             min={1}
 //           />
 //           <input
@@ -800,8 +1611,26 @@
 //             value={payRemarks}
 //             onChange={(e) => setPayRemarks(e.target.value)}
 //           />
+
+//           {/* {(exceedsOwed || exceedsWallet) && (
+//             <div className="text-xs text-red-600 space-y-0.5">
+//               {exceedsOwed && (
+//                 <p>
+//                   ⚠ Amount exceeds marketer owed (KES{' '}
+//                   {(selectedMarketer?.owed ?? 0).toLocaleString()})
+//                 </p>
+//               )}
+//               {exceedsWallet && (
+//                 <p>
+//                   ⚠ Amount exceeds wallet balance (KES{' '}
+//                   {walletAvailable.toLocaleString()})
+//                 </p>
+//               )}
+//             </div>
+//           )} */}
+
 //           <button
-//             disabled={paying || !payMarketerId || (selectedMarketer?.owed ?? 0) <= 0}
+//             disabled={payoutDisabled}
 //             className="w-full rounded-xl bg-secondary text-white py-2 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
 //           >
 //             {paying ? 'Sending…' : 'Send B2C payout'}
@@ -840,7 +1669,7 @@
 //                   <td className="py-2">
 //                     {new Date(p.createdAt).toLocaleString()}
 //                   </td>
-//                   <td>{p.marketerId?.name ?? '—'}</td>
+//                   <td>{marketerLabel(p.marketerId)}</td>
 //                   <td className="font-mono text-xs">{p.reference}</td>
 //                   <td>KES {p.amount.toLocaleString()}</td>
 //                   <td>
@@ -912,6 +1741,8 @@
 //   );
 // }
 
+// /* ---------------- Helpers ---------------- */
+
 // function StatCard({
 //   label,
 //   value,
@@ -951,11 +1782,24 @@
 //   );
 // }
 
+// function marketerLabel(
+//   marketer: Payout['marketerId']
+// ): string {
+//   if (!marketer) return '—';
+//   if (typeof marketer === 'string') return marketer;
+//   return marketer.name || marketer.email || '—';
+// }
+
+
 // app/shd-pages/admin/wallet/page.tsx
 'use client';
 
 import { useAuth } from '@/shd-contexts/AuthContext';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
 
 type Wallet = {
   balance: number;
@@ -966,24 +1810,21 @@ type Wallet = {
   currency: string;
 };
 
-type Marketer = {
+/** Shape returned by GET /api/admin/referrals */
+type ReferralUser = {
   _id: string;
   name: string;
   email: string;
   phoneNumber: string;
-  marketerStatus: 'pending' | 'approved' | 'rejected' | 'suspended';
-  marketerTier: string;
-  totalCommissions: number;
-  totalReferralsMade: number;
-  disbursed: number;
-  owed: number;
-  payoutMethod?: 'mpesa' | 'bank';
-  payoutDetails?: {
-    phoneNumber?: string;
-    bankName?: string;
-    accountNumber?: string;
-    accountName?: string;
-  };
+  referralCode: string;
+  referredBy?: string | null;
+  referrals: string[];
+  referralEarnings: number;
+  referralCommissionEarnings: number;
+  referralSubscriptionEarnings: number;
+  isMember: boolean;
+  isVerified: boolean;
+  createdAt: string;
 };
 
 type Payout = {
@@ -996,12 +1837,7 @@ type Payout = {
   errorMessage?: string;
   createdAt: string;
   marketerId?:
-    | {
-        _id: string;
-        name: string;
-        email: string;
-        phoneNumber: string;
-      }
+    | { _id: string; name: string; email: string; phoneNumber: string }
     | string;
 };
 
@@ -1017,6 +1853,17 @@ type Txn = {
   createdAt: string;
 };
 
+/* ------------------------------------------------------------------ */
+/*  Constants                                                          */
+/* ------------------------------------------------------------------ */
+
+/** KES paid per referred user. */
+const RATE_PER_REFERRAL = 50;
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                               */
+/* ------------------------------------------------------------------ */
+
 export default function AdminWalletPage() {
   const { user, token, organizationId, isLoading: authLoading } = useAuth();
   const adminUserId = user?.id ?? null;
@@ -1030,16 +1877,16 @@ export default function AdminWalletPage() {
     null
   );
 
-  /* ---------------- Marketers ---------------- */
-  const [marketers, setMarketers] = useState<Marketer[]>([]);
-  const [marketersLoading, setMarketersLoading] = useState(false);
+  /* ---------------- Referral users ---------------- */
+  const [referralUsers, setReferralUsers] = useState<ReferralUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
 
   /* ---------------- Deposit form ---------------- */
   const [depositAmount, setDepositAmount] = useState('');
   const [depositPhone, setDepositPhone] = useState('');
 
   /* ---------------- Payout form ---------------- */
-  const [payMarketerId, setPayMarketerId] = useState('');
+  const [payUserId, setPayUserId] = useState('');
   const [payAmount, setPayAmount] = useState('');
   const [payPhone, setPayPhone] = useState('');
   const [payRemarks, setPayRemarks] = useState('');
@@ -1048,7 +1895,7 @@ export default function AdminWalletPage() {
   /* ---------------- Payout history ---------------- */
   const [payouts, setPayouts] = useState<Payout[]>([]);
 
-  /* ---------------- Stable refs (prevent effect-dep churn) ---------------- */
+  /* ---------------- Stable refs ---------------- */
   const tokenRef = useRef<string | null>(token);
   useEffect(() => {
     tokenRef.current = token;
@@ -1059,9 +1906,16 @@ export default function AdminWalletPage() {
     orgIdRef.current = activeOrganizationId;
   }, [activeOrganizationId]);
 
-  const selectedMarketer = useMemo(
-    () => marketers.find((m) => m._id === payMarketerId) || null,
-    [marketers, payMarketerId]
+  /* ---------------- Derived ---------------- */
+  const selectedUser = useMemo(
+    () => referralUsers.find((u) => u._id === payUserId) || null,
+    [referralUsers, payUserId]
+  );
+
+  /** Amount owed = referrals made × rate. */
+  const amountOwed = useMemo(
+    () => (selectedUser ? selectedUser.referrals.length * RATE_PER_REFERRAL : 0),
+    [selectedUser]
   );
 
   const hasPendingPayouts = payouts.some(
@@ -1077,15 +1931,10 @@ export default function AdminWalletPage() {
     if (authLoading || !t || !orgId) return;
     setLoading(true);
     try {
-      const params = new URLSearchParams({
-        organizationId: String(orgId),
-      });
+      const params = new URLSearchParams({ organizationId: String(orgId) });
       const res = await fetch(
         `/api/admin/wallet/summary?${params.toString()}`,
-        {
-          headers: { Authorization: `Bearer ${t}` },
-          cache: 'no-store',
-        }
+        { headers: { Authorization: `Bearer ${t}` }, cache: 'no-store' }
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load wallet');
@@ -1101,160 +1950,49 @@ export default function AdminWalletPage() {
     }
   }, [authLoading]);
 
-  /* ---------------- Load marketers ---------------- */
-  // const loadMarketers = useCallback(async () => {
-  //   const t = tokenRef.current;
-  //   if (authLoading || !t) return;
-  //   setMarketersLoading(true);
-  //   try {
-  //     const params = new URLSearchParams();
-  //     const orgId = orgIdRef.current;
-  //     if (orgId) params.set('organizationId', String(orgId));
+  /* ---------------- Load referral users ---------------- */
+  const loadReferralUsers = useCallback(async () => {
+    const t = tokenRef.current;
+    if (authLoading || !t) return;
 
-  //     const res = await fetch(
-  //       `/api/admin/wallet/marketers?${params.toString()}`,
-  //       {
-  //         headers: { Authorization: `Bearer ${t}` },
-  //         cache: 'no-store',
-  //       }
-  //     );
-  //     const data = await res.json();
-  //     if (!res.ok) throw new Error(data.error || 'Failed to load marketers');
-  //     setMarketers(data.marketers || []);
-  //   } catch (error: any) {
-  //     setMsg({ type: 'err', text: error.message });
-  //   } finally {
-  //     setMarketersLoading(false);
-  //   }
-  // }, [authLoading]);
-
-
-/* ---------------- Load marketers ---------------- */
-const loadMarketers = useCallback(async () => {
-  const t = tokenRef.current;
-  const orgId = orgIdRef.current;
-
-  console.group('[MARKETERS] Loading diagnostic');
-
-  console.log('Environment:', {
-    url: window.location.href,
-    hostname: window.location.hostname,
-    isProduction: process.env.NODE_ENV === 'production',
-  });
-
-  console.log('Authentication:', {
-    authLoading,
-    hasToken: !!t,
-    tokenLength: t?.length || 0,
-    tokenPrefix: t ? t.substring(0, 10) + '...' : null,
-  });
-
-  console.log('Organization:', {
-    orgId,
-    orgIdType: typeof orgId,
-  });
-
-  if (authLoading || !t) {
-    console.warn('[MARKETERS] Aborting request:', {
-      reason: authLoading ? 'Authentication still loading' : 'Missing token',
-    });
-    console.groupEnd();
-    return;
-  }
-
-  setMarketersLoading(true);
-
-  try {
-    const params = new URLSearchParams();
-
-    if (orgId) {
-      params.set('organizationId', String(orgId));
-    }
-
-    const endpoint = `/api/admin/wallet/marketers?${params.toString()}`;
-
-    console.log('[MARKETERS] Request:', endpoint);
-
-    const startTime = performance.now();
-
-    const res = await fetch(endpoint, {
-      headers: {
-        Authorization: `Bearer ${t}`,
-      },
-      cache: 'no-store',
-    });
-
-    const duration = performance.now() - startTime;
-
-    console.log('[MARKETERS] Response metadata:', {
-      status: res.status,
-      statusText: res.statusText,
-      ok: res.ok,
-      durationMs: Math.round(duration),
-      contentType: res.headers.get('content-type'),
-    });
-
-    const responseText = await res.text();
-
-    console.log('[MARKETERS] Raw response:', responseText);
-
-    let data;
-
+    setUsersLoading(true);
     try {
-      data = JSON.parse(responseText);
-    } catch {
-      throw new Error(
-        `Invalid JSON response. HTTP ${res.status}: ${responseText.substring(0, 300)}`
+      // Only users who have referred at least one person, sorted by count.
+      const params = new URLSearchParams({
+        hasReferred: 'true',
+        sortBy: 'referrals',
+        sortOrder: 'desc',
+      });
+      const res = await fetch(
+        `/api/shd-api/api/admin/referrals?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${t}` }, cache: 'no-store' }
       );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load referrals');
+
+      // API returns { referrals: [...] }
+      const list: ReferralUser[] = data.referrals ?? [];
+      setReferralUsers(list);
+    } catch (error: any) {
+      setMsg({
+        type: 'err',
+        text: error.message || 'Failed to load referral users',
+      });
+    } finally {
+      setUsersLoading(false);
     }
-
-    console.log('[MARKETERS] Parsed response:', data);
-
-    if (!res.ok) {
-      throw new Error(
-        data.error || `Request failed with HTTP ${res.status}`
-      );
-    }
-
-    const loadedMarketers = data.marketers || [];
-
-    console.log('[MARKETERS] Results:', {
-      count: loadedMarketers.length,
-      marketers: loadedMarketers,
-    });
-
-    setMarketers(loadedMarketers);
-
-    console.log('[MARKETERS] Successfully loaded');
-
-  } catch (error: any) {
-    console.error('[MARKETERS] FAILED:', error);
-
-    setMsg({
-      type: 'err',
-      text: error.message || 'Failed to load marketers',
-    });
-
-  } finally {
-    setMarketersLoading(false);
-    console.groupEnd();
-  }
-}, [authLoading]);
-
+  }, [authLoading]);
 
   /* ---------------- Load payout history ---------------- */
-  const loadPayouts = useCallback(async (marketerId?: string) => {
+  const loadPayouts = useCallback(async (userId?: string) => {
     const t = tokenRef.current;
     if (!t) return;
     try {
       const params = new URLSearchParams({ limit: '25' });
-      if (marketerId) params.set('marketerId', marketerId);
+      if (userId) params.set('marketerId', userId);
       const res = await fetch(
         `/api/admin/wallet/payouts?${params.toString()}`,
-        {
-          headers: { Authorization: `Bearer ${t}` },
-          cache: 'no-store',
-        }
+        { headers: { Authorization: `Bearer ${t}` }, cache: 'no-store' }
       );
       const data = await res.json();
       if (res.ok) setPayouts(data.payouts || []);
@@ -1264,49 +2002,39 @@ const loadMarketers = useCallback(async () => {
   }, []);
 
   /* ---------------- Initial loads ---------------- */
-  // Fixed-length deps. No payMarketerId / loadPayouts here — the
-  // marketer-selection effect owns payout loading.
   useEffect(() => {
     if (authLoading || !token || !activeOrganizationId) return;
     void load();
-    void loadMarketers();
-  }, [authLoading, token, activeOrganizationId, load, loadMarketers]);
+    void loadReferralUsers();
+  }, [authLoading, token, activeOrganizationId, load, loadReferralUsers]);
 
-  /* ---------------- Marketer selection → prefill + load payouts ---------------- */
-  // Single owner of payout-history loading. Always runs when the
-  // selected marketer changes (or when token becomes available).
+  /* ---------------- User selection → prefill + load payouts ---------------- */
   useEffect(() => {
     if (!token) return;
 
-    if (!selectedMarketer) {
+    if (!selectedUser) {
       setPayAmount('');
       setPayPhone('');
       void loadPayouts(undefined);
       return;
     }
 
-    setPayAmount(
-      selectedMarketer.owed > 0 ? String(selectedMarketer.owed) : ''
-    );
-    setPayPhone(
-      selectedMarketer.payoutDetails?.phoneNumber ||
-        selectedMarketer.phoneNumber ||
-        ''
-    );
-    void loadPayouts(selectedMarketer._id);
-  }, [selectedMarketer, token, loadPayouts]);
+    const owed = selectedUser.referrals.length * RATE_PER_REFERRAL;
+    setPayAmount(owed > 0 ? String(owed) : '');
+    setPayPhone(selectedUser.phoneNumber || '');
+    void loadPayouts(selectedUser._id);
+  }, [selectedUser, token, loadPayouts]);
 
   /* ---------------- Poll payout status ---------------- */
   useEffect(() => {
     if (!hasPendingPayouts) return;
     const t = setInterval(() => {
-      void loadPayouts(payMarketerId || undefined);
-      // Also refresh wallet + marketers because reserved funds may have cleared
+      void loadPayouts(payUserId || undefined);
       void load();
-      void loadMarketers();
+      void loadReferralUsers();
     }, 30000);
     return () => clearInterval(t);
-  }, [hasPendingPayouts, payMarketerId, loadPayouts, load, loadMarketers]);
+  }, [hasPendingPayouts, payUserId, loadPayouts, load, loadReferralUsers]);
 
   /* ---------------- Deposit ---------------- */
   async function handleDeposit(e: React.FormEvent) {
@@ -1330,7 +2058,6 @@ const loadMarketers = useCallback(async () => {
       if (!res.ok) throw new Error(data.error);
       setMsg({ type: 'ok', text: 'STK sent. Approve on your phone.' });
       setDepositAmount('');
-      // STK callbacks are async — poll a few times to pick up success
       setTimeout(load, 4000);
       setTimeout(load, 10000);
       setTimeout(load, 20000);
@@ -1344,42 +2071,20 @@ const loadMarketers = useCallback(async () => {
     e.preventDefault();
     setMsg(null);
 
-    // if (!payMarketerId || !payAmount) {
-    //   return setMsg({ type: 'err', text: 'Select marketer and amount' });
-    // }
+    if (!payUserId || !payAmount || !payPhone) {
+      return setMsg({ type: 'err', text: 'Select a user, amount and phone' });
+    }
 
-    // const amt = Number(payAmount);
-    // if (!Number.isFinite(amt) || amt <= 0) {
-    //   return setMsg({ type: 'err', text: 'Amount must be greater than 0' });
-    // }
-    // if (selectedMarketer && amt > selectedMarketer.owed) {
-    //   return setMsg({
-    //     type: 'err',
-    //     text: `Amount exceeds owed (KES ${selectedMarketer.owed.toLocaleString()})`,
-    //   });
-    // }
-    // if (amt > walletAvailable) {
-    //   return setMsg({
-    //     type: 'err',
-    //     text: `Amount exceeds wallet balance (KES ${walletAvailable.toLocaleString()})`,
-    //   });
-    // }
-
-
-    // Inside handlePayout
-if (!payMarketerId || !payAmount || !payPhone) {
-  return setMsg({ type: 'err', text: 'Select marketer, amount and phone' });
-}
-const amt = Number(payAmount);
-if (!Number.isFinite(amt) || amt <= 0) {
-  return setMsg({ type: 'err', text: 'Amount must be greater than 0' });
-}
-if (amt > walletAvailable) {
-  return setMsg({
-    type: 'err',
-    text: `Amount exceeds wallet balance (KES ${walletAvailable.toLocaleString()})`,
-  });
-}
+    const amt = Number(payAmount);
+    if (!Number.isFinite(amt) || amt <= 0) {
+      return setMsg({ type: 'err', text: 'Amount must be greater than 0' });
+    }
+    if (amt > walletAvailable) {
+      return setMsg({
+        type: 'err',
+        text: `Amount exceeds wallet balance (KES ${walletAvailable.toLocaleString()})`,
+      });
+    }
 
     setPaying(true);
     try {
@@ -1392,7 +2097,7 @@ if (amt > walletAvailable) {
         body: JSON.stringify({
           adminUserId,
           organizationId: activeOrganizationId,
-          marketerId: payMarketerId,
+          marketerId: payUserId, // backend expects marketerId; using user id
           amount: amt,
           phoneNumber: payPhone || undefined,
           remarks: payRemarks || undefined,
@@ -1409,10 +2114,9 @@ if (amt > walletAvailable) {
       setPayPhone('');
       setPayRemarks('');
 
-      // Refresh everything
       await Promise.all([
-        loadMarketers(),
-        loadPayouts(payMarketerId),
+        loadReferralUsers(),
+        loadPayouts(payUserId),
         load(),
       ]);
     } catch (err: any) {
@@ -1422,38 +2126,26 @@ if (amt > walletAvailable) {
     }
   }
 
-  /* ---------------- Derived payout-form guards ---------------- */
+  /* ---------------- Payout-form guards ---------------- */
   const parsedAmount = Number(payAmount) || 0;
-  const exceedsOwed =
-    !!selectedMarketer && parsedAmount > selectedMarketer.owed;
   const exceedsWallet = parsedAmount > walletAvailable;
-  // const payoutDisabled =
-  //   paying ||
-  //   !payMarketerId ||
-  //   parsedAmount <= 0 ||
-  //   exceedsOwed ||
-  //   exceedsWallet ||
-  //   (selectedMarketer?.owed ?? 0) <= 0;
   const payoutDisabled =
-  paying ||
-  !payMarketerId ||
-  !payPhone ||
-  parsedAmount <= 0 ||
-  exceedsWallet;
+    paying || !payUserId || !payPhone || parsedAmount <= 0 || exceedsWallet;
 
+  /* ---------------- Render ---------------- */
   return (
     <main className="container p-6 space-y-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-secondary">Admin Wallet</h1>
         <button
           onClick={() => {
-            load();
-            loadMarketers();
-            loadPayouts(payMarketerId || undefined);
+            void load();
+            void loadReferralUsers();
+            void loadPayouts(payUserId || undefined);
           }}
           className="px-4 py-2 rounded-xl bg-primary text-white hover:opacity-90"
         >
-          {loading || marketersLoading ? 'Refreshing…' : 'Refresh'}
+          {loading || usersLoading ? 'Refreshing…' : 'Refresh'}
         </button>
       </header>
 
@@ -1511,52 +2203,55 @@ if (amt > walletAvailable) {
           className="bg-white rounded-2xl p-5 shadow-sm space-y-3"
         >
           <h2 className="font-semibold text-secondary">
-            Disburse to marketer (B2C)
+            Disburse referral reward (B2C)
           </h2>
 
           <select
             className="w-full rounded-xl border px-3 py-2"
-            value={payMarketerId}
-            onChange={(e) => setPayMarketerId(e.target.value)}
+            value={payUserId}
+            onChange={(e) => setPayUserId(e.target.value)}
           >
             <option value="">
-              {marketersLoading ? 'Loading marketers…' : 'Select a marketer…'}
+              {usersLoading ? 'Loading users…' : 'Select a user…'}
             </option>
-            {/* {marketers.map((m) => (
-              <option key={m._id} value={m._id}>
-                {m.name} — owed KES {m.owed.toLocaleString()} ({m.marketerStatus})
+            {referralUsers.map((u) => (
+              <option key={u._id} value={u._id}>
+                {u.name} — {u.referrals.length} referral
+                {u.referrals.length === 1 ? '' : 's'} (KES{' '}
+                {(u.referrals.length * RATE_PER_REFERRAL).toLocaleString()})
               </option>
-            ))} */}
-            {marketers.map((m) => (
-  <option key={m._id} value={m._id}>
-    {m.name} — {m.marketerStatus}
-  </option>
-))}
+            ))}
           </select>
 
-          {/* {selectedMarketer && (
+          {selectedUser && (
             <div className="rounded-xl bg-gray-50 p-3 text-xs text-muted space-y-1">
               <div className="flex justify-between">
-                <span>Total earned</span>
+                <span>Name</span>
                 <span className="font-semibold text-secondary">
-                  KES {selectedMarketer.totalCommissions.toLocaleString()}
+                  {selectedUser.name}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>Already disbursed</span>
-                <span className="font-semibold">
-                  KES {selectedMarketer.disbursed.toLocaleString()}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Owed</span>
-                <span className="font-semibold text-green-700">
-                  KES {selectedMarketer.owed.toLocaleString()}
+                <span>Phone</span>
+                <span className="font-mono">
+                  {selectedUser.phoneNumber || '—'}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Referrals</span>
-                <span>{selectedMarketer.totalReferralsMade}</span>
+                <span className="font-semibold">
+                  {selectedUser.referrals.length}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Rate</span>
+                <span>KES {RATE_PER_REFERRAL} / referral</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Amount owed</span>
+                <span className="font-semibold text-green-700">
+                  KES {amountOwed.toLocaleString()}
+                </span>
               </div>
               <div className="flex justify-between pt-1 border-t">
                 <span>Wallet available</span>
@@ -1565,26 +2260,7 @@ if (amt > walletAvailable) {
                 </span>
               </div>
             </div>
-          )} */}
-
-          {selectedMarketer && (
-  <div className="rounded-xl bg-gray-50 p-3 text-xs text-muted space-y-1">
-    <div className="flex justify-between">
-      <span>Marketer</span>
-      <span className="font-semibold text-secondary">{selectedMarketer.name}</span>
-    </div>
-    <div className="flex justify-between">
-      <span>Phone</span>
-      <span className="font-mono">{selectedMarketer.phoneNumber || '—'}</span>
-    </div>
-    <div className="flex justify-between pt-1 border-t">
-      <span>Wallet available</span>
-      <span className="font-semibold text-secondary">
-        KES {walletAvailable.toLocaleString()}
-      </span>
-    </div>
-  </div>
-)}
+          )}
 
           <input
             className="w-full rounded-xl border px-3 py-2"
@@ -1592,10 +2268,6 @@ if (amt > walletAvailable) {
             placeholder="Amount (KES)"
             value={payAmount}
             onChange={(e) => setPayAmount(e.target.value)}
-            // max={Math.min(
-            //   selectedMarketer?.owed ?? Infinity,
-            //   walletAvailable || Infinity
-            // )}
             max={walletAvailable || undefined}
             min={1}
           />
@@ -1612,22 +2284,12 @@ if (amt > walletAvailable) {
             onChange={(e) => setPayRemarks(e.target.value)}
           />
 
-          {/* {(exceedsOwed || exceedsWallet) && (
-            <div className="text-xs text-red-600 space-y-0.5">
-              {exceedsOwed && (
-                <p>
-                  ⚠ Amount exceeds marketer owed (KES{' '}
-                  {(selectedMarketer?.owed ?? 0).toLocaleString()})
-                </p>
-              )}
-              {exceedsWallet && (
-                <p>
-                  ⚠ Amount exceeds wallet balance (KES{' '}
-                  {walletAvailable.toLocaleString()})
-                </p>
-              )}
+          {exceedsWallet && (
+            <div className="text-xs text-red-600">
+              ⚠ Amount exceeds wallet balance (KES{' '}
+              {walletAvailable.toLocaleString()})
             </div>
-          )} */}
+          )}
 
           <button
             disabled={payoutDisabled}
@@ -1638,11 +2300,11 @@ if (amt > walletAvailable) {
         </form>
       </section>
 
-      {/* Payout history for selected marketer */}
+      {/* Payout history for selected user */}
       <section className="bg-white rounded-2xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-secondary">
-            Payouts{selectedMarketer ? ` — ${selectedMarketer.name}` : ''}
+            Payouts{selectedUser ? ` — ${selectedUser.name}` : ''}
           </h2>
           {hasPendingPayouts && (
             <span className="text-xs text-muted flex items-center gap-1">
@@ -1656,7 +2318,7 @@ if (amt > walletAvailable) {
             <thead className="text-left text-muted">
               <tr>
                 <th className="py-2">Time</th>
-                <th>Marketer</th>
+                <th>User</th>
                 <th>Ref</th>
                 <th>Amount</th>
                 <th>Status</th>
@@ -1741,7 +2403,9 @@ if (amt > walletAvailable) {
   );
 }
 
-/* ---------------- Helpers ---------------- */
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                            */
+/* ------------------------------------------------------------------ */
 
 function StatCard({
   label,
@@ -1782,9 +2446,7 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-function marketerLabel(
-  marketer: Payout['marketerId']
-): string {
+function marketerLabel(marketer: Payout['marketerId']): string {
   if (!marketer) return '—';
   if (typeof marketer === 'string') return marketer;
   return marketer.name || marketer.email || '—';

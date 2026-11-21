@@ -481,7 +481,7 @@ export default function AdminReferrals() {
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
                       <button
-                        onClick={() => router.push(`/admin/referrals/${user._id}`)}
+                        onClick={() => router.push(`/shd-pages/admin/referrals/${user._id}`)}
                         className="text-primary hover:text-accent-dark text-sm font-medium transition"
                       >
                         View
