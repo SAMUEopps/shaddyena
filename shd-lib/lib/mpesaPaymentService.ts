@@ -2283,46 +2283,90 @@ export class MpesaPaymentService {
     return this.initiatePaymentWithPhone(amount, purpose, user.phoneNumber, metadata);
   }
 
+  // async initiatePaymentWithPhone(
+  //   amount: number,
+  //   purpose: PaymentPurpose,
+  //   phoneNumber: string,
+  //   metadata: any = {}
+  // ): Promise<{
+  //   checkoutRequestId: string;
+  //   merchantRequestId: string;
+  //   transactionId: string;
+  // }> {
+  //   const user = await this.getUser();
+  //   if (!user) throw new Error('User not found');
+
+  //   const cleanPhone = this.normalizePhone(phoneNumber);
+  //   const accountReference =
+  //     metadata.accountReference ||
+  //     this.generateReference(this.getReferencePrefix(purpose));
+
+  //   if (!metadata.transactionId) {
+  //     throw new Error(
+  //       'initiatePaymentWithPhone: metadata.transactionId is required. ' +
+  //         'Create the Transaction document before calling this method.'
+  //     );
+  //   }
+
+  //   const response = await initSTKPush(cleanPhone, amount, accountReference);
+
+  //   // ✅ CHANGED: write `providerTransactionId` (a real schema field),
+  //   // not `merchantRequestId` (which Mongoose silently drops).
+  //   await Transaction.findByIdAndUpdate(metadata.transactionId, {
+  //     checkoutRequestId: response.CheckoutRequestID,
+  //     providerTransactionId: response.MerchantRequestID,
+  //   });
+
+  //   return {
+  //     checkoutRequestId: response.CheckoutRequestID,
+  //     merchantRequestId: response.MerchantRequestID,
+  //     transactionId: metadata.transactionId,
+  //   };
+  // }
+
   async initiatePaymentWithPhone(
-    amount: number,
-    purpose: PaymentPurpose,
-    phoneNumber: string,
-    metadata: any = {}
-  ): Promise<{
-    checkoutRequestId: string;
-    merchantRequestId: string;
-    transactionId: string;
-  }> {
-    const user = await this.getUser();
-    if (!user) throw new Error('User not found');
+  amount: number,
+  purpose: PaymentPurpose,
+  phoneNumber: string,
+  metadata: any = {}
+): Promise<{
+  checkoutRequestId: string;
+  merchantRequestId: string;
+  transactionId: string;
+  accountReference: string;
+}> {
+  const user = await this.getUser();
+  if (!user) throw new Error('User not found');
 
-    const cleanPhone = this.normalizePhone(phoneNumber);
-    const accountReference =
-      metadata.accountReference ||
-      this.generateReference(this.getReferencePrefix(purpose));
+  const cleanPhone = this.normalizePhone(phoneNumber);
 
-    if (!metadata.transactionId) {
-      throw new Error(
-        'initiatePaymentWithPhone: metadata.transactionId is required. ' +
-          'Create the Transaction document before calling this method.'
-      );
-    }
+  // Reuse caller-provided reference if present, else generate.
+  const accountReference =
+    metadata.accountReference ||
+    this.generateReference(this.getReferencePrefix(purpose));
 
-    const response = await initSTKPush(cleanPhone, amount, accountReference);
-
-    // ✅ CHANGED: write `providerTransactionId` (a real schema field),
-    // not `merchantRequestId` (which Mongoose silently drops).
-    await Transaction.findByIdAndUpdate(metadata.transactionId, {
-      checkoutRequestId: response.CheckoutRequestID,
-      providerTransactionId: response.MerchantRequestID,
-    });
-
-    return {
-      checkoutRequestId: response.CheckoutRequestID,
-      merchantRequestId: response.MerchantRequestID,
-      transactionId: metadata.transactionId,
-    };
+  if (!metadata.transactionId) {
+    throw new Error(
+      'initiatePaymentWithPhone: metadata.transactionId is required.'
+    );
   }
+
+  const response = await initSTKPush(cleanPhone, amount, accountReference);
+
+  // ✅ This is the line that was missing. Verify it exists in the deployed build.
+  await Transaction.findByIdAndUpdate(metadata.transactionId, {
+    checkoutRequestId: response.CheckoutRequestID,
+    providerTransactionId: response.MerchantRequestID,
+    accountReference,
+  });
+
+  return {
+    checkoutRequestId: response.CheckoutRequestID,
+    merchantRequestId: response.MerchantRequestID,
+    transactionId: metadata.transactionId,
+    accountReference,
+  };
+}
 
   async queryPaymentStatus(checkoutRequestId: string): Promise<any> {
     try {
