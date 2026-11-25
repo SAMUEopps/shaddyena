@@ -847,9 +847,628 @@
 
 
 // app/shd-pages/membership/dashboard/page.tsx
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import { useRouter } from 'next/navigation';
+// import Link from 'next/link';
+// import DepositModal from '@/app/SHD-COMPONENTS/components/DepositModal';
+// import { useAuth } from '@/shd-contexts/AuthContext';
+
+// interface DashboardData {
+//   user: {
+//     name: string;
+//     isMember: boolean;
+//     memberSince: string;
+//     totalSavings: number;
+//     totalInvestments: number;
+//     availableBalance: number;
+//   };
+//   investments: Array<{
+//     _id: string;
+//     type: string;
+//     amount: number;
+//     status: string;
+//     expectedReturn: number;
+//     endDate: string;
+//   }>;
+//   recentSavings: Array<{
+//     _id: string;
+//     amount: number;
+//     type: string;
+//     description: string;
+//     createdAt: string;
+//   }>;
+// }
+
+// export default function MembershipDashboard() {
+//   const router = useRouter();
+//   const [loading, setLoading] = useState(true);
+//   const [data, setData] = useState<DashboardData | null>(null);
+//   const [activeTab, setActiveTab] = useState<'overview' | 'investments' | 'savings'>('overview');
+//   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+//   const { user: authUser, organizationId } = useAuth();
+  
+//   // Modal states
+//   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+//   const [isDepositing, setIsDepositing] = useState(false);
+//   const [paymentData, setPaymentData] = useState<{
+//     checkoutId: string;
+//     transactionId: string;
+//     phoneNumber: string;
+//   } | null>(null);
+
+//   useEffect(() => {
+//     fetchDashboardData();
+//   }, []);
+
+//   const fetchDashboardData = async () => {
+//     try {
+//       const token = localStorage.getItem('token');
+//       if (!token) {
+//         router.push('/login');
+//         return;
+//       }
+
+//       const response = await fetch('/api/shd-api/api/membership/dashboard', {
+//         headers: {
+//           'Authorization': `Bearer ${token}`
+//         }
+//       });
+
+//       if (response.ok) {
+//         const dashboardData = await response.json();
+//         setData(dashboardData);
+//       } else {
+//         router.push('/');
+//       }
+//     } catch (error) {
+//       console.error('Error fetching dashboard:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // const handleDeposit = async (amount: number, password: string, phoneNumber: string) => {
+//   //   setIsDepositing(true);
+//   //   setMessage(null);
+
+//   //   try {
+//   //     const token = localStorage.getItem('token');
+//   //     const response = await fetch('/api/shd-api/api/savings/deposit', {
+//   //       method: 'POST',
+//   //       headers: {
+//   //         'Authorization': `Bearer ${token}`,
+//   //         'Content-Type': 'application/json'
+//   //       },
+//   //       body: JSON.stringify({ 
+//   //         amount, 
+//   //         password,
+//   //         phoneNumber,
+//   //         description: 'Savings deposit' 
+//   //       })
+//   //     });
+
+//   //     const data = await response.json();
+
+//   //     if (response.ok) {
+//   //       setMessage({ 
+//   //         type: 'success', 
+//   //         text: `💳 M-Pesa STK Push sent to ${phoneNumber}. Please enter your PIN to complete deposit.` 
+//   //       });
+
+//   //       // Start polling for payment status
+//   //       const interval = setInterval(() => {
+//   //         checkPaymentStatus(data.payment.checkoutRequestId);
+//   //       }, 3000);
+
+//   //       // Clean up interval after 2 minutes
+//   //       setTimeout(() => {
+//   //         clearInterval(interval);
+//   //       }, 120000);
+
+//   //     } else {
+//   //       setMessage({ type: 'error', text: data.error || 'Deposit failed' });
+//   //       throw new Error(data.error || 'Deposit failed');
+//   //     }
+//   //   } catch (error: any) {
+//   //     setMessage({ type: 'error', text: error.message || 'An error occurred' });
+//   //     throw error;
+//   //   } finally {
+//   //     setIsDepositing(false);
+//   //     setIsDepositModalOpen(false);
+//   //   }
+//   // };
+
+
+//   const handleDeposit = async (amount: number, password: string, phoneNumber: string) => {
+//   setIsDepositing(true);
+//   setMessage(null);
+
+//   try {
+//     // ✅ Resolve organizationId: AuthContext → localStorage → user object
+//     const orgId =
+//       organizationId ||
+//       localStorage.getItem('organizationId') ||
+//       authUser?.organizationId;
+
+//     // const orgId = '6a9ae426b93383bc2caacaef';
+
+//     // if (!orgId) {
+//     //   setMessage({
+//     //     type: 'error',
+//     //     text: 'Organization not found. Please log out and log in again.',
+//     //   });
+//     //   throw new Error('Organization not found. Please log out and log in again.');
+//     // }
+
+//   const token = localStorage.getItem('token');
+//     if (!token) {
+//       setMessage({ type: 'error', text: 'Please log in again.' });
+//       throw new Error('Not authenticated');
+//     }
+
+//     const response = await fetch('/api/shd-api/api/savings/deposit', {
+//       method: 'POST',
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({
+//         amount,
+//         password,
+//         phoneNumber,
+//         description: 'Savings deposit',
+//         organizationId: orgId, // ✅ ADD THIS
+        
+//       }),
+//     });
+
+//     const data = await response.json();
+
+//     if (!response.ok) {
+//       setMessage({ type: 'error', text: data.error || 'Deposit failed' });
+//       throw new Error(data.error || 'Deposit failed');
+//     }
+
+//     setMessage({
+//       type: 'success',
+//       text: `💳 M-Pesa STK Push sent to ${phoneNumber}. Please enter your PIN to complete deposit.`,
+//     });
+
+//     // Start polling for payment status
+//     const interval = setInterval(() => {
+//       checkPaymentStatus(data.payment.checkoutRequestId);
+//     }, 3000);
+
+//     // Clean up interval after 2 minutes
+//     setTimeout(() => {
+//       clearInterval(interval);
+//     }, 120000);
+//   } catch (error: any) {
+//     setMessage({ type: 'error', text: error.message || 'An error occurred' });
+//     throw error;
+//   } finally {
+//     setIsDepositing(false);
+//     setIsDepositModalOpen(false);
+//   }
+// };
+
+//   const checkPaymentStatus = async (checkoutId: string) => {
+//     try {
+//       const token = localStorage.getItem('token');
+//       const response = await fetch(`/api/shd-api/api/payment/status/${checkoutId}`, {
+//         headers: {
+//           'Authorization': `Bearer ${token}`
+//         }
+//       });
+
+//       const data = await response.json();
+      
+//       if (data.status === 'success') {
+//         setMessage({ type: 'success', text: '✅ Deposit successful!' });
+//         setPaymentData(null);
+//         fetchDashboardData();
+//         setTimeout(() => setMessage(null), 5000);
+//       } else if (data.status === 'failed') {
+//         setMessage({ type: 'error', text: '❌ Deposit failed. Please try again.' });
+//         setPaymentData(null);
+//         setTimeout(() => setMessage(null), 5000);
+//       }
+//     } catch (error) {
+//       console.error('Error checking payment status:', error);
+//     }
+//   };
+
+//   const handleInvest = async (type: string, amount: number) => {
+//     try {
+//       const token = localStorage.getItem('token');
+//       const response = await fetch('/api/shd-api/api/investments/create', {
+//         method: 'POST',
+//         headers: {
+//           'Authorization': `Bearer ${token}`,
+//           'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify({ type, amount })
+//       });
+
+//       if (response.ok) {
+//         setMessage({ type: 'success', text: 'Investment created successfully!' });
+//         fetchDashboardData();
+//         setTimeout(() => setMessage(null), 3000);
+//       } else {
+//         const data = await response.json();
+//         setMessage({ type: 'error', text: data.error || 'Investment failed' });
+//       }
+//     } catch (error) {
+//       setMessage({ type: 'error', text: 'An error occurred' });
+//     }
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="min-h-screen flex items-center justify-center bg-background">
+//         <div className="text-center">
+//           <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto"></div>
+//           <p className="mt-4 text-muted font-medium">Loading dashboard...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (!data?.user.isMember) {
+//     return (
+//       <div className="min-h-screen bg-background py-8 sm:py-12 px-4 flex items-center justify-center">
+//         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-surface">
+//           <div className="text-6xl mb-4">🔒</div>
+//           <h2 className="text-2xl font-bold text-secondary mb-2">Not a Member Yet</h2>
+//           <p className="text-muted mb-6">
+//             Become a member to access savings and investment opportunities.
+//           </p>
+//           <Link
+//             href="/shd-pages/membership/activate"
+//             className="inline-block bg-primary hover:bg-accent-dark text-white px-8 py-3 rounded-xl font-bold transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98]"
+//           >
+//             Activate Membership
+//           </Link>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   const { user, investments, recentSavings } = data;
+
+//   return (
+//     <div className="min-h-screen bg-background py-6 sm:py-8">
+//       <div className="max-w-6xl mx-auto px-4 sm:px-6">
+//         {/* Messages */}
+//         {message && (
+//           <div className={`mb-6 p-4 rounded-xl border ${
+//             message.type === 'success' 
+//               ? 'bg-green-50 border-green-200 text-green-700' 
+//               : 'bg-red-50 border-red-200 text-red-700'
+//           }`}>
+//             <div className="flex items-center gap-2">
+//               <span>{message.type === 'success' ? '✅' : '❌'}</span>
+//               <span>{message.text}</span>
+//             </div>
+//           </div>
+//         )}
+
+//         {/* Header */}
+//         <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-6 sm:p-8 mb-6 border border-surface">
+//           <div className="flex flex-wrap items-center justify-between gap-4">
+//             <div>
+//               <h1 className="text-2xl sm:text-3xl font-black text-secondary flex items-center gap-2">
+//                 <span>🌟</span> Membership Dashboard
+//               </h1>
+//               <p className="text-sm text-muted mt-1">
+//                 Member since {new Date(user.memberSince).toLocaleDateString('en-US', {
+//                   year: 'numeric',
+//                   month: 'long',
+//                   day: 'numeric'
+//                 })}
+//               </p>
+//             </div>
+//             <div className="flex flex-wrap gap-3">
+//               <button
+//                 onClick={() => setIsDepositModalOpen(true)}
+//                 disabled={isDepositing}
+//                 className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+//               >
+//                 {isDepositing ? (
+//                   <>
+//                     <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+//                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+//                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+//                     </svg>
+//                     Processing...
+//                   </>
+//                 ) : (
+//                   <>
+//                     <span>💰</span>
+//                     Deposit
+//                   </>
+//                 )}
+//               </button>
+//               <Link
+//                 href="/shd-pages/membership/invest"
+//                 className="bg-primary hover:bg-accent-dark text-white px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] font-medium inline-flex items-center gap-2"
+//               >
+//                 <span>💼</span>
+//                 Invest
+//               </Link>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Stats Cards */}
+//         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+//           <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-surface hover:border-primary/20">
+//             <p className="text-sm text-muted font-medium">Total Savings</p>
+//             <p className="text-2xl sm:text-3xl font-black text-primary mt-1">
+//               KSh {user.totalSavings?.toLocaleString() || 0}
+//             </p>
+//           </div>
+//           <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-surface hover:border-primary/20">
+//             <p className="text-sm text-muted font-medium">Total Investments</p>
+//             <p className="text-2xl sm:text-3xl font-black text-accent-dark mt-1">
+//               KSh {user.totalInvestments?.toLocaleString() || 0}
+//             </p>
+//           </div>
+//           <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-surface hover:border-primary/20">
+//             <p className="text-sm text-muted font-medium">Available Balance</p>
+//             <p className="text-2xl sm:text-3xl font-black text-secondary mt-1">
+//               KSh {user.availableBalance?.toLocaleString() || 0}
+//             </p>
+//           </div>
+//         </div>
+
+//         {/* Tabs */}
+//         <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-surface overflow-hidden">
+//           <div className="border-b border-surface">
+//             <div className="flex flex-wrap gap-2 p-4">
+//               <button
+//                 onClick={() => setActiveTab('overview')}
+//                 className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+//                   activeTab === 'overview'
+//                     ? 'bg-primary text-white shadow-sm'
+//                     : 'bg-surface hover:bg-surface/70 text-secondary'
+//                 }`}
+//               >
+//                 📊 Overview
+//               </button>
+//               <button
+//                 onClick={() => setActiveTab('investments')}
+//                 className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+//                   activeTab === 'investments'
+//                     ? 'bg-primary text-white shadow-sm'
+//                     : 'bg-surface hover:bg-surface/70 text-secondary'
+//                 }`}
+//               >
+//                 📈 Investments ({investments?.length || 0})
+//               </button>
+//               <button
+//                 onClick={() => setActiveTab('savings')}
+//                 className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+//                   activeTab === 'savings'
+//                     ? 'bg-primary text-white shadow-sm'
+//                     : 'bg-surface hover:bg-surface/70 text-secondary'
+//                 }`}
+//               >
+//                 💰 Savings History
+//               </button>
+//             </div>
+//           </div>
+
+//           <div className="p-4 sm:p-6">
+//             {activeTab === 'overview' && (
+//               <div>
+//                 <h3 className="font-bold text-secondary mb-4">Recent Activity</h3>
+//                 {recentSavings?.length === 0 ? (
+//                   <div className="text-center py-8">
+//                     <div className="text-4xl mb-2">📭</div>
+//                     <p className="text-muted">No recent activity</p>
+//                   </div>
+//                 ) : (
+//                   <div className="space-y-3">
+//                     {recentSavings?.map(saving => (
+//                       <div key={saving._id} className="flex flex-wrap items-center justify-between p-3 rounded-xl bg-surface/30 hover:bg-surface/50 transition-colors duration-200">
+//                         <div>
+//                           <p className="font-medium text-secondary">{saving.description}</p>
+//                           <p className="text-xs text-muted">
+//                             {new Date(saving.createdAt).toLocaleDateString('en-US', {
+//                               year: 'numeric',
+//                               month: 'short',
+//                               day: 'numeric'
+//                             })}
+//                           </p>
+//                         </div>
+//                         <span className={`font-bold ${
+//                           saving.type === 'deposit' ? 'text-green-600' : 'text-red-500'
+//                         }`}>
+//                           {saving.type === 'deposit' ? '+' : '-'} KSh {saving.amount?.toLocaleString() || 0}
+//                         </span>
+//                       </div>
+//                     ))}
+//                   </div>
+//                 )}
+//               </div>
+//             )}
+
+//             {activeTab === 'investments' && (
+//               <div>
+//                 <h3 className="font-bold text-secondary mb-4">Your Investments</h3>
+//                 {investments?.length === 0 ? (
+//                   <div className="text-center py-8">
+//                     <div className="text-4xl mb-2">📈</div>
+//                     <p className="text-muted">No investments yet</p>
+//                     <Link
+//                       href="/shd-pages/membership/invest"
+//                       className="text-primary hover:text-accent-dark font-medium transition-colors duration-200 mt-2 inline-block"
+//                     >
+//                       Start Investing →
+//                     </Link>
+//                   </div>
+//                 ) : (
+//                   <div className="grid gap-4">
+//                     {investments?.map(investment => (
+//                       <div key={investment._id} className="border-2 border-surface rounded-xl p-4 hover:border-primary/30 transition-colors duration-200">
+//                         <div className="flex flex-wrap justify-between items-start gap-4">
+//                           <div>
+//                             <h4 className="font-bold text-secondary">{investment.type}</h4>
+//                             <p className="text-sm text-muted">
+//                               Amount: <span className="font-medium text-secondary">KSh {investment.amount?.toLocaleString() || 0}</span>
+//                             </p>
+//                             <p className="text-sm text-muted">
+//                               Expected Return: <span className="font-medium text-green-600">KSh {investment.expectedReturn?.toLocaleString() || 0}</span>
+//                             </p>
+//                           </div>
+//                           <div className="text-right">
+//                             <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
+//                               investment.status === 'active' ? 'bg-green-100 text-green-700 border-green-200' :
+//                               investment.status === 'completed' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+//                               'bg-red-100 text-red-700 border-red-200'
+//                             }`}>
+//                               {investment.status.charAt(0).toUpperCase() + investment.status.slice(1)}
+//                             </span>
+//                             <p className="text-xs text-muted mt-1">
+//                               Ends: {new Date(investment.endDate).toLocaleDateString('en-US', {
+//                                 year: 'numeric',
+//                                 month: 'short',
+//                                 day: 'numeric'
+//                               })}
+//                             </p>
+//                           </div>
+//                         </div>
+//                       </div>
+//                     ))}
+//                   </div>
+//                 )}
+//               </div>
+//             )}
+
+//             {activeTab === 'savings' && (
+//               <div>
+//                 <h3 className="font-bold text-secondary mb-4">Savings History</h3>
+//                 {recentSavings?.length === 0 ? (
+//                   <div className="text-center py-8">
+//                     <div className="text-4xl mb-2">💰</div>
+//                     <p className="text-muted">No savings history</p>
+//                   </div>
+//                 ) : (
+//                   <div className="overflow-x-auto">
+//                     <table className="w-full">
+//                       <thead>
+//                         <tr className="border-b-2 border-surface">
+//                           <th className="text-left py-3 text-xs font-medium text-muted uppercase tracking-wider">Date</th>
+//                           <th className="text-left py-3 text-xs font-medium text-muted uppercase tracking-wider">Description</th>
+//                           <th className="text-right py-3 text-xs font-medium text-muted uppercase tracking-wider">Amount</th>
+//                         </tr>
+//                       </thead>
+//                       <tbody className="divide-y divide-surface">
+//                         {recentSavings?.map(saving => (
+//                           <tr key={saving._id} className="hover:bg-surface/30 transition-colors duration-200">
+//                             <td className="py-3 text-sm text-muted">
+//                               {new Date(saving.createdAt).toLocaleDateString('en-US', {
+//                                 year: 'numeric',
+//                                 month: 'short',
+//                                 day: 'numeric'
+//                               })}
+//                             </td>
+//                             <td className="py-3 text-sm text-secondary">{saving.description}</td>
+//                             <td className={`py-3 text-sm text-right font-bold ${
+//                               saving.type === 'deposit' ? 'text-green-600' : 'text-red-500'
+//                             }`}>
+//                               {saving.type === 'deposit' ? '+' : '-'} KSh {saving.amount?.toLocaleString() || 0}
+//                             </td>
+//                           </tr>
+//                         ))}
+//                       </tbody>
+//                     </table>
+//                   </div>
+//                 )}
+//               </div>
+//             )}
+//           </div>
+//         </div>
+
+//         {/* Quick Actions */}
+//         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+//           <button
+//             onClick={() => setIsDepositModalOpen(true)}
+//             className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-surface hover:border-primary/20 group"
+//           >
+//             <div className="flex items-center justify-between">
+//               <div>
+//                 <p className="text-xs text-muted">Save Money</p>
+//                 <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">Add to savings</p>
+//               </div>
+//               <span className="text-2xl">💰</span>
+//             </div>
+//           </button>
+
+//           <Link
+//             href="/shd-pages/membership/invest"
+//             className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-surface hover:border-primary/20 group"
+//           >
+//             <div className="flex items-center justify-between">
+//               <div>
+//                 <p className="text-xs text-muted">Invest</p>
+//                 <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">Grow your money</p>
+//               </div>
+//               <span className="text-2xl">📈</span>
+//             </div>
+//           </Link>
+
+//           <Link
+//             href="/shd-pages/membership/withdraw"
+//             className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-surface hover:border-primary/20 group"
+//           >
+//             <div className="flex items-center justify-between">
+//               <div>
+//                 <p className="text-xs text-muted">Withdraw</p>
+//                 <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">Cash out</p>
+//               </div>
+//               <span className="text-2xl">🏦</span>
+//             </div>
+//           </Link>
+
+//           <Link
+//             href="/shd-pages/membership/refer"
+//             className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-surface hover:border-primary/20 group"
+//           >
+//             <div className="flex items-center justify-between">
+//               <div>
+//                 <p className="text-xs text-muted">Refer</p>
+//                 <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">Earn bonuses</p>
+//               </div>
+//               <span className="text-2xl">👥</span>
+//             </div>
+//           </Link>
+//         </div>
+//       </div>
+
+//       {/* Deposit Modal */}
+//       <DepositModal
+//         isOpen={isDepositModalOpen}
+//         onClose={() => {
+//           if (!isDepositing) {
+//             setIsDepositModalOpen(false);
+//           }
+//         }}
+//         onDeposit={handleDeposit}
+//         isLoading={isDepositing}
+//       />
+//     </div>
+//   );
+// }
+
+
+// app/shd-pages/membership/dashboard/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import DepositModal from '@/app/SHD-COMPONENTS/components/DepositModal';
@@ -886,20 +1505,31 @@ export default function MembershipDashboard() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'investments' | 'savings'>('overview');
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const { user: authUser, organizationId } = useAuth();
-  
-  // Modal states
+
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isDepositing, setIsDepositing] = useState(false);
-  const [paymentData, setPaymentData] = useState<{
-    checkoutId: string;
-    transactionId: string;
-    phoneNumber: string;
-  } | null>(null);
+
+  // ✅ CHANGED: hold the polling interval so we can clear it on terminal status
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollStopRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+    if (pollStopRef.current) {
+      clearTimeout(pollStopRef.current);
+      pollStopRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
+    return () => stopPolling();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDashboardData = async () => {
@@ -911,9 +1541,7 @@ export default function MembershipDashboard() {
       }
 
       const response = await fetch('/api/shd-api/api/membership/dashboard', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -929,152 +1557,104 @@ export default function MembershipDashboard() {
     }
   };
 
-  // const handleDeposit = async (amount: number, password: string, phoneNumber: string) => {
-  //   setIsDepositing(true);
-  //   setMessage(null);
-
-  //   try {
-  //     const token = localStorage.getItem('token');
-  //     const response = await fetch('/api/shd-api/api/savings/deposit', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Authorization': `Bearer ${token}`,
-  //         'Content-Type': 'application/json'
-  //       },
-  //       body: JSON.stringify({ 
-  //         amount, 
-  //         password,
-  //         phoneNumber,
-  //         description: 'Savings deposit' 
-  //       })
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (response.ok) {
-  //       setMessage({ 
-  //         type: 'success', 
-  //         text: `💳 M-Pesa STK Push sent to ${phoneNumber}. Please enter your PIN to complete deposit.` 
-  //       });
-
-  //       // Start polling for payment status
-  //       const interval = setInterval(() => {
-  //         checkPaymentStatus(data.payment.checkoutRequestId);
-  //       }, 3000);
-
-  //       // Clean up interval after 2 minutes
-  //       setTimeout(() => {
-  //         clearInterval(interval);
-  //       }, 120000);
-
-  //     } else {
-  //       setMessage({ type: 'error', text: data.error || 'Deposit failed' });
-  //       throw new Error(data.error || 'Deposit failed');
-  //     }
-  //   } catch (error: any) {
-  //     setMessage({ type: 'error', text: error.message || 'An error occurred' });
-  //     throw error;
-  //   } finally {
-  //     setIsDepositing(false);
-  //     setIsDepositModalOpen(false);
-  //   }
-  // };
-
-
   const handleDeposit = async (amount: number, password: string, phoneNumber: string) => {
-  setIsDepositing(true);
-  setMessage(null);
+    setIsDepositing(true);
+    setMessage(null);
 
-  try {
-    // ✅ Resolve organizationId: AuthContext → localStorage → user object
-    const orgId =
-      organizationId ||
-      localStorage.getItem('organizationId') ||
-      authUser?.organizationId;
+    try {
+      const orgId =
+        organizationId ||
+        localStorage.getItem('organizationId') ||
+        authUser?.organizationId;
 
-    // const orgId = '6a9ae426b93383bc2caacaef';
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setMessage({ type: 'error', text: 'Please log in again.' });
+        throw new Error('Not authenticated');
+      }
 
-    // if (!orgId) {
-    //   setMessage({
-    //     type: 'error',
-    //     text: 'Organization not found. Please log out and log in again.',
-    //   });
-    //   throw new Error('Organization not found. Please log out and log in again.');
-    // }
+      const response = await fetch('/api/shd-api/api/savings/deposit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount,
+          password,
+          phoneNumber,
+          description: 'Savings deposit',
+          organizationId: orgId,
+        }),
+      });
 
-  const token = localStorage.getItem('token');
-    if (!token) {
-      setMessage({ type: 'error', text: 'Please log in again.' });
-      throw new Error('Not authenticated');
+      const respData = await response.json();
+
+      if (!response.ok) {
+        setMessage({ type: 'error', text: respData.error || 'Deposit failed' });
+        throw new Error(respData.error || 'Deposit failed');
+      }
+
+      setMessage({
+        type: 'success',
+        text: `💳 M-Pesa STK Push sent to ${phoneNumber}. Please enter your PIN to complete deposit.`,
+      });
+
+      // ✅ CHANGED: start polling. The callback OR the status route will flip
+      // the transaction to success, and this loop will catch it.
+      stopPolling();
+      pollRef.current = setInterval(() => {
+        checkPaymentStatus(respData.payment.checkoutRequestId);
+      }, 3000);
+      // Hard stop after 3 minutes
+      pollStopRef.current = setTimeout(() => {
+        stopPolling();
+      }, 180000);
+
+      // ✅ CHANGED: close the modal now that the STK push is initiated.
+      // Polling runs in the background and will refresh the dashboard.
+      setIsDepositModalOpen(false);
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'An error occurred' });
+      // Keep the modal open on failure so the user can retry
+      throw error;
+    } finally {
+      setIsDepositing(false);
     }
-
-    const response = await fetch('/api/shd-api/api/savings/deposit', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        amount,
-        password,
-        phoneNumber,
-        description: 'Savings deposit',
-        organizationId: orgId, // ✅ ADD THIS
-        
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      setMessage({ type: 'error', text: data.error || 'Deposit failed' });
-      throw new Error(data.error || 'Deposit failed');
-    }
-
-    setMessage({
-      type: 'success',
-      text: `💳 M-Pesa STK Push sent to ${phoneNumber}. Please enter your PIN to complete deposit.`,
-    });
-
-    // Start polling for payment status
-    const interval = setInterval(() => {
-      checkPaymentStatus(data.payment.checkoutRequestId);
-    }, 3000);
-
-    // Clean up interval after 2 minutes
-    setTimeout(() => {
-      clearInterval(interval);
-    }, 120000);
-  } catch (error: any) {
-    setMessage({ type: 'error', text: error.message || 'An error occurred' });
-    throw error;
-  } finally {
-    setIsDepositing(false);
-    setIsDepositModalOpen(false);
-  }
-};
+  };
 
   const checkPaymentStatus = async (checkoutId: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/shd-api/api/payment/status/${checkoutId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetch(
+        `/api/shd-api/api/payment/status/${checkoutId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (!response.ok) {
+        // Status route now returns 200 even when not found, so this branch
+        // is rare. Still, don't crash.
+        return;
+      }
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+      const status = data.status ?? data.transaction?.status;
+
+      if (status === 'success') {
+        stopPolling();
         setMessage({ type: 'success', text: '✅ Deposit successful!' });
-        setPaymentData(null);
-        fetchDashboardData();
+        await fetchDashboardData();
         setTimeout(() => setMessage(null), 5000);
-      } else if (data.status === 'failed') {
-        setMessage({ type: 'error', text: '❌ Deposit failed. Please try again.' });
-        setPaymentData(null);
+      } else if (status === 'failed' || status === 'cancelled') {
+        stopPolling();
+        setMessage({
+          type: 'error',
+          text: data.message || '❌ Deposit failed. Please try again.',
+        });
+        await fetchDashboardData();
         setTimeout(() => setMessage(null), 5000);
       }
+      // 'pending' → keep polling
     } catch (error) {
       console.error('Error checking payment status:', error);
     }
@@ -1086,10 +1666,10 @@ export default function MembershipDashboard() {
       const response = await fetch('/api/shd-api/api/investments/create', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ type, amount })
+        body: JSON.stringify({ type, amount }),
       });
 
       if (response.ok) {
@@ -1097,8 +1677,8 @@ export default function MembershipDashboard() {
         fetchDashboardData();
         setTimeout(() => setMessage(null), 3000);
       } else {
-        const data = await response.json();
-        setMessage({ type: 'error', text: data.error || 'Investment failed' });
+        const respData = await response.json();
+        setMessage({ type: 'error', text: respData.error || 'Investment failed' });
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'An error occurred' });
@@ -1141,13 +1721,14 @@ export default function MembershipDashboard() {
   return (
     <div className="min-h-screen bg-background py-6 sm:py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Messages */}
         {message && (
-          <div className={`mb-6 p-4 rounded-xl border ${
-            message.type === 'success' 
-              ? 'bg-green-50 border-green-200 text-green-700' 
-              : 'bg-red-50 border-red-200 text-red-700'
-          }`}>
+          <div
+            className={`mb-6 p-4 rounded-xl border ${
+              message.type === 'success'
+                ? 'bg-green-50 border-green-200 text-green-700'
+                : 'bg-red-50 border-red-200 text-red-700'
+            }`}
+          >
             <div className="flex items-center gap-2">
               <span>{message.type === 'success' ? '✅' : '❌'}</span>
               <span>{message.text}</span>
@@ -1155,7 +1736,6 @@ export default function MembershipDashboard() {
           </div>
         )}
 
-        {/* Header */}
         <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-6 sm:p-8 mb-6 border border-surface">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -1163,10 +1743,11 @@ export default function MembershipDashboard() {
                 <span>🌟</span> Membership Dashboard
               </h1>
               <p className="text-sm text-muted mt-1">
-                Member since {new Date(user.memberSince).toLocaleDateString('en-US', {
+                Member since{' '}
+                {new Date(user.memberSince).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
-                  day: 'numeric'
+                  day: 'numeric',
                 })}
               </p>
             </div>
@@ -1178,9 +1759,25 @@ export default function MembershipDashboard() {
               >
                 {isDepositing ? (
                   <>
-                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Processing...
                   </>
@@ -1202,7 +1799,6 @@ export default function MembershipDashboard() {
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
           <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-surface hover:border-primary/20">
             <p className="text-sm text-muted font-medium">Total Savings</p>
@@ -1224,7 +1820,6 @@ export default function MembershipDashboard() {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-surface overflow-hidden">
           <div className="border-b border-surface">
             <div className="flex flex-wrap gap-2 p-4">
@@ -1272,22 +1867,28 @@ export default function MembershipDashboard() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {recentSavings?.map(saving => (
-                      <div key={saving._id} className="flex flex-wrap items-center justify-between p-3 rounded-xl bg-surface/30 hover:bg-surface/50 transition-colors duration-200">
+                    {recentSavings?.map((saving) => (
+                      <div
+                        key={saving._id}
+                        className="flex flex-wrap items-center justify-between p-3 rounded-xl bg-surface/30 hover:bg-surface/50 transition-colors duration-200"
+                      >
                         <div>
                           <p className="font-medium text-secondary">{saving.description}</p>
                           <p className="text-xs text-muted">
                             {new Date(saving.createdAt).toLocaleDateString('en-US', {
                               year: 'numeric',
                               month: 'short',
-                              day: 'numeric'
+                              day: 'numeric',
                             })}
                           </p>
                         </div>
-                        <span className={`font-bold ${
-                          saving.type === 'deposit' ? 'text-green-600' : 'text-red-500'
-                        }`}>
-                          {saving.type === 'deposit' ? '+' : '-'} KSh {saving.amount?.toLocaleString() || 0}
+                        <span
+                          className={`font-bold ${
+                            saving.type === 'deposit' ? 'text-green-600' : 'text-red-500'
+                          }`}
+                        >
+                          {saving.type === 'deposit' ? '+' : '-'} KSh{' '}
+                          {saving.amount?.toLocaleString() || 0}
                         </span>
                       </div>
                     ))}
@@ -1312,31 +1913,46 @@ export default function MembershipDashboard() {
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {investments?.map(investment => (
-                      <div key={investment._id} className="border-2 border-surface rounded-xl p-4 hover:border-primary/30 transition-colors duration-200">
+                    {investments?.map((investment) => (
+                      <div
+                        key={investment._id}
+                        className="border-2 border-surface rounded-xl p-4 hover:border-primary/30 transition-colors duration-200"
+                      >
                         <div className="flex flex-wrap justify-between items-start gap-4">
                           <div>
                             <h4 className="font-bold text-secondary">{investment.type}</h4>
                             <p className="text-sm text-muted">
-                              Amount: <span className="font-medium text-secondary">KSh {investment.amount?.toLocaleString() || 0}</span>
+                              Amount:{' '}
+                              <span className="font-medium text-secondary">
+                                KSh {investment.amount?.toLocaleString() || 0}
+                              </span>
                             </p>
                             <p className="text-sm text-muted">
-                              Expected Return: <span className="font-medium text-green-600">KSh {investment.expectedReturn?.toLocaleString() || 0}</span>
+                              Expected Return:{' '}
+                              <span className="font-medium text-green-600">
+                                KSh {investment.expectedReturn?.toLocaleString() || 0}
+                              </span>
                             </p>
                           </div>
                           <div className="text-right">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
-                              investment.status === 'active' ? 'bg-green-100 text-green-700 border-green-200' :
-                              investment.status === 'completed' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                              'bg-red-100 text-red-700 border-red-200'
-                            }`}>
-                              {investment.status.charAt(0).toUpperCase() + investment.status.slice(1)}
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
+                                investment.status === 'active'
+                                  ? 'bg-green-100 text-green-700 border-green-200'
+                                  : investment.status === 'completed'
+                                  ? 'bg-blue-100 text-blue-700 border-blue-200'
+                                  : 'bg-red-100 text-red-700 border-red-200'
+                              }`}
+                            >
+                              {investment.status.charAt(0).toUpperCase() +
+                                investment.status.slice(1)}
                             </span>
                             <p className="text-xs text-muted mt-1">
-                              Ends: {new Date(investment.endDate).toLocaleDateString('en-US', {
+                              Ends:{' '}
+                              {new Date(investment.endDate).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'short',
-                                day: 'numeric'
+                                day: 'numeric',
                               })}
                             </p>
                           </div>
@@ -1361,26 +1977,38 @@ export default function MembershipDashboard() {
                     <table className="w-full">
                       <thead>
                         <tr className="border-b-2 border-surface">
-                          <th className="text-left py-3 text-xs font-medium text-muted uppercase tracking-wider">Date</th>
-                          <th className="text-left py-3 text-xs font-medium text-muted uppercase tracking-wider">Description</th>
-                          <th className="text-right py-3 text-xs font-medium text-muted uppercase tracking-wider">Amount</th>
+                          <th className="text-left py-3 text-xs font-medium text-muted uppercase tracking-wider">
+                            Date
+                          </th>
+                          <th className="text-left py-3 text-xs font-medium text-muted uppercase tracking-wider">
+                            Description
+                          </th>
+                          <th className="text-right py-3 text-xs font-medium text-muted uppercase tracking-wider">
+                            Amount
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-surface">
-                        {recentSavings?.map(saving => (
-                          <tr key={saving._id} className="hover:bg-surface/30 transition-colors duration-200">
+                        {recentSavings?.map((saving) => (
+                          <tr
+                            key={saving._id}
+                            className="hover:bg-surface/30 transition-colors duration-200"
+                          >
                             <td className="py-3 text-sm text-muted">
                               {new Date(saving.createdAt).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'short',
-                                day: 'numeric'
+                                day: 'numeric',
                               })}
                             </td>
                             <td className="py-3 text-sm text-secondary">{saving.description}</td>
-                            <td className={`py-3 text-sm text-right font-bold ${
-                              saving.type === 'deposit' ? 'text-green-600' : 'text-red-500'
-                            }`}>
-                              {saving.type === 'deposit' ? '+' : '-'} KSh {saving.amount?.toLocaleString() || 0}
+                            <td
+                              className={`py-3 text-sm text-right font-bold ${
+                                saving.type === 'deposit' ? 'text-green-600' : 'text-red-500'
+                              }`}
+                            >
+                              {saving.type === 'deposit' ? '+' : '-'} KSh{' '}
+                              {saving.amount?.toLocaleString() || 0}
                             </td>
                           </tr>
                         ))}
@@ -1393,7 +2021,6 @@ export default function MembershipDashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
           <button
             onClick={() => setIsDepositModalOpen(true)}
@@ -1402,7 +2029,9 @@ export default function MembershipDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted">Save Money</p>
-                <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">Add to savings</p>
+                <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">
+                  Add to savings
+                </p>
               </div>
               <span className="text-2xl">💰</span>
             </div>
@@ -1415,7 +2044,9 @@ export default function MembershipDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted">Invest</p>
-                <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">Grow your money</p>
+                <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">
+                  Grow your money
+                </p>
               </div>
               <span className="text-2xl">📈</span>
             </div>
@@ -1428,7 +2059,9 @@ export default function MembershipDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted">Withdraw</p>
-                <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">Cash out</p>
+                <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">
+                  Cash out
+                </p>
               </div>
               <span className="text-2xl">🏦</span>
             </div>
@@ -1441,7 +2074,9 @@ export default function MembershipDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted">Refer</p>
-                <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">Earn bonuses</p>
+                <p className="font-semibold text-secondary group-hover:text-primary transition-colors duration-200">
+                  Earn bonuses
+                </p>
               </div>
               <span className="text-2xl">👥</span>
             </div>
@@ -1449,13 +2084,10 @@ export default function MembershipDashboard() {
         </div>
       </div>
 
-      {/* Deposit Modal */}
       <DepositModal
         isOpen={isDepositModalOpen}
         onClose={() => {
-          if (!isDepositing) {
-            setIsDepositModalOpen(false);
-          }
+          if (!isDepositing) setIsDepositModalOpen(false);
         }}
         onDeposit={handleDeposit}
         isLoading={isDepositing}

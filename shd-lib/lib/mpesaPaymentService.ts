@@ -1701,6 +1701,498 @@
 // }
 
 
+// // shd-lib/lib/mpesaPaymentService.ts
+
+// import { initSTKPush, queryTransactionStatus } from '@/shd-lib/lib/mpesa';
+// import { connectToDatabase } from '@/shd-lib/lib/mongodb';
+// import Transaction from '@/shd-models/models/Transaction';
+// import User from '@/shd-models/models/User';
+// import Subscription from '@/shd-models/models/Subscription';
+// import Vendor from '@/shd-models/models/Vendor';
+// import mongoose from 'mongoose';
+
+// type PaymentPurpose =
+//   | 'membership'
+//   | 'savings'
+//   | 'investment'
+//   | 'subscription'
+//   | 'advertisement';
+
+// export class MpesaPaymentService {
+//   private userId: string;
+//   private user: any;
+//   private organizationId: string;
+
+//   constructor(userId: string, organizationId?: string) {
+
+//     if (!userId) {
+//       throw new Error('MpesaPaymentService: userId is required');
+//     }
+//     if (!organizationId) {
+//       throw new Error('MpesaPaymentService: organizationId is required');
+//     }
+//     if (!mongoose.Types.ObjectId.isValid(organizationId)) {
+//       throw new Error(
+//         `MpesaPaymentService: invalid organizationId "${organizationId}"`
+//       );
+//     }
+
+//     this.userId = userId;
+//     this.organizationId = organizationId;
+//   }
+
+//   private async getUser() {
+//     if (!this.user) {
+//       await connectToDatabase();
+//       this.user = await User.findById(this.userId);
+//     }
+//     return this.user;
+//   }
+
+//   private generateReference(prefix: string): string {
+//     return `${prefix}-${Date.now()}-${Math.random()
+//       .toString(36)
+//       .substring(2, 7)
+//       .toUpperCase()}`;
+//   }
+
+//   private getReferencePrefix(purpose: PaymentPurpose): string {
+//     switch (purpose) {
+//       case 'membership':
+//         return 'MEM';
+//       case 'savings':
+//         return 'SAV';
+//       case 'investment':
+//         return 'INV';
+//       case 'advertisement':
+//         return 'ADS';
+//       case 'subscription':
+//       default:
+//         return 'SUB';
+//     }
+//   }
+
+//   private normalizePhone(phoneNumber: string): string {
+//     let cleanPhone = phoneNumber.replace(/[+\s]/g, '');
+//     if (cleanPhone.startsWith('0')) {
+//       cleanPhone = '254' + cleanPhone.substring(1);
+//     }
+//     if (!cleanPhone.startsWith('254')) {
+//       cleanPhone = '254' + cleanPhone;
+//     }
+//     if (!/^254[0-9]{9}$/.test(cleanPhone)) {
+//       throw new Error('Invalid phone number format');
+//     }
+//     return cleanPhone;
+//   }
+
+//   /**
+//    * Initiate payment using the user's phone number on file.
+//    *
+//    * IMPORTANT: This method does NOT create a Transaction record.
+//    * The caller (route/controller) is responsible for creating the
+//    * Transaction document and passing its `transactionId` via metadata.
+//    */
+//   async initiatePayment(
+//     amount: number,
+//     purpose: PaymentPurpose,
+//     metadata: any = {}
+//   ): Promise<{
+//     checkoutRequestId: string;
+//     merchantRequestId: string;
+//     transactionId: string;
+//   }> {
+//     const user = await this.getUser();
+//     if (!user) throw new Error('User not found');
+
+//     if (!user.phoneNumber) {
+//       throw new Error('User has no phone number on file');
+//     }
+
+//     return this.initiatePaymentWithPhone(
+//       amount,
+//       purpose,
+//       user.phoneNumber,
+//       metadata
+//     );
+//   }
+
+//   /**
+//    * Initiate payment using a supplied phone number.
+//    *
+//    * IMPORTANT: This method does NOT create a Transaction record.
+//    * The caller must create the Transaction first and pass
+//    * `metadata.transactionId`. The same value is returned.
+//    */
+//   async initiatePaymentWithPhone(
+//     amount: number,
+//     purpose: PaymentPurpose,
+//     phoneNumber: string,
+//     metadata: any = {}
+//   ): Promise<{
+//     checkoutRequestId: string;
+//     merchantRequestId: string;
+//     transactionId: string;
+//   }> {
+//     const user = await this.getUser();
+//     if (!user) throw new Error('User not found');
+
+//     const cleanPhone = this.normalizePhone(phoneNumber);
+
+//     const accountReference =
+//       metadata.accountReference ||
+//       this.generateReference(this.getReferencePrefix(purpose));
+
+//     // ⚠️ Transaction is owned by the caller. We just pass through.
+//     if (!metadata.transactionId) {
+//       throw new Error(
+//         'initiatePaymentWithPhone: metadata.transactionId is required. ' +
+//           'Create the Transaction document before calling this method.'
+//       );
+//     }
+
+//     const response = await initSTKPush(cleanPhone, amount, accountReference);
+
+//     // 🔧 FIX: persist the M-Pesa request IDs onto the Transaction here so
+//     // status queries work even if the route forgets to do it. This is
+//     // idempotent — the route's own update is harmless.
+//     await Transaction.findByIdAndUpdate(metadata.transactionId, {
+//       checkoutRequestId: response.CheckoutRequestID,
+//       merchantRequestId: response.MerchantRequestID,
+//     });
+
+//     return {
+//       checkoutRequestId: response.CheckoutRequestID,
+//       merchantRequestId: response.MerchantRequestID,
+//       transactionId: metadata.transactionId,
+//     };
+//   }
+
+//   /**
+//    * Query payment status and update the matching Transaction.
+//    */
+//   async queryPaymentStatus(checkoutRequestId: string): Promise<any> {
+//     try {
+//       const result = await queryTransactionStatus(checkoutRequestId);
+
+//       const transaction = await Transaction.findOne({ checkoutRequestId });
+//       if (!transaction) {
+//         throw new Error('Transaction not found');
+//       }
+
+//       const currentMetadata = transaction.metadata || {};
+
+//       if (result.ResultCode === 0) {
+//         const items = result.CallbackMetadata?.Item || [];
+//         const receipt = items.find(
+//           (i: any) => i.Name === 'MpesaReceiptNumber'
+//         )?.Value;
+
+//         transaction.receiptNumber = receipt || transaction.receiptNumber;
+//         transaction.metadata = {
+//           ...currentMetadata,
+//           mpesaReceipt: receipt,
+//           callbackMetadata: result.CallbackMetadata,
+//         };
+
+//         // Handles post-payment side effects and marks status success.
+//         await this.handleSuccessfulPayment(transaction.id.toString());
+//       } else if (
+//         result.ResultDesc?.toLowerCase().includes('still under processing')
+//       ) {
+//         transaction.status = 'pending';
+//         transaction.errorMessage = undefined;
+//         await transaction.save();
+//       } else if (result.ResultCode === 1032 || result.ResultCode === 1037) {
+//         transaction.status = 'failed';
+//         transaction.errorMessage = result.ResultDesc || 'Payment cancelled';
+//         await transaction.save();
+//       } else {
+//         transaction.status = 'pending';
+//         await transaction.save();
+//       }
+
+//       // Re-read to reflect status set by handleSuccessfulPayment
+//       const updated = await Transaction.findById(transaction._id);
+
+//       return {
+//         status: updated?.status,
+//         message: result.ResultDesc,
+//         transaction: updated,
+//       };
+//     } catch (error) {
+//       console.error('Payment query error:', error);
+//       throw error;
+//     }
+//   }
+
+//   /**
+//    * Handle a successful payment: run category-specific side effects
+//    * and mark the transaction as success.
+//    */
+//   async handleSuccessfulPayment(transactionId: string): Promise<any> {
+//     const session = await mongoose.startSession();
+//     session.startTransaction();
+
+//     try {
+//       const transaction = await Transaction.findById(transactionId).session(
+//         session
+//       );
+//       if (!transaction) throw new Error('Transaction not found');
+
+//       const metadata = transaction.metadata || {};
+//       const userId = metadata.userId;
+//       if (!userId) {
+//         throw new Error('User ID not found in transaction metadata');
+//       }
+
+//       const user = await User.findById(userId).session(session);
+//       if (!user) throw new Error('User not found');
+
+//       let result: any = { success: true };
+
+//       switch (transaction.category) {
+//         case 'membership':
+//           result = await this.processMembershipActivation(
+//             user,
+//             transaction,
+//             session
+//           );
+//           break;
+
+//         case 'savings':
+//           result = await this.processSavingsDeposit(
+//             user,
+//             transaction,
+//             session
+//           );
+//           break;
+
+//         case 'investment':
+//           result = await this.processInvestmentPayment(
+//             user,
+//             transaction,
+//             session
+//           );
+//           break;
+
+//         case 'advertisement':
+//           result = await this.processAdvertisementPayment(
+//             user,
+//             transaction,
+//             session
+//           );
+//           break;
+
+//         case 'subscription':
+//           result = await this.processSubscriptionPayment(
+//             user,
+//             transaction,
+//             session
+//           );
+//           break;
+
+//         default:
+//           throw new Error(
+//             `Unknown transaction category: ${transaction.category}`
+//           );
+//       }
+
+//       transaction.status = 'success';
+//       await transaction.save({ session });
+
+//       await session.commitTransaction();
+//       return result;
+//     } catch (error) {
+//       await session.abortTransaction();
+//       throw error;
+//     } finally {
+//       session.endSession();
+//     }
+//   }
+
+//   // ─────────────────────────────────────────────
+//   // Category processors
+//   // ─────────────────────────────────────────────
+
+//   private async processMembershipActivation(
+//     user: any,
+//     transaction: any,
+//     session: any
+//   ) {
+//     if (user.isMember) {
+//       throw new Error('Already a member');
+//     }
+
+//     user.isMember = true;
+//     user.memberSince = new Date();
+//     user.totalSavings = (user.totalSavings || 0) + transaction.amount;
+//     user.availableBalance = (user.availableBalance || 0) + transaction.amount;
+//     await user.save({ session });
+
+//     return {
+//       success: true,
+//       message: 'Membership activated successfully!',
+//       user: {
+//         isMember: user.isMember,
+//         memberSince: user.memberSince,
+//         totalSavings: user.totalSavings,
+//         availableBalance: user.availableBalance,
+//       },
+//     };
+//   }
+
+//   private async processSavingsDeposit(
+//     user: any,
+//     transaction: any,
+//     session: any
+//   ) {
+//     if (!user.isMember) {
+//       throw new Error('Must be a member to save');
+//     }
+
+//     user.totalSavings = (user.totalSavings || 0) + transaction.amount;
+//     user.availableBalance = (user.availableBalance || 0) + transaction.amount;
+//     await user.save({ session });
+
+//     return {
+//       success: true,
+//       message: 'Deposit successful!',
+//       user: {
+//         totalSavings: user.totalSavings,
+//         availableBalance: user.availableBalance,
+//       },
+//     };
+//   }
+
+//   private async processAdvertisementPayment(
+//     user: any,
+//     transaction: any,
+//     session: any
+//   ) {
+//     const metadata = transaction.metadata || {};
+//     const { adId } = metadata;
+
+//     if (!adId) throw new Error('Advertisement ID missing');
+
+//     const Advertisement = mongoose.model('Advertisement');
+
+//     const advertisement = await Advertisement.findByIdAndUpdate(
+//       adId,
+//       { paymentStatus: 'paid', isActive: true },
+//       { session, new: true }
+//     );
+
+//     if (!advertisement) throw new Error('Advertisement not found');
+
+//     return {
+//       success: true,
+//       message: 'Advertisement payment completed',
+//       advertisement,
+//     };
+//   }
+
+//   private async processInvestmentPayment(
+//     user: any,
+//     transaction: any,
+//     session: any
+//   ) {
+//     if (!user.isMember) {
+//       throw new Error('Must be a member to invest');
+//     }
+
+//     const metadata = transaction.metadata || {};
+//     const { investmentId } = metadata;
+
+//     if ((user.availableBalance || 0) < transaction.amount) {
+//       throw new Error('Insufficient balance');
+//     }
+
+//     user.availableBalance = (user.availableBalance || 0) - transaction.amount;
+//     user.totalInvestments = (user.totalInvestments || 0) + transaction.amount;
+//     await user.save({ session });
+
+//     if (investmentId) {
+//       const Investment = mongoose.model('Investment');
+//       await Investment.findByIdAndUpdate(
+//         investmentId,
+//         { status: 'active', startDate: new Date() },
+//         { session }
+//       );
+//     }
+
+//     return {
+//       success: true,
+//       message: 'Investment payment confirmed!',
+//       user: {
+//         totalInvestments: user.totalInvestments,
+//         availableBalance: user.availableBalance,
+//       },
+//     };
+//   }
+
+//   /**
+//    * Activate (or renew) a vendor subscription.
+//    * Reads `metadata.subscriptionId` and `metadata.vendorId`
+//    * that the route attached to the transaction.
+//    */
+//   private async processSubscriptionPayment(
+//     user: any,
+//     transaction: any,
+//     session: any
+//   ) {
+//     const metadata = transaction.metadata || {};
+//     const { subscriptionId, vendorId } = metadata;
+
+//     if (!subscriptionId || !vendorId) {
+//       throw new Error(
+//         'Subscription payment missing subscriptionId or vendorId in metadata'
+//       );
+//     }
+
+//     const subscription = await Subscription.findById(subscriptionId).session(
+//       session
+//     );
+//     if (!subscription) throw new Error('Subscription plan not found');
+
+//     const VendorSubscription = mongoose.model('VendorSubscription');
+
+//     const now = new Date();
+//     const billingCycle = subscription.billingCycle || 'monthly';
+//     const endDate = new Date(now);
+
+//     if (billingCycle === 'yearly' || billingCycle === 'annual') {
+//       endDate.setFullYear(endDate.getFullYear() + 1);
+//     } else if (billingCycle === 'quarterly') {
+//       endDate.setMonth(endDate.getMonth() + 3);
+//     } else {
+//       endDate.setMonth(endDate.getMonth() + 1);
+//     }
+
+//     const vendorSubscription = await VendorSubscription.findOneAndUpdate(
+//       { vendorId },
+//       {
+//         vendorId,
+//         subscriptionId,
+//         status: 'active',
+//         startDate: now,
+//         endDate,
+//         autoRenew: true,
+//         amountPaid: transaction.amount,
+//         lastPaymentId: transaction._id,
+//       },
+//       { session, upsert: true, new: true }
+//     );
+
+//     return {
+//       success: true,
+//       message: 'Subscription activated successfully!',
+//       subscription: vendorSubscription,
+//     };
+//   }
+// }
+
+
 // shd-lib/lib/mpesaPaymentService.ts
 
 import { initSTKPush, queryTransactionStatus } from '@/shd-lib/lib/mpesa';
@@ -1708,7 +2200,7 @@ import { connectToDatabase } from '@/shd-lib/lib/mongodb';
 import Transaction from '@/shd-models/models/Transaction';
 import User from '@/shd-models/models/User';
 import Subscription from '@/shd-models/models/Subscription';
-import Vendor from '@/shd-models/models/Vendor';
+import Savings from '@/shd-models/models/Savings';           // ✅ NEW
 import mongoose from 'mongoose';
 
 type PaymentPurpose =
@@ -1724,7 +2216,6 @@ export class MpesaPaymentService {
   private organizationId: string;
 
   constructor(userId: string, organizationId?: string) {
-
     if (!userId) {
       throw new Error('MpesaPaymentService: userId is required');
     }
@@ -1758,41 +2249,25 @@ export class MpesaPaymentService {
 
   private getReferencePrefix(purpose: PaymentPurpose): string {
     switch (purpose) {
-      case 'membership':
-        return 'MEM';
-      case 'savings':
-        return 'SAV';
-      case 'investment':
-        return 'INV';
-      case 'advertisement':
-        return 'ADS';
+      case 'membership':   return 'MEM';
+      case 'savings':      return 'SAV';
+      case 'investment':   return 'INV';
+      case 'advertisement':return 'ADS';
       case 'subscription':
-      default:
-        return 'SUB';
+      default:             return 'SUB';
     }
   }
 
   private normalizePhone(phoneNumber: string): string {
     let cleanPhone = phoneNumber.replace(/[+\s]/g, '');
-    if (cleanPhone.startsWith('0')) {
-      cleanPhone = '254' + cleanPhone.substring(1);
-    }
-    if (!cleanPhone.startsWith('254')) {
-      cleanPhone = '254' + cleanPhone;
-    }
+    if (cleanPhone.startsWith('0')) cleanPhone = '254' + cleanPhone.substring(1);
+    if (!cleanPhone.startsWith('254')) cleanPhone = '254' + cleanPhone;
     if (!/^254[0-9]{9}$/.test(cleanPhone)) {
       throw new Error('Invalid phone number format');
     }
     return cleanPhone;
   }
 
-  /**
-   * Initiate payment using the user's phone number on file.
-   *
-   * IMPORTANT: This method does NOT create a Transaction record.
-   * The caller (route/controller) is responsible for creating the
-   * Transaction document and passing its `transactionId` via metadata.
-   */
   async initiatePayment(
     amount: number,
     purpose: PaymentPurpose,
@@ -1804,26 +2279,10 @@ export class MpesaPaymentService {
   }> {
     const user = await this.getUser();
     if (!user) throw new Error('User not found');
-
-    if (!user.phoneNumber) {
-      throw new Error('User has no phone number on file');
-    }
-
-    return this.initiatePaymentWithPhone(
-      amount,
-      purpose,
-      user.phoneNumber,
-      metadata
-    );
+    if (!user.phoneNumber) throw new Error('User has no phone number on file');
+    return this.initiatePaymentWithPhone(amount, purpose, user.phoneNumber, metadata);
   }
 
-  /**
-   * Initiate payment using a supplied phone number.
-   *
-   * IMPORTANT: This method does NOT create a Transaction record.
-   * The caller must create the Transaction first and pass
-   * `metadata.transactionId`. The same value is returned.
-   */
   async initiatePaymentWithPhone(
     amount: number,
     purpose: PaymentPurpose,
@@ -1838,12 +2297,10 @@ export class MpesaPaymentService {
     if (!user) throw new Error('User not found');
 
     const cleanPhone = this.normalizePhone(phoneNumber);
-
     const accountReference =
       metadata.accountReference ||
       this.generateReference(this.getReferencePrefix(purpose));
 
-    // ⚠️ Transaction is owned by the caller. We just pass through.
     if (!metadata.transactionId) {
       throw new Error(
         'initiatePaymentWithPhone: metadata.transactionId is required. ' +
@@ -1853,12 +2310,11 @@ export class MpesaPaymentService {
 
     const response = await initSTKPush(cleanPhone, amount, accountReference);
 
-    // 🔧 FIX: persist the M-Pesa request IDs onto the Transaction here so
-    // status queries work even if the route forgets to do it. This is
-    // idempotent — the route's own update is harmless.
+    // ✅ CHANGED: write `providerTransactionId` (a real schema field),
+    // not `merchantRequestId` (which Mongoose silently drops).
     await Transaction.findByIdAndUpdate(metadata.transactionId, {
       checkoutRequestId: response.CheckoutRequestID,
-      merchantRequestId: response.MerchantRequestID,
+      providerTransactionId: response.MerchantRequestID,
     });
 
     return {
@@ -1868,16 +2324,25 @@ export class MpesaPaymentService {
     };
   }
 
-  /**
-   * Query payment status and update the matching Transaction.
-   */
   async queryPaymentStatus(checkoutRequestId: string): Promise<any> {
     try {
       const result = await queryTransactionStatus(checkoutRequestId);
 
       const transaction = await Transaction.findOne({ checkoutRequestId });
-      if (!transaction) {
-        throw new Error('Transaction not found');
+      if (!transaction) throw new Error('Transaction not found');
+
+      // ✅ CHANGED: terminal short-circuit. If the callback already marked
+      // this transaction success, don't touch it. This prevents the poll
+      // from re-running side effects.
+      if (transaction.status === 'success' || transaction.status === 'failed') {
+        return {
+          status: transaction.status,
+          message:
+            transaction.status === 'success'
+              ? 'Payment completed'
+              : transaction.errorMessage || 'Payment failed',
+          transaction,
+        };
       }
 
       const currentMetadata = transaction.metadata || {};
@@ -1895,7 +2360,6 @@ export class MpesaPaymentService {
           callbackMetadata: result.CallbackMetadata,
         };
 
-        // Handles post-payment side effects and marks status success.
         await this.handleSuccessfulPayment(transaction.id.toString());
       } else if (
         result.ResultDesc?.toLowerCase().includes('still under processing')
@@ -1912,7 +2376,6 @@ export class MpesaPaymentService {
         await transaction.save();
       }
 
-      // Re-read to reflect status set by handleSuccessfulPayment
       const updated = await Transaction.findById(transaction._id);
 
       return {
@@ -1926,19 +2389,20 @@ export class MpesaPaymentService {
     }
   }
 
-  /**
-   * Handle a successful payment: run category-specific side effects
-   * and mark the transaction as success.
-   */
   async handleSuccessfulPayment(transactionId: string): Promise<any> {
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-      const transaction = await Transaction.findById(transactionId).session(
-        session
-      );
+      const transaction = await Transaction.findById(transactionId).session(session);
       if (!transaction) throw new Error('Transaction not found');
+
+      // ✅ CHANGED: idempotency guard. If the callback or a previous poll
+      // already credited this transaction, do not run side effects again.
+      if (transaction.status === 'success') {
+        await session.abortTransaction();
+        return { success: true, alreadyProcessed: true };
+      }
 
       const metadata = transaction.metadata || {};
       const userId = metadata.userId;
@@ -1953,43 +2417,23 @@ export class MpesaPaymentService {
 
       switch (transaction.category) {
         case 'membership':
-          result = await this.processMembershipActivation(
-            user,
-            transaction,
-            session
-          );
+          result = await this.processMembershipActivation(user, transaction, session);
           break;
 
         case 'savings':
-          result = await this.processSavingsDeposit(
-            user,
-            transaction,
-            session
-          );
+          result = await this.processSavingsDeposit(user, transaction, session);
           break;
 
         case 'investment':
-          result = await this.processInvestmentPayment(
-            user,
-            transaction,
-            session
-          );
+          result = await this.processInvestmentPayment(user, transaction, session);
           break;
 
         case 'advertisement':
-          result = await this.processAdvertisementPayment(
-            user,
-            transaction,
-            session
-          );
+          result = await this.processAdvertisementPayment(user, transaction, session);
           break;
 
         case 'subscription':
-          result = await this.processSubscriptionPayment(
-            user,
-            transaction,
-            session
-          );
+          result = await this.processSubscriptionPayment(user, transaction, session);
           break;
 
         default:
@@ -2021,7 +2465,18 @@ export class MpesaPaymentService {
     session: any
   ) {
     if (user.isMember) {
-      throw new Error('Already a member');
+      // ✅ CHANGED: idempotent — don't throw if already a member,
+      // just let the transaction pass.
+      return {
+        success: true,
+        message: 'Already a member',
+        user: {
+          isMember: true,
+          memberSince: user.memberSince,
+          totalSavings: user.totalSavings,
+          availableBalance: user.availableBalance,
+        },
+      };
     }
 
     user.isMember = true;
@@ -2042,64 +2497,132 @@ export class MpesaPaymentService {
     };
   }
 
+  // //private async processSavingsDeposit(
+  //   user: any,
+  //   transaction: any,
+  //   session: any
+  // ) {
+  //   if (!user.isMember) throw new Error('Must be a member to save');
+
+  //   // ✅ CHANGED: bump the user's aggregate totals.
+  //   user.totalSavings = (user.totalSavings || 0) + transaction.amount;
+  //   user.availableBalance = (user.availableBalance || 0) + transaction.amount;
+  //   await user.save({ session });
+
+  //   // ✅ NEW: create the Savings row that the dashboard's "Recent Activity"
+  //   // and "Savings History" tabs read from. The unique index on
+  //   // checkoutRequestId means we can safely upsert — if the callback and
+  //   // the poll race, only one row is created.
+  //   const metadata = transaction.metadata || {};
+  //   try {
+  //     await Savings.findOneAndUpdate(
+  //       { checkoutRequestId: transaction.checkoutRequestId },
+  //       {
+  //         $setOnInsert: {
+  //           userId: user._id,
+  //           organizationId: transaction.organizationId,
+  //           amount: transaction.amount,
+  //           type: 'deposit',
+  //           description: metadata.description || 'Savings deposit',
+  //           status: 'success',
+  //           transactionId: transaction.transactionId,
+  //           checkoutRequestId: transaction.checkoutRequestId,
+  //           receiptNumber: transaction.receiptNumber,
+  //           metadata,
+  //         },
+  //       },
+  //       { upsert: true, new: true, session }
+  //     );
+  //   } catch (err: any) {
+  //     // E11000 = duplicate key. That means another worker already inserted
+  //     // the Savings row for this checkout. That's fine — treat as success.
+  //     if (err?.code !== 11000) throw err;
+  //   }
+
+  //   return {
+  //     success: true,
+  //     message: 'Deposit successful!',
+  //     user: {
+  //       totalSavings: user.totalSavings,
+  //       availableBalance: user.availableBalance,
+  //     },
+  //   };
+  // }
+
+
   private async processSavingsDeposit(
-    user: any,
-    transaction: any,
-    session: any
-  ) {
-    if (!user.isMember) {
-      throw new Error('Must be a member to save');
-    }
+  user: any,
+  transaction: any,
+  session: any
+) {
+  if (!user.isMember) throw new Error('Must be a member to save');
 
-    user.totalSavings = (user.totalSavings || 0) + transaction.amount;
-    user.availableBalance = (user.availableBalance || 0) + transaction.amount;
-    await user.save({ session });
+  user.totalSavings = (user.totalSavings || 0) + transaction.amount;
+  user.availableBalance = (user.availableBalance || 0) + transaction.amount;
+  await user.save({ session });
 
-    return {
-      success: true,
-      message: 'Deposit successful!',
-      user: {
-        totalSavings: user.totalSavings,
-        availableBalance: user.availableBalance,
+  const metadata = transaction.metadata || {};
+
+  // reference is required + unique in the schema
+  const reference =
+    metadata.reference ||
+    `SAV-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+  try {
+    await Savings.findOneAndUpdate(
+      { checkoutRequestId: transaction.checkoutRequestId },
+      {
+        $setOnInsert: {
+          userId: user._id,
+          organizationId: transaction.organizationId,
+          amount: transaction.amount,
+          type: 'deposit',
+          description: metadata.description || 'Savings deposit',
+          // ✅ schema enum is 'completed', not 'success'
+          status: 'completed',
+          reference,
+          // ✅ schema field is an ObjectId ref to Transaction
+          transactionId: transaction._id,
+          checkoutRequestId: transaction.checkoutRequestId,
+          receiptNumber: transaction.receiptNumber,
+          metadata,
+        },
       },
-    };
+      { upsert: true, new: true, session }
+    );
+  } catch (err: any) {
+    // E11000 = another worker (callback vs poll) already inserted this row.
+    // That's fine — treat as success.
+    if (err?.code !== 11000) throw err;
   }
 
-  private async processAdvertisementPayment(
-    user: any,
-    transaction: any,
-    session: any
-  ) {
+  return {
+    success: true,
+    message: 'Deposit successful!',
+    user: {
+      totalSavings: user.totalSavings,
+      availableBalance: user.availableBalance,
+    },
+  };
+}
+
+  private async processAdvertisementPayment(user: any, transaction: any, session: any) {
     const metadata = transaction.metadata || {};
     const { adId } = metadata;
-
     if (!adId) throw new Error('Advertisement ID missing');
 
     const Advertisement = mongoose.model('Advertisement');
-
     const advertisement = await Advertisement.findByIdAndUpdate(
       adId,
       { paymentStatus: 'paid', isActive: true },
       { session, new: true }
     );
-
     if (!advertisement) throw new Error('Advertisement not found');
-
-    return {
-      success: true,
-      message: 'Advertisement payment completed',
-      advertisement,
-    };
+    return { success: true, message: 'Advertisement payment completed', advertisement };
   }
 
-  private async processInvestmentPayment(
-    user: any,
-    transaction: any,
-    session: any
-  ) {
-    if (!user.isMember) {
-      throw new Error('Must be a member to invest');
-    }
+  private async processInvestmentPayment(user: any, transaction: any, session: any) {
+    if (!user.isMember) throw new Error('Must be a member to invest');
 
     const metadata = transaction.metadata || {};
     const { investmentId } = metadata;
@@ -2131,32 +2654,19 @@ export class MpesaPaymentService {
     };
   }
 
-  /**
-   * Activate (or renew) a vendor subscription.
-   * Reads `metadata.subscriptionId` and `metadata.vendorId`
-   * that the route attached to the transaction.
-   */
-  private async processSubscriptionPayment(
-    user: any,
-    transaction: any,
-    session: any
-  ) {
+  private async processSubscriptionPayment(user: any, transaction: any, session: any) {
     const metadata = transaction.metadata || {};
     const { subscriptionId, vendorId } = metadata;
-
     if (!subscriptionId || !vendorId) {
       throw new Error(
         'Subscription payment missing subscriptionId or vendorId in metadata'
       );
     }
 
-    const subscription = await Subscription.findById(subscriptionId).session(
-      session
-    );
+    const subscription = await Subscription.findById(subscriptionId).session(session);
     if (!subscription) throw new Error('Subscription plan not found');
 
     const VendorSubscription = mongoose.model('VendorSubscription');
-
     const now = new Date();
     const billingCycle = subscription.billingCycle || 'monthly';
     const endDate = new Date(now);
