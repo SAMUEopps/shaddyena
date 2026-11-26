@@ -612,6 +612,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PaymentProcessor from '@/app/SHD-COMPONENTS/components/PaymentProcessor';
+import { useAuth } from '@/shd-contexts/AuthContext';
 
 
 const INVESTMENT_TYPES = [
@@ -619,7 +620,7 @@ const INVESTMENT_TYPES = [
     id: 'TRANSPORT',
     name: '🚚 Transport',
     description: 'Invest in logistics and transportation services',
-    minAmount: 1000,
+    minAmount: 10,
     maxAmount: 100000,
     returnRate: '15%',
     duration: '6 months',
@@ -630,7 +631,7 @@ const INVESTMENT_TYPES = [
     id: 'MARKETING',
     name: '📢 Marketing',
     description: 'Invest in digital marketing and advertising',
-    minAmount: 500,
+    minAmount: 10,
     maxAmount: 50000,
     returnRate: '12%',
     duration: '4 months',
@@ -641,7 +642,7 @@ const INVESTMENT_TYPES = [
     id: 'TECHNOLOGY',
     name: '💻 Technology',
     description: 'Invest in tech startups and innovation',
-    minAmount: 2000,
+    minAmount: 10,
     maxAmount: 200000,
     returnRate: '20%',
     duration: '12 months',
@@ -652,7 +653,7 @@ const INVESTMENT_TYPES = [
     id: 'STARTUP',
     name: '🚀 Startup',
     description: 'Invest in promising startups and new businesses',
-    minAmount: 5000,
+    minAmount: 10,
     maxAmount: 500000,
     returnRate: '25%',
     duration: '18 months',
@@ -663,6 +664,7 @@ const INVESTMENT_TYPES = [
 
 export default function Invest() {
   const router = useRouter();
+  const { organizationId } = useAuth();
   const [selectedType, setSelectedType] = useState('');
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
@@ -750,6 +752,12 @@ export default function Invest() {
       return;
     }
 
+    if (!organizationId) {
+      setError('No organization selected. Please refresh or log in again.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('/api/shd-api/api/investments/create', {
@@ -760,27 +768,46 @@ export default function Invest() {
         },
         body: JSON.stringify({
           type: selectedType,
-          amount: investmentAmount
+          amount: investmentAmount,
+          organizationId
         })
       });
 
       const data = await response.json();
 
+      // if (response.ok) {
+      //   // Payment initiated successfully
+      //   setPaymentData({
+      //     checkoutId: data.payment.checkoutRequestId,
+      //     transactionId: data.payment.transactionId,
+      //     phoneNumber: data.payment.phoneNumber
+      //   });
+        
+      //   // Show M-Pesa prompt
+      //   alert(`💳 M-Pesa STK Push sent to ${data.payment.phoneNumber}. Please enter your PIN to complete the investment.`);
+        
+      //   setMessage({ 
+      //     type: 'success', 
+      //     text: 'Investment created! Please complete M-Pesa payment.' 
+      //   });
+      // } else {
+      //   setMessage({ type: 'error', text: data.error || 'Investment failed' });
+      // }
+
       if (response.ok) {
-        // Payment initiated successfully
-        setPaymentData({
-          checkoutId: data.payment.checkoutRequestId,
-          transactionId: data.payment.transactionId,
-          phoneNumber: data.payment.phoneNumber
+        setMessage({
+          type: 'success',
+          text: `🎉 Investment of KSh ${investmentAmount.toLocaleString()} created successfully!`,
         });
-        
-        // Show M-Pesa prompt
-        alert(`💳 M-Pesa STK Push sent to ${data.payment.phoneNumber}. Please enter your PIN to complete the investment.`);
-        
-        setMessage({ 
-          type: 'success', 
-          text: 'Investment created! Please complete M-Pesa payment.' 
-        });
+
+        // Refresh balance + recent investments from server (source of truth)
+        await fetchDashboardData();
+
+        // Reset form
+        setAmount('');
+        setShowSummary(false);
+
+        setTimeout(() => setMessage(null), 5000);
       } else {
         setMessage({ type: 'error', text: data.error || 'Investment failed' });
       }
@@ -1119,3 +1146,4 @@ export default function Invest() {
     </div>
   );
 }
+

@@ -6,7 +6,7 @@ export interface IInvestment extends Document {
   type: 'TRANSPORT' | 'MARKETING' | 'TECHNOLOGY' | 'STARTUP';
   amount: number;
   returns: number;
-  status: 'active' | 'completed' | 'cancelled';
+  status: 'pending' |'active' | 'completed' | 'cancelled';
   duration: number; // in months
   startDate: Date;
   endDate: Date;
@@ -26,7 +26,7 @@ const InvestmentSchema = new Schema<IInvestment>({
   returns: { type: Number, default: 0 },
   status: {
     type: String,
-    enum: ['active', 'completed', 'cancelled'],
+    enum: ['pending','active', 'completed', 'cancelled'],
     default: 'active'
   },
   duration: { type: Number, required: true },
