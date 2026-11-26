@@ -2067,7 +2067,7 @@ export default function MembershipDashboard() {
             </div>
           </Link>
 
-          <Link
+          {/* <Link
             href="/shd-pages/membership/refer"
             className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-surface hover:border-primary/20 group"
           >
@@ -2080,7 +2080,7 @@ export default function MembershipDashboard() {
               </div>
               <span className="text-2xl">👥</span>
             </div>
-          </Link>
+          </Link> */}
         </div>
       </div>
 
